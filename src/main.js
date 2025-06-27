@@ -1,6 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css' // CSS de Bootstrap
 import * as bootstrap from 'bootstrap' // JS de Bootstrap si usas modales, tooltips, etc.
 import 'vue3-easy-data-table/dist/style.css'
+import 'bootstrap-icons/font/bootstrap-icons.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'

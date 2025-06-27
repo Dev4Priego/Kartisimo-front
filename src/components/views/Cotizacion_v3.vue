@@ -41,7 +41,7 @@
                         <th>Cliente</th>
                         <th>Teléfono</th>
                         <th>Paquete</th>
-                        <!-- <th>Total</th> -->
+                        <th>Total</th>
                         <th>Estatus</th>
                         <th>Acciones</th>
                     </tr>
@@ -53,7 +53,7 @@
                         <td>{{ item.cliente }}</td>
                         <td>{{ item.telefono }}</td>
                         <td>{{ item.paquete }}</td>
-                        <!-- <td>{{ item.total }}</td> -->
+                        <td>{{ item.total }}</td>
                         <td>{{ item.estatus }}</td>
                         <td>
                             <div class="d-flex gap-1">
@@ -61,7 +61,7 @@
                                     <i class="bi bi-eye"></i>
                                 </button>
 
-                                <button v-if="item.estatus != 'Realizada'" class="btn btn-sm btn-outline-warning" @click="abrirModalCotizacion(item.acciones)" title="Editar">
+                                <button class="btn btn-sm btn-outline-warning" @click="abrirModalCotizacion(item.acciones)" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </button>
 
@@ -162,33 +162,28 @@
                         <div class="mt-4">
                             <table class="table table-bordered table-sm">
                                 <thead class="table-light">
-                                    <tr>                                        
-                                        <th>CANT</th>
-                                        <th>MARCA - MODELO - MEDIDA</th>
-                                        <th>PRECIO UNITARIO</th>
-                                        <th>TOTAL</th>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Precio Unitario</th>
+                                        <th>Subtotal</th>
                                     </tr>
                                     </thead>
                                 <tbody>
                                     <!-- Llantas -->
                                     <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
-                                        <td class="text-center">{{ llanta.cantidad }}</td>
                                         <td>
-                                            {{ llanta.medidas }}
-                                            <span
-                                                v-if="llanta.almacenOrigen == 'Almacen Foraneo'"
-                                                class="badge bg-warning text-dark ms-2"
-                                            >
-                                                Sobre pedido
-                                            </span>
+                                        {{ llanta.marca }} {{ llanta.modelo }} — {{ llanta.medidas }}
+                                        <span
+                                            v-if="llanta.almacenOrigen == 'Almacen Foraneo'"
+                                            class="badge bg-warning text-dark ms-2"
+                                        >
+                                            Sobre pedido
+                                        </span>
                                         </td>
-                                        <td class="text-end">
-                                            {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                        </td>
-                                        <td class="text-end">
-                                            {{ (llanta.total * 1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                        </td>
-
+                                        <td class="text-center">{{ llanta.cantidad }}</td>
+                                        <td>${{ llanta.precioUnitario.toFixed(2) }}</td>
+                                        <td>${{ llanta.total.toFixed(2) }}</td>
                                     </tr>
 
                                     <!-- Paquetes seleccionados -->
@@ -196,10 +191,10 @@
                                         v-for="(paquete, i) in vistaCotizacion.paquetes"
                                         :key="'paq-' + i"
                                     >
-                                        <td class="text-center">1</td>
                                         <td>{{ paquete.nombre }}</td>
-                                        <td class="text-end">{{ paquete.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ (paquete.precio * 1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td class="text-center">1</td>
+                                        <td>${{ paquete.precio.toFixed(2) }}</td>
+                                        <td>${{ paquete.precio.toFixed(2) }}</td>
                                     </tr>                                   
 
                                     <!-- Servicios adicionales -->
@@ -207,16 +202,16 @@
                                         v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales"
                                         :key="'serv-' + i"
                                     >
-                                        <td class="text-center">{{ servicio.cantidad }}</td>
                                         <td>{{ servicio.nombreServicio }}</td>
-                                        <td class="text-end">{{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ ((servicio.precioUnitario * servicio.cantidad)*1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td class="text-center">{{ servicio.cantidad }}</td>
+                                        <td>${{ servicio.precioUnitario.toFixed(2) }}</td>
+                                        <td>${{ (servicio.precioUnitario * servicio.cantidad).toFixed(2) }}</td>
                                     </tr>
 
                                     <!-- Total -->
                                     <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
                                         <td colspan="3" class="text-center">Total:</td>
-                                        <td>{{ vistaCotizacion.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td>${{ vistaCotizacion.total.toFixed(2) }}</td>
                                     </tr>
 
                                 </tbody>
@@ -344,7 +339,7 @@
                                 >
                                     <template #item-acciones="slotProps">
                                         <button
-                                            v-if="!cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id)"
+                                            v-if="!cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id && ll.ubicacion === slotProps.ubicacion)"
                                             type="button"
                                             class="btn btn-success btn-sm d-flex align-items-center gap-1"
                                             @click="agregarLlanta(slotProps)"
@@ -560,7 +555,7 @@
 <script setup>
     import { ref, watch, computed, onMounted, getCurrentInstance, reactive } from 'vue';
     import EasyDataTable from "vue3-easy-data-table";
-    import html2pdf from 'html2pdf.js'; //TODO: eliminar esta libreria del proyecto
+    import html2pdf from 'html2pdf.js';
 
     const { proxy } = getCurrentInstance()    
     const modalRef = ref(null);
@@ -576,8 +571,8 @@
     const cotizacionesRealizadas = ref([]);
     const vistaCotizacion = ref({});
     const mostrarVista = ref(false);
-    const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
     const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
+    const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
     const filtroEstatus = ref('');
 
     const itemsSelected = ref([]);
@@ -591,7 +586,7 @@
         clienteCorreo: '',
         clienteExistente: '',
         paquetes: [],
-        paquetesDetalles: {},
+        paquetesDetalles: {}, // ← AGREGADO: asegura que SIEMPRE exista y sea objeto vacío
         llantas: [],
         cantidadesPorLlanta: {},
         serviciosExtras: [],
@@ -599,92 +594,6 @@
         fechaCreacion: ''
     });
 
-    const preciosLlantas = reactive({});
-
-
-    /***********************************
-     *  FUNCIONES PARA TABLA COTIZACION
-    ***********************************/
-
-    const cancelarCotizacion = (cotizacion) => {
-        
-        const json = {
-            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
-            idEstadoCotizacion: 4, // se puede obtimizar mas los estatus y usar una sola funcion para las 4 operaciones
-            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
-        }
-        //console.log(JSON.stringify(json))
-        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(json)
-        })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
-        });
-    };
-
-    const reactivarCotizacion = (cotizacion) => {
-        
-        const json = {
-            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
-            idEstadoCotizacion: 1,
-            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
-        }
-        //console.log(JSON.stringify(json))
-        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(json)
-        })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
-        });
-    };
-
-    const aprobarCotizacion = (cotizacion) => {
-        
-        const json = {
-            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
-            idEstadoCotizacion: 2,
-            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
-        }
-        //console.log(JSON.stringify(json))
-        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(json)
-        })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
-        });
-    };
-
-    const finalizarCotizacion = (cotizacion) => {
-        
-        const json = {
-            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
-            idEstadoCotizacion: 3,
-            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
-        }
-        //console.log(JSON.stringify(json))
-        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(json)
-        })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
-        });
-    };
 
     // Función para cargar paquetes
     const cargarPaquetes = async () => {
@@ -716,9 +625,6 @@
             const res = await fetch(proxy.$serverIP + 'api/Llanta/getLlantaPrecio');
             if (!res.ok) throw new Error('Error al obtener llantas');
             const data = await res.json();
-
-             // Limpia precios anteriores
-            Object.keys(preciosLlantas).forEach(key => delete preciosLlantas[key]);
 
             const llantaArray = []
             data.map(llanta => {
@@ -823,21 +729,7 @@
         { immediate: true }
     );
 
-    // Agrega Servicio Adicionales al arreglo CotizacionesForm
-    const agregarServicioExtra = () => {
-        if (nuevoServicio.value && nuevoPrecio.value && nuevaCantidad.value > 0) {
-            cotizacionForm.serviciosExtras.push({
-                idDetalleCotizacionServicio: null,
-                nombre: nuevoServicio.value,
-                cantidad: parseInt(nuevaCantidad.value),
-                precioUnitario: parseFloat(nuevoPrecio.value)
-            });
-            nuevoServicio.value = '';
-            nuevoPrecio.value = '';
-            nuevaCantidad.value = 1;
-        }
-    };
-
+    
     // Elimina ServicioAdicional del arreglo
     const eliminarServicioExtra = (id) => {
         // Si el idDetalleCotizacionServicio es nulo, usa el índice (i) como respaldo
@@ -860,15 +752,25 @@
             alert('Solo puedes agregar hasta 6 llantas diferentes por cotización.');
             return;
         }
-        const yaExiste = cotizacionForm.llantas.some(ll => ll.idLlanta === item.id);
+
+        console.log(JSON.stringify(cotizacionForm.llantas))
+        const yaExiste = cotizacionForm.llantas.some(
+            ll => ll.idLlanta === item.id && ll.ubicacion === item.ubicacion
+        );
+
+        const sobrePedido = item.ubicacion.toLowerCase().includes('proveedor');
+
         if (!yaExiste) {
             cotizacionForm.llantas.push({
                 idDetalleCotizacionLlanta: null,
                 idLlanta: item.id,
-                cantidad: 4, // o el campo que manejes
+                cantidad: 4,
                 precioUnitario: item.precio || 0,
-                modeloMedidas: item.llanta +' - ' + item.medida
+                modeloMedidas: item.llanta + ' - ' + item.medida,
+                ubicacion: item.ubicacion,
+                sobrePedido
             });
+
             cotizacionForm.cantidadesPorLlanta[item.id] = 4;
             
             //console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
@@ -892,7 +794,6 @@
                 paquetes: paquetesDisponibles.value.length ? [paquetesDisponibles.value[0]] : [],
                 paquetesDetalles: {},
                 llantas: [],
-                paquetesDetalles: {},
                 cantidadesPorLlanta: {},
                 serviciosExtras: [],
                 mostrarTotal: false,
@@ -917,14 +818,7 @@
 
             // PAQUETES
             cotizacionForm.paquetes = data.paquetes
-            .map(p => {
-                const base = paquetesDisponibles.value.find(q => q.idPaquete === p.idPaquete);
-                if (!base) return null;
-                return {
-                    ...base,
-                    precioUnitario: p.precioUnitario   
-                };
-            })
+            .map(p => paquetesDisponibles.value.find(q => q.idPaquete === p.idPaquete))
             .filter(Boolean);
 
             cotizacionForm.paquetesDetalles = {};
@@ -943,7 +837,7 @@
             cotizacionForm.cantidadesPorLlanta = {};
             data.llantas.forEach(ll => {
                 cotizacionForm.cantidadesPorLlanta[ll.idLlanta] = ll.cantidad;
-                preciosLlantas[ll.idLlanta] = parseFloat(ll.precioUnitario);
+                preciosLlantas[ll.idLlanta] = ll.precioUnitario;
             });
 
             // SERVICIOS EXTRAS
@@ -955,7 +849,8 @@
             }));
             //console.log('cargarFromulario: ServiciosAdicionales '+JSON.stringify(cotizacionForm.serviciosExtras))
 
-            cotizacionForm.mostrarTotal = mostrarTotalEnVista.value;
+            cotizacionForm.mostrarTotal = false;
+            mostrarTotalEnVista.value = false;
 
         } catch (e) {
             console.error('Error cargando cotización para edición:', e);
@@ -981,7 +876,7 @@
             idDetalleCotizacionLlanta: item.idDetalleCotizacionLlanta || null, // null si nuevo
             idLlanta: item.idLlanta,
             cantidad: cotizacionForm.cantidadesPorLlanta[item.idLlanta],
-            precioUnitario: item.precioUnitario//preciosLlantas[item.idLlanta]
+            precioUnitario: preciosLlantas[item.idLlanta]
         }));
 
         // Paquetes
@@ -991,7 +886,7 @@
             cantidad: p.cantidad ?? 1, // o el valor que requieras
             precioUnitario: p.precioUnitario
         }));
-        //console.log('GuardarCotizacion: Paquetes' + JSON.stringify(paquetes) + JSON.stringify(cotizacionForm.paquetes))
+        console.log('GuardarCotizacion: Paquetes' + JSON.stringify(paquetes) + JSON.stringify(cotizacionForm.paquetes))
 
         // Servicios
         const serviciosAdicionales = cotizacionForm.serviciosExtras.map(s => ({
@@ -1041,12 +936,24 @@
             console.log("Cotización guardada:", data);
             closeModal();         // Cierra modal
             cargarFormulario();   // Limpia formulario
-            cargarCotizaciones(); // Actualiza la info de la tabla cotizaciones
+            cargarCotizaciones(); // <--- ACTUALIZA LA TABLA
         });
         //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
     };
 
-    
+    const agregarServicioExtra = () => {
+        if (nuevoServicio.value && nuevoPrecio.value && nuevaCantidad.value > 0) {
+            cotizacionForm.serviciosExtras.push({
+                idDetalleCotizacionServicio: null,
+                nombre: nuevoServicio.value,
+                cantidad: parseInt(nuevaCantidad.value),
+                precioUnitario: parseFloat(nuevoPrecio.value)
+            });
+            nuevoServicio.value = '';
+            nuevoPrecio.value = '';
+            nuevaCantidad.value = 1;
+        }
+    };
 
     const calcularTotalVista = (data) => {
         const totalLlantas = data.llantas.reduce((sum, l) => sum + (l.precioUnitario * l.cantidad), 0);
@@ -1128,6 +1035,14 @@
         { text: "Acciones", value: "acciones", width: 100 }
     ]
 
+    let preciosLlantas = {
+        66: 1300, // MULTIHAWK
+        67: 1350, // FIREHAWK 900
+        69: 1500, // CV-200 100P
+        78: 1450, // FIREHAWK GTV 82V
+        91: 1800, // FIREHAWK INDY 500
+        98: 1600  // ECOPIA EP 422
+    };
 
     const cotizacionesTransformadas = computed(() => {
         return cotizacionesRealizadas.value
@@ -1164,13 +1079,13 @@
             }));
     });
 
-    watch(itemsSelected, (seleccionados) => {
-        seleccionados.forEach(item => {
-            if (cantidadesPorLlanta.value[item.id] === undefined) {
-                cantidadesPorLlanta.value[item.id] = 4;
-            }
-        });
-    });
+    // watch(itemsSelected, (seleccionados) => {
+    //     seleccionados.forEach(item => {
+    //         if (cantidadesPorLlanta.value[item.id] === undefined) {
+    //             cantidadesPorLlanta.value[item.id] = 4;
+    //         }
+    //     });
+    // });
 
     // observar si clienteExistente a cambiado de valor 
    watch(() => cotizacionForm.clienteExistente, (nuevoNombre) => {
@@ -1188,17 +1103,13 @@
 
     
 
-    /*********************************************
-        FUNCIONES PARA MODAL SCREENSHOT Y PDF
-    **********************************************/
-    // Vista Final para el Cliente
+    //boton ver
     const mostrarVistaPrevia = async (cotizacion, modo = 'ver') => {
         if (modo === 'ver') {
             try {
                 const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
                 const data = await res.json();
 
-                //console.log(JSON.stringify(data));
                 vistaCotizacion.value = {
                     codigo: 'COT-' + data.idCotizacion,
                     fechaCreacion: new Date(data.fechaCreacion).toLocaleString(),
@@ -1215,19 +1126,17 @@
                         almacenOrigen: '', // opcional
                         cantidad: llanta.cantidad,
                         precioUnitario: llanta.precioUnitario,
-                        total: (llanta.precioUnitario * llanta.cantidad)*1.16
+                        total: llanta.precioUnitario * llanta.cantidad
                     })),
                     paquetes: data.paquetes.map(p => ({
                         idPaquete: p.idPaquete,
                         nombre: p.nombre,
-                        precio: p.precioUnitario,
-                        total: p.precioUnitario * 1.16
+                        precio: p.precioUnitario
                     })),
                     serviciosAdicionales: data.servicios.map(s => ({
                         nombreServicio: s.descripcion,
                         cantidad: s.cantidad,
-                        precioUnitario: s.precioUnitario,
-                        total: (s.precioUnitario * s.cantidad)*1.16
+                        precioUnitario: s.precioUnitario
                     })),
                     total: calcularTotalVista(data),
                     estatus: cotizacion.estatus || 'Activa',
@@ -1242,176 +1151,83 @@
         }
     };
 
-    // GENERAR PDF
-
-    const logoBase64 = ref(null);
-
-    const loadLogoBase64 = async () => {
-        if (logoBase64.value) return logoBase64.value;
-        const response = await fetch('/images/Logo-Kartisimo.png');
-        const blob = await response.blob();
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-            logoBase64.value = reader.result;
-            resolve(reader.result);
-            };
-            reader.readAsDataURL(blob);
+    const cancelarCotizacion = (cotizacion) => {
+        
+        const json = {
+            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
+            idEstadoCotizacion: 4,
+            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+        }
+        console.log(JSON.stringify(json))
+        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json)
+        })
+        .then(res => res.json())
+        .then(data  => {
+            console.log("Cotización actualizada:", data)
+            cargarCotizaciones()
         });
     };
 
-    const generarPDF = async () => {
+    const reactivarCotizacion = (cotizacion) => {
         
-        const pdfMakeModule = await import("pdfmake/build/pdfmake");
-        const pdfFonts = await import("pdfmake/build/vfs_fonts");
-        const pdfMake = pdfMakeModule.default;
-        pdfMake.vfs = pdfFonts.pdfMake.vfs;
-
-        const logo = await loadLogoBase64();
-        const v = vistaCotizacion.value;
-
-        // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
-        const llantasRows = v.llantasSelecionadas.map(ll => [
-            { text: String(ll.cantidad), alignment: 'center', fontSize: 11 },
-            { text: `${ll.medidas}`, fontSize: 11 },
-            { text: `$${ll.precioUnitario?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 },
-            { text: `$${ll.total?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 }
-        ]);
-
-        const paquetesRows = v.paquetes.map(p => [
-            { text: '1', alignment: 'center', fontSize: 11 },
-            { text: p.nombre, italics: true, fontSize: 11 },
-            { text: `$${p.precio?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 },
-            { text: `$${p.total?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 }
-        ]);
-
-        const serviciosRows = v.serviciosAdicionales.map(s => [
-            { text: String(s.cantidad), alignment: 'center', fontSize: 11 },
-            { text: s.nombreServicio, italics: true, fontSize: 11 },
-            { text: `$${s.precioUnitario?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 },
-            { text: `$${s.total?.toLocaleString('en-US', { minimumFractionDigits: 2 }) || '0.00'}`, alignment: 'right', fontSize: 11 }
-        ]);
-
-        // Definición del PDF
-        const docDefinition = {
-            pageMargins: [40, 40, 40, 60],
-            content: [
-                // Logo y encabezado
-                {
-                    columns: [
-                        {
-                            width: '*',
-                            stack: [
-                                { image: logo, width: 130, margin: [0, 0, 0, 10] }
-                            ]
-                        },
-                        {
-                            width: 'auto',
-                            stack: [
-                                { text: 'Kartisimo Bajio S.A. de C.V.', bold: true, fontSize: 14, alignment: 'right', margin: [0, 0, 0, 10] },
-                            ]
-                        }
-                    ]
-                },
-                {
-                    columns: [
-                        [
-                            { text: 'Blvd. Delta 2002 esq. Rio Mayo', bold: true, fontSize: 10 },
-                            { text: 'Col. Valle de Jerez C.P 37538', fontSize: 9 },
-                            { text: 'Tel. 477 330 6060 y 477 390 5090', fontSize: 9 },
-                            { text: 'delta@kartisimo.mx', fontSize: 9 }
-                        ],
-                        [
-                            { text: 'Blvd. Lopez Mateos 827 esq. Apolo', bold: true, fontSize: 10 },
-                            { text: 'Col. Obrera C.P. 37340', fontSize: 9 },
-                            { text: 'Tel. 477 717 7440 y 477 470 9419', fontSize: 9 },
-                            { text: 'apolo@kartisimo.mx', fontSize: 9 }
-                        ],
-                        [
-                            { text: 'Blvd. Torres Landa 1901 esq San Jacobo', bold: true, fontSize: 10 },
-                            { text: 'Col. La Pisina C.P. 37440', fontSize: 9 },
-                            { text: 'Tel. 477 390 0290 y 477 461 0028', fontSize: 9 },
-                            { text: 'torreslanda@kartisimo.mx', fontSize: 9 }
-                        ]
-                    ],
-                    columnGap: 20,
-                    margin: [0, 0, 0, 18]
-                },
-                { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 515, y2: 0, lineWidth: 1, lineColor: '#888' } ], margin: [0, 8, 0, 8] },
-                {
-                    columns: [
-                        { text: `No. Cotizacion: ${v.codigo || ''}`, fontSize: 11, margin: [0, 0, 10, 6], bold: true },
-                        { text: `Cliente: ${v.cliente.nombre || ''}`, fontSize: 11, margin: [0, 0, 10, 6] },
-                        { text: `Teléfono: ${v.cliente.telefono || ''}`, fontSize: 11, margin: [0, 0, 10, 6] },
-                    ]
-                },
-                // Tabla principal 
-                {
-                    table: {
-                        headerRows: 1,
-                        widths: [ 40, '*', 90, 90 ],
-                        body: [
-                            [
-                                { text: 'CANT', alignment: 'center', style: 'tableHeaderBorder'},
-                                { text: 'MARCA - MODELO - MEDIDA' },
-                                { text: 'PRECIO UNITARIO', style: 'tableHeaderBorder', alignment: 'center' },
-                                { text: 'TOTAL', style: 'tableHeaderBorder', alignment: 'center' }
-                            ],
-                            ...llantasRows,
-                            ...paquetesRows,
-                            ...serviciosRows
-                        ]
-                    },
-                    layout: {
-                        fillColor: (rowIndex) => rowIndex === 0 ? '#ededed' : null,
-                        hLineWidth: (i, node) => {
-                            // Quita todas las líneas horizontales menos la del encabezado y las divisiones
-                            if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
-                            // Puedes agregar condiciones aquí para las divisiones
-                            return 0;
-                        },
-                        vLineWidth: (i, node) => 0,
-                        // fillColor: (rowIndex) => rowIndex === 0 ? '#ededed' : null,
-                        // hLineWidth: (i, node) => {
-                        //     // Quita todas las líneas horizontales menos la del encabezado y las divisiones
-                        //     if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
-                        //     // Puedes agregar condiciones aquí para las divisiones
-                        //     return 0;
-                        // },
-                        // vLineWidth: (i, node) => 0,
-                        // hLineColor: (i, node) => '#222',
-                        // vLineColor: (i, node) => '#222',
-                        // paddingLeft: (i, node) => 7,
-                        // paddingRight: (i, node) => 7,
-                        // paddingTop: (i, node) => 4,
-                        // paddingBottom: (i, node) => 4
-                    },
-                    margin: [0, 12, 0, 0]
-                },
-                {
-                    text: 'Los precios incluyen IVA',
-                    style: 'notaIVA',
-                    alignment: 'right',
-                    margin: [0, 14, 0, 0]
-                }
-            ],
-            styles: {
-                tableHeaderBorder: {
-                    bold: true,
-                    fontSize: 11,
-                    border: [true, true, true, true], // bordes en todas las direcciones
-                    alignment: 'center'
-                },
-                notaIVA: {
-                    italics: true,
-                    fontSize: 10
-                }
-            }
-        };
-
-        pdfMake.createPdf(docDefinition).open();
+        const json = {
+            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
+            idEstadoCotizacion: 1,
+            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+        }
+        console.log(JSON.stringify(json))
+        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json)
+        })
+        .then(res => res.json())
+        .then(data  => {
+            console.log("Cotización actualizada:", data)
+            cargarCotizaciones()
+        });
     };
 
+    const aprobarCotizacion = (cotizacion) => {
+        
+        const json = {
+            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
+            idEstadoCotizacion: 2,
+            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+        }
+        console.log(JSON.stringify(json))
+        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json)
+        })
+        .then(res => res.json())
+        .then(data  => {
+            console.log("Cotización actualizada:", data)
+            cargarCotizaciones()
+        });
+    };
 
-
+    const finalizarCotizacion = (cotizacion) => {
+        
+        const json = {
+            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
+            idEstadoCotizacion: 3,
+            idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+        }
+        console.log(JSON.stringify(json))
+        fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(json)
+        })
+        .then(res => res.json())
+        .then(data  => {
+            console.log("Cotización actualizada:", data)
+            cargarCotizaciones()
+        });
+    };
 </script>
