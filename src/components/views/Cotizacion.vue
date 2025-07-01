@@ -619,10 +619,20 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(json)
         })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
+        .then(async res => {
+            if (!res.ok) {
+                let errorText = await res.text();
+                throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("Cotización actualizada:", data);
+            cargarCotizaciones();
+        })
+        .catch(error => {
+            // Aquí capturas cualquier error de la API o de red
+            console.error("Error en la petición:", error.message);
         });
     };
 
@@ -639,10 +649,20 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(json)
         })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
+        .then(async res => {
+            if (!res.ok) {
+                let errorText = await res.text();
+                throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("Cotización actualizada:", data);
+            cargarCotizaciones();
+        })
+        .catch(error => {
+            // Aquí capturas cualquier error de la API o de red
+            console.error("Error en la petición:", error.message);
         });
     };
 
@@ -659,10 +679,20 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(json)
         })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
+        .then(async res => {
+            if (!res.ok) {
+                let errorText = await res.text();
+                throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("Cotización actualizada:", data);
+            cargarCotizaciones();
+        })
+        .catch(error => {
+            // Aquí capturas cualquier error de la API o de red
+            console.error("Error en la petición:", error.message);
         });
     };
 
@@ -679,10 +709,20 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(json)
         })
-        .then(res => res.json())
-        .then(data  => {
-            console.log("Cotización actualizada:", data)
-            cargarCotizaciones()
+        .then(async res => {
+            if (!res.ok) {
+                let errorText = await res.text();
+                throw new Error(`Error HTTP ${res.status}: ${errorText}`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            console.log("Cotización actualizada:", data);
+            cargarCotizaciones();
+        })
+        .catch(error => {
+            // Aquí capturas cualquier error de la API o de red
+            console.error("Error en la petición:", error.message);
         });
     };
 
@@ -722,21 +762,35 @@
 
             const llantaArray = []
             data.map(llanta => {
-                const medida = `${llanta.anchura}/${llanta.perfil} R${llanta.rin} ${llanta.carga}${llanta.velocidad}`;
+                // Si el valor es 0, '', null o undefined, se omite
+                const anchura = llanta.anchura && llanta.anchura !== 0 ? llanta.anchura : '';
+                const perfil = llanta.perfil && llanta.perfil !== 0 ? llanta.perfil : '';
+                const rin = llanta.rin && llanta.rin !== 0 ? llanta.rin : '';
+                const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
+                const velocidad = llanta.velocidad && llanta.velocidad !== 0 ? llanta.velocidad : '';
+
+                // Construcción de la medida, solo con los valores válidos
+                let medida = '';
+                if (anchura) medida += anchura;
+                if (perfil) medida += `/${perfil}`;
+                if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
+                if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
+                medida = medida.trim();
+
                 const nombreCompleto = `${llanta.nombreMarca} ${llanta.modelo}`.trim();
                 const sobrePedido = llanta.nombreAlmacen.toLowerCase().includes('proveedor');
-                preciosLlantas[llanta.idLlanta] = parseFloat(llanta.precio); // para cálculos
-                
+                preciosLlantas[llanta.idLlanta] = parseFloat(llanta.precio);
+
                 const obj = {
                     id: llanta.idLlanta,
                     llanta: nombreCompleto,
                     medida: medida,
                     ubicacion: llanta.nombreAlmacen,
-                    precio: parseFloat(llanta.precio)|| 0,
+                    precio: parseFloat(llanta.precio) || 0,
                     sobrePedido,
                 };
 
-                llantaArray.push(obj) 
+                llantaArray.push(obj);
             });
             items.value = llantaArray
             //console.log('cargarLlantas: ' + JSON.stringify(items.value))
@@ -1077,18 +1131,21 @@
         return subtotalPaquete.value + subtotalLlantas.value + subtotalExtras.value;
     });
 
-    // Filtra variable itms en modal creacion
+    
+    // Filtra variable itms en modal creacion filtra si se escribe con o sin espacio
     const itemsFiltrados = computed(() => {
         if (!busquedaLlantas.value) return items.value;
 
-        const texto = busquedaLlantas.value.toLowerCase();
+        // Elimina espacios de la búsqueda
+        const texto = busquedaLlantas.value.replace(/\s+/g, '').toLowerCase();
 
         return items.value.filter(item =>
             Object.values(item).some(val =>
-                String(val).toLowerCase().includes(texto)
+                String(val).replace(/\s+/g, '').toLowerCase().includes(texto)
             )
         );
     });
+
 
     const openModal = () => {
         if (!modalInstance) {
