@@ -4,7 +4,6 @@ import Inventario from '@/components/views/Inventario.vue'
 import MainLayout from '@/components/MainLayout.vue'
 import Inicio from '@/components/views/Inicio.vue'
 import Cotizacion from '@/components/views/Cotizacion.vue'
-
 const routes = [
     { 
         path: '/', 
