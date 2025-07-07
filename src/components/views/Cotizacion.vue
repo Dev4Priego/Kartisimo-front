@@ -14,7 +14,7 @@
             </div>
 
             <div class="col d-flex align-items-center">
-                <label for="select" class="form-label m-2">Selecciona</label>
+                <label for="select" class="form-label m-2">Estatus: </label>
                 <select v-model="filtroEstatus" class="form-select">
                     <option value="">Todos</option>
                     <option value="Creada">Activos</option>
@@ -40,20 +40,22 @@
                         <th>Fecha</th>
                         <th>Cliente</th>
                         <th>Teléfono</th>
-                        <th>Paquete</th>
+                        <!-- <th>Paquete</th> -->
                         <!-- <th>Total</th> -->
+                        <th>Llanta</th>
                         <th>Estatus</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="item in cotizacionesTransformadas" :key="item.codigo">
-                        <td>{{ item.codigo }}</td>
+                        <td>{{ item.codigo }} </td>
                         <td>{{ item.fechaCreacion }}</td>
                         <td>{{ item.cliente }}</td>
                         <td>{{ item.telefono }}</td>
-                        <td>{{ item.paquete }}</td>
-                        <!-- <td>{{ item.total }}</td> -->
+                        <!-- <td>{{ item.paquete }}</td> -->
+                        <!-- <td>{{ item.total }}<span style="diseble">{{ console.log(JSON.stringify(item.nombreLlanta)) }}</span></td> -->
+                        <td>{{ item.nombreLlanta }}</td>
                         <td>{{ item.estatus }}</td>
                         <td>
                             <div class="d-flex gap-1">
@@ -108,18 +110,18 @@
         </div>
          
         <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
-        <div v-if="mostrarVista" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+        <div v-if="mostrarVista" class="modal fade show d-block" tabindex="-1" :style="{ background: 'rgba(0,0,0,0.5)' }">
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content p-4">
                     <div class="modal-header">
                         <h4 class="modal-title">Vista Previa de Cotización</h4>
                         <button type="button" class="btn-close" @click="mostrarVista = false"></button>
                     </div>
-                    <div ref="pdfContent" class="modal-body bg-white p-4" style="font-size: 14px;">
+                    <div ref="pdfContent" class="modal-body bg-white p-4" :style="{ fontSize: '14px' }">
                         <!-- Encabezado con direcciones y logo -->
                         <div class="row">
                             <div class="col">
-                                <img class="float-start" src="/images/Logo-Kartisimo.png" alt="Logo" style="max-width: 250px;" />
+                                <img class="float-start" src="/images/Logo-Kartisimo.png" alt="Logo" :style="{ maxWidth: '250px' }" />
                                 <p class="mt-2 float-end">
                                     <strong>Kartisimo Bajio S.A. de C.V.</strong>
                                 </p>
@@ -154,7 +156,8 @@
 
                         <!-- Información del cliente -->
                         <div class="mb-4" v-if="vistaCotizacion.cliente.nombre">
-                            <span class="mx-2"><strong>No. Cotizacion: </strong> {{ vistaCotizacion.codigo }} </span>
+                            <span class="mx-2"><strong>Fecha emisión: </strong> {{ vistaCotizacion.fechaCreacion }} </span>
+                            <span class="mx-2"><strong>No. Cotización: </strong> {{ vistaCotizacion.codigo }} </span>
                             <span class="mx-2"><strong>Cliente:</strong> {{ vistaCotizacion.cliente.nombre }}</span>
                             <span class="mx-2"><strong>Teléfono:</strong> {{ vistaCotizacion.cliente.telefono }}</span>
                         </div>
@@ -197,7 +200,7 @@
                                         :key="'paq-' + i"
                                     >
                                         <td class="text-center">1</td>
-                                        <td>{{ paquete.nombre }}</td>
+                                        <td>{{ paquete.nombre }}: {{paquete.descripcion}} <span style="diseble">{{console.log(JSON.stringify(paquete))}}</span></td>
                                         <td class="text-end">{{ paquete.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                         <td class="text-end">{{ (paquete.precio * 1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                     </tr>                                   
@@ -235,7 +238,7 @@
         <!-- MODAL PARA CRREAR/EDITAR COTIZACION -->
         <div class="modal fade" ref="modalRef" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-scrollable modal-lg">
-                <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column;">
+                <div class="modal-content" :style="{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }">
                 
                     <div class="modal-header">
                         <div class="row modal-title align-items-center text-center">
@@ -244,9 +247,9 @@
                         <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                     </div>
                     
-                    <div class="modal-body" style="overflow-y: auto;">                                                  
+                    <div class="modal-body" :style="{ overflowY: 'auto' }">                                                  
                         <!-- Seccion informacion cliente -->
-                        <div class="row m-4">
+                        <div class="row m-2">
                             <div class="col d-flex flex-column">
                                 <div class="row m-2">
                                     <label for="clienteNuevo" class="mb-1">Cliente Nuevo:</label>
@@ -363,34 +366,46 @@
                         <div class="row mt-3 mx-3">
                             <h5>Agregar servicio adicional</h5>
                             <div class="d-flex gap-3 mb-3">
-                                <input 
-                                    class="form-control" 
-                                    placeholder="Nombre del servicio" 
-                                    v-model="nuevoServicio" 
-                                />
-                                <input 
-                                    class="form-control" 
-                                    type="number" 
-                                    min="1" 
-                                    placeholder="Cantidad" 
-                                    v-model="nuevaCantidad"
-                                />
-                                <input 
-                                    class="form-control" 
-                                    type="number" 
-                                    min="0" 
-                                    placeholder="Precio unitario" 
-                                    v-model="nuevoPrecio" 
-                                />
+                                <div class="col-3">
+                                    <input 
+                                        class="form-control" 
+                                        placeholder="Nombre del servicio" 
+                                        v-model="nuevoServicio" 
+                                    />
+                                </div>
+                                <div class="col-1">
+                                    <input 
+                                        class="form-control" 
+                                        type="number" 
+                                        min="1" 
+                                        placeholder="Cantidad" 
+                                        v-model="nuevaCantidad"
+                                    />
+                                </div>
+                                <div class="col-3">
+                                    <input 
+                                        class="form-control" 
+                                        placeholder="Observaciones" 
+                                    />
+                                </div>
+                                <div class="col-3">                                    
+                                    <input 
+                                        class="form-control" 
+                                        type="number" 
+                                        min="0" 
+                                        placeholder="Precio unitario" 
+                                        v-model="nuevoPrecio" 
+                                    />
+                                </div>
                                 <button class="btn btn-success" @click="agregarServicioExtra">
                                     Agregar
                                 </button>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col border m-4">
-                                <div class="row m-5 justify-content-center">
-                                    <div class="col-10 p-4 rounded-3">
+                            <div class="col border ">
+                                <div class="row  justify-content-center">
+                                    <div class="col-12 p-4 rounded-3">
                                         <div class="mb-3 d-flex ">
                                             <img src="/images/Logo-Kartisimo.png" alt="Logo Kartisimo" />
                                             <p>Kartisimo Bajio S. A. de CV</p>
@@ -398,7 +413,7 @@
                                         <div class="my-3 d-flex justify-content-between">
                                             <div>
                                                 <small>Blvd. Delta 2002 esq. Rio Mayo</small><br>
-                                                <small>Col. Valle de Jerez C.P 37538</small><br>
+                                                <small>Col. Valle de Jerez C.P. 37538</small><br>
                                                 <small>Tel. 477 330 6060 y 477 390 5090</small><br>
                                                 <small>delta@kartisimo.mx</small><br>
                                             </div>
@@ -413,6 +428,11 @@
                                                 <small>Col. La Pisina C.P. 37440</small><br>
                                                 <small>Tel. 477 390 0290 y 477 461 0028</small><br>
                                                 <small>torreslanda@kartisimo.mx</small><br>
+                                            </div>
+                                            <div>
+                                                <small>Blvd. Mariano Escobedo Pte. 2715 br</small><br>
+                                                <small>La Martinica, C.P. 37500</small><br>
+                                                <small>Tel. 477 763 3285</small>                                                
                                             </div>
                                         </div>
 
@@ -441,11 +461,10 @@
                                                     <td>
                                                         <input
                                                             type="number"
-                                                            min="4"
+                                                            min="1"
                                                             class="form-control"
-                                                            style="width: 70px;"
-                                                            v-model.number="cantidadesPorLlanta[item.idllanta]"
-                                                            placeholder="4"
+                                                            :style="{ width: '70px' }"
+                                                            v-model.number="item.cantidad"
                                                         />
                                                     </td>
                                                     <td>
@@ -453,13 +472,13 @@
                                                             type="number"
                                                             min="0"
                                                             class="form-control"
-                                                            style="width: 90px;"
+                                                            :style="{ width: '90px' }"
                                                             v-model.number="item.precioUnitario"
                                                             placeholder="Precio c/u"
                                                         />
                                                     </td>
                                                     <td>
-                                                        {{ formatoMoneda((item.precioUnitario || 0) * (cantidadesPorLlanta[item.idllanta] ?? 4)) }}
+                                                        {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 4)) }}
                                                     </td>
                                                     <td>
                                                         <button
@@ -474,13 +493,12 @@
                                                 <!-- Paquetes -->
                                                 <tr v-for="(p, index) in cotizacionForm.paquetes" :key="'paquete-' + index">
                                                     <td>{{ p.nombre }}</td>
-                                                    <td></td>
                                                     <td>
                                                         <input
                                                             type="number"
                                                             min="0"
                                                             class="form-control"
-                                                            style="width: 90px;"
+                                                            :style="{ width: '90px' }"
                                                             v-model.number="p.precioUnitario"
                                                             placeholder="Precio"
                                                         />
@@ -506,7 +524,7 @@
                                                             type="number"
                                                             min="1"
                                                             class="form-control"
-                                                            style="width: 60px;"
+                                                            :style="{ width: '60px' }"
                                                             v-model.number="extra.cantidad"
                                                             placeholder="1"
                                                         />
@@ -516,7 +534,7 @@
                                                             type="number"
                                                             min="0"
                                                             class="form-control"
-                                                            style="width: 90px;"
+                                                            :style="{ width: '90px' }"
                                                             v-model.number="extra.precioUnitario"
                                                             placeholder="Precio c/u"
                                                         />
@@ -582,7 +600,6 @@
 
     const itemsSelected = ref([]);
     const paquetesSeleccionados = ref([]);
-    const cantidadesPorLlanta = ref({});
 
     const cotizacionForm = reactive({
         codigo: '',                   // ← Para saber si es edición
@@ -593,7 +610,6 @@
         paquetes: [],
         paquetesDetalles: {},
         llantas: [],
-        cantidadesPorLlanta: {},
         serviciosExtras: [],
         mostrarTotal: false,
         fechaCreacion: ''
@@ -756,7 +772,7 @@
             const res = await fetch(proxy.$serverIP + 'api/Llanta/getLlantaPrecio');
             if (!res.ok) throw new Error('Error al obtener llantas');
             const data = await res.json();
-
+            
              // Limpia precios anteriores
             Object.keys(preciosLlantas).forEach(key => delete preciosLlantas[key]);
 
@@ -783,8 +799,10 @@
 
                 const obj = {
                     id: llanta.idLlanta,
+                    codigo: llanta.codigo,
                     llanta: nombreCompleto,
                     medida: medida,
+                    cantidad: llanta.cantidad,
                     ubicacion: llanta.nombreAlmacen,
                     precio: parseFloat(llanta.precio) || 0,
                     sobrePedido,
@@ -810,17 +828,18 @@
 
             cotizacionesRealizadas.value = data.map((c, i) => ({
                 codigo: 'COT-' + String(c.idCotizacion).padStart(5, '0'), // Ej: COT-00001
-                fechaCreacion: new Date(c.fechaCreacion).toLocaleString('es-MX'),
+                fechaCreacion: new Date(c.fechaCreacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }),
                 cliente: {
                     nombre: c.clienteNombre,
                     telefono: c.telefono,
                     correo: c.correo
                 },
                 paquetes: c.nombresPaquetes === 'Ninguno' ? [] : c.nombresPaquetes.split(', ').map(nombre => ({ nombre })),
-                llantasSelecionadas: [], // ← puedes llenarlo después si hay detalle
+                llantasSelecionadas: [],
                 serviciosAdicionales: [],
                 total: c.total,
                 estatus: c.estado,
+                nombreLlanta: c.nombreLlanta,
                 mostrarTotal: false
             }));
         } catch (error) {
@@ -865,13 +884,11 @@
     });
 
     // Paquetes: colocarlo por default cuando de carge el componente
-    // Si no hay paquete seleccionado y ya se cargaron los paquetes, pon el primero
-    watch(
-        paquetesDisponibles,
-        (nuevoValor) => {
+    // Si no hay paquete seleccionado y ya se cargaron los paquetes, pon el primero como default
+    watch(paquetesDisponibles, (nuevoValor) => {
             // Solo aplica si es una nueva cotización (no edición)
             if (!cotizacionForm.codigo && nuevoValor.length && cotizacionForm.paquetes.length === 0) {
-            cotizacionForm.paquetes = [nuevoValor[0]];
+                cotizacionForm.paquetes = [nuevoValor[0]];
             }
         },
         { immediate: true }
@@ -904,7 +921,6 @@
     // Opcional: elimina también su cantidad para limpiar el objeto
     const eliminarLlanta = (idLlanta) => {
         cotizacionForm.llantas = cotizacionForm.llantas.filter(ll => ll.idLlanta !== idLlanta);
-        delete cotizacionForm.cantidadesPorLlanta[idLlanta];
     };
 
     // Agrega la llanta al arreglo
@@ -923,7 +939,6 @@
                 precioUnitario: item.precio || 0,
                 modeloMedidas: item.llanta +' - ' + item.medida
             });
-            cotizacionForm.cantidadesPorLlanta[item.id] = 4;
             
             //console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
         }
@@ -947,7 +962,6 @@
                 paquetesDetalles: {},
                 llantas: [],
                 paquetesDetalles: {},
-                cantidadesPorLlanta: {},
                 serviciosExtras: [],
                 mostrarTotal: false,
                 fechaCreacion: ''
@@ -981,7 +995,6 @@
             })
             .filter(Boolean);
 
-            cotizacionForm.paquetesDetalles = {};
             data.paquetes.forEach(p => {
                 cotizacionForm.paquetesDetalles[p.idPaquete] = p.idDetalleCotizacionPaquete;
             });
@@ -993,10 +1006,8 @@
             }));
             //console.log('cargarFormulario: ' + JSON.stringify(cotizacionForm.llantas))
 
-            // cantidades y precios por llanta
-            cotizacionForm.cantidadesPorLlanta = {};
+
             data.llantas.forEach(ll => {
-                cotizacionForm.cantidadesPorLlanta[ll.idLlanta] = ll.cantidad;
                 preciosLlantas[ll.idLlanta] = parseFloat(ll.precioUnitario);
             });
 
@@ -1031,11 +1042,11 @@
         }
 
         // Mapear llantas al formato esperado
-        const llantas = cotizacionForm.llantas.map(item => ({
-            idDetalleCotizacionLlanta: item.idDetalleCotizacionLlanta || null, // null si nuevo
-            idLlanta: item.idLlanta,
-            cantidad: cotizacionForm.cantidadesPorLlanta[item.idLlanta],
-            precioUnitario: item.precioUnitario//preciosLlantas[item.idLlanta]
+        const llantas = cotizacionForm.llantas.map(ll => ({
+            idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null, // null si nuevo
+            idLlanta: ll.idLlanta,
+            cantidad: ll.cantidad,
+            precioUnitario: ll.precioUnitario//preciosLlantas[item.idLlanta]
         }));
 
         // Paquetes
@@ -1115,6 +1126,7 @@
 
     const subtotalLlantas = computed(() => {
         return itemsSelected.value.reduce((sum, item) => {
+            console.log(JSON.stringify(item))
             const cantidad = cantidadesPorLlanta.value[item.id] ?? 4; // ← por defecto 4
             return sum + ((preciosLlantas[item.id] || 0) * cantidad);
         }, 0);
@@ -1179,10 +1191,12 @@
 
     const tblHeadersModal = [
         { text:"Llanta", value: "llanta"},
+        { text:"Codigo", value: "codigo"},
         { text:"Medidas", value: "medida"},
+        { text:"Cantidad", value: "cantidad"},
         { text:"Ubicación", value: "ubicacion", width:200},
         { text:"Precio", value: "precio", width:100},        
-        { text: "Acciones", value: "acciones", width: 100 }
+        { text:"Acciones", value: "acciones", width: 100 }
     ]
 
 
@@ -1200,7 +1214,8 @@
                     c.cliente?.telefono,
                     c.total?.toString(),
                     c.estatus,
-                    ...(c.paquetes?.map(p => p.nombre) || []) // para búsqueda por nombre de paquetes
+                    c.nombreLlanta, 
+                    ...(c.paquetes?.map(p => p.nombre) || [])
                 ];
 
                 return valores.some(v =>
@@ -1215,6 +1230,7 @@
                 paquete: c.paquetes?.length
                     ? c.paquetes.map(p => p.nombre).join(', ')
                     : '—',
+                nombreLlanta: c.nombreLlanta || '—',
                 total: formatoMoneda(c.total || 0),
                 estatus: typeof c.estatus === 'string' ? c.estatus : 'Desconocido',
                 acciones: c
@@ -1258,7 +1274,7 @@
                 //console.log(JSON.stringify(data));
                 vistaCotizacion.value = {
                     codigo: 'COT-' + data.idCotizacion,
-                    fechaCreacion: new Date(data.fechaCreacion).toLocaleString(),
+                    fechaCreacion: new Date(data.fechaCreacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }),
                     cliente: {
                         nombre: data.clienteNombre,
                         telefono: data.telefono || 'Sin teléfono',
@@ -1278,7 +1294,8 @@
                         idPaquete: p.idPaquete,
                         nombre: p.nombre,
                         precio: p.precioUnitario,
-                        total: p.precioUnitario * 1.16
+                        total: p.precioUnitario * 1.16,
+                        descripcion: p.descripcion
                     })),
                     serviciosAdicionales: data.servicios.map(s => ({
                         nombreServicio: s.descripcion,
@@ -1290,7 +1307,7 @@
                     estatus: cotizacion.estatus || 'Activa',
                     mostrarTotal: false
                 };
-
+                console.log(data)
                 mostrarVista.value = true;
             } catch (error) {
                 console.error("Error al cargar detalle de cotización:", error);
@@ -1318,7 +1335,6 @@
     };
 
     const generarPDF = async () => {
-        
         const pdfMakeModule = await import("pdfmake/build/pdfmake");
         const pdfFonts = await import("pdfmake/build/vfs_fonts");
         const pdfMake = pdfMakeModule.default;
