@@ -1,9 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Login from '@/components/views/Login.vue'
-import Inventario from '@/components/views/Inventario.vue'
-import MainLayout from '@/components/MainLayout.vue'
-import Inicio from '@/components/views/Inicio.vue'
-import Cotizacion from '@/components/views/Cotizacion.vue'
+import Login from '@/views/Login.vue'
+import Inventario from '@/views/Inventario.vue'
+import MainLayout from '@/MainLayout.vue'
+import Inicio from '@/views/Inicio.vue'
+import Cotizacion from '@/views/Cotizacion.vue'
+import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
+import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 const routes = [
     { 
         path: '/', 
@@ -27,6 +29,18 @@ const routes = [
                 path: 'cotizacion',
                 name:'cotizacion',
                 component: Cotizacion
+            },
+            {
+                path: 'OrdenTrabajo',
+                name:'OrdenTrabajo',
+                component: OrdenTrabajo
+            },
+            {
+                
+                path:'FormularioOT',
+                name:'formOT',
+                component: FormularioOT
+                      
             }
         ]
     }

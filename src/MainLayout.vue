@@ -13,7 +13,8 @@
                 >
                     ☰
                 </button>
-                <h1 class="mb-0 h4">Kartisimo</h1>
+                <!-- <img src="../public/images/Logo-Kartisimo2.png" style="width: 120px; height: 30px;"> -->
+                <h5>Kartisimo</h5>
             </div>
         </header>
 
@@ -67,8 +68,10 @@
                     <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
+                            data-bs-dismiss="offcanvas"
+                            @click.prevent="irA('/content/OrdenTrabajo')"
                         >
-                            Clientes
+                            Orden de Trabajo
                         </button>
                     </li>
                 </ul>
@@ -84,18 +87,10 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Offcanvas } from 'bootstrap'
 import { useRouter } from 'vue-router'
 // #d43535
 const router = useRouter()
 const sidebarRef = ref(null)
-
-const cerrarSidebar = () => {
-  if (sidebarRef.value) {
-    const sidebarInstance = Offcanvas.getInstance(sidebarRef.value) || new Offcanvas(sidebarRef.value)
-    sidebarInstance.hide()
-  }
-}
 
 const irA = (ruta) => {
   router.push(ruta)

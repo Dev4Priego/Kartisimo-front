@@ -89,11 +89,30 @@ onMounted(async () => {
     try {
         const res = await fetch(proxy.$serverIP + "api/InventarioLlanta/existenciasInventario");
         const data = await res.json();
-        llantas.value = data.map((llanta) => ({
-        ...llanta,
-        medidas: `${llanta.anchura}/${llanta.perfil} R${llanta.rin} ${llanta.carga}${llanta.velocidad}`,
-        descripcion: `${llanta.nombre} ${llanta.modelo} ${llanta.anchura}/${llanta.perfil} R${llanta.rin} ${llanta.carga}${llanta.velocidad}`,
-        }));
+        llantas.value = data.map((llanta) => {
+            const anchura = llanta.anchura && llanta.anchura !== 0 ? llanta.anchura : '';
+            const perfil = llanta.perfil && llanta.perfil !== 0 ? llanta.perfil : '';
+            const rin = llanta.rin && llanta.rin !== 0 ? llanta.rin : '';
+            const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
+            const velocidad = llanta.velocidad && llanta.velocidad !== 0 ? llanta.velocidad : '';
+
+            let medida = '';
+            if (anchura) medida += anchura;
+            if (perfil) medida += `/${perfil}`;
+            if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
+            if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
+            medida = medida.trim();
+
+            const nombre = llanta.nombre ? llanta.nombre : '';
+            const modelo = llanta.modelo ? llanta.modelo : '';
+            const descripcion = `${nombre} ${modelo} ${medida}`.trim();
+
+            return {
+                ...llanta,
+                medidas: medida,
+                descripcion: descripcion
+            };
+        });
     } catch (e) {
         console.error("Error cargando datos", e);
     }

@@ -119,12 +119,9 @@
                     </div>
                     <div ref="pdfContent" class="modal-body bg-white p-4" :style="{ fontSize: '14px' }">
                         <!-- Encabezado con direcciones y logo -->
-                        <div class="row">
+                        <div class="row my-3">
                             <div class="col">
                                 <img class="float-start" src="/images/Logo-Kartisimo.png" alt="Logo" :style="{ maxWidth: '250px' }" />
-                                <p class="mt-2 float-end">
-                                    <strong>Kartisimo Bajio S.A. de C.V.</strong>
-                                </p>
                             </div>
                         </div>
                         <div class="row border-bottom pb-3 mb-4">
@@ -152,6 +149,11 @@
                                     torreslanda@kartisimo.mx<br>
                                 </small>
                             </div>
+                            <div class="col">
+                                <strong>Blvd. Mariano Escobedo Pte. 2715</strong><br>
+                                <small>La Martinica, C.P. 37500</small><br>
+                                <small>Tel. 477 763 3285</small>
+                            </div>
                         </div>
 
                         <!-- Información del cliente -->
@@ -167,19 +169,22 @@
                                 <thead class="table-light">
                                     <tr>                                        
                                         <th>CANT</th>
-                                        <th>MARCA - MODELO - MEDIDA</th>
+                                        <th>MEDIDA - MARCA - MODELO - RANGO</th>
                                         <th>PRECIO UNITARIO</th>
                                         <th>TOTAL</th>
                                     </tr>
                                     </thead>
                                 <tbody>
+                                    <tr>
+                                        <td class="text-center" colspan="5" >LLANTAS</td>
+                                    </tr>
                                     <!-- Llantas -->
                                     <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
                                         <td class="text-center">{{ llanta.cantidad }}</td>
                                         <td>
                                             {{ llanta.medidas }}
                                             <span
-                                                v-if="llanta.almacenOrigen == 'Almacen Foraneo'"
+                                                v-if="llanta.ubicacion != 'Kartisimo' || llanta.ubicacion != 'Martinica'"
                                                 class="badge bg-warning text-dark ms-2"
                                             >
                                                 Sobre pedido
@@ -189,31 +194,35 @@
                                             {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                         </td>
                                         <td class="text-end">
-                                            {{ (llanta.total * 1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            {{ (llanta.total).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                         </td>
 
                                     </tr>
-
+                                    <tr>
+                                        <td class="text-center" colspan="5">PAQUETE</td>
+                                    </tr>
                                     <!-- Paquetes seleccionados -->
                                     <tr
                                         v-for="(paquete, i) in vistaCotizacion.paquetes"
                                         :key="'paq-' + i"
                                     >
                                         <td class="text-center">1</td>
-                                        <td>{{ paquete.nombre }}: {{paquete.descripcion}} <span style="diseble">{{console.log(JSON.stringify(paquete))}}</span></td>
-                                        <td class="text-end">{{ paquete.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ (paquete.precio * 1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td>{{ paquete.nombre }}, {{paquete.descripcion}}</td>
+                                        <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                     </tr>                                   
-
+                                    <tr>
+                                        <td class="text-center" colspan="5">SERVICIOS EXTRAS</td>
+                                    </tr>
                                     <!-- Servicios adicionales -->
                                     <tr
                                         v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales"
                                         :key="'serv-' + i"
                                     >
                                         <td class="text-center">{{ servicio.cantidad }}</td>
-                                        <td>{{ servicio.nombreServicio }}</td>
+                                        <td>{{ servicio.nombreServicio }} {{ servicio.observacion }}</td>
                                         <td class="text-end">{{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ ((servicio.precioUnitario * servicio.cantidad)*1.16).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td class="text-end">{{ (servicio.precioUnitario * servicio.cantidad).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                     </tr>
 
                                     <!-- Total -->
@@ -226,10 +235,26 @@
                             </table>
                             <p class="mt-2 fst-italic text-end">Los precios incluyen IVA</p>
                         </div>
-
-                        <!-- Botón PDF -->
-                        <div class="text-end mt-4">
-                            <button class="btn btn-outline-secondary" @click="generarPDF">Descargar PDF</button>
+                        
+                        <div class="row text-center">
+                            <div class="col">
+                                <!-- Botón PDF -->
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-danger w-100" @click="generarPDF">Enviar por correo</button>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <!-- Botón PDF -->
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-primary w-100" @click="generarPDF">Imprimir</button>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <!-- Botón PDF -->
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-secondary w-100" @click="generarPDF">Descargar PDF</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -339,27 +364,33 @@
                                         placeholder="Buscar por nombre o medida..."
                                     />
                                 </div>
-                                <EasyDataTable
-                                    :headers="tblHeadersModal"
-                                    :items="itemsFiltrados"
-                                    :rows-per-page="10"
-                                    show-index
-                                >
-                                    <template #item-acciones="slotProps">
-                                        <button
-                                            v-if="!cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id)"
-                                            type="button"
-                                            class="btn btn-success btn-sm d-flex align-items-center gap-1"
-                                            @click="agregarLlanta(slotProps)"
-                                            :title="cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id) ? 'Llanta ya agregada' : 'Agregar llanta'"
-                                        >
-                                            <i class="bi bi-plus"></i>                                            
-                                        </button>
-                                        <span v-else class="text-secondary small">
-                                            Ya agregada
-                                        </span>
-                                    </template>
-                                </EasyDataTable>
+                                <div style="max-height: 400px; overflow-y: auto;">
+                                    <EasyDataTable
+                                        :headers="tblHeadersModal"
+                                        :items="itemsFiltrados"
+                                        :rows-per-page="25"
+                                        show-index
+                                    >
+                                        <!-- TEMPLATE PARA ADAPTAR LA INFORMACION A LA ORGANIZACION medida - marca - modelo - rango -->
+                                        <template #item-medida="slotProps">
+                                            {{ slotProps.medida }} {{ slotProps.rango }}
+                                        </template>
+                                        <template #item-acciones="slotProps">
+                                            <button
+                                                v-if="!cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id)"
+                                                type="button"
+                                                class="btn btn-success btn-sm d-flex align-items-center gap-1"
+                                                @click="agregarLlanta(slotProps)"
+                                                :title="cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id) ? 'Llanta ya agregada' : 'Agregar llanta'"
+                                            >
+                                                <i class="bi bi-plus"></i>                                            
+                                            </button>
+                                            <span v-else class="text-secondary small">
+                                                Ya agregada
+                                            </span>
+                                        </template>
+                                    </EasyDataTable>
+                                </div>
                             </div>
                         </div>
 
@@ -386,6 +417,7 @@
                                     <input 
                                         class="form-control" 
                                         placeholder="Observaciones" 
+                                        v-model="nuevaObservacion"
                                     />
                                 </div>
                                 <div class="col-3">                                    
@@ -406,31 +438,32 @@
                             <div class="col border ">
                                 <div class="row  justify-content-center">
                                     <div class="col-12 p-4 rounded-3">
-                                        <div class="mb-3 d-flex ">
-                                            <img src="/images/Logo-Kartisimo.png" alt="Logo Kartisimo" />
-                                            <p>Kartisimo Bajio S. A. de CV</p>
+                                        <div class="row mb-3 d-flex">
+                                            <div class="col text-start">
+                                                <img src="/images/Logo-Kartisimo.png" alt="Logo" :style="{ maxWidth: '250px' }" />                                
+                                            </div>
                                         </div>
-                                        <div class="my-3 d-flex justify-content-between">
-                                            <div>
-                                                <small>Blvd. Delta 2002 esq. Rio Mayo</small><br>
+                                        <div class="row my-3 d-flex justify-content-between">
+                                            <div class="col">
+                                                <small><strong>Blvd. Delta 2002 esq. Rio Mayo</strong></small><br>
                                                 <small>Col. Valle de Jerez C.P. 37538</small><br>
                                                 <small>Tel. 477 330 6060 y 477 390 5090</small><br>
                                                 <small>delta@kartisimo.mx</small><br>
                                             </div>
-                                            <div>
-                                                <small>Blvd. Lopez Mateos 827 esq. Apolo</small><br>
+                                            <div class="col">
+                                                <small><strong>Blvd. Lopez Mateos 827 esq. Apolo</strong></small><br>
                                                 <small>Col. Obrera C.P. 37340</small><br>
                                                 <small>Tel. 477 717 7440 y 477 470 9419</small><br>
                                                 <small>apolo@kartisimo.mx</small><br>
                                             </div>
-                                            <div>
-                                                <small>Blvd. Torres Landa 1901 esq San Jacobo</small><br>
+                                            <div class="col">
+                                                <small><strong>Blvd. Torres Landa 1901 esq San Jacobo</strong></small><br>
                                                 <small>Col. La Pisina C.P. 37440</small><br>
                                                 <small>Tel. 477 390 0290 y 477 461 0028</small><br>
                                                 <small>torreslanda@kartisimo.mx</small><br>
                                             </div>
-                                            <div>
-                                                <small>Blvd. Mariano Escobedo Pte. 2715 br</small><br>
+                                            <div class="col">
+                                                <small><strong>Blvd. Mariano Escobedo Pte. 2715</strong></small><br>
                                                 <small>La Martinica, C.P. 37500</small><br>
                                                 <small>Tel. 477 763 3285</small>                                                
                                             </div>
@@ -444,19 +477,20 @@
                                         <table class="table align-middle">
                                             <thead>
                                                 <tr>
-                                                    <th>Nombre / Descripción</th>
+                                                    <th>MEDIDA - MARCA - MODELO - RANGO</th>
                                                     <th>Cantidad</th>
                                                     <th>Precio Unitario</th>
-                                                    <th>Total</th>
+                                                    <th style="width: 120px; text-align: right;">Total</th>
                                                     <th></th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <!-- Llantas -->
                                                 <tr v-for="item in cotizacionForm.llantas" :key="'llanta-' + item.id">
+                                                    
                                                     <td>
                                                         {{ item.modeloMedidas }}
-                                                        <span v-if="item.sobrePedido" class="badge bg-warning text-dark ms-2">Sobre pedido</span>
+                                                        <span v-if="item.ubicacion != 'Kartisimo' || item.ubicacion != 'Martinica'" class="badge bg-warning text-dark ms-2">Sobre pedido</span>
                                                     </td>
                                                     <td>
                                                         <input
@@ -469,7 +503,6 @@
                                                     </td>
                                                     <td>
                                                         <input
-                                                            type="number"
                                                             min="0"
                                                             class="form-control"
                                                             :style="{ width: '90px' }"
@@ -477,7 +510,7 @@
                                                             placeholder="Precio c/u"
                                                         />
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 120px; text-align: right;">
                                                         {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 4)) }}
                                                     </td>
                                                     <td>
@@ -496,6 +529,15 @@
                                                     <td>
                                                         <input
                                                             type="number"
+                                                            min="1"
+                                                            class="form-control"
+                                                            :style="{ width: '70px' }"
+                                                            :value="1"
+                                                            disabled
+                                                        />
+                                                    </td>
+                                                    <td>
+                                                        <input
                                                             min="0"
                                                             class="form-control"
                                                             :style="{ width: '90px' }"
@@ -503,7 +545,7 @@
                                                             placeholder="Precio"
                                                         />
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 120px; text-align: right;">
                                                         {{ formatoMoneda(p.precioUnitario || 0) }}
                                                     </td>
                                                     <td>
@@ -518,20 +560,19 @@
                                                 </tr>
                                                 <!-- Servicios adicionales -->
                                                 <tr v-for="(extra, i) in cotizacionForm.serviciosExtras" :key="'servicio-' + i">
-                                                    <td>{{ extra.nombre }}</td>
+                                                    <td>{{ extra.nombre }} {{ extra.observacion }}</td>
                                                     <td>
                                                         <input
                                                             type="number"
                                                             min="1"
                                                             class="form-control"
-                                                            :style="{ width: '60px' }"
+                                                            :style="{ width: '70px' }"
                                                             v-model.number="extra.cantidad"
                                                             placeholder="1"
                                                         />
                                                     </td>
                                                     <td>
                                                         <input
-                                                            type="number"
                                                             min="0"
                                                             class="form-control"
                                                             :style="{ width: '90px' }"
@@ -539,7 +580,7 @@
                                                             placeholder="Precio c/u"
                                                         />
                                                     </td>
-                                                    <td>
+                                                    <td style="width: 120px; text-align: right;">
                                                         {{ formatoMoneda(extra.precioUnitario * (extra.cantidad || 1)) }}
                                                     </td>
                                                     <td>
@@ -589,6 +630,7 @@
     const nuevoServicio = ref('');
     const nuevoPrecio = ref('');
     const nuevaCantidad = ref(1);
+    const nuevaObservacion = ref('');
     const busquedaLlantas = ref('');
     const busquedaCotizaciones = ref('');
     const cotizacionesRealizadas = ref([]);
@@ -773,26 +815,11 @@
             if (!res.ok) throw new Error('Error al obtener llantas');
             const data = await res.json();
             
-             // Limpia precios anteriores
+            // Limpia precios anteriores
             Object.keys(preciosLlantas).forEach(key => delete preciosLlantas[key]);
-
+            //console.log(JSON.stringify(data))
             const llantaArray = []
             data.map(llanta => {
-                // Si el valor es 0, '', null o undefined, se omite
-                const anchura = llanta.anchura && llanta.anchura !== 0 ? llanta.anchura : '';
-                const perfil = llanta.perfil && llanta.perfil !== 0 ? llanta.perfil : '';
-                const rin = llanta.rin && llanta.rin !== 0 ? llanta.rin : '';
-                const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
-                const velocidad = llanta.velocidad && llanta.velocidad !== 0 ? llanta.velocidad : '';
-
-                // Construcción de la medida, solo con los valores válidos
-                let medida = '';
-                if (anchura) medida += anchura;
-                if (perfil) medida += `/${perfil}`;
-                if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
-                if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
-                medida = medida.trim();
-
                 const nombreCompleto = `${llanta.nombreMarca} ${llanta.modelo}`.trim();
                 const sobrePedido = llanta.nombreAlmacen.toLowerCase().includes('proveedor');
                 preciosLlantas[llanta.idLlanta] = parseFloat(llanta.precio);
@@ -801,7 +828,8 @@
                     id: llanta.idLlanta,
                     codigo: llanta.codigo,
                     llanta: nombreCompleto,
-                    medida: medida,
+                    medida: llanta.medidas,
+                    rango: llanta.rango, // campo para colocar en cotizacionForm como el cliente la solicita medida - marca - modelo - rango
                     cantidad: llanta.cantidad,
                     ubicacion: llanta.nombreAlmacen,
                     precio: parseFloat(llanta.precio) || 0,
@@ -811,7 +839,6 @@
                 llantaArray.push(obj);
             });
             items.value = llantaArray
-            //console.log('cargarLlantas: ' + JSON.stringify(items.value))
             return items
             
         } catch (error) {
@@ -896,16 +923,18 @@
 
     // Agrega Servicio Adicionales al arreglo CotizacionesForm
     const agregarServicioExtra = () => {
-        if (nuevoServicio.value && nuevoPrecio.value && nuevaCantidad.value > 0) {
+        if (nuevoServicio.value && nuevoPrecio.value && nuevaObservacion.value && nuevaCantidad.value > 0) {
             cotizacionForm.serviciosExtras.push({
                 idDetalleCotizacionServicio: null,
-                nombre: nuevoServicio.value,
+                nombre: (nuevoServicio.value).toUpperCase(),
+                observacion: (nuevaObservacion.value).toUpperCase(),
                 cantidad: parseInt(nuevaCantidad.value),
                 precioUnitario: parseFloat(nuevoPrecio.value)
             });
             nuevoServicio.value = '';
             nuevoPrecio.value = '';
             nuevaCantidad.value = 1;
+            nuevaObservacion.value = '';
         }
     };
 
@@ -925,7 +954,7 @@
 
     // Agrega la llanta al arreglo
     const agregarLlanta = (item) => {
-        //console.log('agregarLlanta: '+ JSON.stringify(item))
+        console.log('agregarLlanta: '+ JSON.stringify(item))
         if (cotizacionForm.llantas.length >= 6) {
             alert('Solo puedes agregar hasta 6 llantas diferentes por cotización.');
             return;
@@ -937,10 +966,11 @@
                 idLlanta: item.id,
                 cantidad: 4, // o el campo que manejes
                 precioUnitario: item.precio || 0,
-                modeloMedidas: item.llanta +' - ' + item.medida
+                modeloMedidas: item.medida + ' ' +item.llanta+ ' ' + item.rango,
+                ubicacion: item.ubicacion, 
             });
             
-            //console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
+            console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
         }
         else
         {
@@ -975,7 +1005,7 @@
         try {
             const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
             const data = await res.json();
-
+            
             cotizacionForm.codigo = 'COT-' + data.idCotizacion;
             cotizacionForm.fechaCreacion = data.fechaCreacion;
             cotizacionForm.clienteNombre = data.clienteNombre;
@@ -1015,6 +1045,7 @@
             cotizacionForm.serviciosExtras = data.servicios.map(s => ({
                 idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
                 nombre: s.descripcion,
+                observacion: s.observacion,
                 cantidad: s.cantidad,
                 precioUnitario: s.precioUnitario
             }));
@@ -1029,7 +1060,7 @@
     };
 
     // CREAR/EDITAR COTIZACIONES
-    const guardarCotizacion = () => {
+    const guardarCotizacion = async () => {
 
         const rawId = cotizacionForm.codigo
         ? Number(cotizacionForm.codigo.replace(/^COT-/, ''))
@@ -1062,6 +1093,7 @@
         const serviciosAdicionales = cotizacionForm.serviciosExtras.map(s => ({
             idDetalleCotizacionServicio: s.idDetalleCotizacionServicio || null,
             descripcionServicio: s.nombre,
+            observacion: s.observacion,
             cantidad: s.cantidad,
             precioUnitario: s.precioUnitario
         }));
@@ -1081,13 +1113,13 @@
         
         const nuevaCotizacion = {
             codigo: rawId,
-            llantas,
-            paquetes,
-            serviciosAdicionales,
             mostrarTotal: cotizacionForm.mostrarTotal,
             total: totalCotizacion.value,
             creadoPor: 1,
-            cliente
+            cliente,
+            llantas,
+            paquetes,
+            serviciosAdicionales,
         }
 
 
@@ -1096,17 +1128,21 @@
             ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
             : `${proxy.$serverIP}api/Cotizacion/crearCotizacion`;
 
-        fetch(url, {
+        await fetch(url, {
             method: cotizacionForm.codigo ? 'PUT' : 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(nuevaCotizacion)
         })
         .then(res => res.json())
         .then(data => {
-            console.log("Cotización guardada:", data);
-            closeModal();         // Cierra modal
+            const obj ={
+                codigo: data.codigo.toString()
+            }
+            //console.log("Cotización guardada:", obj);
             cargarFormulario();   // Limpia formulario
+            closeModal();         // Cierra modal
             cargarCotizaciones(); // Actualiza la info de la tabla cotizaciones
+            mostrarVistaPrevia(obj, 'ver');
         });
         //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
     };
@@ -1148,15 +1184,33 @@
     const itemsFiltrados = computed(() => {
         if (!busquedaLlantas.value) return items.value;
 
-        // Elimina espacios de la búsqueda
-        const texto = busquedaLlantas.value.replace(/\s+/g, '').toLowerCase();
+        // Limpiar el texto de búsqueda y dividirlo en partes
+        const busquedaNormalizada = busquedaLlantas.value
+        .toLowerCase()
+        .replace(/[^a-z0-9]/gi, '');
 
-        return items.value.filter(item =>
-            Object.values(item).some(val =>
-                String(val).replace(/\s+/g, '').toLowerCase().includes(texto)
-            )
-        );
+        const fragmentos = [];
+        for (let i = 0; i < busquedaNormalizada.length - 2; i++) {
+            fragmentos.push(busquedaNormalizada.substring(i, i + 3));
+        }
+
+        return items.value.filter(item => {
+            const textoItem = `
+            ${item.codigo}
+            ${item.llanta}
+            ${item.medida}
+            ${item.rango}
+            ${item.ubicacion}
+            `
+            .toLowerCase()
+            .replace(/[^a-z0-9]/gi, ''); // igual al formato de búsqueda
+
+            // Verifica que todos los fragmentos estén contenidos
+            return fragmentos.every(frag => textoItem.includes(frag));
+        });
     });
+
+
 
 
     const openModal = () => {
@@ -1186,17 +1240,15 @@
         openModal();
     };
 
-    // contenido local para demostracion
-    // TODO: ELIMINAR CUANDO SE TENGAN DATOS REALES Y DESARROLLADO EL BACKEND
 
     const tblHeadersModal = [
-        { text:"Llanta", value: "llanta"},
+        { text:"Llanta", value: "llanta", sortable: true},
         { text:"Codigo", value: "codigo"},
-        { text:"Medidas", value: "medida"},
-        { text:"Cantidad", value: "cantidad"},
-        { text:"Ubicación", value: "ubicacion", width:200},
-        { text:"Precio", value: "precio", width:100},        
-        { text:"Acciones", value: "acciones", width: 100 }
+        { text:"Medidas", value: "medida", sortable: true},
+        { text:"Cantidad", value: "cantidad", sortable: true},
+        { text:"Ubicación", value: "ubicacion"},
+        { text:"Precio", value: "precio", sortable: true},        
+        { text:"Acciones", value: "acciones", width: 50 }
     ]
 
 
@@ -1268,6 +1320,7 @@
     const mostrarVistaPrevia = async (cotizacion, modo = 'ver') => {
         if (modo === 'ver') {
             try {
+                console.log(JSON.stringify(cotizacion))
                 const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
                 const data = await res.json();
 
@@ -1285,23 +1338,24 @@
                         marca: llanta.modelo.split(' ')[0],
                         modelo: llanta.modelo.split(' ').slice(1).join(' '),
                         medidas: llanta.modeloMedidas.replace(llanta.modelo + ' — ', ''),
-                        almacenOrigen: '', // opcional
+                        ubicacion: llanta.ubicacion, 
                         cantidad: llanta.cantidad,
                         precioUnitario: llanta.precioUnitario,
-                        total: (llanta.precioUnitario * llanta.cantidad)*1.16
+                        total: (llanta.precioUnitario * llanta.cantidad)
                     })),
                     paquetes: data.paquetes.map(p => ({
                         idPaquete: p.idPaquete,
                         nombre: p.nombre,
                         precio: p.precioUnitario,
-                        total: p.precioUnitario * 1.16,
+                        total: p.precioUnitario,
                         descripcion: p.descripcion
                     })),
                     serviciosAdicionales: data.servicios.map(s => ({
                         nombreServicio: s.descripcion,
+                        observacion: s.observacion,
                         cantidad: s.cantidad,
                         precioUnitario: s.precioUnitario,
-                        total: (s.precioUnitario * s.cantidad)*1.16
+                        total: (s.precioUnitario * s.cantidad)
                     })),
                     total: calcularTotalVista(data),
                     estatus: cotizacion.estatus || 'Activa',
