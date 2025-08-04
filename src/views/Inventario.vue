@@ -9,11 +9,11 @@
                     <input
                         v-model="busquedaCodigoDesc"
                         type="text"
-                        placeholder="Buscar por código o descripción"
+                        placeholder="Buscar"
                         class="form-control"
                     />
                 </div>
-                <div class="col d-flex align-items-center gap-3 mb-3">
+                <!-- <div class="col d-flex align-items-center gap-3 mb-3">
                     <label for="search" class="form-label">Buscar medida de llanta</label>
                     <input
                         v-model="busquedaMedida"
@@ -22,14 +22,14 @@
                         id="search"
                         placeholder="Ej. XXX/XX RXX XXJ"
                     />  
-                </div>
+                </div> -->
                 <div class="col d-flex align-items-center gap-3 mb-3">
                     <label for="city" class="form-label mb-0">Almacén</label>
                     <select v-model="almacenSeleccionado" class="form-select w-auto" id="city">
                         <option value="">Todos los almacenes</option>
-                        <option value="Almacén 1">Almacén 1</option>
-                        <option value="Almacén 2">Almacén 2</option>
-                        <option value="Almacén 3">Almacén 3</option>
+                        <option v-for="itm in almacen" :key="itm.idAlmacen" :value="itm.nombre">
+                            {{itm.nombre}}
+                        </option>
                     </select>
                 </div>
                 <div class="col-auto d-flex align-items-center mb-3">
@@ -72,6 +72,7 @@ import "bootstrap/dist/js/bootstrap.bundle"; // muy importante para que offcanva
 
 const { proxy } = getCurrentInstance()
 const llantas = ref([]);
+const almacen = ref([])
 const busquedaMedida = ref('')
 const almacenSeleccionado = ref('');
 const busquedaCodigoDesc = ref('')
@@ -81,11 +82,12 @@ const headers = [
     { text: "Descripción", value: "descripcion" },
     { text: "Medidas", value: "medidas" },
     { text: "Existencia", value: "cantidad" },
+    { text: "Precio", value: "precio" },
     { text: "Nombre Almacen", value: "nombreAlmacen" },
     //   { text: "Acciones", value: "action" },
 ];
 
-onMounted(async () => {
+const cargarExistenciasInventario = async () => {
     try {
         const res = await fetch(proxy.$serverIP + "api/InventarioLlanta/existenciasInventario");
         const data = await res.json();
@@ -116,40 +118,70 @@ onMounted(async () => {
     } catch (e) {
         console.error("Error cargando datos", e);
     }
+}
+
+const cargarListaAlmacen = async () =>{
+    try {
+        const res = await fetch(proxy.$serverIP + "api/InventarioLlanta/mostrarAlmacen");
+        const data = await res.json();
+        //console.log(JSON.stringify(data))
+        almacen.value = data.map((almacen) => {
+            return {
+                idAlmacen: almacen.idAlmacen,
+                nombre: almacen.nombre
+            }
+        })
+        //console.log(almacen.value)
+    } catch (e) {
+        console.error("Error cargando datos", e);
+    }
+}
+
+onMounted(async () => {
+    await cargarExistenciasInventario();
+    await cargarListaAlmacen();
 });
 
 
 // Filtrado flexible por cualquier parte del texto
 const llantasFiltradas = computed(() => {
-    const queryMedidas = busquedaMedida.value.trim().toLowerCase()
-    const queryDesc = busquedaCodigoDesc.value.trim().toLowerCase()
-    const almacen = almacenSeleccionado.value.trim().toLowerCase()
+    const queryDesc = busquedaCodigoDesc.value.trim().toLowerCase();
+    const almacen = almacenSeleccionado.value.trim().toLowerCase();
 
-    return llantas.value.filter((llanta) => {
-        const textoMedidas = `
-            ${llanta.anchura}
-            ${llanta.perfil}
-            ${llanta.rin}
-            ${llanta.carga}
-            ${llanta.velocidad}
-            ${llanta.modelo}
-            ${llanta.medidas}
-            ${llanta.descripcion}
-        `.replace(/\s+/g, '').toLowerCase()
+    // Dividimos el query en palabras clave
+    const palabrasClave = queryDesc
+        .split(/[\s\/\-]+/)
+        .filter(p => p.length > 0);
 
-        const palabrasMedidas = queryMedidas.split(/\s+/).filter(Boolean)
+    const queryUnido = queryDesc.replace(/[^a-z0-9]/gi, '');
 
-        const coincideMedidas = palabrasMedidas.every((palabra) =>
-            textoMedidas.includes(palabra)
-        )
+    return llantas.value.filter(llanta => {
+        const textoItem = `
+        ${llanta.codigo}
+        ${llanta.anchura}
+        ${llanta.perfil}
+        ${llanta.rin}
+        ${llanta.carga}
+        ${llanta.velocidad}
+        ${llanta.modelo}
+        ${llanta.medidas}
+        ${llanta.descripcion}
+        `.toLowerCase();
 
-        const coincideCodigoDescripcion = !queryDesc || llanta.codigo.toLowerCase().includes(queryDesc) || llanta.descripcion.toLowerCase().includes(queryDesc)
+        const textoUnido = textoItem.replace(/[^a-z0-9]/gi, '');
 
-        const coincideAlmacen = !almacen || llanta.nombreAlmacen.toLowerCase() === almacen
+        const coincidePorPalabras = palabrasClave.every(p =>
+        textoItem.includes(p)
+        );
 
-        return coincideMedidas && coincideCodigoDescripcion && coincideAlmacen
-    })
-})
+        const coincideTodoJunto = textoUnido.includes(queryUnido);
+
+        const coincideAlmacen = !almacen || llanta.nombreAlmacen.toLowerCase() === almacen;
+
+        return (coincidePorPalabras || coincideTodoJunto) && coincideAlmacen;
+    });
+});
+
 
 const limpiarBusqueda = () => {
   busquedaMedida.value = ''

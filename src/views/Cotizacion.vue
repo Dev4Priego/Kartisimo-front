@@ -54,7 +54,7 @@
                         <td>{{ item.cliente }}</td>
                         <td>{{ item.telefono }}</td>
                         <!-- <td>{{ item.paquete }}</td> -->
-                        <!-- <td>{{ item.total }}<span style="diseble">{{ console.log(JSON.stringify(item.nombreLlanta)) }}</span></td> -->
+                        <!-- <td>{{ item.total }}</td> -->
                         <td>{{ item.nombreLlanta }}</td>
                         <td>{{ item.estatus }}</td>
                         <td>
@@ -150,7 +150,7 @@
                                 </small>
                             </div>
                             <div class="col">
-                                <strong>Blvd. Mariano Escobedo Pte. 2715</strong><br>
+                                <strong><small>Blvd. Mariano Escobedo Pte. 2715</small></strong><br>
                                 <small>La Martinica, C.P. 37500</small><br>
                                 <small>Tel. 477 763 3285</small>
                             </div>
@@ -183,12 +183,12 @@
                                         <td class="text-center">{{ llanta.cantidad }}</td>
                                         <td>
                                             {{ llanta.medidas }}
-                                            <span
+                                            <!-- <span
                                                 v-if="llanta.ubicacion != 'Kartisimo' || llanta.ubicacion != 'Martinica'"
                                                 class="badge bg-warning text-dark ms-2"
                                             >
                                                 Sobre pedido
-                                            </span>
+                                            </span> -->
                                         </td>
                                         <td class="text-end">
                                             {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
@@ -207,7 +207,7 @@
                                         :key="'paq-' + i"
                                     >
                                         <td class="text-center">1</td>
-                                        <td>{{ paquete.nombre }}, {{paquete.descripcion}}</td>
+                                        <td>{{ paquete.nombre.toUpperCase() }}, {{paquete.descripcion.toUpperCase()}}</td>
                                         <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                         <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                     </tr>                                   
@@ -240,13 +240,13 @@
                             <div class="col">
                                 <!-- Botón PDF -->
                                 <div class="mt-4">
-                                    <button class="btn btn-outline-danger w-100" @click="generarPDF">Enviar por correo</button>
+                                    <button class="btn btn-outline-danger w-100">Enviar por correo</button>
                                 </div>
                             </div>
                             <div class="col">
                                 <!-- Botón PDF -->
                                 <div class="mt-4">
-                                    <button class="btn btn-outline-primary w-100" @click="generarPDF">Imprimir</button>
+                                    <button class="btn btn-outline-primary w-100">Imprimir</button>
                                 </div>
                             </div>
                             <div class="col">
@@ -525,7 +525,7 @@
                                                 </tr>
                                                 <!-- Paquetes -->
                                                 <tr v-for="(p, index) in cotizacionForm.paquetes" :key="'paquete-' + index">
-                                                    <td>{{ p.nombre }}</td>
+                                                    <td>{{ p.nombre.toUpperCase() }}</td>
                                                     <td>
                                                         <input
                                                             type="number"
@@ -671,7 +671,7 @@
             idEstadoCotizacion: 4, // se puede obtimizar mas los estatus y usar una sola funcion para las 4 operaciones
             idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
         }
-        //console.log(JSON.stringify(json))
+    
         fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -701,7 +701,6 @@
             idEstadoCotizacion: 1,
             idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
         }
-        //console.log(JSON.stringify(json))
         fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -731,7 +730,6 @@
             idEstadoCotizacion: 2,
             idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
         }
-        //console.log(JSON.stringify(json))
         fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -761,7 +759,6 @@
             idEstadoCotizacion: 3,
             idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
         }
-        //console.log(JSON.stringify(json))
         fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -817,7 +814,6 @@
             
             // Limpia precios anteriores
             Object.keys(preciosLlantas).forEach(key => delete preciosLlantas[key]);
-            //console.log(JSON.stringify(data))
             const llantaArray = []
             data.map(llanta => {
                 const nombreCompleto = `${llanta.nombreMarca} ${llanta.modelo}`.trim();
@@ -954,7 +950,6 @@
 
     // Agrega la llanta al arreglo
     const agregarLlanta = (item) => {
-        console.log('agregarLlanta: '+ JSON.stringify(item))
         if (cotizacionForm.llantas.length >= 6) {
             alert('Solo puedes agregar hasta 6 llantas diferentes por cotización.');
             return;
@@ -970,7 +965,7 @@
                 ubicacion: item.ubicacion, 
             });
             
-            console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
+            //console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
         }
         else
         {
@@ -1162,7 +1157,6 @@
 
     const subtotalLlantas = computed(() => {
         return itemsSelected.value.reduce((sum, item) => {
-            console.log(JSON.stringify(item))
             const cantidad = cantidadesPorLlanta.value[item.id] ?? 4; // ← por defecto 4
             return sum + ((preciosLlantas[item.id] || 0) * cantidad);
         }, 0);
@@ -1184,31 +1178,40 @@
     const itemsFiltrados = computed(() => {
         if (!busquedaLlantas.value) return items.value;
 
-        // Limpiar el texto de búsqueda y dividirlo en partes
-        const busquedaNormalizada = busquedaLlantas.value
-        .toLowerCase()
-        .replace(/[^a-z0-9]/gi, '');
+        const busquedaOriginal = busquedaLlantas.value.toLowerCase();
 
-        const fragmentos = [];
-        for (let i = 0; i < busquedaNormalizada.length - 2; i++) {
-            fragmentos.push(busquedaNormalizada.substring(i, i + 3));
-        }
+        // Dividimos por espacios, guiones, slashes (y quitamos vacíos)
+        const palabrasClave = busquedaOriginal
+            .split(/[\s\/\-]+/)
+            .filter(p => p.length > 0);
+
+        // Búsqueda todo junto sin símbolos ni espacios
+        const busquedaUnida = busquedaOriginal.replace(/[^a-z0-9]/gi, '');
 
         return items.value.filter(item => {
+            // Unimos todos los campos del item
             const textoItem = `
             ${item.codigo}
             ${item.llanta}
             ${item.medida}
             ${item.rango}
             ${item.ubicacion}
-            `
-            .toLowerCase()
-            .replace(/[^a-z0-9]/gi, ''); // igual al formato de búsqueda
+            `.toLowerCase();
 
-            // Verifica que todos los fragmentos estén contenidos
-            return fragmentos.every(frag => textoItem.includes(frag));
+            const textoUnido = textoItem.replace(/[^a-z0-9]/gi, '');
+
+            // Coincidencia parcial: basta que cada palabra esté parcialmente incluida
+            const coincidePorPalabras = palabrasClave.every(palabra =>
+            textoItem.includes(palabra)
+            );
+
+            // Coincidencia parcial por texto completo unido (para búsquedas todo junto)
+            const coincideTodoJunto = textoUnido.includes(busquedaUnida);
+
+            return coincidePorPalabras || coincideTodoJunto;
         });
     });
+
 
 
 
@@ -1320,7 +1323,6 @@
     const mostrarVistaPrevia = async (cotizacion, modo = 'ver') => {
         if (modo === 'ver') {
             try {
-                console.log(JSON.stringify(cotizacion))
                 const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
                 const data = await res.json();
 
@@ -1361,7 +1363,6 @@
                     estatus: cotizacion.estatus || 'Activa',
                     mostrarTotal: false
                 };
-                console.log(data)
                 mostrarVista.value = true;
             } catch (error) {
                 console.error("Error al cargar detalle de cotización:", error);
