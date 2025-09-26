@@ -6,6 +6,7 @@ import Inicio from '@/views/Inicio.vue'
 import Cotizacion from '@/views/Cotizacion.vue'
 import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
+import PromocionesOT from '@/components/Promociones/PromocionesOT.vue'
 const routes = [
     { 
         path: '/', 
@@ -41,6 +42,13 @@ const routes = [
                 name:'formOT',
                 component: FormularioOT
                       
+            },
+
+            {
+                path:'PromocionesOT',
+                name:'promOT',
+                component:PromocionesOT
+                
             }
         ]
     }
