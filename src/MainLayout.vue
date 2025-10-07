@@ -76,6 +76,7 @@
                         >
                             Orden de Trabajo
                         </button>
+
                             </li>
                              <li class="nav-item mb-2">
                                 <button
@@ -87,6 +88,19 @@
                                 </button>
                             </li>
 
+                                     <li class="nav-item mb-2">
+                             <button
+                                class="nav-link text-white"
+                                data-bs-dismiss="offcanvas"
+                         @click.prevent="irA('/content/Almacenes')"
+>
+  Almacen
+</button>
+
+                            </li>
+
+
+                            
                     
                 </ul>
             </div>

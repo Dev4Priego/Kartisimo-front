@@ -7,6 +7,7 @@ import Cotizacion from '@/views/Cotizacion.vue'
 import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import PromocionesOT from '@/components/Promociones/PromocionesOT.vue'
+import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
 const routes = [
     { 
         path: '/', 
@@ -49,7 +50,14 @@ const routes = [
                 name:'promOT',
                 component:PromocionesOT
                 
+            },
+            {
+         path: 'Almacenes', 
+        name: 'Almacen',
+        component: AlmacenOT
             }
+
+            
         ]
     }
 ]

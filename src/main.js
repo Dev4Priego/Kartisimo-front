@@ -11,7 +11,7 @@ import router from './router'
 const app = createApp(App)
 window.bootstrap = bootstrap // <- esto hace que sea accesible en todo el proyecto 
 
-app.config.globalProperties.$serverIP = "http://kartisimo.homelinux.org/" // Entorno Productivo
-// app.config.globalProperties.$serverIP = "http://localhost:5106/" // Entorno Dev
+//app.config.globalProperties.$serverIP = "http://kartisimo.homelinux.org/" // Entorno Productivo
+ app.config.globalProperties.$serverIP = "http://localhost:5106/" // Entorno Dev
 
 app.use(router).mount('#app')
