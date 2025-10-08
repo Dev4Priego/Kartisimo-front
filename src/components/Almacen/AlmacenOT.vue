@@ -22,6 +22,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2' 
+
 import AlmacenForm from '@/components/Almacen/AlmacenForm.vue'
 import AlmacenTable from '@/components/Almacen/AlmacenTable.vue'
 
@@ -35,7 +37,7 @@ const form = ref({
   idAlmacen: null,
   nombre: '',
   descripcion: '',
-  idSucursal: null,  // Cambiado a null para que sea consistente con el tipo
+  idSucursal: null,
   sysCreadoPor: 1
 })
 const isEditing = ref(false)
@@ -48,46 +50,55 @@ onMounted(() => {
 async function fetchAlmacenes() {
   try {
     const res = await axios.get(API_ALMACENES)
-    console.log('Almacenes API response:', res.data)
     almacenes.value = res.data
   } catch (error) {
     console.error('Error al obtener almacenes:', error)
-    alert('Error al cargar almacenes.')
+    Swal.fire('Error', 'Error al cargar almacenes.', 'error')
   }
 }
 
 async function fetchSucursales() {
   try {
     const res = await axios.get(API_SUCURSALES)
-    console.log('Sucursales API response:', res.data)
     sucursales.value = res.data
   } catch (error) {
     console.error('Error al obtener sucursales:', error)
-    alert('Error al cargar sucursales.')
+    Swal.fire('Error', 'Error al cargar sucursales.', 'error')
   }
 }
 
 function editAlmacen(almacen) {
-  // Para evitar pasar propiedades extras o anidadas, mapea solo las necesarias
   form.value = {
     idAlmacen: almacen.idAlmacen,
     nombre: almacen.nombre,
     descripcion: almacen.descripcion,
     idSucursal: almacen.idSucursal,
-    sysCreadoPor: 1 // O quien sea el usuario logueado
+    sysCreadoPor: 1
   }
   isEditing.value = true
 }
 
 async function deleteAlmacen(id) {
-  if (!confirm('¿Estás seguro que deseas eliminar este almacén?')) return
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Este almacén será eliminado.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (!result.isConfirmed) return
 
   try {
     await axios.delete(`${API_ALMACENES}/${id}`)
     await fetchAlmacenes()
+    Swal.fire('Eliminado', 'El almacén ha sido eliminado con éxito.', 'success')
   } catch (error) {
     console.error('Error al eliminar:', error)
-    alert('No se pudo eliminar el almacén.')
+    Swal.fire('Error', 'No se pudo eliminar el almacén.', 'error')
   }
 }
 
@@ -98,6 +109,14 @@ function cancelEdit() {
 function handleSaved() {
   fetchAlmacenes()
   resetForm()
+
+  Swal.fire({
+    title: 'Guardado',
+    text: isEditing.value ? 'Almacén actualizado correctamente.' : 'Almacén creado exitosamente.',
+    icon: 'success',
+    timer: 2000,
+    showConfirmButton: false
+  })
 }
 
 function resetForm() {

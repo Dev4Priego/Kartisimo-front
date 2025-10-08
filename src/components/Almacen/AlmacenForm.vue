@@ -41,6 +41,7 @@
 <script setup>
 import { reactive, watch } from 'vue'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 const props = defineProps({
   formData: {
@@ -100,20 +101,47 @@ async function handleSubmit() {
   try {
     if (props.isEditing) {
       await axios.put(`https://localhost:7172/api/Almacen/${form.idAlmacen}`, payload)
-      alert('Almacén actualizado correctamente.')
+      await Swal.fire({
+        icon: 'success',
+        title: 'Actualizado',
+        text: 'Almacén actualizado correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      })
     } else {
       await axios.post('https://localhost:7172/api/Almacen', payload)
-      alert('Almacén creado correctamente.')
+      await Swal.fire({
+        icon: 'success',
+        title: 'Creado',
+        text: 'Almacén creado correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      })
     }
 
     emit('onSaved')
   } catch (error) {
     console.error('Error al guardar:', error.response?.data || error.message || error)
-    alert('Error al guardar el almacén.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo guardar el almacén.'
+    })
   }
 }
 
-function cancelEdit() {
-  emit('onCancel')
+async function cancelEdit() {
+  const result = await Swal.fire({
+    title: '¿Cancelar edición?',
+    text: "Se perderán los cambios no guardados.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, cancelar',
+    cancelButtonText: 'No, continuar editando'
+  })
+
+  if (result.isConfirmed) {
+    emit('onCancel')
+  }
 }
 </script>

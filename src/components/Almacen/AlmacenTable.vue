@@ -71,9 +71,10 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import axios from 'axios'
+import Swal from 'sweetalert2'
 
 // Props
 const props = defineProps({
@@ -95,8 +96,6 @@ const form = reactive({
   descripcion: '',
   idSucursal: null
 })
-
-// Watch props.almacenes or props.sucursales if you want to react to changes, optional
 
 // Get sucursal name by id
 function getNombreSucursal(idSucursal) {
@@ -135,39 +134,72 @@ async function guardar() {
       nombre: form.nombre.trim(),
       descripcion: form.descripcion.trim(),
       idSucursal: Number(form.idSucursal),
-      nombreSucursal: getNombreSucursal(form.idSucursal)  // Agregar esta línea
+      nombreSucursal: getNombreSucursal(form.idSucursal)
     }
 
     await axios.put(`https://localhost:7172/api/Almacen/${form.idAlmacen}`, payload)
-    alert('Almacén actualizado correctamente.')
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Almacén actualizado',
+      text: 'El almacén se actualizó correctamente.',
+      timer: 2000,
+      showConfirmButton: false
+    })
+
     cerrarModal()
     emit('actualizarLista')
     window.location.reload()
-    
   } catch (error) {
     console.error('Error al guardar:', error.response?.data || error.message)
-    alert('Error al guardar el almacén.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudo guardar el almacén.'
+    })
   }
 }
 
-const currentUserId = 1; // Cambia esto por el ID real del usuario
+const currentUserId = 1
 
 async function eliminar(idAlmacen) {
-  if (!confirm('¿Seguro que quieres eliminar este almacén?')) return;
+  const result = await Swal.fire({
+    title: '¿Estás seguro?',
+    text: "¡No podrás revertir esto!",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar'
+  })
 
-  try {
-    await axios.delete(`https://localhost:7172/api/Almacen/${idAlmacen}`, {
-      data: { sysBorradoPor: currentUserId }
-    });
+  if (result.isConfirmed) {
+    try {
+      await axios.delete(`https://localhost:7172/api/Almacen/${idAlmacen}`, {
+        data: { sysBorradoPor: currentUserId }
+      })
 
-    alert('Almacén eliminado correctamente.');
-    emit('actualizarLista');
-  } catch (error) {
-    console.error('Error al eliminar:', error.response?.data || error.message);
-    alert('No se pudo eliminar el almacén.');
+      await Swal.fire({
+        icon: 'success',
+        title: 'Eliminado',
+        text: 'El almacén fue eliminado correctamente.',
+        timer: 2000,
+        showConfirmButton: false
+      })
+
+      emit('actualizarLista')
+      window.location.reload()
+    } catch (error) {
+      console.error('Error al eliminar:', error.response?.data || error.message)
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo eliminar el almacén.'
+      })
+    }
   }
 }
-
 
 // Initialize modal on mount
 onMounted(() => {
