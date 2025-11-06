@@ -7,6 +7,7 @@ import Cotizacion from '@/views/Cotizacion.vue'
 import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import Promocion from '@/views/Promocion.vue'
+import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
 const routes = [
     { 
         path: '/', 
