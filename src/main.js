@@ -15,3 +15,6 @@ app.config.globalProperties.$serverIP = "http://kartisimo.homelinux.org/" // Ent
 // app.config.globalProperties.$serverIP = "http://localhost:5106/" // Entorno Dev
 
 app.use(router).mount('#app')
+
+
+

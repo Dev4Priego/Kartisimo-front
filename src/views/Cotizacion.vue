@@ -26,8 +26,8 @@
 
             <div class="col-3 m-4">
                 <!-- Botón para abrir el modal -->
-                <button  class="btn btn-primary" @click="openModal">
-                    Nueva cotizacion
+                <button  class="btn btn-primary" @click="abrirModalCotizacion()">
+                    Nueva cotización
                 </button>
             </div>                                   
         </div>
@@ -111,8 +111,8 @@
          
         <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
         <div v-if="mostrarVista" class="modal fade show d-block" tabindex="-1" :style="{ background: 'rgba(0,0,0,0.5)' }">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content p-4">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content p-4" >
                     <div class="modal-header">
                         <h4 class="modal-title">Vista Previa de Cotización</h4>
                         <button type="button" class="btn-close" @click="mostrarVista = false"></button>
@@ -144,7 +144,7 @@
                             <div class="col">
                                 <small>
                                     <strong>Blvd. Torres Landa 1901 esq San Jacobo</strong><br>
-                                    Col. La Pisina C.P. 37440<br>
+                                    Col. La Piscina C.P. 37440<br>
                                     Tel. 477 390 0290 y 477 461 0028<br>
                                     torreslanda@kartisimo.mx<br>
                                 </small>
@@ -157,80 +157,170 @@
                         </div>
 
                         <!-- Información del cliente -->
-                        <div class="mb-4" v-if="vistaCotizacion.cliente.nombre">
-                            <span class="mx-2"><strong>Fecha emisión: </strong> {{ vistaCotizacion.fechaCreacion }} </span>
-                            <span class="mx-2"><strong>No. Cotización: </strong> {{ vistaCotizacion.codigo }} </span>
-                            <span class="mx-2"><strong>Cliente:</strong> {{ vistaCotizacion.cliente.nombre }}</span>
-                            <span class="mx-2"><strong>Teléfono:</strong> {{ vistaCotizacion.cliente.telefono }}</span>
+                        <div class="mb-4">
+                            <span class="mx-2">
+                                <strong>No. Cotización: </strong> {{ vistaCotizacion.codigo || 'N/A' }}
+                            </span>
+                            <span class="mx-2">
+                                <strong>Fecha emisión: </strong> {{ vistaCotizacion.fechaCreacion || 'N/A' }}
+                            </span>
+                            <span class="mx-2">
+                                <strong>Cliente: </strong> {{ vistaCotizacion.cliente?.nombre || 'N/A' }}
+                            </span>
+                            <span class="mx-2">
+                                <strong>Teléfono: </strong> {{ telefonoVistaFormateado || 'N/A' }}
+                            </span>
                         </div>
 
+
                         <div class="mt-4">
-                            <table class="table table-bordered table-sm">
+                            <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
+                                <colgroup>
+                                    <col style="width: 50px;">
+                                    <col style="width: 60%;">  <!-- ajusta según necesites -->
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
                                 <thead class="table-light">
-                                    <tr>                                        
+                                    <tr>
                                         <th>CANT</th>
                                         <th>MEDIDA - MARCA - MODELO - RANGO</th>
                                         <th>PRECIO UNITARIO</th>
                                         <th>TOTAL</th>
                                     </tr>
-                                    </thead>
+                                </thead>
                                 <tbody>
-                                    <tr>
-                                        <td class="text-center" colspan="5" >LLANTAS</td>
-                                    </tr>
                                     <!-- Llantas -->
                                     <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
                                         <td class="text-center">{{ llanta.cantidad }}</td>
                                         <td>
                                             {{ llanta.medidas }}
-                                            <!-- <span
-                                                v-if="llanta.ubicacion != 'Kartisimo' || llanta.ubicacion != 'Martinica'"
-                                                class="badge bg-warning text-dark ms-2"
-                                            >
-                                                Sobre pedido
-                                            </span> -->
-                                        </td>
-                                        <td class="text-end">
-                                            {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                        </td>
-                                        <td class="text-end">
-                                            {{ (llanta.total).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            <small class="badge bg-secondary mt-1">
+                                                {{ llanta.comentario }}
+                                            </small>
                                         </td>
 
+                                        <td class="text-end">
+                                            <!-- Promoción (individual o general) -->
+                                            <div v-if="llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'">
+                                                <span class="text-decoration-line-through text-muted d-block">
+                                                    {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <span class="text-success fw-bold d-block">
+                                                    {{ llanta.precioConPromo.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <small class="badge bg-danger mt-1">
+                                                    {{ llanta.promoLabel }}
+                                                </small>
+                                            </div>
+
+                                            <!-- Excluido -->
+                                            <div v-else-if="llanta.promoLabel === '(Excluido de promoción)'">
+                                                {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+
+                                            <!-- Sin promoción -->
+                                            <div v-else>
+                                                {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+                                        </td>
+
+                                        <td
+                                            class="text-end"
+                                            :class="{'text-success fw-bold': llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'                                            }"
+                                        >
+                                            {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                        </td>
                                     </tr>
-                                    <tr>
-                                        <td class="text-center" colspan="5">PAQUETE</td>
-                                    </tr>
+                                </tbody>
+                            </table>
+                            <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
+                                <colgroup>
+                                    <col style="width: 50px;">
+                                    <col style="width: 60%;">
+                                    <col style="width: 20%;">
+                                    <col style="width: 20%;">
+                                </colgroup>
+                                <tbody>
                                     <!-- Paquetes seleccionados -->
-                                    <tr
-                                        v-for="(paquete, i) in vistaCotizacion.paquetes"
-                                        :key="'paq-' + i"
-                                    >
+                                    <tr v-for="(paquete, index) in vistaCotizacion.paquetes" :key="'paq-' + index">
                                         <td class="text-center">1</td>
-                                        <td>{{ paquete.nombre.toUpperCase() }}, {{paquete.descripcion.toUpperCase()}}</td>
-                                        <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ (paquete.precio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                    </tr>                                   
-                                    <tr>
-                                        <td class="text-center" colspan="5">SERVICIOS EXTRAS</td>
+                                        <td>
+                                            {{ paquete.nombre.toUpperCase() }} {{ paquete.descripcion.toUpperCase() }}
+                                            <small class="badge bg-secondary mt-1">
+                                                {{ paquete.comentario }}
+                                            </small>
+                                        </td>
+
+                                        <td class="text-end">
+                                            <div v-if="paquete.promoLabel && paquete.promoLabel !== '(Excluido de promoción)'">
+                                                <span class="text-decoration-line-through text-muted d-block">
+                                                    {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <span class="text-success fw-bold d-block">
+                                                    {{ paquete.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <small class="badge bg-danger mt-1">
+                                                    {{ paquete.promoLabel }}
+                                                </small>
+                                            </div>
+
+                                            <div v-else-if="paquete.promoLabel === '(Excluido de promoción)'">
+                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+
+                                            <div v-else>
+                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+                                        </td>
+
+                                        <td class="text-end">
+                                            {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                        </td>
                                     </tr>
+
                                     <!-- Servicios adicionales -->
-                                    <tr
-                                        v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales"
-                                        :key="'serv-' + i"
-                                    >
+                                    <tr v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales" :key="'serv-' + i">
                                         <td class="text-center">{{ servicio.cantidad }}</td>
-                                        <td>{{ servicio.nombreServicio }} {{ servicio.observacion }}</td>
-                                        <td class="text-end">{{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
-                                        <td class="text-end">{{ (servicio.precioUnitario * servicio.cantidad).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td>
+                                            {{ servicio.nombreServicio }} {{ servicio.observacion }}
+                                            <small class="badge bg-secondary mt-1">
+                                                {{ servicio.comentario }}
+                                            </small>
+                                        </td>
+
+                                        <td class="text-end">
+                                            <div v-if="servicio.promoLabel && servicio.promoLabel !== '(Excluido de promoción)'">
+                                                <span class="text-decoration-line-through text-muted d-block">
+                                                    {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <span class="text-success fw-bold d-block">
+                                                    {{ servicio.precioConPromo.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                </span>
+                                                <small class="badge bg-danger mt-1">
+                                                    {{ servicio.promoLabel }}
+                                                </small>
+                                            </div>
+
+                                            <div v-else-if="servicio.promoLabel === '(Excluido de promoción)'">
+                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+
+                                            <div v-else>
+                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+                                        </td>
+
+                                        <td class="text-end">
+                                            {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                        </td>
                                     </tr>
 
                                     <!-- Total -->
                                     <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
                                         <td colspan="3" class="text-center">Total:</td>
-                                        <td>{{ vistaCotizacion.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+                                        <td class="text-end">{{ vistaCotizacion.totalBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
                                     </tr>
-
                                 </tbody>
                             </table>
                             <p class="mt-2 fst-italic text-end">Los precios incluyen IVA</p>
@@ -267,7 +357,7 @@
                 
                     <div class="modal-header">
                         <div class="row modal-title align-items-center text-center">
-                            <h3>Nueva cotizacion</h3>
+                            <h3>{{ tituloModal }}</h3>
                         </div>
                         <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
                     </div>
@@ -290,8 +380,9 @@
                                     <label for="numTelefono">Num. Telefono:</label>
                                     <input
                                         id="numTelefono"
-                                        v-model="cotizacionForm.clienteTelefono" 
-                                        type="text" 
+                                        v-model="telefonoFormateado" 
+                                        type="text"
+                                        maxlength="12" 
                                         class="form-control" 
                                         placeholder="Ej. XXX-XXX-XXXX"
                                     >
@@ -330,7 +421,7 @@
                                 <div class="row m-2">  
                                     <div class="col">
                                         <div class="form-check m-4">
-                                            <input class="form-check-input" type="checkbox" id="mostrarTotal" v-model="mostrarTotalEnVista">
+                                            <input class="form-check-input" type="checkbox" id="mostrarTotal" v-model="cotizacionForm.mostrarTotal">
                                             <label class="form-check-label" for="mostrarTotal">
                                                 Mostrar total en la vista previa
                                             </label>
@@ -358,24 +449,88 @@
                             <div class="col">
                                 <label for="" class="m-2">Selecciona las llantas deseadas:</label>
                                 <div class="row m-2">
-                                    <input
-                                        v-model="busquedaLlantas"
-                                        class="form-control"
-                                        placeholder="Buscar por nombre o medida..."
-                                    />
+                                    <div class="col-9">
+                                        <input
+                                            v-model="busquedaLlantas"
+                                            class="form-control"
+                                            placeholder="Buscar por nombre o medida..."
+                                        />
+                                    </div>
+
+                                    <div class="col-3">
+                                        <div class="position-relative">
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
+                                                @click="dropdownOpen = !dropdownOpen"
+                                            >
+                                                <span>{{ selectedAlmacenes.length ? selectedAlmacenes.join(', ') : 'Elegir almacenes' }}</span>
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+
+                                            <!-- menú -->
+                                            <div
+                                                v-if="dropdownOpen"
+                                                class="border rounded shadow bg-white position-absolute w-100 mt-1 p-2"
+                                                style="z-index: 1050;"
+                                                @mouseleave="dropdownOpen = false"
+                                            >
+                                                <div class="form-check mb-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        class="form-check-input"
+                                                        id="alm-todos"
+                                                        @change="toggleTodos"
+                                                        :checked="selectedAlmacenes.length === 0"
+                                                    />
+                                                    <label class="form-check-label" for="alm-todos">
+                                                        Todos
+                                                    </label>
+                                                </div>
+
+                                                <div
+                                                    v-for="alm in almacenes"
+                                                    :key="alm.id"
+                                                    class="form-check"
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        class="form-check-input"
+                                                        :id="'alm-' + alm.id"
+                                                        :value="alm.nombre"
+                                                        v-model="selectedAlmacenes"
+                                                    />
+                                                    <label class="form-check-label" :for="'alm-' + alm.id">
+                                                        {{ alm.nombre }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div style="max-height: 400px; overflow-y: auto;">
+                                <div> <!-- style="max-height: 400px; overflow-y: auto;" -->
                                     <EasyDataTable
+                                        :key="tableKey"   
                                         :headers="tblHeadersModal"
                                         :items="itemsFiltrados"
-                                        :rows-per-page="25"
+                                        :rows-per-page="100"
                                         show-index
+                                        :table-height="400"
+                                        :sort-by="sortBy"
+                                        :sort-type="sortType"
+                                        @update:sort-by="onUpdateSortBy"
+                                        @update:sort-type="onUpdateSortType"
                                     >
                                         <!-- TEMPLATE PARA ADAPTAR LA INFORMACION A LA ORGANIZACION medida - marca - modelo - rango -->
                                         <template #item-medida="slotProps">
                                             {{ slotProps.medida }} {{ slotProps.rango }}
                                         </template>
+
+                                        
+
                                         <template #item-acciones="slotProps">
+                                            
                                             <button
                                                 v-if="!cotizacionForm.llantas.some(ll => ll.idLlanta === slotProps.id)"
                                                 type="button"
@@ -423,8 +578,8 @@
                                 <div class="col-3">                                    
                                     <input 
                                         class="form-control" 
+                                        min="0"
                                         type="number" 
-                                        min="0" 
                                         placeholder="Precio unitario" 
                                         v-model="nuevoPrecio" 
                                     />
@@ -458,7 +613,7 @@
                                             </div>
                                             <div class="col">
                                                 <small><strong>Blvd. Torres Landa 1901 esq San Jacobo</strong></small><br>
-                                                <small>Col. La Pisina C.P. 37440</small><br>
+                                                <small>Col. La Piscina C.P. 37440</small><br>
                                                 <small>Tel. 477 390 0290 y 477 461 0028</small><br>
                                                 <small>torreslanda@kartisimo.mx</small><br>
                                             </div>
@@ -470,8 +625,21 @@
                                         </div>
 
                                         <div class="mb-2 d-flex">
-                                            <p class="mx-2"><strong>Cliente: </strong>{{ cotizacionForm.clienteNombre || '---' }}</p>
-                                            <p class="mx-2"><strong>Teléfono: </strong>{{ cotizacionForm.clienteTelefono || '---' }}</p>
+                                            <span class="mx-2">
+                                                <strong>No. Cotización: </strong> {{ cotizacionForm.codigo || 'N/A' }}
+                                            </span>
+                                            <span class="mx-2">
+                                                <strong>Fecha emisión: </strong> {{ cotizacionForm.fechaCreacion || 'N/A' }}
+                                            </span>
+                                            <span class="mx-2">
+                                                <strong>Cliente: </strong> {{ cotizacionForm.clienteNombre || 'N/A' }}
+                                            </span>
+                                            <span class="mx-2">
+                                                <strong>Teléfono: </strong> {{ telefonoFormateado || 'N/A' }}
+                                            </span>
+                                            <span class="mx-2">
+                                                <strong>Correo: </strong> {{ cotizacionForm.clienteCorreo || 'N/A' }}
+                                            </span>
                                         </div>
 
                                         <table class="table align-middle">
@@ -482,38 +650,164 @@
                                                     <th>Precio Unitario</th>
                                                     <th style="width: 120px; text-align: right;">Total</th>
                                                     <th></th>
+                                                    <!-- <th></th> -->
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <!-- Llantas -->
-                                                <tr v-for="item in cotizacionForm.llantas" :key="'llanta-' + item.id">
-                                                    
+                                                <tr v-for="item in cotizacionForm.llantas" :key="'llanta-' + item.idLlanta">
                                                     <td>
                                                         {{ item.modeloMedidas }}
-                                                        <span v-if="item.ubicacion != 'Kartisimo' || item.ubicacion != 'Martinica'" class="badge bg-warning text-dark ms-2">Sobre pedido</span>
+                                                        <span
+                                                            v-if="item.ubicacion != 'Kartisimo' && item.ubicacion != 'Martinica'"
+                                                            class="badge bg-warning text-dark ms-2"
+                                                        >
+                                                            {{ item.ubicacion }}
+                                                        </span>
+
+                                                        <div class="mt-1">
+                                                            <input
+                                                                type="text"
+                                                                v-model="item.comentario"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="Agregar comentario..."
+                                                            />
+                                                        </div>
                                                     </td>
+
+                                                    <!-- Cantidad -->
                                                     <td>
                                                         <input
                                                             type="number"
                                                             min="1"
                                                             class="form-control"
-                                                            :style="{ width: '70px' }"
+                                                            :style="{ width: '70px' }"                                                            
                                                             v-model.number="item.cantidad"
                                                         />
                                                     </td>
-                                                    <td>
-                                                        <input
-                                                            min="0"
-                                                            class="form-control"
-                                                            :style="{ width: '90px' }"
-                                                            v-model.number="item.precioUnitario"
-                                                            placeholder="Precio c/u"
-                                                        />
+
+                                                    <!-- PRECIO UNITARIO -->
+                                                    <td style="width: 140px; text-align: right;">
+                                                        <!-- Caso 1: Promoción individual -->
+                                                        <div v-if="item.promo && item.promo.valor != null">
+                                                            <div class="d-flex flex-column align-items-end">
+                                                                <input
+                                                                    min="0"
+                                                                    class="form-control input-precio-unitario"
+                                                                    :style="{ width: '90px' }"
+                                                                    v-model.number="item.precioUnitario"
+                                                                    placeholder="Precio c/u"
+                                                                    @keydown="irAlSiguientePrecio"
+                                                                />
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
+                                                                </span>
+                                                                <small class="badge bg-danger mt-1">
+                                                                    {{ item.promo.nombre }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caso 2: Promoción general (sin individual y no excluido) -->
+                                                        <div v-else-if="promoGeneral && !item.excluirPromocionGeneral">
+                                                            <input
+                                                                min="0"
+                                                                class="form-control input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="item.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+                                                            <div class="text-success fst-italic small mt-1">
+                                                                (Aplica promoción general)
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caso 3: Excluido -->
+                                                        <div v-else-if="item.excluirPromocionGeneral" class="text-muted fst-italic small mt-1">
+                                                            <input
+                                                                min="0"
+                                                                class="form-control input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="item.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+
+                                                            <!-- Texto de estado -->
+                                                            <div v-if="promoGeneral && !item.excluirPromocionGeneral" class="text-success fst-italic small mt-1">
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caso 4: Sin promociones -->
+                                                        <div v-else>
+                                                            <input
+                                                                min="0"
+                                                                class="form-control input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="item.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+                                                        </div>
                                                     </td>
+
+                                                    <!-- SUBTOTAL -->
                                                     <td style="width: 120px; text-align: right;">
-                                                        {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 4)) }}
+                                                        <!-- Promo individual -->
+                                                        <div v-if="item.promo && item.promo.valor != null">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(item, promoGeneral) * (item.cantidad ?? 1)) }}
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Promo general -->
+                                                        <div v-else-if="promoGeneral && !item.excluirPromocionGeneral">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(item, promoGeneral) * (item.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <small class="badge bg-danger mt-1 d-block">
+                                                                {{ promoGeneral.nombre }}
+                                                            </small>
+                                                        </div>
+
+                                                        <!-- Excluido -->
+                                                        <div v-else-if="item.excluirPromocionGeneral" class="text-muted fst-italic small">
+                                                            {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                        </div>
+
+                                                        <!-- Sin promoción -->
+                                                        <div v-else>
+                                                            {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                        </div>
                                                     </td>
+
+                                                    <!-- Acciones -->
                                                     <td>
+                                                        <div class="form-check mb-2">
+                                                            <input
+                                                                class="form-check-input"
+                                                                type="checkbox"
+                                                                v-model="item.excluirPromocionGeneral"
+                                                                :id="'excluir-llanta-' + item.idLlanta"
+                                                            />
+                                                            <label class="form-check-label small" :for="'excluir-llanta-' + item.idLlanta">
+                                                                Excluir promoción
+                                                            </label>
+                                                        </div>
+
                                                         <button
                                                             class="btn btn-sm btn-outline-danger"
                                                             @click="eliminarLlanta(item.idLlanta)"
@@ -523,9 +817,21 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
+
                                                 <!-- Paquetes -->
                                                 <tr v-for="(p, index) in cotizacionForm.paquetes" :key="'paquete-' + index">
-                                                    <td>{{ p.nombre.toUpperCase() }}</td>
+                                                    <td>
+                                                        {{ p.nombre.toUpperCase() }}
+                                                        <div class="mt-1">
+                                                            <input
+                                                                type="text"
+                                                                v-model="p.comentario"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="Agregar comentario..."
+                                                            />
+                                                        </div>
+                                                    </td>
                                                     <td>
                                                         <input
                                                             type="number"
@@ -536,19 +842,103 @@
                                                             disabled
                                                         />
                                                     </td>
+                                                    
+                                                    <!-- PRECIO UNITARIO  -->
                                                     <td>
-                                                        <input
-                                                            min="0"
-                                                            class="form-control"
-                                                            :style="{ width: '90px' }"
-                                                            v-model.number="p.precioUnitario"
-                                                            placeholder="Precio"
-                                                        />
+                                                        <div v-if="p.promo">
+                                                            <div class="d-flex flex-column align-items-end">
+                                                                <!-- Precio original tachado -->
+                                                                <input
+                                                                    min="0"
+                                                                    class="form-control input-precio-unitario"
+                                                                    :style="{ width: '90px' }"
+                                                                    v-model.number="p.precioUnitario"
+                                                                    placeholder="Precio"
+                                                                    @keydown="irAlSiguientePrecio"
+                                                                />
+
+                                                                <!-- Precio con promo -->
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(p, promoGeneral)) }}
+                                                                </span>
+
+                                                                <!-- Etiqueta de promo -->
+                                                                <small class="badge bg-danger mt-1">
+                                                                    {{ p.promo.nombre }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+
+                                                        <div v-else>
+                                                            <input
+                                                                min="0"
+                                                                class="form-control text-end input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="p.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+
+                                                            <!-- Texto de estado -->
+                                                            <div v-if="promoGeneral && !p.excluirPromocionGeneral" class="text-success fst-italic small mt-1">
+                                                                (Aplica promoción general)
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(p, promoGeneral)) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>                                                        
                                                     </td>
+
+                                                    <!-- SUBTOTAL -->
                                                     <td style="width: 120px; text-align: right;">
-                                                        {{ formatoMoneda(p.precioUnitario || 0) }}
+
+                                                        <!-- Caso 1: Promoción individual -->
+                                                        <div v-if="p.promo && p.promo.valor != null">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(p, promoGeneral) * (p.cantidad ?? 1)) }}
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Caso 2: Aplica promoción general (sin promo individual y no excluido) -->
+                                                        <div v-else-if="promoGeneral && !p.excluirPromocionGeneral">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(p, promoGeneral) * (p.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <small class="badge bg-danger mt-1 d-block">
+                                                                {{ promoGeneral.nombre }}
+                                                            </small>
+                                                        </div>
+
+                                                        <!-- Caso 3: Excluido de promoción -->
+                                                        <div v-else-if="p.excluirPromocionGeneral" class="text-muted fst-italic small">
+                                                            {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                        </div>
+
+                                                        <!-- Caso 4: Sin promociones -->
+                                                        <div v-else>
+                                                            {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                        </div>
                                                     </td>
+
                                                     <td>
+                                                        <div class="form-check mb-2">
+                                                            <input
+                                                                class="form-check-input"
+                                                                type="checkbox"
+                                                                v-model="p.excluirPromocionGeneral"
+                                                                :id="'excluir-paquete-' + p.idPaquete"
+                                                            />
+                                                            <label class="form-check-label small" :for="'excluir-paquete-' + p.idPaquete">
+                                                                Excluir promoción
+                                                            </label>
+                                                        </div>
+
                                                         <button
                                                             class="btn btn-sm btn-outline-danger"
                                                             @click="eliminarPaquete(p.idPaquete)"
@@ -557,10 +947,22 @@
                                                             <i class="bi bi-trash"></i>
                                                         </button>
                                                     </td>
+
                                                 </tr>
                                                 <!-- Servicios adicionales -->
                                                 <tr v-for="(extra, i) in cotizacionForm.serviciosExtras" :key="'servicio-' + i">
-                                                    <td>{{ extra.nombre }} {{ extra.observacion }}</td>
+                                                    <td>
+                                                        {{ extra.nombre }} {{ extra.observacion }}
+                                                        <div class="mt-1">
+                                                            <input
+                                                                type="text"
+                                                                v-model="extra.comentario"
+                                                                class="form-control form-control-sm"
+                                                                placeholder="Agregar comentario..."
+                                                            />
+                                                        </div>
+                                                    </td>
+
                                                     <td>
                                                         <input
                                                             type="number"
@@ -571,19 +973,121 @@
                                                             placeholder="1"
                                                         />
                                                     </td>
-                                                    <td>
-                                                        <input
-                                                            min="0"
-                                                            class="form-control"
-                                                            :style="{ width: '90px' }"
-                                                            v-model.number="extra.precioUnitario"
-                                                            placeholder="Precio c/u"
-                                                        />
+
+                                                    <!-- PRECIO UNITARIO -->
+                                                    <td style="width: 140px; text-align: right;">
+                                                        <!-- Caso 1: Promoción individual -->
+                                                        <div v-if="extra.promo && extra.promo.valor != null">
+                                                            <div class="d-flex flex-column align-items-end">
+                                                                <input
+                                                                    min="0"
+                                                                    class="form-control input-precio-unitario"
+                                                                    :style="{ width: '90px' }"
+                                                                    v-model.number="extra.precioUnitario"
+                                                                    placeholder="Precio c/u"
+                                                                    @keydown="irAlSiguientePrecio"
+                                                                />
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(extra, promoGeneral)) }}
+                                                                </span>
+                                                                <small class="badge bg-danger mt-1">
+                                                                    {{ extra.promo.nombre }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caso 2: Promoción general (sin individual y no excluido) -->
+                                                        <div v-else-if="promoGeneral && !extra.excluirPromocionGeneral">
+                                                            <input
+                                                                min="0"
+                                                                class="form-control text-end input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="extra.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+                                                            <div class="text-success fst-italic small mt-1">
+                                                                (Aplica promoción general)
+                                                                <span class="text-success fw-bold">
+                                                                    {{ formatoMoneda(precioFinalItem(extra, promoGeneral)) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Caso 3: Excluido -->
+                                                        <div v-else-if="extra.excluirPromocionGeneral" class="text-muted fst-italic small mt-1">
+                                                            <input
+                                                                min="0"
+                                                                class="form-control text-end input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="extra.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+                                                        </div>
+
+                                                        <!-- Caso 4: Sin promociones -->
+                                                        <div v-else>
+                                                            <input
+                                                                min="0"
+                                                                class="form-control text-end input-precio-unitario"
+                                                                :style="{ width: '90px' }"
+                                                                v-model.number="extra.precioUnitario"
+                                                                placeholder="Precio c/u"
+                                                                @keydown="irAlSiguientePrecio"
+                                                            />
+                                                        </div>
                                                     </td>
+
+                                                    <!-- SUBTOTAL -->
                                                     <td style="width: 120px; text-align: right;">
-                                                        {{ formatoMoneda(extra.precioUnitario * (extra.cantidad || 1)) }}
+                                                        <!-- Promo individual -->
+                                                        <div v-if="extra.promo && extra.promo.valor != null">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(extra, promoGeneral) * (extra.cantidad ?? 1)) }}
+                                                            </span>
+                                                        </div>
+
+                                                        <!-- Promo general -->
+                                                        <div v-else-if="promoGeneral && !extra.excluirPromocionGeneral">
+                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                                {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold d-block">
+                                                                {{ formatoMoneda(precioFinalItem(extra, promoGeneral) * (extra.cantidad ?? 1)) }}
+                                                            </span>
+                                                            <small class="badge bg-danger mt-1 d-block">
+                                                                {{ promoGeneral.nombre }}
+                                                            </small>
+                                                        </div>
+
+                                                        <!-- Excluido -->
+                                                        <div v-else-if="extra.excluirPromocionGeneral" class="text-muted fst-italic small">
+                                                            {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                        </div>
+
+                                                        <!-- Sin promoción -->
+                                                        <div v-else>
+                                                            {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                        </div>
                                                     </td>
+
                                                     <td>
+                                                        <div class="form-check mb-2">
+                                                            <input
+                                                                class="form-check-input"
+                                                                type="checkbox"
+                                                                v-model="extra.excluirPromocionGeneral"
+                                                                :id="'excluir-serv-' + i"
+                                                            />
+                                                            <label class="form-check-label small" :for="'excluir-serv-' + i">
+                                                                Excluir promoción
+                                                            </label>
+                                                        </div>
+
                                                         <button
                                                             class="btn btn-sm btn-outline-danger"
                                                             @click="eliminarServicioExtra(extra.idDetalleCotizacionServicio ?? i)"
@@ -593,11 +1097,60 @@
                                                         </button>
                                                     </td>
                                                 </tr>
+
                                             </tbody>
                                             <tfoot>
-                                                <tr v-if="mostrarTotalEnVista">
-                                                    <td colspan="4" class="text-end fs-5 fw-bold">Total</td>
-                                                    <td colspan="2" class="fs-5 fw-bold">{{ formatoMoneda(totalCotizacion) }}</td>
+                                                <!-- TOTAL GENERAL -->
+                                                <tr v-if="cotizacionForm.mostrarTotal">
+                                                    <td colspan="4" class="text-end fs-5 fw-bold">
+                                                        Total:
+                                                    </td>
+                                                    <td colspan="2" class="fs-5 fw-bold text-end">
+                                                        <!-- Si hay promoción general, mostrar ambos -->
+                                                        <!-- <div v-if="promoGeneral">
+                                                            <span class="text-decoration-line-through text-muted me-2">
+                                                                {{ formatoMoneda(totalCotizacion) }}
+                                                            </span>
+                                                            <span class="text-success fw-bold">
+                                                                {{ formatoMoneda(totalGeneralConPromo) }}
+                                                            </span>
+                                                            <small class="badge bg-info ms-2">
+                                                                {{ promoGeneral.nombre }}
+                                                                ({{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }})
+                                                            </small>
+                                                        </div> -->
+
+                                                        <!-- Si NO hay promoción -->
+                                                        <!-- <div v-else>
+                                                            {{ formatoMoneda(totalCotizacion) }}
+                                                        </div> -->
+                                                        {{ formatoMoneda(totalCotizacion) }}
+                                                    </td>
+                                                </tr>
+
+                                                
+                                                <!-- Fila para aplicar promoción general -->
+                                                <tr>
+                                                    <td colspan="4" class="align-middle">
+                                                        <button 
+                                                            class="btn btn-outline-primary btn-sm"
+                                                            @click="aplicarPromocionGeneral()"
+                                                        >
+                                                            Ver Promos disponibles
+                                                            <span 
+                                                                v-if="promosGeneralesDisponibles.length > 0"
+                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
+                                                            >
+                                                                {{ promosGeneralesDisponibles.length }}
+                                                            </span>
+                                                        </button>
+                                                    </td>
+                                                    <td colspan="2" class="text-start">
+                                                        <div v-if="promoGeneral" class="alert alert-success py-1 mb-0">
+                                                            <strong>{{ promoGeneral.nombre }}</strong>
+                                                            <span> - {{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }} aplicado</span>
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             </tfoot>
                                         </table>                                        
@@ -617,11 +1170,13 @@
 </template>
 
 <script setup>
-    import { ref, watch, computed, onMounted, getCurrentInstance, reactive } from 'vue';
+    import { ref, watch, computed, onMounted, getCurrentInstance, reactive, onBeforeUnmount, nextTick, toRaw } from 'vue';
     import EasyDataTable from "vue3-easy-data-table";
     import html2pdf from 'html2pdf.js'; //TODO: eliminar esta libreria del proyecto
+    import Swal from 'sweetalert2'
 
-    const { proxy } = getCurrentInstance()    
+
+    const { proxy } = getCurrentInstance()
     const modalRef = ref(null);
     let modalInstance = null;
     const paquetesDisponibles = ref([]);
@@ -637,11 +1192,32 @@
     const vistaCotizacion = ref({});
     const mostrarVista = ref(false);
     const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
+    const tituloModal = ref("Nueva Cotización");
     const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
     const filtroEstatus = ref('');
 
     const itemsSelected = ref([]);
     const paquetesSeleccionados = ref([]);
+
+    const sortBy = ref('');      // '' = sin columna activa
+    const sortType = ref('asc'); // 'asc' | 'desc'
+    const tableKey = ref(0);     // para forzar re-montaje cuando quieras
+
+    const onUpdateSortBy = (v) => { sortBy.value = v ?? ''; };
+    const onUpdateSortType = (v) => { sortType.value = v === 'desc' ? 'desc' : 'asc'; };
+
+
+
+    const promoGeneral = ref(null);
+    const promosGeneralesDisponibles = ref([]);
+
+
+    const resetTabla = () => {
+        sortBy.value = '';
+        sortType.value = 'asc';
+        busquedaLlantas.value = '';  
+        tableKey.value++;            
+    };
 
     const cotizacionForm = reactive({
         codigo: '',                   // ← Para saber si es edición
@@ -654,12 +1230,53 @@
         llantas: [],
         serviciosExtras: [],
         mostrarTotal: false,
-        fechaCreacion: ''
+        fechaCreacion: new Date().toLocaleDateString('es-MX', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric' 
+        })
     });
 
     const preciosLlantas = reactive({});
 
 
+    /***********************************
+     *  FUNCIONES INPUTS
+    ***********************************/
+    const telefonoFormateado = computed({
+        get() {
+            let valor = cotizacionForm.clienteTelefono.replace(/\D/g, '')
+            if (valor.length > 10) valor = valor.substring(0, 10)
+
+            if (valor.length > 6) {
+                return valor.replace(/(\d{3})(\d{3})(\d{0,4})/, '$1 $2 $3')
+            } else if (valor.length > 3) {
+                return valor.replace(/(\d{3})(\d{0,3})/, '$1 $2')
+            } else {
+                return valor
+            }
+        },
+        set(v) {
+            // Guardamos solo números limpios en el modelo real
+            cotizacionForm.clienteTelefono = v.replace(/\D/g, '').substring(0, 10)
+        }
+    })
+
+    const telefonoVistaFormateado = computed(() => {
+        if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono) 
+            return 'Sin teléfono';
+
+        let valor = vistaCotizacion.value.cliente.telefono.replace(/\D/g, '');
+        if (valor.length > 10) valor = valor.substring(0, 10);
+
+        if (valor.length > 6) {
+            return valor.replace(/(\d{3})(\d{3})(\d{0,4})/, '$1 $2 $3');
+        } else if (valor.length > 3) {
+            return valor.replace(/(\d{3})(\d{0,3})/, '$1 $2');
+        } else {
+            return valor;
+        }
+    });
     /***********************************
      *  FUNCIONES PARA TABLA COTIZACION
     ***********************************/
@@ -781,13 +1398,17 @@
         });
     };
 
+
+    /***********************************
+     *  FUNCIONES PARA CARGA DE DATOS
+    ***********************************/
     // Función para cargar paquetes
     const cargarPaquetes = async () => {
         try {
             const res = await fetch(proxy.$serverIP + 'api/Paquetes/getPaquete');
             if (!res.ok) throw new Error('Error en la respuesta');
             const data = await res.json();
-            paquetesDisponibles.value = data;
+            paquetesDisponibles.value = data
         } catch (e) {
             console.error('Error al cargar paquetes:', e);
         }
@@ -822,12 +1443,14 @@
 
                 const obj = {
                     id: llanta.idLlanta,
+                    idInventarioInicial: llanta.idInventarioInicial,
                     codigo: llanta.codigo,
                     llanta: nombreCompleto,
                     medida: llanta.medidas,
                     rango: llanta.rango, // campo para colocar en cotizacionForm como el cliente la solicita medida - marca - modelo - rango
                     cantidad: llanta.cantidad,
                     ubicacion: llanta.nombreAlmacen,
+                    idAlmacen: llanta.idAlmacen,
                     precio: parseFloat(llanta.precio) || 0,
                     sobrePedido,
                 };
@@ -835,6 +1458,7 @@
                 llantaArray.push(obj);
             });
             items.value = llantaArray
+            
             return items
             
         } catch (error) {
@@ -875,11 +1499,38 @@
         await cargarClientes();
         await cargarLlantas();
         await cargarCotizaciones();
+        await cargarAlmacenes();
+        await cargarPromosGenerales();
     });
+
+
 
     /*********************************************
         FUNCIONES PARA MODAL CREACION/EDICION
     **********************************************/
+
+    const irAlSiguientePrecio = (event) => {
+
+        // Detecta si presionó Tab o Enter
+        if (event.key === "Tab" || event.key === "Enter") {
+            event.preventDefault(); // Evita que el navegador haga el tab normal
+
+            //  Obtiene todos los inputs de precio unitario
+            const inputs = Array.from(document.querySelectorAll('.input-precio-unitario'));
+            const currentIndex = inputs.indexOf(event.target);
+
+            //  Mueve el foco al siguiente
+            if (inputs[currentIndex + 1]) {
+                inputs[currentIndex + 1].focus();
+            } else {
+                // Si es el último, puedes:
+                // 1️⃣ Volver al primero:
+                inputs[0]?.focus();
+                // o 2️⃣ simplemente terminar sin mover (comenta la línea de arriba)
+            }
+        }
+    };
+
     
     // Elimina paquete del arreglo
     const eliminarPaquete = (idPaquete) => {
@@ -919,19 +1570,72 @@
 
     // Agrega Servicio Adicionales al arreglo CotizacionesForm
     const agregarServicioExtra = () => {
-        if (nuevoServicio.value && nuevoPrecio.value && nuevaObservacion.value && nuevaCantidad.value > 0) {
-            cotizacionForm.serviciosExtras.push({
-                idDetalleCotizacionServicio: null,
-                nombre: (nuevoServicio.value).toUpperCase(),
-                observacion: (nuevaObservacion.value).toUpperCase(),
-                cantidad: parseInt(nuevaCantidad.value),
-                precioUnitario: parseFloat(nuevoPrecio.value)
+        const nombre = (nuevoServicio.value || "").trim().toUpperCase();
+        const observacion = (nuevaObservacion.value || "").trim().toUpperCase();
+        const cantidad = parseInt(nuevaCantidad.value);
+        const precio = parseFloat(nuevoPrecio.value);
+        
+        // Validaciones básicas
+        if (!nombre) {
+            Swal.fire({
+            icon: "warning",
+            title: "Campo requerido",
+            text: "Debes ingresar el nombre del servicio.",
+            confirmButtonColor: "#3085d6"
             });
-            nuevoServicio.value = '';
-            nuevoPrecio.value = '';
-            nuevaCantidad.value = 1;
-            nuevaObservacion.value = '';
+            return;
         }
+
+        if (isNaN(cantidad) || cantidad <= 0) {
+            Swal.fire({
+            icon: "warning",
+            title: "Cantidad inválida",
+            text: "La cantidad debe ser un número mayor a 0.",
+            confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+
+        if (isNaN(precio) || precio <= 0) {
+            Swal.fire({
+            icon: "warning",
+            title: "Precio inválido",
+            text: "El precio debe ser un número mayor a 0.",
+            confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+
+        const duplicado = cotizacionForm.serviciosExtras.some(
+            s => s.nombre.trim().toUpperCase() === nombre
+        );
+
+        if (duplicado) {
+            Swal.fire({
+            icon: "info",
+            title: "Servicio duplicado",
+            text: "Ya existe un servicio adicional con ese nombre.",
+            confirmButtonColor: "#3085d6"
+            });
+            return;
+        }
+
+        // Si pasa las validaciones, agregar el servicio
+        cotizacionForm.serviciosExtras.push({
+            idDetalleCotizacionServicio: null,
+            nombre: nuevoServicio.value.toUpperCase(),
+            observacion: nuevaObservacion.value.toUpperCase(),
+            cantidad: parseInt(nuevaCantidad.value),
+            precioUnitario: precio,
+            excluirPromocionGeneral: false,
+
+        });
+
+        // Reset de los inputs
+        nuevoServicio.value = '';
+        nuevoPrecio.value = '';
+        nuevaCantidad.value = 1;
+        nuevaObservacion.value = '';
     };
 
     // Elimina ServicioAdicional del arreglo
@@ -949,23 +1653,139 @@
     };
 
     // Agrega la llanta al arreglo
-    const agregarLlanta = (item) => {
+    const agregarLlanta = async (item) => {
         if (cotizacionForm.llantas.length >= 6) {
-            alert('Solo puedes agregar hasta 6 llantas diferentes por cotización.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Límite alcanzado',
+                    text: 'Solo puedes agregar hasta 6 llantas diferentes por cotización.',
+                    confirmButtonText: 'Entendido',
+                    confirmButtonColor: '#3085d6'
+                })
             return;
         }
+
+        // console.log(item.llanta) 
+
         const yaExiste = cotizacionForm.llantas.some(ll => ll.idLlanta === item.id);
         if (!yaExiste) {
-            cotizacionForm.llantas.push({
+            
+            const nuevaLlanta = {
                 idDetalleCotizacionLlanta: null,
                 idLlanta: item.id,
-                cantidad: 4, // o el campo que manejes
-                precioUnitario: item.precio || 0,
-                modeloMedidas: item.medida + ' ' +item.llanta+ ' ' + item.rango,
-                ubicacion: item.ubicacion, 
-            });
+                idInventarioInicial: item.idInventarioInicial,
+                cantidad: 4,
+                precioUnitario: parseFloat(item.precio) || 0,
+                modeloMedidas: `${item.llanta} ${item.medida} ${item.rango}`,
+                marca: item.marca,
+                idAlmacen: item.idAlmacen,
+                ubicacion: item.ubicacion,
+                promo: null,
+                precioConPromo: null,
+                excluirPromocionGeneral: false,
+                comentario: "",
+            };
+
+            //console.log('Agregar Llanta: obj enviado '+ JSON.stringify(item))
+            //console.log('Agregar Llanta: nuevo obj '+JSON.stringify(nuevaLlanta))
             
-            //console.log('agregarLlanta: '+ JSON.stringify(cotizacionForm.llantas))
+
+            try {
+
+                const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${nuevaLlanta.idInventarioInicial}`);
+                if (!res.ok) throw new Error('Error al obtener promociones');
+
+                //console.log(nuevaLlanta.idInventarioInicial)
+
+                const promosDisponibles = await res.json();
+
+                console.log(promosDisponibles)
+
+                if (promosDisponibles.length > 0) {
+                    // No hay promos disponibles
+
+                    // Si hay más de una promoción, permitir al usuario elegir
+                    const opciones = promosDisponibles.map(promo => {
+                        const descripcion = promo.tipo
+                            ? `Descuento del ${promo.valor}%`
+                            : `Descuento de $${promo.valor}`;
+                        return {
+                            id: promo.idPromocion,
+                            nombre: promo.nombre,
+                            descripcion,
+                            promo
+                        };
+                    });
+
+                    let html = `<p>Selecciona la promoción que deseas aplicar:</p>`;
+                    
+                    opciones.forEach((op, i) => {
+                        html += `
+                            <div style="text-align:left; margin-bottom:8px;">
+                            <input type="radio" name="promo" id="promo_${i}" value="${op.id}" style="margin-right:6px;">
+                            <label for="promo_${i}">
+                                <strong>${op.nombre}</strong> — ${op.descripcion}
+                            </label>
+                            </div>
+                        `;
+                    });
+
+                    const { value: promoSeleccionadaId } = await Swal.fire({
+                        title: 'Promociones disponibles',
+                        html,
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        confirmButtonText: 'Aplicar promoción',
+                        cancelButtonText: 'Cancelar',
+                        preConfirm: () => {
+                            const checked = document.querySelector('input[name="promo"]:checked');
+                            return checked ? checked.value : null;
+                        }
+                    });
+
+                    if (promoSeleccionadaId) {
+                        const promoSeleccionada = opciones.find(op => op.id == promoSeleccionadaId).promo;
+                        nuevaLlanta.promo = promoSeleccionada;
+
+                        // 🔹 Calcula el nuevo precio
+                        nuevaLlanta.precioConPromo = promoSeleccionada.tipo
+                            ? nuevaLlanta.precioUnitario * (1 - promoSeleccionada.valor / 100)
+                            : Math.max(0, nuevaLlanta.precioUnitario - promoSeleccionada.valor);
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Promoción aplicada',
+                            text: `Se aplicó "${promoSeleccionada.nombre}" (${promoSeleccionada.tipo ? promoSeleccionada.valor + '%' : '$' + promoSeleccionada.valor})`
+                        });
+                    }                  
+                }
+                
+                cotizacionForm.llantas.push(nuevaLlanta);  
+                
+                cotizacionForm.llantas.sort((a, b) => {
+                    const prioridad = (llanta) => {
+                        const modelo = llanta.modeloMedidas?.toUpperCase() || '';
+                        if (modelo.includes('BRIDGESTONE')) return 1;
+                        if (modelo.includes('FIRESTONE')) return 2;
+                        return 3; // resto de marcas
+                    };
+
+                    const aPrioridad = prioridad(a);
+                    const bPrioridad = prioridad(b);
+
+                    if (aPrioridad !== bPrioridad) {
+                        return aPrioridad - bPrioridad;
+                    }
+
+                    // Si tienen la misma prioridad, ordenar por precio de mayor a menor
+                    return (b.precioUnitario || 0) - (a.precioUnitario || 0);
+                });                
+            } catch (error) {
+                console.error('Error al consultar promociones:', error);
+            }
+            
+            //console.log('agregarLlanta2: '+ JSON.stringify(cotizacionForm.llantas))
+            
         }
         else
         {
@@ -973,10 +1793,46 @@
         }
     }
 
+
+    // Helper reutilizable
+    const aplicarPromo = (precio, promoIndividual, promoGlobal) => {
+        if (promoIndividual && promoIndividual.valor != null) {
+            return promoIndividual.tipo
+                ? precio * (1 - promoIndividual.valor / 100)
+                : Math.max(0, precio - promoIndividual.valor);
+        } else if (promoGlobal && promoGlobal.valor != null) {
+            return promoGlobal.tipo
+                ? precio * (1 - promoGlobal.valor / 100)
+                : Math.max(0, precio - promoGlobal.valor);
+        }
+        return precio;
+    };
+
+    const precioFinalItem = (item, promoGlobal) => {
+        const base = item.precioUnitario ?? 0;
+
+        // Si tiene promo individual → aplica esa
+        if (item.promo && item.promo.valor != null) {
+            return item.promo.tipo
+            ? base * (1 - item.promo.valor / 100)
+            : Math.max(0, base - item.promo.valor);
+        }
+
+        // Si tiene promo general y no está excluido → aplica
+        if (promoGlobal && promoGlobal.valor != null && !item.excluirPromocionGeneral) {
+            return promoGlobal.tipo
+            ? base * (1 - promoGlobal.valor / 100)
+            : Math.max(0, base - promoGlobal.valor);
+        }
+
+        // Si está excluido o sin promo
+        return base;
+    };
+
+
     // carga de informacion y limpia la informacion, modal creacion/edicion
     const cargarFormulario = async (cotizacion = null) => {
         if (!cotizacion) {
-            // Si no hay cotización, limpiamos
             Object.assign(cotizacionForm, {
                 codigo: '',
                 clienteNombre: '',
@@ -986,76 +1842,300 @@
                 paquetes: paquetesDisponibles.value.length ? [paquetesDisponibles.value[0]] : [],
                 paquetesDetalles: {},
                 llantas: [],
-                paquetesDetalles: {},
                 serviciosExtras: [],
                 mostrarTotal: false,
-                fechaCreacion: ''
+                fechaCreacion: new Date().toLocaleDateString('es-MX', { 
+                    day: '2-digit', 
+                    month: '2-digit', 
+                    year: 'numeric' 
+                })
             });
-            itemsSelected.value = [];
+
+            promoGeneral.value = null;         
+            itemsSelected.value = [];        
             paquetesSeleccionados.value = [];
-            mostrarTotalEnVista.value = false;
             return;
         }
 
         try {
             const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
             const data = await res.json();
-            
+
+            // ===============================
+            // 🔹 PROMOCIÓN GENERAL
+            // ===============================
+            promoGeneral.value = (data.idPromocionGeneral && data.valorPromocionGeneral != null)
+                ? {
+                    idPromocion: data.idPromocionGeneral,
+                    nombre: data.nombrePromocionGeneral,
+                    valor: data.valorPromocionGeneral,
+                    tipo: data.tipoPromocionGeneral
+                }
+                : null;
+
+            // ===============================
+            // 🔹 DATOS GENERALES
+            // ===============================
             cotizacionForm.codigo = 'COT-' + data.idCotizacion;
             cotizacionForm.fechaCreacion = data.fechaCreacion;
             cotizacionForm.clienteNombre = data.clienteNombre;
             cotizacionForm.clienteTelefono = data.telefono;
             cotizacionForm.clienteCorreo = data.correo;
-            cotizacionForm.clienteExistente = ''; // si deseas autocompletar, podrías buscar coincidencia
+            cotizacionForm.clienteExistente = '';
+            cotizacionForm.mostrarTotal = data.mostrarTotal;
 
-            // PAQUETES
-            cotizacionForm.paquetes = data.paquetes
-            .map(p => {
+            // ===============================
+            // 🔹 PAQUETES
+            // ===============================
+            cotizacionForm.paquetes = data.paquetes.map(p => {
                 const base = paquetesDisponibles.value.find(q => q.idPaquete === p.idPaquete);
                 if (!base) return null;
+
+                const promoIndividual = p.valorPromocion != null
+                    ? {
+                        idPromocion: p.idPromocion,
+                        nombre: p.nombrePromocion,
+                        valor: p.valorPromocion,
+                        tipo: p.tipoPromocion
+                    }
+                    : null;
+
+                const precioBase = p.precioUnitario ?? 0;
+
+                const precioConPromo = precioFinalItem({
+                    precioUnitario: precioBase,
+                    promo: promoIndividual,
+                    excluirPromocionGeneral: p.excluirPromocionGeneral
+                }, promoGeneral.value);
+
                 return {
                     ...base,
-                    precioUnitario: p.precioUnitario   
+                    precioUnitario: precioBase,
+                    precioConPromo,
+                    promo: promoIndividual,
+                    excluirPromocionGeneral: p.excluirPromocionGeneral ?? false,
+                    comentario: p.comentario || "",
                 };
-            })
-            .filter(Boolean);
+            }).filter(Boolean);
 
             data.paquetes.forEach(p => {
                 cotizacionForm.paquetesDetalles[p.idPaquete] = p.idDetalleCotizacionPaquete;
             });
-            //console.log('cargarFormulario: ' + JSON.stringify(cotizacionForm.paquetes))
 
-            // LLANTAS
-            cotizacionForm.llantas = data.llantas.map(ll => ({
-                ...ll
-            }));
-            //console.log('cargarFormulario: ' + JSON.stringify(cotizacionForm.llantas))
+            // ===============================
+            // 🔹 LLANTAS
+            // ===============================
+            cotizacionForm.llantas = data.llantas.map(ll => {
+                const promoIndividual = (ll.idPromocion && ll.valorPromocion != null)
+                    ? {
+                        idPromocion: ll.idPromocion,
+                        nombre: ll.nombrePromocion,
+                        valor: ll.valorPromocion,
+                        tipo: ll.tipoPromocion
+                    }
+                    : null;
 
+                const precioBase = ll.precioUnitario;
 
-            data.llantas.forEach(ll => {
-                preciosLlantas[ll.idLlanta] = parseFloat(ll.precioUnitario);
+                const precioConPromo = precioFinalItem({
+                    precioUnitario: precioBase,
+                    promo: promoIndividual,
+                    excluirPromocionGeneral: ll.excluirPromocionGeneral
+                }, promoGeneral.value);
+
+                preciosLlantas[ll.idLlanta] = parseFloat(precioBase);
+
+                return {
+                    idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta,
+                    idLlanta: ll.idLlanta,
+                    cantidad: ll.cantidad,
+                    precioUnitario: precioBase,
+                    modeloMedidas: ll.modeloMedidas,
+                    modelo: ll.modelo,
+                    ubicacion: ll.ubicacion,
+                    promo: promoIndividual,
+                    precioConPromo,
+                    excluirPromocionGeneral: ll.excluirPromocionGeneral ?? false,
+                    comentario: ll.comentario || "",
+                };
             });
 
-            // SERVICIOS EXTRAS
-            cotizacionForm.serviciosExtras = data.servicios.map(s => ({
-                idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-                nombre: s.descripcion,
-                observacion: s.observacion,
-                cantidad: s.cantidad,
-                precioUnitario: s.precioUnitario
-            }));
-            //console.log('cargarFromulario: ServiciosAdicionales '+JSON.stringify(cotizacionForm.serviciosExtras))
+            // ===============================
+            // 🔹 SERVICIOS EXTRAS
+            // ===============================
+            cotizacionForm.serviciosExtras = data.servicios.map(s => {
+                const promoIndividual = s.valorPromocion != null
+                    ? {
+                        idPromocion: s.idPromocion,
+                        nombre: s.nombrePromocion,
+                        valor: s.valorPromocion,
+                        tipo: s.tipoPromocion
+                    }
+                    : null;
 
-            cotizacionForm.mostrarTotal = mostrarTotalEnVista.value;
+                const precioBase = s.precioUnitario ?? 0;
 
+                const precioConPromo = precioFinalItem({
+                    precioUnitario: precioBase,
+                    promo: promoIndividual,
+                    excluirPromocionGeneral: s.excluirPromocionGeneral
+                }, promoGeneral.value);
+
+                return {
+                    idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
+                    nombre: s.descripcion,
+                    observacion: s.observacion,
+                    cantidad: s.cantidad,
+                    precioUnitario: precioBase,
+                    precioConPromo,
+                    promo: promoIndividual,
+                    excluirPromocionGeneral: s.excluirPromocionGeneral ?? false,
+                    comentario: s.comentario || "",
+                };
+            });
+            console.log(data)
         } catch (e) {
             console.error('Error cargando cotización para edición:', e);
             alert('No se pudo cargar la cotización');
         }
     };
 
+
+
+    const cargarPromosGenerales = async () => {
+        try {
+            const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromocionesGenerales`);
+            if (!res.ok) throw new Error('Error al obtener promociones generales');
+
+            const data = await res.json();
+            promosGeneralesDisponibles.value = data;
+
+            if (data.length > 0) {
+                console.log(`Se cargaron ${data.length} promociones generales activas.`);
+            } else {
+                console.log('⚠️ No hay promociones generales activas.');
+            }
+        } catch (error) {
+            console.error('Error al cargar promociones generales:', error);
+        }
+    };
+
+    const aplicarPromocionGeneral = async () => {
+        const promos = promosGeneralesDisponibles.value;
+
+        if (promos.length === 0) {
+            Swal.fire('Sin promociones', 'No hay promociones generales activas.', 'info');
+            return;
+        }
+
+        let html = '<p>Selecciona una promoción general para aplicar:</p>';
+        promos.forEach((promo, i) => {
+            html += `
+            <div style="text-align:left;margin-bottom:8px;">
+                <input type="radio" name="promoGeneral" id="promoGeneral_${i}" value="${promo.idPromocion}" style="margin-right:6px;">
+                <label for="promoGeneral_${i}">
+                <strong>${promo.nombre}</strong> — ${promo.tipo ? `Descuento del ${promo.valor}%` : `Descuento de $${promo.valor}`}
+                </label>
+            </div>
+            `;
+        });
+
+        const { value: promoId } = await Swal.fire({
+            title: 'Promociones generales',
+            html,
+            focusConfirm: false,
+            showCancelButton: true,
+            confirmButtonText: 'Aplicar promoción',
+            cancelButtonText: 'Cancelar',
+            preConfirm: () => {
+                const checked = document.querySelector('input[name="promoGeneral"]:checked');
+                return checked ? checked.value : null;
+            }
+        });
+
+        if (!promoId) return;
+
+        const seleccionada = promos.find(p => p.idPromocion == promoId);
+        promoGeneral.value = seleccionada;
+
+        // 🔸 Recalcular precios con la nueva promoción general
+        cotizacionForm.llantas.forEach(ll => {
+            ll.precioConPromo = aplicarPromo(ll.precioUnitario, ll.promo, promoGeneral.value);
+        });
+
+        cotizacionForm.paquetes.forEach(p => {
+            p.precioConPromo = aplicarPromo(p.precioUnitario, p.promo, promoGeneral.value);
+        });
+
+        cotizacionForm.serviciosExtras.forEach(s => {
+            s.precioConPromo = aplicarPromo(s.precioUnitario, s.promo, promoGeneral.value);
+        });
+
+        // Forzar reactividad profunda
+        await nextTick(() => {
+            cotizacionForm.llantas = JSON.parse(JSON.stringify(toRaw(cotizacionForm.llantas)));
+            cotizacionForm.paquetes = JSON.parse(JSON.stringify(toRaw(cotizacionForm.paquetes)));
+            cotizacionForm.serviciosExtras = JSON.parse(JSON.stringify(toRaw(cotizacionForm.serviciosExtras)));
+        });
+
+        // 🔸 Actualización visual inmediata
+        Swal.fire({
+            icon: 'success',
+            title: 'Promoción aplicada',
+            text: `Se aplicó "${seleccionada.nombre}" correctamente.`
+        });
+    };
+
+
+
+
+
     // CREAR/EDITAR COTIZACIONES
     const guardarCotizacion = async () => {
+
+        const llantaInvalida = cotizacionForm.llantas.find(l =>
+            isNaN(Number(l.cantidad)) || Number(l.cantidad) <= 0 ||
+            isNaN(Number(l.precioUnitario)) || Number(l.precioUnitario) <= 0
+        );
+
+        if (llantaInvalida) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Datos inválidos en llantas",
+                text: `Verifica las cantidades y precios de las llantas.`,
+                confirmButtonColor: "#3085d6"
+            });
+            return false; // 🟢 Detiene por completo la ejecución
+        }
+
+        const paqueteInvalido = cotizacionForm.paquetes.find(p =>
+            isNaN(Number(p.precioUnitario)) || Number(p.precioUnitario) <= 0
+        );
+
+        if (paqueteInvalido) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Datos inválidos en paquetes",
+                text: `Verifica los precios de los paquetes.`,
+                confirmButtonColor: "#3085d6"
+            });
+            return false;
+        }
+
+        const servicioInvalido = cotizacionForm.serviciosExtras.find(s =>
+            isNaN(Number(s.cantidad)) || Number(s.cantidad) <= 0 ||
+            isNaN(Number(s.precioUnitario)) || Number(s.precioUnitario) <= 0
+        );
+
+        if (servicioInvalido) {
+            await Swal.fire({
+                icon: "warning",
+                title: "Datos inválidos en servicios adicionales",
+                text: `Verifica las cantidades y precios de los servicios.`,
+                confirmButtonColor: "#3085d6"
+            });
+            return false;
+        }
 
         const rawId = cotizacionForm.codigo
         ? Number(cotizacionForm.codigo.replace(/^COT-/, ''))
@@ -1069,18 +2149,26 @@
 
         // Mapear llantas al formato esperado
         const llantas = cotizacionForm.llantas.map(ll => ({
-            idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null, // null si nuevo
+            idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null,
             idLlanta: ll.idLlanta,
+            idInventarioInicial: ll.idInventarioInicial,
             cantidad: ll.cantidad,
-            precioUnitario: ll.precioUnitario//preciosLlantas[item.idLlanta]
+            precioUnitario: ll.precioUnitario,
+            idAlmacen: ll.idAlmacen,
+            idPromocion: ll.promo ? ll.promo.idPromocion : null,
+            excluirPromocionGeneral: ll.excluirPromocionGeneral ? 1 : 0,
+            comentario: ll.comentario || ""
         }));
+
 
         // Paquetes
         const paquetes = cotizacionForm.paquetes.map(p => ({
             idDetalleCotizacionPaquete: cotizacionForm.paquetesDetalles[p.idPaquete] || null,
             idPaquete: p.idPaquete,
             cantidad: p.cantidad ?? 1, // o el valor que requieras
-            precioUnitario: p.precioUnitario
+            precioUnitario: p.precioUnitario,
+            excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
+            comentario: p.comentario || "" 
         }));
         //console.log('GuardarCotizacion: Paquetes' + JSON.stringify(paquetes) + JSON.stringify(cotizacionForm.paquetes))
 
@@ -1090,7 +2178,9 @@
             descripcionServicio: s.nombre,
             observacion: s.observacion,
             cantidad: s.cantidad,
-            precioUnitario: s.precioUnitario
+            precioUnitario: s.precioUnitario,
+            excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
+            comentario: s.comentario || "" 
         }));
         //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras))
 
@@ -1109,113 +2199,242 @@
         const nuevaCotizacion = {
             codigo: rawId,
             mostrarTotal: cotizacionForm.mostrarTotal,
-            total: totalCotizacion.value,
-            creadoPor: 1,
             cliente,
             llantas,
             paquetes,
             serviciosAdicionales,
-        }
+            creadoPor: 1,
+            idPromocionGeneral: promoGeneral.value ? promoGeneral.value.idPromocion : null 
+        };
 
-
+        console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
         // Decide si POST o PUT
         const url = cotizacionForm.codigo
             ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
             : `${proxy.$serverIP}api/Cotizacion/crearCotizacion`;
 
-        await fetch(url, {
-            method: cotizacionForm.codigo ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(nuevaCotizacion)
-        })
-        .then(res => res.json())
-        .then(data => {
-            const obj ={
-                codigo: data.codigo.toString()
-            }
-            //console.log("Cotización guardada:", obj);
-            cargarFormulario();   // Limpia formulario
-            closeModal();         // Cierra modal
-            cargarCotizaciones(); // Actualiza la info de la tabla cotizaciones
+
+        try{
+            const res = await fetch(url, {
+                method: cotizacionForm.codigo ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevaCotizacion)
+            });
+
+            if (!res.ok) throw new Error(`Error al guardar cotización (${res.status})`);
+
+            const data = await res.json();
+            const obj = { codigo: data.codigo?.toString() };
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Cotización guardada',
+                text: 'Se guardó correctamente la cotización.'
+            });
+
+            // Actualizar vista
+            cargarFormulario(); // limpia la informacion
+            closeModal();
+            cargarCotizaciones();
             mostrarVistaPrevia(obj, 'ver');
-        });
-        //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+       
+            // console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+        }catch (error){
+            console.error('Error al guardar cotización:', error);
+            Swal.fire('Error', 'No se pudo guardar la cotización.', 'error');
+        }
     };
 
-    
-
-    const calcularTotalVista = (data) => {
-        const totalLlantas = data.llantas.reduce((sum, l) => sum + (l.precioUnitario * l.cantidad), 0);
-        const totalPaquetes = data.paquetes.reduce((sum, p) => sum + p.precioUnitario, 0);
-        const totalServicios = data.servicios.reduce((sum, s) => sum + (s.precioUnitario * s.cantidad), 0);
-        return totalLlantas + totalPaquetes + totalServicios;
-    };
-
-    const subtotalPaquete = computed(() => {
-        return paquetesSeleccionados.value.reduce((sum, p) => sum + p.precioUnitario, 0);
-    });
 
     const subtotalLlantas = computed(() => {
-        return itemsSelected.value.reduce((sum, item) => {
-            const cantidad = cantidadesPorLlanta.value[item.id] ?? 4; // ← por defecto 4
-            return sum + ((preciosLlantas[item.id] || 0) * cantidad);
+        return cotizacionForm.llantas.reduce((sum, ll) => {
+            const cantidad = ll.cantidad ?? 1;
+            return sum + precioFinalItem(ll, promoGeneral.value) * cantidad;
+        }, 0);
+    });
+
+    const subtotalPaquete = computed(() => {
+        return cotizacionForm.paquetes.reduce((sum, p) => {
+            const cantidad = p.cantidad ?? 1;
+            return sum + precioFinalItem(p, promoGeneral.value) * cantidad;
         }, 0);
     });
 
     const subtotalExtras = computed(() => {
-        return cotizacionForm.serviciosExtras.reduce((sum, item) => {
-            const cantidad = item.cantidad || 1;
-            return sum + (item.precioUnitario * cantidad);
+        return cotizacionForm.serviciosExtras.reduce((sum, s) => {
+            const cantidad = s.cantidad ?? 1;
+            return sum + precioFinalItem(s, promoGeneral.value) * cantidad;
         }, 0);
     });
 
     const totalCotizacion = computed(() => {
-        return subtotalPaquete.value + subtotalLlantas.value + subtotalExtras.value;
+        return subtotalLlantas.value + subtotalPaquete.value + subtotalExtras.value;
     });
 
+
+
+    /************************************/
+    /*   BUSQUEDA LLANTAS CON PRECIO    */
+    /************************************/
     
-    // Filtra variable itms en modal creacion filtra si se escribe con o sin espacio
-    const itemsFiltrados = computed(() => {
-        if (!busquedaLlantas.value) return items.value;
+    /* ====== 1) Constantes/Helpers ====== */
+    const brandPriority = { bridgestone: 1, firestone: 2 };
+    const multiwordBrands = ['ngt auto', 'general tire'];
+    const reSplit = /[\s\/\-]+/;
+    const reNonAN = /[^a-z0-9]/gi;
+    const collator = new Intl.Collator('es', { sensitivity: 'base' });
 
-        const busquedaOriginal = busquedaLlantas.value.toLowerCase();
+    function extractMarcaFromLlanta(llanta) {
+        const t = (llanta || '').toString().trim();
+        if (!t) return '';
+        const lower = t.toLowerCase();
+        const mw = multiwordBrands.find(m => lower.startsWith(m + ' '));
+    
+        return (mw ? mw : t.split(/[\s-]+/, 1)[0]).toUpperCase();
+    }
 
-        // Dividimos por espacios, guiones, slashes (y quitamos vacíos)
-        const palabrasClave = busquedaOriginal
-            .split(/[\s\/\-]+/)
-            .filter(p => p.length > 0);
+    function parsePrecio(v) {
+        if (v == null) return Number.POSITIVE_INFINITY;
+        if (typeof v === 'number') return Number.isFinite(v) ? v : Number.POSITIVE_INFINITY;
+        const n = Number(v.toString().replace(/[^\d.,-]/g, '').replace(/\./g, '').replace(',', '.'));
+        
+        return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
+    }
 
-        // Búsqueda todo junto sin símbolos ni espacios
-        const busquedaUnida = busquedaOriginal.replace(/[^a-z0-9]/gi, '');
+    /* ====== 2) Prepara ítems una sola vez ====== */
+    const preparedItems = computed(() =>
+        (items.value || []).map(it => {
+            const codigo = (it.codigo ?? '').toString();
+            const llanta = (it.llanta ?? '').toString();
+            const medida = (it.medida ?? '').toString();
+            const rango  = (it.rango  ?? '').toString();
+            const ubic   = (it.ubicacion ?? '').toString();
 
-        return items.value.filter(item => {
-            // Unimos todos los campos del item
-            const textoItem = `
-            ${item.codigo}
-            ${item.llanta}
-            ${item.medida}
-            ${item.rango}
-            ${item.ubicacion}
-            `.toLowerCase();
+            const text = ( llanta + ' ' + medida + ' ' + rango + ' ' + ubic ).toLowerCase();
+            const unido = text.replace(reNonAN, '');
 
-            const textoUnido = textoItem.replace(/[^a-z0-9]/gi, '');
+            const marca = extractMarcaFromLlanta(llanta);
+            const brandRank = brandPriority[marca.toLowerCase()] ?? 3;
+            const idInventarioInicial = ( it.idInventarioInicial ?? '' ).toString();
+           
+            return {
+                ...it,
+                _text: text,
+                _unido: unido,
+                _marca: marca,
+                _brandRank: brandRank,
+                _priceNum: parsePrecio(it.precio),
+                _code: codigo,
+                _idInventarioInicial: idInventarioInicial
+            };
+        })
+    );
 
-            // Coincidencia parcial: basta que cada palabra esté parcialmente incluida
-            const coincidePorPalabras = palabrasClave.every(palabra =>
-            textoItem.includes(palabra)
-            );
+    /* ====== 3) Orden base (una sola vez) ====== */
+    const baseSorted = computed(() => {
 
-            // Coincidencia parcial por texto completo unido (para búsquedas todo junto)
-            const coincideTodoJunto = textoUnido.includes(busquedaUnida);
+        const arr = preparedItems.value.slice();
 
-            return coincidePorPalabras || coincideTodoJunto;
+        arr.sort((a, b) => {
+            // 1. Prioridad por marca
+            if (a._brandRank !== b._brandRank) return a._brandRank - b._brandRank;
+
+            // 2. Precio DESC (mayor primero)
+            if (a._priceNum !== b._priceNum) return b._priceNum - a._priceNum;
+
+
+            return collator.compare(a._code, b._code);
         });
+
+        return arr;
     });
 
+    /* ====== 4) Debounce de la búsqueda ====== */
+    const q = busquedaLlantas;            // tu ref existente
+    const qDebounced = ref('');
+    let _t;                                // timer
+    watch(q, (val) => {
+        clearTimeout(_t);
+        _t = setTimeout(() => {
+            qDebounced.value = (val || '').toLowerCase().trim();
+        }, 250); // ajusta 200–300ms
+    });
+
+    /* ====== 5) Filtrado usando el orden base (sin reordenar en cada tecla) ====== */
+    const itemsFiltrados = computed(() => {
+        const term = qDebounced.value
+        let base = baseSorted.value
+
+        // Filtro por búsqueda de texto
+        if (term) {
+            const palabras = term.split(reSplit).filter(Boolean)
+            base = base.filter(it => {
+                const t = it._text, u = it._unido
+                for (let i = 0; i < palabras.length; i++) {
+                    const p = palabras[i]
+                    const pn = p.replace(reNonAN, '')
+                    if (!(t.includes(p) || u.includes(pn))) return false
+                }
+                return true
+            })
+        }
+        
+        // Filtro por almacenes seleccionados
+        if (selectedAlmacenes.value.length > 0) {
+            base = base.filter(it =>
+                selectedAlmacenes.value.includes(it.ubicacion)
+            )
+        }
 
 
+        return base
+    })
+
+    const toggleTodos = (e) => {
+        // Si marca “Todos”, limpiar los filtros
+        if (e.target.checked) {
+            selectedAlmacenes.value = [];
+        }
+    };
 
 
+    /*************************************/
+    /*      FUNCION DROPDAWN ALMACENES
+    /*************************************/
+    const almacenes = ref([
+        { id: 1, nombre: 'Kartisimo' },
+        { id: 2, nombre: 'Bridgestone' },
+        { id: 3, nombre: 'Sucursal Sur' }
+    ])
+
+    const selectedAlmacenes = ref([])
+    const dropdownOpen = ref(false)
+
+    const cargarAlmacenes = async () =>{
+         try {
+            const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`)
+            
+            if (!response.ok) {
+                throw new Error(`Error HTTP: ${response.status}`)
+            }
+
+            const data = await response.json()   // <- aquí parseas el JSON real
+
+            //console.log('Datos recibidos:', data)
+            // Aquí mapeamos para que tenga el mismo formato que esperabas
+            almacenes.value = data.map(a => ({
+                id: a.idAlmacen,
+                nombre: a.nombre
+            }))
+            
+        } catch (error) {
+            console.error('Error cargando almacenes:', error)
+        }
+    }
+
+    /*************************************/
+    /*      ABRIR/CERRAR MODAL
+    /*************************************/
     const openModal = () => {
         if (!modalInstance) {
             modalInstance = new bootstrap.Modal(modalRef.value);
@@ -1226,8 +2445,21 @@
     const closeModal = () => {
         modalInstance?.hide();
         codigoCotizacionEnEdicion.value = null;
-        cargarFormulario();
+        resetTabla();
+        cargarFormulario(); // limpia informacoin
     };
+
+    /*************************************/
+    /*      AL MONTAR COMPONENTE
+    /*************************************/
+    onMounted(() => {
+        const el = modalRef.value;
+        el?.addEventListener('hidden.bs.modal', resetTabla);
+    });
+    onBeforeUnmount(() => {
+        const el = modalRef.value;
+        el?.removeEventListener('hidden.bs.modal', resetTabla);
+    });
 
     const formatoMoneda = (valor) => {
         return new Intl.NumberFormat('es-MX', {
@@ -1238,7 +2470,12 @@
     };
 
     const abrirModalCotizacion = (cotizacion = null) => {
-        //console.log(cotizacion)
+        if (cotizacion && cotizacion.codigo) {
+            tituloModal.value = "Editar Cotización";
+        } else {
+            tituloModal.value = "Nueva Cotización";  
+        }
+
         cargarFormulario(cotizacion);
         openModal();
     };
@@ -1249,7 +2486,7 @@
         { text:"Codigo", value: "codigo"},
         { text:"Medidas", value: "medida", sortable: true},
         { text:"Cantidad", value: "cantidad", sortable: true},
-        { text:"Ubicación", value: "ubicacion"},
+        { text:"Ubicación", value: "ubicacion", sortable: true},
         { text:"Precio", value: "precio", sortable: true},        
         { text:"Acciones", value: "acciones", width: 50 }
     ]
@@ -1314,62 +2551,273 @@
         }
     });
 
-    
+    /*********************************************
+     *  WATCHER: recalcular precioConPromo al editar precio unitario
+     *********************************************/
+    watch(
+        () => cotizacionForm.llantas.map(ll => ({ id: ll.idLlanta, precio: ll.precioUnitario })), 
+        (nuevosValores) => {
+            nuevosValores.forEach(({ id, precio }) => {
+            const llanta = cotizacionForm.llantas.find(l => l.idLlanta === id);
+            if (!llanta) return;
+
+            // Aplica la misma lógica que tu helper actual
+            if (llanta.promo && llanta.promo.valor != null) {
+                llanta.precioConPromo = llanta.promo.tipo
+                ? precio * (1 - llanta.promo.valor / 100)
+                : Math.max(0, precio - llanta.promo.valor);
+            } else if (promoGeneral.value && promoGeneral.value.valor != null) {
+                llanta.precioConPromo = promoGeneral.value.tipo
+                ? precio * (1 - promoGeneral.value.valor / 100)
+                : Math.max(0, precio - promoGeneral.value.valor);
+            } else {
+                llanta.precioConPromo = precio; // sin promoción
+            }
+            });
+        },
+        { deep: true }
+    );
+
+    // Paquetes
+    watch(
+        () => cotizacionForm.paquetes.map(p => ({ id: p.idPaquete, precio: p.precioUnitario })), 
+        (nuevosValores) => {
+            nuevosValores.forEach(({ id, precio }) => {
+            const paquete = cotizacionForm.paquetes.find(p => p.idPaquete === id);
+            if (!paquete) return;
+            const promo = paquete.promo || promoGeneral.value;
+            paquete.precioConPromo = promo
+                ? promo.tipo
+                ? precio * (1 - promo.valor / 100)
+                : Math.max(0, precio - promo.valor)
+                : precio;
+            });
+        },
+        { deep: true }
+    );
+
+    // Servicios
+    watch(
+        () => cotizacionForm.serviciosExtras.map(s => ({ nombre: s.nombre, precio: s.precioUnitario })), 
+        (nuevosValores) => {
+            nuevosValores.forEach(({ nombre, precio }) => {
+            const servicio = cotizacionForm.serviciosExtras.find(s => s.nombre === nombre);
+            if (!servicio) return;
+            const promo = servicio.promo || promoGeneral.value;
+            servicio.precioConPromo = promo
+                ? promo.tipo
+                ? precio * (1 - promo.valor / 100)
+                : Math.max(0, precio - promo.valor)
+                : precio;
+            });
+        },
+        { deep: true }
+    );
+
 
     /*********************************************
         FUNCIONES PARA MODAL SCREENSHOT Y PDF
     **********************************************/
-    // Vista Final para el Cliente
+
+
+    const tieneElementosConPromoGeneral = computed(() => {
+        const llantasAplican = vistaCotizacion.value.llantasSelecionadas?.some(l => l.promoLabel !== '(Excluido de promoción)');
+        const paquetesAplican = vistaCotizacion.value.paquetes?.some(p => p.promoLabel !== '(Excluido de promoción)');
+        const serviciosAplican = vistaCotizacion.value.serviciosAdicionales?.some(s => s.promoLabel !== '(Excluido de promoción)');
+        
+        return llantasAplican || paquetesAplican || serviciosAplican;
+    });
+
+
     const mostrarVistaPrevia = async (cotizacion, modo = 'ver') => {
         if (modo === 'ver') {
             try {
                 const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
                 const data = await res.json();
 
-                //console.log(JSON.stringify(data));
+                // ===============================
+                // 🔹 PROMOCIÓN GENERAL
+                // ===============================
+                const promoGeneral = data.idPromocionGeneral
+                    ? {
+                        idPromocion: data.idPromocionGeneral,
+                        nombre: data.nombrePromocionGeneral,
+                        valor: data.valorPromocionGeneral,
+                        tipo: data.tipoPromocionGeneral
+                    }
+                    : null;
+
+                // ===============================
+                //   LLANTAS
+                // ===============================
+                const llantasConPromo = data.llantas.map(ll => {
+                    const promoIndividual = ll.idPromocion && ll.valorPromocion != null
+                        ? {
+                            idPromocion: ll.idPromocion,
+                            nombre: ll.nombrePromocion,
+                            valor: ll.valorPromocion,
+                            tipo: ll.tipoPromocion
+                        }
+                        : null;
+
+                    // Si el ítem está excluido, no aplicar ninguna promo
+                    const aplicaPromo = !ll.excluirPromocionGeneral;
+                    const precioBase = ll.precioUnitario ?? 0;
+
+                    const precioConPromo = aplicaPromo
+                        ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
+                        : precioBase;
+
+                    // Etiqueta
+                    const promoLabel = aplicaPromo
+                        ? promoIndividual
+                            ? `${promoIndividual.nombre}`
+                            : promoGeneral
+                                ? `${promoGeneral.nombre} `
+                                : ''
+                        : '(Excluido de promoción)';
+
+                    return {
+                        idLlanta: ll.idLlanta,
+                        medidas: ll.modeloMedidas,
+                        cantidad: ll.cantidad,
+                        precioUnitario: precioBase,
+                        ubicacion: ll.ubicacion,
+                        precioConPromo,
+                        promoLabel,
+                        total: precioConPromo * ll.cantidad,
+                        comentario: ll.comentario || ''
+                    };
+                });
+
+                // ===============================
+                // 🔹 PAQUETES
+                // ===============================
+                const paquetes = data.paquetes.map(p => {
+                    const promoIndividual = p.valorPromocion != null
+                        ? {
+                            nombre: p.nombrePromocion,
+                            valor: p.valorPromocion,
+                            tipo: p.tipoPromocion
+                        }
+                        : null;
+
+                    const aplicaPromo = !p.excluirPromocionGeneral;
+                    const precioBase = p.precioUnitario ?? 0;
+
+                    const precioConPromo = aplicaPromo
+                        ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
+                        : precioBase;
+
+                    const promoLabel = aplicaPromo
+                        ? promoIndividual
+                            ? `${promoIndividual.nombre}`
+                            : promoGeneral
+                                ? `${promoGeneral.nombre}`
+                                : ''
+                        : '(Excluido de promoción)';
+
+                    return {
+                        idPaquete: p.idPaquete,
+                        nombre: p.nombre,
+                        descripcion: p.descripcion,
+                        precioUnitario: precioBase,
+                        precio: precioConPromo,
+                        total: precioConPromo,
+                        promoLabel,
+                        comentario: p.comentario || ''
+                    };
+                });
+
+                // ===============================
+                // 🔹 SERVICIOS
+                // ===============================
+                const serviciosAdicionales = data.servicios.map(s => {
+                    const promoIndividual = s.valorPromocion != null
+                        ? {
+                            nombre: s.nombrePromocion,
+                            valor: s.valorPromocion,
+                            tipo: s.tipoPromocion
+                        }
+                        : null;
+
+                    const aplicaPromo = !s.excluirPromocionGeneral;
+                    const precioBase = s.precioUnitario ?? 0;
+
+                    const precioConPromo = aplicaPromo
+                        ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
+                        : precioBase;
+
+                    const promoLabel = aplicaPromo
+                        ? promoIndividual
+                            ? `${promoIndividual.nombre}`
+                            : promoGeneral
+                                ? `${promoGeneral.nombre}`
+                                : ''
+                        : '(Excluido de promoción)';
+
+                    return {
+                        nombreServicio: s.descripcion,
+                        observacion: s.observacion,
+                        cantidad: s.cantidad,
+                        precioUnitario: precioBase,
+                        precioConPromo,
+                        total: precioConPromo * s.cantidad,
+                        promoLabel,
+                        comentario: s.comentario || ''
+                    };
+                });
+
+                // ===============================
+                // 🔹 CALCULO DE TOTALES
+                // ===============================
+                const totalBase =
+                    llantasConPromo.reduce((s, l) => s + (l.precioUnitario * l.cantidad), 0) +
+                    paquetes.reduce((s, p) => s + p.precioUnitario, 0) +
+                    serviciosAdicionales.reduce((s, s2) => s + (s2.precioUnitario * s2.cantidad), 0);
+
+                const totalFinal =
+                    llantasConPromo.reduce((s, l) => s + l.total, 0) +
+                    paquetes.reduce((s, p) => s + p.total, 0) +
+                    serviciosAdicionales.reduce((s, s2) => s + s2.total, 0);
+
+                // ===============================
+                // 🔹 VISTA FINAL
+                // ===============================
                 vistaCotizacion.value = {
                     codigo: 'COT-' + data.idCotizacion,
-                    fechaCreacion: new Date(data.fechaCreacion).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                    fechaCreacion: new Date(data.fechaCreacion).toLocaleDateString('es-MX', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                    }),
                     cliente: {
                         nombre: data.clienteNombre,
                         telefono: data.telefono || 'Sin teléfono',
                         correo: data.correo || 'Sin correo'
                     },
-                    llantasSelecionadas: data.llantas.map(llanta => ({
-                        idllanta: llanta.idLlanta,
-                        marca: llanta.modelo.split(' ')[0],
-                        modelo: llanta.modelo.split(' ').slice(1).join(' '),
-                        medidas: llanta.modeloMedidas.replace(llanta.modelo + ' — ', ''),
-                        ubicacion: llanta.ubicacion, 
-                        cantidad: llanta.cantidad,
-                        precioUnitario: llanta.precioUnitario,
-                        total: (llanta.precioUnitario * llanta.cantidad)
-                    })),
-                    paquetes: data.paquetes.map(p => ({
-                        idPaquete: p.idPaquete,
-                        nombre: p.nombre,
-                        precio: p.precioUnitario,
-                        total: p.precioUnitario,
-                        descripcion: p.descripcion
-                    })),
-                    serviciosAdicionales: data.servicios.map(s => ({
-                        nombreServicio: s.descripcion,
-                        observacion: s.observacion,
-                        cantidad: s.cantidad,
-                        precioUnitario: s.precioUnitario,
-                        total: (s.precioUnitario * s.cantidad)
-                    })),
-                    total: calcularTotalVista(data),
+                    llantasSelecionadas: llantasConPromo,
+                    paquetes,
+                    serviciosAdicionales,
+                    total: totalFinal,
+                    totalBase,
+                    nombrePromocionGeneral: data.nombrePromocionGeneral,
+                    valorPromocionGeneral: data.valorPromocionGeneral,
+                    tipoPromocionGeneral: data.tipoPromocionGeneral,
                     estatus: cotizacion.estatus || 'Activa',
-                    mostrarTotal: false
+                    mostrarTotal: data.mostrarTotal
                 };
+
                 mostrarVista.value = true;
+
             } catch (error) {
                 console.error("Error al cargar detalle de cotización:", error);
-                alert("Error al cargar cotización");
+                Swal.fire('Error', 'No se pudo cargar la cotización.', 'error');
             }
         }
     };
+
+
 
     // GENERAR PDF
 
@@ -1539,7 +2987,6 @@
 
         pdfMake.createPdf(docDefinition).open();
     };
-
 
 
 </script>

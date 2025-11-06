@@ -62,7 +62,7 @@
                             data-bs-dismiss="offcanvas"
                             @click.prevent="irA('/content/cotizacion')" 
                         >
-                            Cotizaciones
+                            Cotizacion
                         </button>
                     </li>
                     <li class="nav-item mb-2">
@@ -72,6 +72,15 @@
                             @click.prevent="irA('/content/OrdenTrabajo')"
                         >
                             Orden de Trabajo
+                        </button>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <button
+                            class="nav-link text-white"
+                            data-bs-dismiss="offcanvas"
+                            @click.prevent="irA('/content/Promocion')"
+                        >
+                            Promocion
                         </button>
                     </li>
                 </ul>
