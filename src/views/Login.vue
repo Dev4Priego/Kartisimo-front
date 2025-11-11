@@ -58,6 +58,7 @@
 <script setup>
 import { ref, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
+import Swal from 'sweetalert2'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -82,9 +83,19 @@ async function  handleLogin() {
         const result = await response.json();
 
         if (result.success) {
+            // Guardar token y usuario en localStorage
+            // sessionStorage.setItem("token", result.token);
+            // sessionStorage.setItem("usuario", JSON.stringify(result.usuario));
+
             router.push('/content/inventario') // Redirige si es correcto
         } else {
-            alert(result.error || 'Credenciales incorrectas')
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de autenticación',
+                text: result.error || 'Credenciales incorrectas',
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#3085d6'
+            });
         }
     } catch (error) {
         console.error('Error al iniciar sesión:', error)

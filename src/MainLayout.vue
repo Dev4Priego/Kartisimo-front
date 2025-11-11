@@ -76,6 +76,7 @@
                             Orden de Trabajo
                         </button>
                     </li>
+                    
                     <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
@@ -85,6 +86,7 @@
                             Promocion
                         </button>
                     </li>
+
                     <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
@@ -93,7 +95,6 @@
                         >
                             Almacen
                         </button >
-
                     </li>
                 </ul>
             </div>

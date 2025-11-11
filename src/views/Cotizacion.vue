@@ -117,7 +117,7 @@
                         <h4 class="modal-title">Vista Previa de Cotización</h4>
                         <button type="button" class="btn-close" @click="mostrarVista = false"></button>
                     </div>
-                    <div ref="pdfContent" class="modal-body bg-white p-4" :style="{ fontSize: '14px' }">
+                    <div ref="pdfContent" class="modal-body bg-white p-4 fs-6" :style="{ fontSize: '14px' }">
                         <!-- Encabezado con direcciones y logo -->
                         <div class="row my-3">
                             <div class="col">
@@ -143,23 +143,25 @@
                             </div>
                             <div class="col">
                                 <small>
-                                    <strong>Blvd. Torres Landa 1901 esq San Jacobo</strong><br>
+                                    <strong>Blvd. Torres Landa 1901 esq. San Jacobo</strong><br>
                                     Col. La Piscina C.P. 37440<br>
                                     Tel. 477 390 0290 y 477 461 0028<br>
                                     torreslanda@kartisimo.mx<br>
                                 </small>
                             </div>
                             <div class="col">
-                                <strong><small>Blvd. Mariano Escobedo Pte. 2715</small></strong><br>
-                                <small>La Martinica, C.P. 37500</small><br>
-                                <small>Tel. 477 763 3285</small>
+                                <small>
+                                    <strong>Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong><br>
+                                    Col. La Martinica, C.P. 37500<br>
+                                    Tel. 477 763 3285 y 477 763 3284
+                                </small>
                             </div>
                         </div>
 
                         <!-- Información del cliente -->
                         <div class="mb-4">
                             <span class="mx-2">
-                                <strong>No. Cotización: </strong> {{ vistaCotizacion.codigo || 'N/A' }}
+                                <strong>No. Cotización: </strong>{{'COT-'+ vistaCotizacion.codigo || 'N/A' }}
                             </span>
                             <span class="mx-2">
                                 <strong>Fecha emisión: </strong> {{ vistaCotizacion.fechaCreacion || 'N/A' }}
@@ -192,44 +194,45 @@
                                 <tbody>
                                     <!-- Llantas -->
                                     <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
+                                        
                                         <td class="text-center">{{ llanta.cantidad }}</td>
+
                                         <td>
                                             {{ llanta.medidas }}
-                                            <small class="badge bg-secondary mt-1">
-                                                {{ llanta.comentario }}
-                                            </small>
-                                        </td>
-
-                                        <td class="text-end">
-                                            <!-- Promoción (individual o general) -->
-                                            <div v-if="llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'">
-                                                <span class="text-decoration-line-through text-muted d-block">
-                                                    {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                                <span class="text-success fw-bold d-block">
-                                                    {{ llanta.precioConPromo.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                                <small class="badge bg-danger mt-1">
-                                                    {{ llanta.promoLabel }}
+                                            <br>
+                                            <span>
+                                                <small class="badge bg-secondary mt-1">
+                                                    {{ llanta.comentario }}
                                                 </small>
-                                            </div>
+                                            </span>
+                                        </td>
 
-                                            <!-- Excluido -->
-                                            <div v-else-if="llanta.promoLabel === '(Excluido de promoción)'">
-                                                {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-
-                                            <!-- Sin promoción -->
-                                            <div v-else>
+                                        <!-- Precio Unitario -->
+                                        <td class="text-end">
+                                            <div>
                                                 {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                             </div>
                                         </td>
 
-                                        <td
-                                            class="text-end"
-                                            :class="{'text-success fw-bold': llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'                                            }"
-                                        >
-                                            {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                        <!-- Subtotal -->
+                                        <td class="text-end">
+                                            <div v-if="llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (llanta.precioUnitario * llanta.cantidad).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                    <span span>
+                                                       <small class="badge bg-danger">
+                                                            {{ llanta.promoLabel }}
+                                                        </small>
+                                                    </span>
+                                                </span>
+                                                <span class='text-success fw-bold'>
+                                                    {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}                                                    
+                                                </span>
+                                            </div>
+                                            
+                                            <div v-else>
+                                                {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
+                                            </div>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -245,37 +248,41 @@
                                     <!-- Paquetes seleccionados -->
                                     <tr v-for="(paquete, index) in vistaCotizacion.paquetes" :key="'paq-' + index">
                                         <td class="text-center">1</td>
+
                                         <td>
                                             {{ paquete.nombre.toUpperCase() }} {{ paquete.descripcion.toUpperCase() }}
-                                            <small class="badge bg-secondary mt-1">
-                                                {{ paquete.comentario }}
-                                            </small>
+                                            <p>
+                                                <small class="badge bg-secondary mt-1">
+                                                    {{ paquete.comentario }}
+                                                </small>
+                                            </p>
                                         </td>
 
+                                        <!-- Precio unitario -->
+                                        <td class="text-end">
+                                            <div>
+                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+                                        </td> 
+
+                                        <!-- Subtotal -->
                                         <td class="text-end">
                                             <div v-if="paquete.promoLabel && paquete.promoLabel !== '(Excluido de promoción)'">
                                                 <span class="text-decoration-line-through text-muted d-block">
                                                     {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
+                                                    <span>
+                                                       <small class="badge bg-danger">
+                                                            {{ paquete.promoLabel }}
+                                                        </small>
+                                                    </span>
+                                                </span> 
                                                 <span class="text-success fw-bold d-block">
-                                                    {{ paquete.precio.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                    {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}                                                    
                                                 </span>
-                                                <small class="badge bg-danger mt-1">
-                                                    {{ paquete.promoLabel }}
-                                                </small>
                                             </div>
-
-                                            <div v-else-if="paquete.promoLabel === '(Excluido de promoción)'">
-                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-
                                             <div v-else>
-                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
                                             </div>
-                                        </td>
-
-                                        <td class="text-end">
-                                            {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                         </td>
                                     </tr>
 
@@ -284,35 +291,38 @@
                                         <td class="text-center">{{ servicio.cantidad }}</td>
                                         <td>
                                             {{ servicio.nombreServicio }} {{ servicio.observacion }}
-                                            <small class="badge bg-secondary mt-1">
-                                                {{ servicio.comentario }}
-                                            </small>
+                                            <p>
+                                                <small class="badge bg-secondary mt-1">
+                                                    {{ servicio.comentario }}
+                                                </small>
+                                            </p>
                                         </td>
 
+                                        <!-- Precio unitario -->
+                                        <td class="text-end">
+                                            <div>
+                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                            </div>
+                                        </td>
+
+                                        <!-- Subtotal -->
                                         <td class="text-end">
                                             <div v-if="servicio.promoLabel && servicio.promoLabel !== '(Excluido de promoción)'">
                                                 <span class="text-decoration-line-through text-muted d-block">
                                                     {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                    <span>
+                                                        <small class="badge bg-danger mt-1">
+                                                            {{ servicio.promoLabel }}
+                                                        </small>
+                                                    </span>
                                                 </span>
                                                 <span class="text-success fw-bold d-block">
-                                                    {{ servicio.precioConPromo.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                    {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                                 </span>
-                                                <small class="badge bg-danger mt-1">
-                                                    {{ servicio.promoLabel }}
-                                                </small>
                                             </div>
-
-                                            <div v-else-if="servicio.promoLabel === '(Excluido de promoción)'">
-                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-
                                             <div v-else>
-                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+                                                {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
                                             </div>
-                                        </td>
-
-                                        <td class="text-end">
-                                            {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
                                         </td>
                                     </tr>
 
@@ -328,13 +338,11 @@
                         
                         <div class="row text-center">
                             <div class="col">
-                                <!-- Botón PDF -->
-                                <div class="mt-4">
-                                    <button class="btn btn-outline-danger w-100">Enviar por correo</button>
-                                </div>
+                                <!-- Botón enviar correo -->                            
+                                <EnviarCorreoModal :cotizacion="vistaCotizacion" />                       
                             </div>
                             <div class="col">
-                                <!-- Botón PDF -->
+                                <!-- Botón enviar pdf a imprimir -->
                                 <div class="mt-4">
                                     <button class="btn btn-outline-primary w-100">Imprimir</button>
                                 </div>
@@ -343,6 +351,11 @@
                                 <!-- Botón PDF -->
                                 <div class="mt-4">
                                     <button class="btn btn-outline-secondary w-100" @click="generarPDF">Descargar PDF</button>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-warning w-100" @click="abrirModalCotizacion(vistaCotizacion)">Editar</button>
                                 </div>
                             </div>
                         </div>
@@ -612,15 +625,15 @@
                                                 <small>apolo@kartisimo.mx</small><br>
                                             </div>
                                             <div class="col">
-                                                <small><strong>Blvd. Torres Landa 1901 esq San Jacobo</strong></small><br>
+                                                <small><strong>Blvd. Torres Landa 1901 esq. San Jacobo</strong></small><br>
                                                 <small>Col. La Piscina C.P. 37440</small><br>
                                                 <small>Tel. 477 390 0290 y 477 461 0028</small><br>
                                                 <small>torreslanda@kartisimo.mx</small><br>
                                             </div>
                                             <div class="col">
-                                                <small><strong>Blvd. Mariano Escobedo Pte. 2715</strong></small><br>
-                                                <small>La Martinica, C.P. 37500</small><br>
-                                                <small>Tel. 477 763 3285</small>                                                
+                                                <small><strong>Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong></small><br>
+                                                <small>Col. La Martinica, C.P. 37500</small><br>
+                                                <small>Tel. 477 763 3285 y 477 763 3284</small>
                                             </div>
                                         </div>
 
@@ -648,7 +661,7 @@
                                                     <th>MEDIDA - MARCA - MODELO - RANGO</th>
                                                     <th>Cantidad</th>
                                                     <th>Precio Unitario</th>
-                                                    <th style="width: 120px; text-align: right;">Total</th>
+                                                    <th style="width: 150px; text-align: right;">Total</th>
                                                     <th></th>
                                                     <!-- <th></th> -->
                                                 </tr>
@@ -687,66 +700,8 @@
                                                     </td>
 
                                                     <!-- PRECIO UNITARIO -->
-                                                    <td style="width: 140px; text-align: right;">
-                                                        <!-- Caso 1: Promoción individual -->
-                                                        <div v-if="item.promo && item.promo.valor != null">
-                                                            <div class="d-flex flex-column align-items-end">
-                                                                <input
-                                                                    min="0"
-                                                                    class="form-control input-precio-unitario"
-                                                                    :style="{ width: '90px' }"
-                                                                    v-model.number="item.precioUnitario"
-                                                                    placeholder="Precio c/u"
-                                                                    @keydown="irAlSiguientePrecio"
-                                                                />
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
-                                                                </span>
-                                                                <small class="badge bg-danger mt-1">
-                                                                    {{ item.promo.nombre }}
-                                                                </small>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Caso 2: Promoción general (sin individual y no excluido) -->
-                                                        <div v-else-if="promoGeneral && !item.excluirPromocionGeneral">
-                                                            <input
-                                                                min="0"
-                                                                class="form-control input-precio-unitario"
-                                                                :style="{ width: '90px' }"
-                                                                v-model.number="item.precioUnitario"
-                                                                placeholder="Precio c/u"
-                                                                @keydown="irAlSiguientePrecio"
-                                                            />
-                                                            <div class="text-success fst-italic small mt-1">
-                                                                (Aplica promoción general)
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Caso 3: Excluido -->
-                                                        <div v-else-if="item.excluirPromocionGeneral" class="text-muted fst-italic small mt-1">
-                                                            <input
-                                                                min="0"
-                                                                class="form-control input-precio-unitario"
-                                                                :style="{ width: '90px' }"
-                                                                v-model.number="item.precioUnitario"
-                                                                placeholder="Precio c/u"
-                                                                @keydown="irAlSiguientePrecio"
-                                                            />
-
-                                                            <!-- Texto de estado -->
-                                                            <div v-if="promoGeneral && !item.excluirPromocionGeneral" class="text-success fst-italic small mt-1">
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(item, promoGeneral)) }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Caso 4: Sin promociones -->
-                                                        <div v-else>
+                                                    <td style="width: 140px; text-align: right;">                                        
+                                                        <div>
                                                             <input
                                                                 min="0"
                                                                 class="form-control input-precio-unitario"
@@ -759,11 +714,16 @@
                                                     </td>
 
                                                     <!-- SUBTOTAL -->
-                                                    <td style="width: 120px; text-align: right;">
+                                                    <td style="text-align: right;">
                                                         <!-- Promo individual -->
                                                         <div v-if="item.promo && item.promo.valor != null">
-                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                            <span class="text-decoration-line-through text-muted small">
                                                                 {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                                <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ promoGeneral.nombre }}
+                                                                    </small>
+                                                                </span>
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(item, promoGeneral) * (item.cantidad ?? 1)) }}
@@ -772,15 +732,18 @@
 
                                                         <!-- Promo general -->
                                                         <div v-else-if="promoGeneral && !item.excluirPromocionGeneral">
-                                                            <span class="text-decoration-line-through text-muted d-block small">
+                                                            <span class="text-decoration-line-through text-muted small">
                                                                 {{ formatoMoneda((item.precioUnitario || 0) * (item.cantidad ?? 1)) }}
+                                                                <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ promoGeneral.nombre }}
+                                                                    </small>
+                                                                </span>
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(item, promoGeneral) * (item.cantidad ?? 1)) }}
                                                             </span>
-                                                            <small class="badge bg-danger mt-1 d-block">
-                                                                {{ promoGeneral.nombre }}
-                                                            </small>
+                                                            
                                                         </div>
 
                                                         <!-- Excluido -->
@@ -845,47 +808,15 @@
                                                     
                                                     <!-- PRECIO UNITARIO  -->
                                                     <td>
-                                                        <div v-if="p.promo">
-                                                            <div class="d-flex flex-column align-items-end">
-                                                                <!-- Precio original tachado -->
-                                                                <input
-                                                                    min="0"
-                                                                    class="form-control input-precio-unitario"
-                                                                    :style="{ width: '90px' }"
-                                                                    v-model.number="p.precioUnitario"
-                                                                    placeholder="Precio"
-                                                                    @keydown="irAlSiguientePrecio"
-                                                                />
-
-                                                                <!-- Precio con promo -->
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(p, promoGeneral)) }}
-                                                                </span>
-
-                                                                <!-- Etiqueta de promo -->
-                                                                <small class="badge bg-danger mt-1">
-                                                                    {{ p.promo.nombre }}
-                                                                </small>
-                                                            </div>
-                                                        </div>
-
-                                                        <div v-else>
+                                                        <div>
                                                             <input
                                                                 min="0"
-                                                                class="form-control text-end input-precio-unitario"
+                                                                class="form-control input-precio-unitario"
                                                                 :style="{ width: '90px' }"
                                                                 v-model.number="p.precioUnitario"
                                                                 placeholder="Precio c/u"
                                                                 @keydown="irAlSiguientePrecio"
                                                             />
-
-                                                            <!-- Texto de estado -->
-                                                            <div v-if="promoGeneral && !p.excluirPromocionGeneral" class="text-success fst-italic small mt-1">
-                                                                (Aplica promoción general)
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(p, promoGeneral)) }}
-                                                                </span>
-                                                            </div>
                                                         </div>                                                        
                                                     </td>
 
@@ -896,6 +827,11 @@
                                                         <div v-if="p.promo && p.promo.valor != null">
                                                             <span class="text-decoration-line-through text-muted d-block small">
                                                                 {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                                <!-- <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ p.promo.nombre }}
+                                                                    </small>
+                                                                </span> -->
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(p, promoGeneral) * (p.cantidad ?? 1)) }}
@@ -906,13 +842,15 @@
                                                         <div v-else-if="promoGeneral && !p.excluirPromocionGeneral">
                                                             <span class="text-decoration-line-through text-muted d-block small">
                                                                 {{ formatoMoneda((p.precioUnitario || 0) * (p.cantidad ?? 1)) }}
+                                                                <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ promoGeneral.nombre }}
+                                                                    </small>
+                                                                </span>
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(p, promoGeneral) * (p.cantidad ?? 1)) }}
                                                             </span>
-                                                            <small class="badge bg-danger mt-1 d-block">
-                                                                {{ promoGeneral.nombre }}
-                                                            </small>
                                                         </div>
 
                                                         <!-- Caso 3: Excluido de promoción -->
@@ -976,61 +914,11 @@
 
                                                     <!-- PRECIO UNITARIO -->
                                                     <td style="width: 140px; text-align: right;">
-                                                        <!-- Caso 1: Promoción individual -->
-                                                        <div v-if="extra.promo && extra.promo.valor != null">
-                                                            <div class="d-flex flex-column align-items-end">
-                                                                <input
-                                                                    min="0"
-                                                                    class="form-control input-precio-unitario"
-                                                                    :style="{ width: '90px' }"
-                                                                    v-model.number="extra.precioUnitario"
-                                                                    placeholder="Precio c/u"
-                                                                    @keydown="irAlSiguientePrecio"
-                                                                />
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(extra, promoGeneral)) }}
-                                                                </span>
-                                                                <small class="badge bg-danger mt-1">
-                                                                    {{ extra.promo.nombre }}
-                                                                </small>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Caso 2: Promoción general (sin individual y no excluido) -->
-                                                        <div v-else-if="promoGeneral && !extra.excluirPromocionGeneral">
-                                                            <input
-                                                                min="0"
-                                                                class="form-control text-end input-precio-unitario"
-                                                                :style="{ width: '90px' }"
-                                                                v-model.number="extra.precioUnitario"
-                                                                placeholder="Precio c/u"
-                                                                @keydown="irAlSiguientePrecio"
-                                                            />
-                                                            <div class="text-success fst-italic small mt-1">
-                                                                (Aplica promoción general)
-                                                                <span class="text-success fw-bold">
-                                                                    {{ formatoMoneda(precioFinalItem(extra, promoGeneral)) }}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Caso 3: Excluido -->
-                                                        <div v-else-if="extra.excluirPromocionGeneral" class="text-muted fst-italic small mt-1">
-                                                            <input
-                                                                min="0"
-                                                                class="form-control text-end input-precio-unitario"
-                                                                :style="{ width: '90px' }"
-                                                                v-model.number="extra.precioUnitario"
-                                                                placeholder="Precio c/u"
-                                                                @keydown="irAlSiguientePrecio"
-                                                            />
-                                                        </div>
-
                                                         <!-- Caso 4: Sin promociones -->
-                                                        <div v-else>
+                                                        <div>
                                                             <input
                                                                 min="0"
-                                                                class="form-control text-end input-precio-unitario"
+                                                                class="form-control input-precio-unitario"
                                                                 :style="{ width: '90px' }"
                                                                 v-model.number="extra.precioUnitario"
                                                                 placeholder="Precio c/u"
@@ -1045,6 +933,11 @@
                                                         <div v-if="extra.promo && extra.promo.valor != null">
                                                             <span class="text-decoration-line-through text-muted d-block small">
                                                                 {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                                <!-- <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ promoGeneral.nombre }}
+                                                                    </small>
+                                                                </span> -->
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(extra, promoGeneral) * (extra.cantidad ?? 1)) }}
@@ -1055,13 +948,15 @@
                                                         <div v-else-if="promoGeneral && !extra.excluirPromocionGeneral">
                                                             <span class="text-decoration-line-through text-muted d-block small">
                                                                 {{ formatoMoneda((extra.precioUnitario || 0) * (extra.cantidad ?? 1)) }}
+                                                                <span>
+                                                                    <small class="badge bg-danger mt-1">
+                                                                        {{ promoGeneral.nombre }}
+                                                                    </small>
+                                                                </span>
                                                             </span>
                                                             <span class="text-success fw-bold d-block">
                                                                 {{ formatoMoneda(precioFinalItem(extra, promoGeneral) * (extra.cantidad ?? 1)) }}
                                                             </span>
-                                                            <small class="badge bg-danger mt-1 d-block">
-                                                                {{ promoGeneral.nombre }}
-                                                            </small>
                                                         </div>
 
                                                         <!-- Excluido -->
@@ -1148,7 +1043,10 @@
                                                     <td colspan="2" class="text-start">
                                                         <div v-if="promoGeneral" class="alert alert-success py-1 mb-0">
                                                             <strong>{{ promoGeneral.nombre }}</strong>
-                                                            <span> - {{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }} aplicado</span>
+                                                            <span> 
+                                                                {{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }} 
+                                                                aplicado
+                                                            </span>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -1172,9 +1070,11 @@
 <script setup>
     import { ref, watch, computed, onMounted, getCurrentInstance, reactive, onBeforeUnmount, nextTick, toRaw } from 'vue';
     import EasyDataTable from "vue3-easy-data-table";
-    import html2pdf from 'html2pdf.js'; //TODO: eliminar esta libreria del proyecto
+    import html2pdf from 'html2pdf.js'; 
     import Swal from 'sweetalert2'
-
+    import EnviarCorreoModal from '@/components/EnviarCorreo/EnviarCorreoModal.vue'
+    import Toastify from "toastify-js";
+    import "toastify-js/src/toastify.css";
 
     const { proxy } = getCurrentInstance()
     const modalRef = ref(null);
@@ -1206,7 +1106,32 @@
     const onUpdateSortBy = (v) => { sortBy.value = v ?? ''; };
     const onUpdateSortType = (v) => { sortType.value = v === 'desc' ? 'desc' : 'asc'; };
 
+    // success => "success"
+    // warning => "warning"
+    // info => ""
+    const mostrarToast = (type, message) => {
+        const color = type === "success" 
+            ? "linear-gradient(to right, #96c93d)" 
+            : type === "warning"
+            ? "linear-gradient(to right, #f5af19, #f12711)"
+            : "linear-gradient(to right, #6dd5ed, #2193b0)";
 
+        Toastify({
+            text: message,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+            style: {
+                background: color,
+                borderRadius: "6px",
+                color: "white",
+                fontSize: "14px",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+            },
+        }).showToast();
+    };
 
     const promoGeneral = ref(null);
     const promosGeneralesDisponibles = ref([]);
@@ -1302,7 +1227,7 @@
             return res.json();
         })
         .then(data => {
-            console.log("Cotización actualizada:", data);
+            //console.log("Cotización actualizada:", data);
             cargarCotizaciones();
         })
         .catch(error => {
@@ -1331,7 +1256,7 @@
             return res.json();
         })
         .then(data => {
-            console.log("Cotización actualizada:", data);
+            //console.log("Cotización actualizada:", data);
             cargarCotizaciones();
         })
         .catch(error => {
@@ -1360,7 +1285,7 @@
             return res.json();
         })
         .then(data => {
-            console.log("Cotización actualizada:", data);
+            //console.log("Cotización actualizada:", data);
             cargarCotizaciones();
         })
         .catch(error => {
@@ -1389,7 +1314,7 @@
             return res.json();
         })
         .then(data => {
-            console.log("Cotización actualizada:", data);
+            //console.log("Cotización actualizada:", data);
             cargarCotizaciones();
         })
         .catch(error => {
@@ -1577,32 +1502,41 @@
         
         // Validaciones básicas
         if (!nombre) {
-            Swal.fire({
-            icon: "warning",
-            title: "Campo requerido",
-            text: "Debes ingresar el nombre del servicio.",
-            confirmButtonColor: "#3085d6"
-            });
+            // Swal.fire({
+            // icon: "warning",
+            // title: "Campo requerido",
+            // text: "Debes ingresar el nombre del servicio.",
+            // confirmButtonColor: "#3085d6"
+            // });
+
+            mostrarToast("warning", "Debes ingresar el nombre del servicio.")
+
             return;
         }
 
         if (isNaN(cantidad) || cantidad <= 0) {
-            Swal.fire({
-            icon: "warning",
-            title: "Cantidad inválida",
-            text: "La cantidad debe ser un número mayor a 0.",
-            confirmButtonColor: "#3085d6"
-            });
+            // Swal.fire({
+            // icon: "warning",
+            // title: "Cantidad inválida",
+            // text: "La cantidad debe ser un número mayor a 0.",
+            // confirmButtonColor: "#3085d6"
+            // });
+
+            mostrarToast("warning", "La cantidad debe ser un número mayor a 0.")
+
             return;
         }
 
         if (isNaN(precio) || precio <= 0) {
-            Swal.fire({
-            icon: "warning",
-            title: "Precio inválido",
-            text: "El precio debe ser un número mayor a 0.",
-            confirmButtonColor: "#3085d6"
-            });
+            // Swal.fire({
+            // icon: "warning",
+            // title: "Precio inválido",
+            // text: "El precio debe ser un número mayor a 0.",
+            // confirmButtonColor: "#3085d6"
+            // });
+
+            mostrarToast("warning", "El precio debe ser un número mayor a 0.")
+
             return;
         }
 
@@ -1611,12 +1545,15 @@
         );
 
         if (duplicado) {
-            Swal.fire({
-            icon: "info",
-            title: "Servicio duplicado",
-            text: "Ya existe un servicio adicional con ese nombre.",
-            confirmButtonColor: "#3085d6"
-            });
+            // Swal.fire({
+            // icon: "info",
+            // title: "Servicio duplicado",
+            // text: "Ya existe un servicio adicional con ese nombre.",
+            // confirmButtonColor: "#3085d6"
+            // });
+
+            mostrarToast("warning", "Ya existe un servicio adicional con ese nombre.")
+
             return;
         }
 
@@ -1655,13 +1592,7 @@
     // Agrega la llanta al arreglo
     const agregarLlanta = async (item) => {
         if (cotizacionForm.llantas.length >= 6) {
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Límite alcanzado',
-                    text: 'Solo puedes agregar hasta 6 llantas diferentes por cotización.',
-                    confirmButtonText: 'Entendido',
-                    confirmButtonColor: '#3085d6'
-                })
+                mostrarToast("warning", "No puedes agregar más de 6 llantas")
             return;
         }
 
@@ -1699,7 +1630,7 @@
 
                 const promosDisponibles = await res.json();
 
-                console.log(promosDisponibles)
+                //console.log(promosDisponibles)
 
                 if (promosDisponibles.length > 0) {
                     // No hay promos disponibles
@@ -1786,9 +1717,7 @@
             
             //console.log('agregarLlanta2: '+ JSON.stringify(cotizacionForm.llantas))
             
-        }
-        else
-        {
+        }else{
             console.log("agregarLLanta: ya existe esa llanta")    
         }
     }
@@ -1858,7 +1787,14 @@
         }
 
         try {
-            const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace('COT-', '')}`);
+
+            const codigoStr = String(cotizacion?.codigo ?? '').trim();
+
+            const codigoLimpio = codigoStr.startsWith('COT-')
+            ? codigoStr.replace('COT-', '')
+            : codigoStr;
+
+            const res = await fetch(`${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`);
             const data = await res.json();
 
             // ===============================
@@ -1993,10 +1929,10 @@
                     comentario: s.comentario || "",
                 };
             });
-            console.log(data)
+            //console.log(data)
         } catch (e) {
             console.error('Error cargando cotización para edición:', e);
-            alert('No se pudo cargar la cotización');
+            mostrarToast('warning','No se pudo cargar la cotización');
         }
     };
 
@@ -2011,7 +1947,7 @@
             promosGeneralesDisponibles.value = data;
 
             if (data.length > 0) {
-                console.log(`Se cargaron ${data.length} promociones generales activas.`);
+                //console.log(`Se cargaron ${data.length} promociones generales activas.`);
             } else {
                 console.log('⚠️ No hay promociones generales activas.');
             }
@@ -2207,7 +2143,7 @@
             idPromocionGeneral: promoGeneral.value ? promoGeneral.value.idPromocion : null 
         };
 
-        console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+        //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
         // Decide si POST o PUT
         const url = cotizacionForm.codigo
             ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
@@ -2226,11 +2162,7 @@
             const data = await res.json();
             const obj = { codigo: data.codigo?.toString() };
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Cotización guardada',
-                text: 'Se guardó correctamente la cotización.'
-            });
+            mostrarToast("success", "Cotizacion Guardada")
 
             // Actualizar vista
             cargarFormulario(); // limpia la informacion
@@ -2478,6 +2410,9 @@
 
         cargarFormulario(cotizacion);
         openModal();
+
+        // cerrar modal screenshot
+        mostrarVista.value = false
     };
 
 
@@ -2620,13 +2555,13 @@
     **********************************************/
 
 
-    const tieneElementosConPromoGeneral = computed(() => {
-        const llantasAplican = vistaCotizacion.value.llantasSelecionadas?.some(l => l.promoLabel !== '(Excluido de promoción)');
-        const paquetesAplican = vistaCotizacion.value.paquetes?.some(p => p.promoLabel !== '(Excluido de promoción)');
-        const serviciosAplican = vistaCotizacion.value.serviciosAdicionales?.some(s => s.promoLabel !== '(Excluido de promoción)');
+    // const tieneElementosConPromoGeneral = computed(() => {
+    //     const llantasAplican = vistaCotizacion.value.llantasSelecionadas?.some(l => l.promoLabel !== '(Excluido de promoción)');
+    //     const paquetesAplican = vistaCotizacion.value.paquetes?.some(p => p.promoLabel !== '(Excluido de promoción)');
+    //     const serviciosAplican = vistaCotizacion.value.serviciosAdicionales?.some(s => s.promoLabel !== '(Excluido de promoción)');
         
-        return llantasAplican || paquetesAplican || serviciosAplican;
-    });
+    //     return llantasAplican || paquetesAplican || serviciosAplican;
+    // });
 
 
     const mostrarVistaPrevia = async (cotizacion, modo = 'ver') => {
@@ -2785,7 +2720,7 @@
                 // 🔹 VISTA FINAL
                 // ===============================
                 vistaCotizacion.value = {
-                    codigo: 'COT-' + data.idCotizacion,
+                    codigo: data.idCotizacion,
                     fechaCreacion: new Date(data.fechaCreacion).toLocaleDateString('es-MX', {
                         day: '2-digit',
                         month: '2-digit',
