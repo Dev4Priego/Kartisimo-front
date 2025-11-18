@@ -87,15 +87,15 @@
                         </button>
                     </li>
 
-                    <li class="nav-item mb-2">
+                    <!-- <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
-                            @click.prevent="irA('/content/Almacenes')"
+                            @click.prevent="irA('/content/almacen')"
                         >
                             Almacen
                         </button >
-                    </li>
+                    </li> -->
                 </ul>
             </div>
         </div>

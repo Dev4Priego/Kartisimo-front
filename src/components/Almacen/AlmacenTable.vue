@@ -71,10 +71,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, getCurrentInstance } from 'vue'
 import bootstrap from 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+
+const { proxy } = getCurrentInstance()
 
 // Props
 const props = defineProps({
@@ -137,7 +139,7 @@ async function guardar() {
       nombreSucursal: getNombreSucursal(form.idSucursal)
     }
 
-    await axios.put(`https://localhost:7172/api/Almacen/${form.idAlmacen}`, payload)
+    await axios.put(`${proxy.$serverIP}/api/Almacen/${form.idAlmacen}`, payload)
 
     await Swal.fire({
       icon: 'success',

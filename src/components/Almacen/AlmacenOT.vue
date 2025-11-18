@@ -20,15 +20,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2' 
 
 import AlmacenForm from '@/components/Almacen/AlmacenForm.vue'
 import AlmacenTable from '@/components/Almacen/AlmacenTable.vue'
 
-const API_ALMACENES = 'https://localhost:7172/api/Almacen'
-const API_SUCURSALES = 'https://localhost:7172/api/Sucursales/getSucursales'
+const { proxy } = getCurrentInstance()
+
+const API_ALMACENES =`${proxy.$serverIP}api/Almacen`
+const API_SUCURSALES =`${proxy.$serverIP}api/Sucursales/getSucursales`
 
 const almacenes = ref([])
 const sucursales = ref([])

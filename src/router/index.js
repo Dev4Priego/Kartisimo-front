@@ -48,6 +48,11 @@ const routes = [
                 path: 'Promocion',
                 name:'Promocion',
                 component: Promocion
+            },
+            {
+                path:'Almacen',
+                name:'almacen',
+                component: AlmacenOT
             }
         ]
     }

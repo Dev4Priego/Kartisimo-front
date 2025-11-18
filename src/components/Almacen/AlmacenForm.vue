@@ -39,9 +39,11 @@
 </template>
 
 <script setup>
-import { reactive, watch } from 'vue'
+import { reactive, watch, getCurrentInstance } from 'vue'
 import axios from 'axios'
 import Swal from 'sweetalert2'
+
+const { proxy } = getCurrentInstance()
 
 const props = defineProps({
   formData: {
@@ -100,7 +102,7 @@ async function handleSubmit() {
 
   try {
     if (props.isEditing) {
-      await axios.put(`https://localhost:7172/api/Almacen/${form.idAlmacen}`, payload)
+      await axios.put(`${proxy.$serverIP}api/Almacen/${form.idAlmacen}`, payload)
       await Swal.fire({
         icon: 'success',
         title: 'Actualizado',
@@ -109,7 +111,7 @@ async function handleSubmit() {
         showConfirmButton: false
       })
     } else {
-      await axios.post('https://localhost:7172/api/Almacen', payload)
+      await axios.post(`${proxy.$serverIP}api/Almacen`, payload)
       await Swal.fire({
         icon: 'success',
         title: 'Creado',
