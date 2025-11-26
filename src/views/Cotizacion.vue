@@ -10,6 +10,7 @@
                     class="form-control"
                     placeholder="Buscar por código, cliente, fecha..."
                     v-model="busquedaCotizaciones"
+                    @keydown.stop
                 />
             </div>
 
@@ -111,7 +112,7 @@
          
         <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
         <div v-if="mostrarVista" class="modal fade show d-block" tabindex="-1" :style="{ background: 'rgba(0,0,0,0.5)' }">
-            <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 95vw;">
                 <div class="modal-content p-4" >
                     <div class="modal-header">
                         <h4 class="modal-title">Vista Previa de Cotización</h4>
@@ -383,7 +384,7 @@
         </div>
         <!-- MODAL PARA CRREAR/EDITAR COTIZACION -->
         <div class="modal fade" ref="modalRef" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable modal-lg">
+            <div class="modal-dialog modal-centered modal-dialog-scrollable modal-lg" style="max-width: 95vw;">
                 <div class="modal-content" :style="{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }">
                 
                     <div class="modal-header">
@@ -583,7 +584,7 @@
                         <div class="row mt-3 mx-3">
                             <h5>Agregar servicio adicional</h5>
                             <div class="d-flex gap-3 mb-3">
-                                <div class="col-3">
+                                <div class="col">
                                     <input 
                                         class="form-control" 
                                         placeholder="Nombre del servicio" 
@@ -599,14 +600,14 @@
                                         v-model="nuevaCantidad"
                                     />
                                 </div>
-                                <div class="col-3">
+                                <!-- <div class="col-3">
                                     <input 
                                         class="form-control" 
                                         placeholder="Observaciones" 
                                         v-model="nuevaObservacion"
                                     />
-                                </div>
-                                <div class="col-3">                                    
+                                </div> -->
+                                <div class="col">                                    
                                     <input 
                                         class="form-control" 
                                         min="0"
@@ -689,8 +690,7 @@
                                                 <tr v-for="item in cotizacionForm.llantas" :key="'llanta-' + item.idLlanta">
                                                     <td>
                                                         {{ item.modeloMedidas }}
-                                                        <span
-                                                            v-if="item.ubicacion != 'Kartisimo' && item.ubicacion != 'Martinica'"
+                                                        <span                                                            
                                                             class="badge bg-warning text-dark ms-2"
                                                         >
                                                             {{ item.ubicacion }}
@@ -779,6 +779,7 @@
 
                                                     <!-- Acciones -->
                                                     <td>
+                                                        
                                                         <div v-if="item.promosAplicables && item.promosAplicables.length" class="mb-2">
                                                             <select
                                                                 class="form-select form-select-sm"
@@ -1227,7 +1228,7 @@
         clienteNombre: '',
         clienteTelefono: '',
         clienteCorreo: '',
-        clienteExistente: '',
+        clienteExistente: false,
         paquetes: [],
         paquetesDetalles: {},
         llantas: [],
@@ -1411,7 +1412,19 @@
             const res = await fetch(proxy.$serverIP + 'api/Paquetes/getPaquete');
             if (!res.ok) throw new Error('Error en la respuesta');
             const data = await res.json();
-            paquetesDisponibles.value = data
+            // paquetesDisponibles.value = data
+            data.map((p) => {
+                
+                const paquete = {
+                    idPaquete: p.idPaquete,
+                    nombre: p.nombre,
+                    descripcion: p.descripcion,
+                    precioUnitario: Math.trunc(parseFloat(p.precioUnitario)) || 0,
+                }
+
+                paquetesDisponibles.value.push(paquete);
+
+            })
         } catch (e) {
             console.error('Error al cargar paquetes:', e);
         }
@@ -1497,6 +1510,31 @@
         }
     };
 
+    const registrarCerrarConEsc = (mostrarVista) => {
+        //console.log()
+        const listener = (e) => {
+            if (e.key !== "Escape") return;
+
+            // 1Si la vista previa está activa, la cerramos
+            if (mostrarVista.value) {
+                mostrarVista.value = false;
+                return; 
+            }
+
+            // Si el modal de edición está abierto, lo cerramos
+            if (modalInstance && modalRef.value.classList.contains("show")) {
+                closeModal();
+                return;
+            }
+        };
+
+        window.addEventListener("keydown", listener);
+
+        return () => window.removeEventListener("keydown", listener);
+    };
+
+    let cleanupEscListener = null;   // <-- DECLARADO ANTES DE onMounted
+
     onMounted(async () => {
         await cargarPaquetes();
         await cargarClientes();
@@ -1504,6 +1542,7 @@
         await cargarCotizaciones();
         await cargarAlmacenes();
         await cargarPromosGenerales();
+        cleanupEscListener = registrarCerrarConEsc(mostrarVista);
     });
 
 
@@ -1514,25 +1553,39 @@
 
     const irAlSiguientePrecio = (event) => {
 
-        // Detecta si presionó Tab o Enter
-        if (event.key === "Tab" || event.key === "Enter") {
-            event.preventDefault(); // Evita que el navegador haga el tab normal
+        const isTab = event.key === "Tab";
+        const isEnter = event.key === "Enter";
+        const isShift = event.shiftKey;
 
-            //  Obtiene todos los inputs de precio unitario
-            const inputs = Array.from(document.querySelectorAll('.input-precio-unitario'));
-            const currentIndex = inputs.indexOf(event.target);
+        // Solo intercepta Tab o Enter
+        if (!isTab && !isEnter) return;
 
-            //  Mueve el foco al siguiente
-            if (inputs[currentIndex + 1]) {
-                inputs[currentIndex + 1].focus();
+        event.preventDefault(); // Evita comportamiento por defecto
+
+        // Obtener todos los inputs
+        const inputs = Array.from(document.querySelectorAll('.input-precio-unitario'));
+        const currentIndex = inputs.indexOf(event.target);
+
+        // ⬅⬅⬅ Retroceder con Shift + Tab
+        if (isTab && isShift) {
+            if (inputs[currentIndex - 1]) {
+                inputs[currentIndex - 1].focus();
             } else {
-                // Si es el último, puedes:
-                // 1️⃣ Volver al primero:
-                inputs[0]?.focus();
-                // o 2️⃣ simplemente terminar sin mover (comenta la línea de arriba)
+                // Si es el primero, ir al último
+                inputs[inputs.length - 1]?.focus();
             }
+            return;
+        }
+
+        // ➡➡➡ Avanzar con Tab o Enter
+        if (inputs[currentIndex + 1]) {
+            inputs[currentIndex + 1].focus();
+        } else {
+            // Si está en el último, vuelve al primero
+            inputs[0]?.focus();
         }
     };
+
 
     
     // Elimina paquete del arreglo
@@ -1604,11 +1657,11 @@
             nombre,
             observacion,
             cantidad,
-            precioUnitario: precio,
+            precioUnitario: Math.trunc(parseFloat(precio)) || 0,
 
             promo: null,
             promosAplicables: [],
-            idPromocionSeleccionada: null,
+            idPromocionSeleccionada: 0,
             precioConPromo: precio,
             excluirPromocionGeneral: false,
             comentario: ""
@@ -1666,8 +1719,8 @@
             idLlanta: item.id,
             idInventarioInicial: item.idInventarioInicial,
             cantidad: 4,
-            precioUnitario: parseFloat(item.precio) || 0,
-            modeloMedidas: `${item.llanta} ${item.medida} ${item.rango}`,
+            precioUnitario: Math.trunc(parseFloat(item.precio)) || 0,
+            modeloMedidas: `${item.medida} ${item.rango} ${item.llanta}`,
             marca: item.marca,
             idAlmacen: item.idAlmacen,
             ubicacion: item.ubicacion,
@@ -1676,7 +1729,7 @@
             promo: null,
             promosAplicables: [],
             precioConPromo: null,
-            idPromocionSeleccionada: null,
+            idPromocionSeleccionada: 0,
             excluirPromocionGeneral: false,
             comentario: "",
         };
@@ -1686,11 +1739,11 @@
         
 
         try {
-
+            //console.log(nuevaLlanta.idInventarioInicial)
             const promosDisponibles = await obtenerPromosPorInventario(nuevaLlanta.idInventarioInicial);
             
             nuevaLlanta.promosAplicables = promosDisponibles || [];
-            nuevaLlanta.idPromocionSeleccionada = null;
+            nuevaLlanta.idPromocionSeleccionada = 0;
             nuevaLlanta.promo = null;
             nuevaLlanta.precioConPromo = nuevaLlanta.precioUnitario;
                             
@@ -1698,7 +1751,7 @@
 
             console.error('Error al consultar promociones:', error);
             nuevaLlanta.promosAplicables = [];
-            nuevaLlanta.idPromocionSeleccionada = null;
+            nuevaLlanta.idPromocionSeleccionada = 0;
             nuevaLlanta.promo = null;
             nuevaLlanta.precioConPromo = nuevaLlanta.precioUnitario;
 
@@ -1898,7 +1951,7 @@
 
                 // Inicialización
                 p.promo = null;
-                p.idPromocionSeleccionada = null;
+                p.idPromocionSeleccionada = 0;
                 p.promosAplicables = [];
                 p.precioConPromo = p.precioUnitario;
                 p.excluirPromocionGeneral = false;
@@ -1921,7 +1974,7 @@
                 clienteNombre: '',
                 clienteTelefono: '',
                 clienteCorreo: '',
-                clienteExistente: '',
+                clienteExistente: false,
                 paquetes: paquetesDisponibles.value.length ? [paquetesDisponibles.value[0]] : [],
                 paquetesDetalles: {},
                 llantas: [],
@@ -1971,7 +2024,7 @@
             cotizacionForm.clienteNombre = data.clienteNombre;
             cotizacionForm.clienteTelefono = data.telefono;
             cotizacionForm.clienteCorreo = data.correo;
-            cotizacionForm.clienteExistente = '';
+            cotizacionForm.clienteExistente = false;
             cotizacionForm.mostrarTotal = data.mostrarTotal;
 
             // ===============================
@@ -2015,7 +2068,7 @@
                         
                         promosAplicables,
                         promo: promoIndividual,
-                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : null
+                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : 0
                     };
                 })
             );
@@ -2067,7 +2120,7 @@
 
                         promosAplicables,
                         promo: promoIndividual,
-                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : null,
+                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : 0,
 
                         precioConPromo,
                         excluirPromocionGeneral: ll.excluirPromocionGeneral ?? false,
@@ -2113,7 +2166,7 @@
 
                         promosAplicables,
                         promo: promoIndividual,
-                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : null,
+                        idPromocionSeleccionada: promoIndividual ? promoIndividual.idPromocion : 0,
 
                         precioConPromo,
                         excluirPromocionGeneral: s.excluirPromocionGeneral ?? false,
@@ -2564,7 +2617,9 @@
     /*************************************/
     const openModal = () => {
         if (!modalInstance) {
-            modalInstance = new bootstrap.Modal(modalRef.value);
+            modalInstance = new bootstrap.Modal(modalRef.value, {
+                keyboard: false  
+            });
         }
         modalInstance.show();
     };
@@ -2586,6 +2641,10 @@
     onBeforeUnmount(() => {
         const el = modalRef.value;
         el?.removeEventListener('hidden.bs.modal', resetTabla);
+
+        if (cleanupEscListener) cleanupEscListener();
+
+        window.removeEventListener("keydown", handleKeydown);
     });
 
     const formatoMoneda = (valor) => {
