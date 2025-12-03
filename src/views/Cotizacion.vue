@@ -33,81 +33,106 @@
             </div>                                   
         </div>
         <div class="row mx-4">
-            <table class="table table-hover table-sm">
-                <caption><strong>Lista de cotizaciones</strong></caption>
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Fecha</th>
-                        <th>Cliente</th>
-                        <th>Teléfono</th>
-                        <!-- <th>Paquete</th> -->
-                        <!-- <th>Total</th> -->
-                        <th>Llanta</th>
-                        <th>Estatus</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="item in cotizacionesTransformadas" :key="item.codigo">
-                        <td>{{ item.codigo }} </td>
-                        <td>{{ item.fechaCreacion }}</td>
-                        <td>{{ item.cliente }}</td>
-                        <td>{{ item.telefono }}</td>
-                        <!-- <td>{{ item.paquete }}</td> -->
-                        <!-- <td>{{ item.total }}</td> -->
-                        <td>{{ item.nombreLlanta }}</td>
-                        <td>{{ item.estatus }}</td>
-                        <td>
-                            <div class="d-flex gap-1">
-                                <button class="btn btn-sm btn-outline-info" @click="mostrarVistaPrevia(item.acciones, 'ver')" title="Ver">
-                                    <i class="bi bi-eye"></i>
-                                </button>
 
-                                <button v-if="item.estatus != 'Realizada'" class="btn btn-sm btn-outline-warning" @click="abrirModalCotizacion(item.acciones)" title="Editar">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
+            <div v-if="loading" class="text-center my-4">
+                <table class="table table-hover table-sm">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <!-- <th>Paquete</th> -->
+                            <!-- <th>Total</th> -->
+                            <th>Llanta</th>
+                            <th>Estatus</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>                                      
+                </table>
+                <div class="text-center my-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Cargando promociones...</p>
+                </div>  
+            </div>
 
-                                <button
-                                    v-if="item.estatus != 'Cancelada'"
-                                    class="btn btn-sm btn-outline-danger"
-                                    @click="cancelarCotizacion(item.acciones)"
-                                    title="Cancelar"
-                                >
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
+            <div v-else>
+                <table class="table table-hover table-sm">
+                    <caption><strong>Lista de cotizaciones</strong></caption>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <!-- <th>Paquete</th> -->
+                            <!-- <th>Total</th> -->
+                            <th>Llanta</th>
+                            <th>Estatus</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in cotizacionesTransformadas" :key="item.codigo">
+                            <td>{{ item.codigo }} </td>
+                            <td>{{ item.fechaCreacion }}</td>
+                            <td>{{ item.cliente }}</td>
+                            <td>{{ item.telefono }}</td>
+                            <!-- <td>{{ item.paquete }}</td> -->
+                            <!-- <td>{{ item.total }}</td> -->
+                            <td>{{ item.nombreLlanta }}</td>
+                            <td>{{ item.estatus }}</td>
+                            <td>
+                                <div class="d-flex gap-1">
+                                    <button class="btn btn-sm btn-outline-info" @click="mostrarVistaPrevia(item.acciones, 'ver')" title="Ver">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
 
-                                <button
-                                    v-if="item.estatus === 'Cancelada'"
-                                    class="btn btn-sm btn-outline-success"
-                                    @click="reactivarCotizacion(item.acciones)"
-                                    title="Reactivar"
-                                >
-                                    <i class="bi bi-arrow-clockwise"></i>
-                                </button>
+                                    <button v-if="item.estatus != 'Realizada'" class="btn btn-sm btn-outline-warning" @click="abrirModalCotizacion(item.acciones)" title="Editar">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </button>
 
-                                <button
-                                    v-if="item.estatus === 'Creada'"
-                                    class="btn btn-sm btn-outline-primary"
-                                    @click="aprobarCotizacion(item.acciones)"
-                                    title="Aprobar"
-                                >
-                                    <i class="bi bi-check-circle"></i>
-                                </button>
+                                    <button
+                                        v-if="item.estatus != 'Cancelada'"
+                                        class="btn btn-sm btn-outline-danger"
+                                        @click="cancelarCotizacion(item.acciones)"
+                                        title="Cancelar"
+                                    >
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
 
-                                <button
-                                    v-if="item.estatus === 'Aprobada'"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    @click="finalizarCotizacion(item.acciones)"
-                                    title="Finalizar"
-                                >
-                                    <i class="bi bi-flag"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                                    <button
+                                        v-if="item.estatus === 'Cancelada'"
+                                        class="btn btn-sm btn-outline-success"
+                                        @click="reactivarCotizacion(item.acciones)"
+                                        title="Reactivar"
+                                    >
+                                        <i class="bi bi-arrow-clockwise"></i>
+                                    </button>
+
+                                    <button
+                                        v-if="item.estatus === 'Creada'"
+                                        class="btn btn-sm btn-outline-primary"
+                                        @click="aprobarCotizacion(item.acciones)"
+                                        title="Aprobar"
+                                    >
+                                        <i class="bi bi-check-circle"></i>
+                                    </button>
+
+                                    <button
+                                        v-if="item.estatus === 'Aprobada'"
+                                        class="btn btn-sm btn-outline-secondary"
+                                        @click="finalizarCotizacion(item.acciones)"
+                                        title="Finalizar"
+                                    >
+                                        <i class="bi bi-flag"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
          
         <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
@@ -1147,7 +1172,7 @@
 </template>
 
 <script setup>
-    import { ref, watch, computed, onMounted, getCurrentInstance, reactive, onBeforeUnmount, nextTick, toRaw } from 'vue';
+    import { ref, watch, computed, onMounted, getCurrentInstance, reactive, onBeforeUnmount, nextTick, toRaw, onUnmounted } from 'vue';
     import EasyDataTable from "vue3-easy-data-table";
     import html2pdf from 'html2pdf.js'; 
     import Swal from 'sweetalert2'
@@ -1174,6 +1199,7 @@
     const tituloModal = ref("Nueva Cotización");
     const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
     const filtroEstatus = ref('');
+    const loading = ref(true)
 
     const itemsSelected = ref([]);
     const paquetesSeleccionados = ref([]);
@@ -1484,6 +1510,7 @@
 
     // Función para cargar cotizaciones
     const cargarCotizaciones = async () => {
+        loading.value = true;
         try {
             const res = await fetch(proxy.$serverIP + 'api/Cotizacion/resumenCotizaciones');
             if (!res.ok) throw new Error('Error al obtener cotizaciones');
@@ -1505,6 +1532,7 @@
                 nombreLlanta: c.nombreLlanta,
                 mostrarTotal: false
             }));
+            loading.value = false;
         } catch (error) {
             console.error('Error al cargar cotizaciones:', error);
         }
@@ -1533,6 +1561,14 @@
         return () => window.removeEventListener("keydown", listener);
     };
 
+    /*************************************/
+    /*      AL MONTAR COMPONENTE
+    /*************************************/
+    onMounted(() => {
+        const el = modalRef.value;
+        el?.addEventListener('hidden.bs.modal', resetTabla);
+    });    
+
     let cleanupEscListener = null;   // <-- DECLARADO ANTES DE onMounted
 
     onMounted(async () => {
@@ -1545,7 +1581,12 @@
         cleanupEscListener = registrarCerrarConEsc(mostrarVista);
     });
 
+    onBeforeUnmount(() => {
+        const el = modalRef.value;
+        el?.removeEventListener('hidden.bs.modal', resetTabla);
 
+        if (cleanupEscListener) cleanupEscListener();
+    });
 
     /*********************************************
         FUNCIONES PARA MODAL CREACION/EDICION
@@ -2631,21 +2672,6 @@
         cargarFormulario(); // limpia informacoin
     };
 
-    /*************************************/
-    /*      AL MONTAR COMPONENTE
-    /*************************************/
-    onMounted(() => {
-        const el = modalRef.value;
-        el?.addEventListener('hidden.bs.modal', resetTabla);
-    });
-    onBeforeUnmount(() => {
-        const el = modalRef.value;
-        el?.removeEventListener('hidden.bs.modal', resetTabla);
-
-        if (cleanupEscListener) cleanupEscListener();
-
-        window.removeEventListener("keydown", handleKeydown);
-    });
 
     const formatoMoneda = (valor) => {
         return new Intl.NumberFormat('es-MX', {
@@ -3029,9 +3055,13 @@
 
     const generarPDF = async () => {
         const pdfMakeModule = await import("pdfmake/build/pdfmake");
-        const pdfFonts = await import("pdfmake/build/vfs_fonts");
+        const pdfFontsModule = await import("pdfmake/build/vfs_fonts");
+
         const pdfMake = pdfMakeModule.default;
-        pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+        const fonts = pdfFontsModule.default || pdfFontsModule;
+
+        pdfMake.vfs = fonts.pdfMake.vfs;
 
         const logo = await loadLogoBase64();
         const v = vistaCotizacion.value;

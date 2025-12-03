@@ -11,11 +11,14 @@
                 </div>
                 <div class="col-8">
                     <label class="form-label" for="slcTecnico">Selecciona el técnico *</label>
-                    <select class="form-select" name="tecnico" id="slcTecnico">
-                        <option value="">-Selecciona-</option>
-                        <option value="">Técnico 1</option>
-                        <option value="">Técnico 2</option>
-                        <option value="">Técnico 3</option>
+                    <select v-model="ordenTrabajoForm.idEmpleado" class="form-select" name="tecnico" id="slcTecnico">
+                        <option :value="0" disabled selected>
+                            -- Selecciona una cotización --
+                        </option>
+
+                        <option v-for="itm in itmEmpleados" :key="itm.idEmpleado" :value="itm.idEmpleado">
+                            ({{ itm.puesto }}) {{ itm.nombres }} {{ itm.apePaterno }}
+                        </option>
                     </select>
                 </div>
             </div>
@@ -27,7 +30,10 @@
                 <div class="col-8">
                     <label class="form-label" for="slcCotizacion">Selecciona una cotización</label>
                     <select v-model="ordenTrabajoForm.cotSeleccionada" class="form-select" name="cotizacion" id="slcCotizacion" @change="cargarInfoCotizacion();">
-                        <option value="">-Selecciona-</option>
+                        <option :value="0" disabled selected>
+                            -- Selecciona una cotización --
+                        </option>
+
                         <option v-for="itm in itmCotizaciones" :key="itm.idCotizacion" :value="itm.idCotizacion">
                             COT-{{itm.idCotizacion}}
                         </option>
@@ -36,121 +42,129 @@
                 </div>
             </div>
             <hr>
-            <div class="row">
+            <div class="row">                
                 <div class="col">
+                    <h5 class="text-center">Vehículo</h5>
                     <div class="row">
                         <div class="col">
-                            <h5 class="text-center">Vehículo</h5>
-                            <div class="row">
-                                <div class="col">
-                                    <div class="mb-3">
-                                        <input
-                                            v-model="serieInput"
-                                            @input="onSerieInput"
-                                            @change="onSerieSeleccionada"
-                                            list="vehiculos"
-                                            placeholder="Num. Serie *"
-                                            class="form-control"
-                                        />
+                            <div class="mb-3">
+                                <input
+                                    v-model="ordenTrabajoForm.vehiculo.numSerie"
+                                    @input="onSerieInput($event.target.value)"
+                                    @change="onSerieSeleccionada"
+                                    list="vehiculos"
+                                    placeholder="Num. Serie *"
+                                    class="form-control"
+                                />
 
-                                        <datalist id="vehiculos">
-                                            <option
-                                                v-for="s in sugerencias"
-                                                :key="s.id_vehiculo"
-                                                :value="s.serie"
-                                            >
-                                                {{ s.marca }} {{ s.modelo }}
-                                            </option>
-                                        </datalist>
-                                    </div>
-                                    <div class="mb-3">
-                                        <input v-model="ordenTrabajoForm.vehiculo.modelo" class="form-control" type="text" placeholder="Modelo *">
-                                    </div>
-                                    <div class="mb-3">
-                                        <input v-model="ordenTrabajoForm.vehiculo.kilometraje" class="form-control" type="text" placeholder="Kilometraje *">
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="mb-3">
-                                        <input v-model="ordenTrabajoForm.vehiculo.color" class="form-control" type="text" placeholder="Color *">
-                                    </div>
-                                    <div class="mb-3">
-                                        <input v-model="ordenTrabajoForm.vehiculo.placas" class="form-control" type="text" placeholder="Placas">
-                                    </div>
-                                </div>
+                                <datalist id="vehiculos">
+                                    <option
+                                        v-for="s in sugerencias"
+                                        :key="s.id_vehiculo"
+                                        :value="s.serie"
+                                    >
+                                        {{ s.marca }} {{ s.modelo }}
+                                    </option>
+                                </datalist>
+                            </div>
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.modelo" class="form-control" type="text" placeholder="Modelo *">
+                            </div>
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.kilometraje" class="form-control" type="text" placeholder="Kilometraje *">
+                            </div>
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.anio" class="form-control" type="text" placeholder="Año *">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.marca" class="form-control" type="text" placeholder="Marca *">
+                            </div>
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.color" class="form-control" type="text" placeholder="Color *">
+                            </div>
+                            <div class="mb-3">
+                                <input v-model="ordenTrabajoForm.vehiculo.placas" class="form-control" type="text" placeholder="Placas *">
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="col">
-                    <div class="row">
+                    <div class="row">                        
+                        <h5 class="text-center">Cliente</h5>
                         <div class="col">
-                            <div class="row">
-                                <h5 class="text-center">Cliente</h5>
-                                <div class="col">
-                                    <!-- Nombre -->
-                                    <div class="mb-3">
-                                        <input 
-                                            v-model="ordenTrabajoForm.cliente.clienteNombre" 
-                                            class="form-control" 
-                                            type="text" 
-                                            placeholder="Nombre Cliente"
-                                            list="clientes"
-                                            @input="onClienteInput($event.target.value)"
-                                            @change="onClienteSeleccionadoByValue($event.target.value)"
-                                        >
-                                    </div>
+                            <!-- Nombre -->
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.clienteNombre" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Nombres *"
+                                    list="clientes"
+                                    @input="onClienteInput($event.target.value)"
+                                    @change="onClienteSeleccionadoByValue($event.target.value)"
+                                >
+                            </div>                                    
 
-                                    <!-- Teléfono -->
-                                    <div class="mb-3">
-                                        <input 
-                                            v-model="ordenTrabajoForm.cliente.clienteTelefono" 
-                                            class="form-control" 
-                                            type="text" 
-                                            placeholder="Teléfono *"
-                                            list="clientes"
-                                            @input="onClienteInput($event.target.value)"
-                                            @change="onClienteSeleccionadoByValue($event.target.value)"
-                                        >
-                                    </div>
+                            <!-- Apllidos -->
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.apPaterno" 
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Apellido Paterno *"
+                                >
+                            </div>
 
-                                    <!-- Correo -->
-                                    <div class="mb-3">
-                                        <input 
-                                            v-model="ordenTrabajoForm.cliente.clienteCorreo" 
-                                            class="form-control" 
-                                            type="text" 
-                                            placeholder="Correo *"
-                                            list="clientes"
-                                            @input="onClienteInput($event.target.value)"
-                                            @change="onClienteSeleccionadoByValue($event.target.value)"
-                                        >
-                                    </div>
-
-                                    <!-- Método de pago -->
-                                    <div class="mb-3">
-                                        <label class="form-label" for="formaPago">Método de Pago *</label>
-                                        <select v-model="ordenTrabajoForm.cliente.metodoPago" class="form-select" name="formaPago" id="slcFormaPago">
-                                            <option value="">-Selecciona-</option>
-                                            <option value="Efectivo">Efectivo</option>
-                                            <option value="Tarjeta">Tarjeta</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col">
-                                    <div class="mb-3">
-                                        <label class="form-label">Fecha Alta *</label>
-                                        <input v-model="ordenTrabajoForm.cliente.fechaAlta" class="form-control" type="date">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">Fecha de entrega propuesta *</label>
-                                        <input v-model="ordenTrabajoForm.cliente.fechaEntrega" class="form-control" type="date">
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.apMaterno" 
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Apellido Materno *"
+                                >
                             </div>
                         </div>
-                    </div>
+
+                        <div class="col">
+                            <!-- Teléfono -->
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.clienteTelefono" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Teléfono *"
+                                    list="clientes"
+                                    @input="onClienteInput($event.target.value)"
+                                    @change="onClienteSeleccionadoByValue($event.target.value)"
+                                >
+                            </div>
+
+                            <!-- Correo -->
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.clienteCorreo" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Correo *"
+                                    list="clientes"
+                                    @input="onClienteInput($event.target.value)"
+                                    @change="onClienteSeleccionadoByValue($event.target.value)"
+                                >
+                            </div>
+
+                            <!-- RFC -->
+                            <div class="mb-3">
+                                <input 
+                                    v-model="ordenTrabajoForm.cliente.rfc" 
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="RFC"
+                                >
+                            </div>
+                        </div>
+                    </div>                    
                 </div>
 
                 <!-- datalist único para los 3 inputs -->
@@ -161,10 +175,35 @@
                         :value="c.nombre"
                     >
                         {{ (c.nombres || '') + ' ' + (c.apPaterno || '') + ' ' + (c.apMaterno || '') }}
-                        <span v-if="c.telefono"> - {{ c.telefono }}</span>
-                        <span v-if="c.correo"> - {{ c.correo }}</span>
+                        <span v-if="c.telefono">  {{ c.telefono }}</span>
+                        <span v-if="c.correo">  {{ c.correo }}</span>
                     </option>
                 </datalist>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <!-- Método de pago -->
+                    <div class="mb-3">
+                        <label class="form-label" for="formaPago">Método de Pago *</label>
+                        <select v-model="ordenTrabajoForm.cliente.metodoPago" class="form-select" name="formaPago" id="slcFormaPago">
+                            <option value="">-Selecciona-</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha Alta *</label>
+                        <input v-model="ordenTrabajoForm.cliente.fechaAlta" class="form-control" type="date">
+                    </div>                                    
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de entrega propuesta *</label>
+                        <input v-model="ordenTrabajoForm.fechaEntrega" class="form-control" type="date">
+                    </div>
+                </div>
             </div>
             <hr>
             <div class="row my-3">
@@ -222,9 +261,9 @@
                 <div class="col-8">
                     <label class="form-label">¿Se desea desechar llantas antiguas?</label><br>
                     Si
-                    <input v-model="boolFactura" class="form-check-input btn-outline-dark mx-2" :value="true" type="radio">
+                    <input v-model="boolDesecharLlanta" class="form-check-input btn-outline-dark mx-2" :value="true" type="radio">
                     No
-                    <input v-model="boolFactura" class="form-check-input mx-2" :value="false" type="radio">                    
+                    <input v-model="boolDesecharLlanta" class="form-check-input mx-2" :value="false" type="radio">                    
                 </div>
             </div>
             <hr>
@@ -383,14 +422,22 @@
 
 <script setup>
 import { ref, watch, getCurrentInstance, onMounted, reactive, nextTick } from 'vue';
+import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2'
 const { proxy } = getCurrentInstance() 
 const boolFactura = ref(false);
+const boolDesecharLlanta = ref(false);
+
+/* VARIABLES PARA LA CARGA DE INFO */
 const itmCotizaciones = ref([])
+const itmEmpleados = ref({})
+
 const ordenTrabajoForm = reactive({
     cotSeleccionada: 0,
+    idEmpleado: 0,
+    fechaEntrega:new Date().toISOString().split('T')[0],
     cliente:{
-        id_cliente: null,
+        id_cliente: 0,
         clienteNombre:'',
         apPaterno:'',
         apMaterno: '',
@@ -401,12 +448,14 @@ const ordenTrabajoForm = reactive({
         metodoPago:''
     },
     vehiculo:{
-        id_vehiculo: null,
+        id_vehiculo: 0,
+        marca:'',
         modelo:'',
         numSerie:'',
         kilometraje:'',
         color:'',
-        placas:''
+        placas:'',
+        anio: ''
     },
     factura:{
         razonSocial:'',
@@ -423,6 +472,57 @@ const ordenTrabajoForm = reactive({
     }    
 })
 
+const router = useRouter()
+
+const irAOrdenTrabajo = () => {
+    router.push({ name: 'OrdenTrabajo' })
+}
+
+/*************************************************/
+// FUNCIONES PARA LA CARGA DE INFORMACION
+/*************************************************/
+const cargarCotizacionesAprobadasOrRealizadas = async () => {
+    try {
+        const res = await fetch(proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada');
+        if (!res.ok) throw new Error('Error en la respuesta');
+        const data = await res.json();
+        itmCotizaciones.value = data
+    } catch (e) {
+        console.error('Error al cargar paquetes:', e);
+    }
+};
+
+const cargarEmpleados = async () => {
+    try {
+        const res = await fetch(proxy.$serverIP + 'api/Empleado/getEmpleado');
+        if (!res.ok) throw new Error('Error en la respuesta');
+        const data = await res.json();
+
+        itmEmpleados.value = data;
+        // console.log('Empleados: '+ JSON.stringify(data))
+        // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
+    } catch (error) {
+        
+    }
+}
+
+onMounted(() => {
+    /* MODAL INSUMOS*/
+    const modalEl = document.getElementById('modalItems')
+    modalInstance = new bootstrap.Modal(modalEl, {
+        backdrop: 'true', // se cierre al hacer clic afuera
+        keyboard: false
+    })
+
+    // Escuchar cuando se cierre manualmente para actualizar showModal
+    modalEl.addEventListener('hidden.bs.modal', () => {
+        showModal.value = false
+    })
+    /******************/
+
+    cargarCotizacionesAprobadasOrRealizadas();
+    cargarEmpleados();
+})
 
 /**********************************/
 // FUNCION MODAL AGRGAR INSUMO ADICIONAL
@@ -432,6 +532,7 @@ let modalInstance = null
 
 const items = ref([
     { 
+        idDetalleCotizacionServicio: 0,
         descripcion: '', 
         cantidad: null, 
         precioUnitario: null, 
@@ -476,7 +577,8 @@ const agregarServicioAdicional = () => {
 }
 
 const agregarItem = () => {
-    items.value.push({ 
+    items.value.push({
+        idDetalleCotizacionServicio: 0,
         descripcion: '', 
         cantidad: null, 
         precioUnitario: null, 
@@ -508,16 +610,15 @@ watch(showModal, (val) => {
 
 /***************/
 // FUNCIONES buscar y rellenar vehiculo
-
-const serieInput = ref("")
 const sugerencias = ref([])
 
 let debounceTimer = null
 
-const onSerieInput = () => {
+const onSerieInput = (valor) => {
     clearTimeout(debounceTimer)
 
-    const value = serieInput.value.trim()
+    const value = valor.trim()
+
     if (!value.length) {
         sugerencias.value = []
         return
@@ -543,25 +644,22 @@ const buscarSugerencias = async (serie) => {
 
 const onSerieSeleccionada = () => {
     // buscar coincidencia exacta en sugerencias
-    const seleccionado = sugerencias.value.find(s => s.serie === serieInput.value)
+    const seleccionado = sugerencias.value.find(s => s.serie === ordenTrabajoForm.vehiculo.numSerie)
     console.log(seleccionado)
     if (seleccionado) {
         ordenTrabajoForm.vehiculo = {
-            id_vehiculo: seleccionado.id_vehiculo,
+            id_vehiculo: seleccionado.idVehiculo,
+            marca:seleccionado.marca,
             modelo: seleccionado.modelo,
+            numSerie:seleccionado.serie,
             color: seleccionado.color,
             placas: seleccionado.placas,
-            kilometraje: seleccionado.kilometraje?? ""
+            kilometraje: seleccionado.kilometraje ?? "",
+            anio: seleccionado.anio
         }
-    } else {
-        ordenTrabajoForm.vehiculo = {
-            id_vehiculo: null,
-            modelo: "",
-            color: "",
-            placas:"",
-            kilometraje: ""
-        }
-    }
+
+        //console.log(ordenTrabajoForm.vehiculo)
+    } 
 }
 
 /***************/
@@ -581,7 +679,7 @@ function onClienteInput(valor) {
         buscarSugerenciasCliente(valor);
     }, 300);
     
-    console.log("SUGERENCIAS CLIENTE:", JSON.stringify(toRaw(sugerenciasClientes.value)));
+    //console.log("SUGERENCIAS CLIENTE:", JSON.stringify(toRaw(sugerenciasClientes.value)));
 }
 
 const buscarSugerenciasCliente = async (texto) => {
@@ -596,7 +694,7 @@ const buscarSugerenciasCliente = async (texto) => {
 }
 
 function onClienteSeleccionado(cliente) {
-    ordenTrabajoForm.cliente.id_cliente = cliente.idCliente || null;
+    ordenTrabajoForm.cliente.id_cliente = cliente.idCliente || 0;
     ordenTrabajoForm.cliente.clienteNombre = cliente.nombres || '';
     ordenTrabajoForm.cliente.apPaterno = cliente.apPaterno || '';
     ordenTrabajoForm.cliente.apMaterno = cliente.apMaterno || '';
@@ -610,20 +708,34 @@ function onClienteSeleccionadoByValue(valor) {
 
     const normalizado = valor.trim().toLowerCase();
 
+    // Buscar por coincidencia en nombre, teléfono o correo
     const cliente = sugerenciasClientes.value.find(c => {
+        
         const nombreCompleto = [c.nombres, c.apPaterno, c.apMaterno]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase();
 
+        const telefono = c.telefono?.toLowerCase() || "";
+        const correo = c.correo?.toLowerCase() || "";
+
+        // 🔍 Coincidencias parciales o exactas
         return (
-            nombreCompleto === normalizado ||
-            (c.telefono && c.telefono.toLowerCase() === normalizado) ||
-            (c.correo && c.correo.toLowerCase() === normalizado)
+            nombreCompleto.includes(normalizado) ||
+            normalizado.includes(nombreCompleto) ||
+            telefono.includes(normalizado) ||
+            normalizado.includes(telefono) ||
+            correo.includes(normalizado) ||
+            normalizado.includes(correo)
         );
     });
 
+    console.log("Normalizado:", normalizado);
+    console.log("Valor:", valor);
+    console.log("Cliente encontrado:", cliente);
+
     if (cliente) {
+        console.log('clienteSeleccionado');
         onClienteSeleccionado(cliente);
     }
 }
@@ -645,7 +757,7 @@ const eliminarInsumo = (tipo, index) => {
     })
 }
 
-const validarYMostrarPreview = () => {
+const validarYMostrarPreview = async () => {
     const errores = []
 
     // Cliente
@@ -653,6 +765,7 @@ const validarYMostrarPreview = () => {
     if (!ordenTrabajoForm.cliente.clienteTelefono || !/^\d{10}$/.test(ordenTrabajoForm.cliente.clienteTelefono)) errores.push('El teléfono debe tener 10 dígitos.')
     if (!ordenTrabajoForm.cliente.metodoPago) errores.push('El método de pago es obligatorio.')
     if (!ordenTrabajoForm.cliente.fechaAlta) errores.push('La fecha de alta es obligatoria.')
+    if (!ordenTrabajoForm.fechaEntrega) errores.push('La fecha de entrega es obligatoria.')
 
     // Vehículo
     if (!ordenTrabajoForm.vehiculo.numSerie) errores.push('El número de serie es obligatorio.')
@@ -662,12 +775,12 @@ const validarYMostrarPreview = () => {
 
     // Factura (si aplica)
     if (boolFactura.value) {
-        if (!ordenTrabajoForm.factura.razonSocial) errores.push('La razón social es obligatoria.')
-        if (!ordenTrabajoForm.factura.direccion) errores.push('La dirección es obligatoria.')
-        if (!ordenTrabajoForm.factura.rfc || !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(ordenTrabajoForm.factura.rfc)) errores.push('El RFC no tiene un formato válido.')
-        if (!ordenTrabajoForm.factura.eMail || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(ordenTrabajoForm.factura.eMail)) errores.push('El correo de la factura no es válido.')
-        if (!ordenTrabajoForm.factura.cp || !/^\d{5}$/.test(ordenTrabajoForm.factura.cp)) errores.push('El código postal debe tener 5 dígitos.')
-        if (!ordenTrabajoForm.factura.usoCFDI) errores.push('El uso de CFDI es obligatorio.')
+        // if (!ordenTrabajoForm.factura.razonSocial) errores.push('La razón social es obligatoria.')
+        // if (!ordenTrabajoForm.factura.direccion) errores.push('La dirección es obligatoria.')
+        // if (!ordenTrabajoForm.factura.rfc || !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(ordenTrabajoForm.factura.rfc)) errores.push('El RFC no tiene un formato válido.')
+        // if (!ordenTrabajoForm.factura.eMail || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(ordenTrabajoForm.factura.eMail)) errores.push('El correo de la factura no es válido.')
+        // if (!ordenTrabajoForm.factura.cp || !/^\d{5}$/.test(ordenTrabajoForm.factura.cp)) errores.push('El código postal debe tener 5 dígitos.')
+        // if (!ordenTrabajoForm.factura.usoCFDI) errores.push('El uso de CFDI es obligatorio.')
     }
 
     if (errores.length > 0) {
@@ -682,83 +795,85 @@ const validarYMostrarPreview = () => {
     // 🔹 Renderizar tabla de insumos
     const insumosHTML = `
         <table style="width:100%; border-collapse: collapse; font-size: 14px;" border="1">
-        <thead>
-            <tr style="background:#f0f0f0; text-align:center;">
-            <th>Descripción</th>
-            <th>Cantidad</th>
-            <th>P/U</th>
-            <th>Subtotal</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${ordenTrabajoForm.insumo.llanta.map(i => `
-            <tr>
-                <td>${i.descripcion}</td>
-                <td style="text-align:center">${i.cantidad}</td>
-                <td style="text-align:right">$${i.precioUnitario.toFixed(2)}</td>
-                <td style="text-align:right">$${i.subTotal}</td>
-            </tr>
-            `).join('')}
-            ${ordenTrabajoForm.insumo.paquete.map(p => `
-            <tr style="font-weight:bold; background:#fafafa;">
-                <td>${p.descripcion}</td>
-                <td style="text-align:center">${p.cantidad}</td>
-                <td style="text-align:right">$${p.precioUnitario.toFixed(2)}</td>
-                <td style="text-align:right">$${p.subTotal}</td>
-            </tr>
-            ${p.detalle.map(d => `
-                <tr style="color:#555;">
-                <td style="padding-left:20px;">↳ ${d.descripcion}</td>
-                <td style="text-align:center">${d.cantidad}</td>
-                <td style="text-align:right">$${d.precioUnitario.toFixed(2)}</td>
-                <td style="text-align:right">$${d.subTotal}</td>
+            <thead>
+                <tr style="background:#f0f0f0; text-align:center;">
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>P/U</th>
+                <th>Subtotal</th>
                 </tr>
-            `).join('')}
-            `).join('')}
-        </tbody>
+            </thead>
+            <tbody>
+                ${ordenTrabajoForm.insumo.llanta.map(i => `
+                <tr>
+                    <td>${i.descripcion}</td>
+                    <td style="text-align:center">${i.cantidad}</td>
+                    <td style="text-align:right">$${i.precioUnitario.toFixed(2)}</td>
+                    <td style="text-align:right">$${i.subTotal}</td>
+                </tr>
+                `).join('')}
+                ${ordenTrabajoForm.insumo.paquete.map(p => `
+                <tr style="font-weight:bold; background:#fafafa;">
+                    <td>${p.descripcion}</td>
+                    <td style="text-align:center">${p.cantidad}</td>
+                    <td style="text-align:right">$${p.precioUnitario.toFixed(2)}</td>
+                    <td style="text-align:right">$${p.subTotal}</td>
+                </tr>
+                ${p.detalle.map(d => `
+                    <tr style="color:#555;">
+                    <td style="padding-left:20px;">↳ ${d.descripcion}</td>
+                    <td style="text-align:center">${d.cantidad}</td>
+                    <td style="text-align:right">$${d.precioUnitario.toFixed(2)}</td>
+                    <td style="text-align:right">$${d.subTotal}</td>
+                    </tr>
+                `).join('')}
+                `).join('')}
+            </tbody>
         </table>
     `
 
     // 🔹 Confirmación con SweetAlert
-    Swal.fire({
+    const result = await Swal.fire({
         title: 'Confirmar datos',
         html: `
             <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
 
-                <!-- Cliente -->
-                <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
-                <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${ordenTrabajoForm.cliente.clienteNombre}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${ordenTrabajoForm.cliente.clienteTelefono}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${ordenTrabajoForm.cliente.metodoPago}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${ordenTrabajoForm.cliente.fechaAlta}</td></tr>
-                </table><br>
+                <div class="m-2">
+                    <!-- Cliente -->
+                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${ordenTrabajoForm.cliente.clienteNombre}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${ordenTrabajoForm.cliente.clienteTelefono}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${ordenTrabajoForm.cliente.metodoPago}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${ordenTrabajoForm.cliente.fechaAlta}</td></tr>
+                    </table><br>
 
-                <!-- Vehículo -->
-                <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
-                <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${ordenTrabajoForm.vehiculo.numSerie}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${ordenTrabajoForm.vehiculo.modelo}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${ordenTrabajoForm.vehiculo.kilometraje}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${ordenTrabajoForm.vehiculo.color}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${ordenTrabajoForm.vehiculo.placas}</td></tr>
-                </table>
+                    <!-- Vehículo -->
+                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${ordenTrabajoForm.vehiculo.numSerie}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${ordenTrabajoForm.vehiculo.modelo}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${ordenTrabajoForm.vehiculo.kilometraje}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${ordenTrabajoForm.vehiculo.color}</td></tr>
+                        <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${ordenTrabajoForm.vehiculo.placas}</td></tr>
+                    </table>
 
-                <!-- Factura -->
-                ${boolFactura.value ? `
-                <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
-                <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
-                <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.factura.rfc}</td></tr>
-                <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
-                <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
-                <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
-                </table>
-                ` : ''}
+                    <!-- Factura -->
+                    ${boolFactura.value ? `
+                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
+                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+                    <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
+                    <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.factura.rfc}</td></tr>
+                    <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
+                    <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
+                    <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
+                    </table>
+                    ` : ''}
 
-                <!-- Insumos -->
-                <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
-                ${insumosHTML}
+                    <!-- Insumos -->
+                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
+                    ${insumosHTML}
+                </div>
 
             </div>
         `,
@@ -766,18 +881,18 @@ const validarYMostrarPreview = () => {
         confirmButtonText: 'Confirmar y enviar',
         cancelButtonText: 'Cancelar',
         width: '700px'
-    }).then(result => {
-        if (result.isConfirmed) {
-            console.log('Datos válidos y confirmados ✅', ordenTrabajoForm)
-            Swal.fire('Enviado', 'La información fue enviada correctamente.', 'success')
-        }
     })
 
-    return true
+    if (result.isConfirmed) {
+        Swal.fire('Enviado', 'La información fue enviada correctamente.', 'success')
+        return true
+    }
+
+    return false
 }
 
-const guardarOT = () => {
-
+const guardarOT = async () => {
+    //console.log(ordenTrabajoForm.vehiculo.numSerie)
     let factura = {}
 
     if(boolFactura){
@@ -792,122 +907,143 @@ const guardarOT = () => {
     }
 
     const objSeend = {
-        nombreCliente: ordenTrabajoForm.cliente.clienteNombre,
-        telefono: ordenTrabajoForm.cliente.clienteTelefono,
-        motodoPago: ordenTrabajoForm.cliente.metodoPago,
+        idCotizacion: ordenTrabajoForm.cotSeleccionada,
+        idEmpleado: ordenTrabajoForm.idEmpleado,
+        metodoPago: ordenTrabajoForm.cliente.metodoPago,
         fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
+        fechaEntrega: ordenTrabajoForm.fechaEntrega,
+        requiereFactura: boolFactura.value,
+        desecharLlanta: boolDesecharLlanta.value,
+        descripcion:'',
+        cliente: {
+            idCliente: ordenTrabajoForm.cliente.id_cliente,
+            nombres: ordenTrabajoForm.cliente.clienteNombre,
+            apPaterno: ordenTrabajoForm.cliente.apPaterno,
+            apMaterno: ordenTrabajoForm.cliente.apMaterno,
+            rfc: ordenTrabajoForm.cliente.rfc,
+            telefono :ordenTrabajoForm.cliente.clienteTelefono,
+            correo: ordenTrabajoForm.cliente.clienteCorreo,
+        },
         vehiculo:{
+            idVehiculo: ordenTrabajoForm.vehiculo.id_vehiculo ?  ordenTrabajoForm.vehiculo.id_vehiculo : 0,
             modelo: ordenTrabajoForm.vehiculo.modelo,
-            numSerie: ordenTrabajoForm.vehiculo.numSerie,
+            marca: ordenTrabajoForm.vehiculo.marca,
+            serie: ordenTrabajoForm.vehiculo.numSerie,
             kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
             color: ordenTrabajoForm.vehiculo.color, 
-            placas: ordenTrabajoForm.vehiculo.placas
+            placas: ordenTrabajoForm.vehiculo.placas,
+            anio: ordenTrabajoForm.vehiculo.anio
         },
         factura: factura,
         insumos: ordenTrabajoForm.insumo
     }
 
-    if(validarYMostrarPreview(objSeend)){
-        console.log(JSON.stringify('GUARDAR OT: '+ JSON.stringify(objSeend)))
-    // fetch(`${proxy.$serverIP}api/Cotizacion/editarCotizacion`, {
-    //     method: cotizacionForm.codigo ? 'PUT' : 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify(nuevaCotizacion)
-    // })
-    // .then(res => res.json())
-    // .then(data => {
-    //     console.log("OT guardada:", data);
-    //     limpiarOrdenTrabajoForm();   // Limpia formulario
-    // });
+    
+    if(await validarYMostrarPreview()){
+        console.log('Valido')
+        console.log('GUARDAR OT: ' + JSON.stringify(objSeend))
+        fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(objSeend)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                console.log("OT guardada:", data);
+                limpiarOrdenTrabajoForm();   // Limpia formulario
+                irAOrdenTrabajo();
+            }
+            else
+            {
+                console.log("No guardada")
+            }            
+        });
     }    
 }
-
-
-
-/*************************************************/
-// FUNCIONES PARA LA CARGA DE INFORMACION
-/*************************************************/
-const cargarCotizacionesAprobadasOrRealizadas = async () => {
-    try {
-        const res = await fetch(proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada');
-        if (!res.ok) throw new Error('Error en la respuesta');
-        const data = await res.json();
-        itmCotizaciones.value = data
-    } catch (e) {
-        console.error('Error al cargar paquetes:', e);
-    }
-};
-
-onMounted(() => {
-    /* MODAL INSUMOS*/
-    const modalEl = document.getElementById('modalItems')
-    modalInstance = new bootstrap.Modal(modalEl, {
-        backdrop: 'true', // se cierre al hacer clic afuera
-        keyboard: false
-    })
-
-    // Escuchar cuando se cierre manualmente para actualizar showModal
-    modalEl.addEventListener('hidden.bs.modal', () => {
-        showModal.value = false
-    })
-    /******************/
-
-    cargarCotizacionesAprobadasOrRealizadas();
-})
 
 
 const cargarInfoCotizacion = async () => {
     const res = await fetch(proxy.$serverIP + 'api/Cotizacion/getDetalleCotizacion?id='+ordenTrabajoForm.cotSeleccionada);
     if (!res.ok) throw new Error('Error en la respuesta');
     const data = await res.json();
-    console.log(JSON.stringify(data))
-    ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre;
-    ordenTrabajoForm.cliente.clienteTelefono = data.telefono;
+
+    console.log(JSON.stringify(data.llantas))
+    ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
+
+    ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre || '';
+    ordenTrabajoForm.cliente.clienteTelefono = data.telefono || '';
+    ordenTrabajoForm.cliente.clienteCorreo = data.correo || '';
 
     ordenTrabajoForm.insumo = {
         llanta: data.llantas.map((llanta) => ({
+            idLlanta: llanta.idLlanta,
+            idAlmacen: llanta.idAlmacen,
             descripcion: llanta.modeloMedidas,
             cantidad: llanta.cantidad,
             precioUnitario: llanta.precioUnitario,
             subTotal: (llanta.cantidad * llanta.precioUnitario).toFixed(2)
         })),
         paquete: data.paquetes.map((paquete) => ({
+            idPaquete: paquete.idPaquete,
             descripcion: paquete.nombre,
             cantidad: 1,
             precioUnitario: paquete.precioUnitario,
             subTotal: (1 * paquete.precioUnitario).toFixed(2),
             detalle: paquete.detallePaquete.map((detalle) => ({
+                idDesglosePaquete: detalle.idDesglosePaquete,
                 descripcion:detalle.nombre,
                 cantidad: 1,
                 precioUnitario: 0,
                 subTotal: 0
             }))
-        })),
-        adicional:[]  
+        })),        
+        adicional: data.servicios.map( (s) => ({
+            idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
+            descripcion: s.descripcion,
+            observacion: s.observacion,
+            cantidad: s.cantidad,
+            precioUnitario: s.precioUnitario,
+            comentario: s.comentario
+        }))  
     };
     console.log(JSON.stringify(ordenTrabajoForm.insumo))
 }
 
 const limpiarOrdenTrabajoForm = () => {
-  ordenTrabajoForm.cotSeleccionada = 0;
+    ordenTrabajoForm.cotSeleccionada = 0;
+    ordenTrabajoForm.idEmpleado = 0;    
 
-  ordenTrabajoForm.cliente.clienteNombre = '';
-  ordenTrabajoForm.cliente.clienteTelefono = '';
-  ordenTrabajoForm.cliente.fechaAlta = new Date().toISOString().split('T')[0];
-  ordenTrabajoForm.cliente.metodoPago = '';
+    ordenTrabajoForm.cliente.id_cliente = 0;
+    ordenTrabajoForm.cliente.apMaterno = '';
+    ordenTrabajoForm.cliente.apPaterno = '';
+    ordenTrabajoForm.cliente.clienteCorreo = '';
+    ordenTrabajoForm.cliente.rfc = '';
+    ordenTrabajoForm.cliente.clienteNombre = '';
+    ordenTrabajoForm.cliente.clienteTelefono = '';
+    ordenTrabajoForm.cliente.fechaAlta = new Date().toISOString().split('T')[0];
+    ordenTrabajoForm.cliente.metodoPago = '';
 
-  ordenTrabajoForm.vehiculo.modelo = '';
-  ordenTrabajoForm.vehiculo.numSerie = '';
-  ordenTrabajoForm.vehiculo.kilometraje = '';
-  ordenTrabajoForm.vehiculo.color = '';
-  ordenTrabajoForm.vehiculo.placas = '';
+    ordenTrabajoForm.vehiculo.id_vehiculo = 0;
+    ordenTrabajoForm.vehiculo.marca = ''
+    ordenTrabajoForm.vehiculo.modelo = '';
+    ordenTrabajoForm.vehiculo.numSerie = '';
+    ordenTrabajoForm.vehiculo.kilometraje = '';
+    ordenTrabajoForm.vehiculo.color = '';
+    ordenTrabajoForm.vehiculo.placas = '';
 
-  ordenTrabajoForm.factura.razonSocial = '';
-  ordenTrabajoForm.factura.direccion = '';
-  ordenTrabajoForm.factura.rfc = '';
-  ordenTrabajoForm.factura.eMail = '';
-  ordenTrabajoForm.factura.cp = '';
-  ordenTrabajoForm.factura.usoCFDI = '';
+    ordenTrabajoForm.factura.razonSocial = '';
+    ordenTrabajoForm.factura.direccion = '';
+    ordenTrabajoForm.factura.rfc = '';
+    ordenTrabajoForm.factura.eMail = '';
+    ordenTrabajoForm.factura.cp = '';
+    ordenTrabajoForm.factura.usoCFDI = '';
+
+    ordenTrabajoForm.insumo = {
+        llanta:[],
+        paquete:[],
+        adicional:[]        
+    }
 }
 
 </script>

@@ -18,7 +18,7 @@
             <div class="col">
                 <div class="mt-3 mt-md-0">
                     <div class="border-start border-4 border-success bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-success">1,000</h5>
+                        <h5 class="mb-0 fw-bold text-success">{{listaOrdenTrabajo.totales.finalizado}}</h5>
                         <small class="text-muted">Completadas</small>
                     </div>
                 </div>
@@ -26,7 +26,7 @@
             <div class="col">
                 <div class="mt-3 mt-md-0">
                     <div class="border-start border-4 border-primary bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-primary">15</h5>
+                        <h5 class="mb-0 fw-bold text-primary">{{listaOrdenTrabajo.totales.enCurso}}</h5>
                         <small class="text-muted">En curso</small>
                     </div>
                 </div>
@@ -34,15 +34,15 @@
             <div class="col">
                 <div class=" mt-3 mt-md-0">
                     <div class="border-start border-4 border-danger bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-danger">35</h5>
-                        <small class="text-muted">Retrasadas</small>
+                        <h5 class="mb-0 fw-bold text-danger">{{listaOrdenTrabajo.totales.creado}}</h5>
+                        <small class="text-muted">Pendientes</small>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row p-3">
-            <div class="col">
-                <table class="table">
+            <div v-if="loading" class="text-center my-4">
+                <table class="table table-hover table-sm">
                     <thead>
                         <tr>
                             <th>#</th>
@@ -56,156 +56,44 @@
                             <th>Estatus</th>
                             <th>Acciones</th>
                         </tr>
+                    </thead>                                      
+                </table>
+                <div class="text-center my-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Cargando ordenes de trabajo...</p>
+                </div>  
+            </div>
+            <div v-else class="col">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>Técnico</th>
+                            <th>Fecha</th>
+                            <th>Vehículo</th>
+                            <th>Pago</th>
+                            <th>Factura</th>
+                            <th>Estatus</th>
+                            <th>Acciones</th>
+                        </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>OT-0001</td>
-                            <td>Juan Pérez</td>
-                            <td>Miguel Hernández</td>
-                            <td>2025-07-01</td>
-                            <td>Jetta 2020 - ABC123</td>
-                            <td>Efectivo</td>
-                            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td>$4,200.00</td>
-                            <td><span class="badge bg-success">Finalizada</span></td>
+                    <tbody>                        
+                        <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo">
+                            <td>OT-{{ ot.idOrdenTrabajo }}</td>
+                            <td>{{ ot.clienteNombre}} {{ot.clienteTelefono}}</td>
+                            <td>{{ot.empleadoNombre}} ({{ ot.empleadoPuesto}})</td>
+                            <td>{{ ot.fechaAlta}}</td>
+                            <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
+                            <td>{{ot.metodoPago}}</td>
+                            <td v-if="ot.requiereFactura"><i class="bi bi-check-circle-fill text-success"></i></td>
+                            <td v-else><i class="bi bi-x-circle text-danger"></i></td>
+                            <td v-if="ot.estado == 'En curso'"><span class="badge bg-warning text-dark">{{ot.estado}}</span></td>
+                            <td v-else-if="ot.estado == 'Creado'"><span class="badge bg-secondary">{{ ot.estado }}</span></td>
+                            <td v-else-if="ot.estado == 'Finalizado'"><span class="badge bg-success">{{ ot.estado }}</span></td>
                             <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0002</td>
-                            <td>Laura García</td>
-                            <td>Carlos Torres</td>
-                            <td>2025-07-02</td>
-                            <td>Mazda CX-5 - XYZ789</td>
-                            <td>Tarjeta</td>
-                            <td><i class="bi bi-x-circle text-danger"></i></td>
-                            <td>$3,120.00</td>
-                            <td><span class="badge bg-warning text-dark">En proceso</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0003</td>
-                            <td>Andrés Martínez</td>
-                            <td>Sandra Vega</td>
-                            <td>2025-07-03</td>
-                            <td>Chevrolet Aveo - GHY456</td>
-                            <td>Efectivo</td>
-                            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td>$1,560.00</td>
-                            <td><span class="badge bg-secondary">Pendiente</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0004</td>
-                            <td>Mariana López</td>
-                            <td>Miguel Hernández</td>
-                            <td>2025-07-04</td>
-                            <td>Nissan Sentra - JKL321</td>
-                            <td>Tarjeta</td>
-                            <td><i class="bi bi-x-circle text-danger"></i></td>
-                            <td>$2,890.00</td>
-                            <td><span class="badge bg-warning text-dark">En proceso</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0005</td>
-                            <td>Héctor Ruiz</td>
-                            <td>Carlos Torres</td>
-                            <td>2025-07-05</td>
-                            <td>Ford Figo - BVC852</td>
-                            <td>Efectivo</td>
-                            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td>$3,700.00</td>
-                            <td><span class="badge bg-success">Finalizada</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0006</td>
-                            <td>Lucía Morales</td>
-                            <td>Sandra Vega</td>
-                            <td>2025-07-06</td>
-                            <td>Toyota Corolla - QWE987</td>
-                            <td>Tarjeta</td>
-                            <td><i class="bi bi-x-circle text-danger"></i></td>
-                            <td>$1,980.00</td>
-                            <td><span class="badge bg-secondary">Pendiente</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0007</td>
-                            <td>Pedro Castillo</td>
-                            <td>Miguel Hernández</td>
-                            <td>2025-07-07</td>
-                            <td>Honda Civic - ASD741</td>
-                            <td>Efectivo</td>
-                            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td>$2,450.00</td>
-                            <td><span class="badge bg-success">Finalizada</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0008</td>
-                            <td>Ana Ramírez</td>
-                            <td>Carlos Torres</td>
-                            <td>2025-07-08</td>
-                            <td>Volkswagen Polo - ZXC963</td>
-                            <td>Tarjeta</td>
-                            <td><i class="bi bi-x-circle text-danger"></i></td>
-                            <td>$1,800.00</td>
-                            <td><span class="badge bg-warning text-dark">En proceso</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0009</td>
-                            <td>Eduardo Mendoza</td>
-                            <td>Sandra Vega</td>
-                            <td>2025-07-09</td>
-                            <td>Hyundai Elantra - YUI753</td>
-                            <td>Efectivo</td>
-                            <td><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td>$2,230.00</td>
-                            <td><span class="badge bg-success">Finalizada</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>OT-0010</td>
-                            <td>Fernanda Salinas</td>
-                            <td>Miguel Hernández</td>
-                            <td>2025-07-10</td>
-                            <td>Kia Rio - MNB159</td>
-                            <td>Tarjeta</td>
-                            <td><i class="bi bi-x-circle text-danger"></i></td>
-                            <td>$3,050.00</td>
-                            <td><span class="badge bg-secondary">Pendiente</span></td>
-                            <td>
-                            <button class="btn btn-sm btn-outline-primary">Ver</button>
-                            <button class="btn btn-sm btn-outline-secondary">Editar</button>
+                                <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                <button class="btn btn-sm btn-outline-secondary">Editar</button>
                             </td>
                         </tr>
                     </tbody>
@@ -217,10 +105,43 @@
 
 <script setup>
 
+import { getCurrentInstance, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
-/***** FUNCIONES PRINCIPALES *****/
+const { proxy } = getCurrentInstance() 
+
 const irA = (ruta) => {
-  router.push(ruta)
+    router.push(ruta)
 }
+
+const loading =  ref(true)
+const listaOrdenTrabajo = ref({
+    ordenes:[],
+    totales: {
+        finalizado:0,
+        enCurso:0,
+        creado:0
+    }
+});
+
+/***** CRAGA DE INFORMACION *****/
+const cargarOrdenTrabajo = async () => {
+    try {
+        const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`)
+        if (!res.ok) throw new Error("Error en la API")
+
+        const result = await res.json()
+        listaOrdenTrabajo.value = result.data
+
+        loading.value = false
+        console.log(listaOrdenTrabajo.value)
+    } catch (err) {
+        console.error("Error al obtener sugerencias:", err)
+        listaOrdenTrabajo.value = {}
+    }
+}
+
+onMounted(() => {
+    cargarOrdenTrabajo()
+})
 </script>

@@ -12,76 +12,76 @@
 		<!-- Spinner mientras carga -->
 		<div v-if="loading" class="text-center my-4">
 			<div class="spinner-border text-primary" role="status"></div>
-				<p class="mt-2 text-muted">Cargando promociones...</p>
+			<p class="mt-2 text-muted">Cargando promociones...</p>
 		</div>
 
 		<!-- Tabla -->
 		<div v-else class="table-responsive">
 			<table class="table align-middle table-hover">
 				<thead class="table-light">
-				<tr>
-					<!-- <th>ID</th> -->
-					<th>Nombre</th>
-					<th>Tipo</th>
-					<th>Valor</th>
-					<th>Es General</th>
-					<th>Fecha Inicio</th>
-					<th>Fecha Fin</th>
-					<th>Cant. Artículos</th>
-					<!-- <th>Estado</th> -->
-					<th>Acciones</th>
-				</tr>
+					<tr>
+						<!-- <th>ID</th> -->
+						<th>Nombre</th>
+						<th>Tipo</th>
+						<th>Valor</th>
+						<th>Es General</th>
+						<th>Fecha Inicio</th>
+						<th>Fecha Fin</th>
+						<th>Cant. Artículos</th>
+						<!-- <th>Estado</th> -->
+						<th>Acciones</th>
+					</tr>
 				</thead>
 
 				<tbody>
-				<tr v-for="promo in promocionesFiltradas" :key="promo.idPromocion">
-					<!-- <td>{{ promo.idPromocion }}</td> -->
-					<td>{{ promo.nombre }}</td>
-					<td>
-					<span
-						class="badge"
-						:class="promo.tipo ? 'bg-primary' : 'bg-info'"
-					>
-						{{ promo.tipo ? "Porcentaje" : "Monto fijo" }}
-					</span>
-					</td>
-					<td>{{ promo.valor }}</td>
-					<td>{{ promo.esGeneral ? "Sí" : "No" }}</td>
-					<td>{{ formatearFecha(promo.fechaInicio) }}</td>
-					<td>{{ formatearFecha(promo.fechaFin) }}</td>
-					<td>{{ promo.cantidadArticulos }}</td>
-					<!-- <td>
+					<tr v-for="promo in promocionesFiltradas" :key="promo.idPromocion">
+						<!-- <td>{{ promo.idPromocion }}</td> -->
+						<td>{{ promo.nombre }}</td>
+						<td>
 						<span
 							class="badge"
-							:class="promo.activo ? 'bg-success' : 'bg-danger'"
+							:class="promo.tipo ? 'bg-primary' : 'bg-info'"
 						>
-							{{ promo.activo ? 'Activo' : 'Inactivo' }}
+							{{ promo.tipo ? "Porcentaje" : "Monto fijo" }}
 						</span>
-					</td> -->
-					<td>
-					<button
-						class="btn btn-sm btn-outline-info me-1"
-						@click="verPromocion(promo.idPromocion)"
-					>
-						<i class="bi bi-eye"></i>
-					</button>
-					<button
-						class="btn btn-sm btn-outline-primary me-1"
-						@click="editarPromocion(promo.idPromocion)"
-					>
-						<i class="bi bi-pencil"></i>
-					</button>
-					<!-- <button class="btn btn-sm btn-outline-danger">
-						<i class="bi bi-trash"></i>
-					</button> -->
-					</td>
-				</tr>
+						</td>
+						<td>{{ promo.valor }}</td>
+						<td>{{ promo.esGeneral ? "Sí" : "No" }}</td>
+						<td>{{ formatearFecha(promo.fechaInicio) }}</td>
+						<td>{{ formatearFecha(promo.fechaFin) }}</td>
+						<td>{{ promo.cantidadArticulos }}</td>
+						<!-- <td>
+							<span
+								class="badge"
+								:class="promo.activo ? 'bg-success' : 'bg-danger'"
+							>
+								{{ promo.activo ? 'Activo' : 'Inactivo' }}
+							</span>
+						</td> -->
+						<td>
+						<button
+							class="btn btn-sm btn-outline-info me-1"
+							@click="verPromocion(promo.idPromocion)"
+						>
+							<i class="bi bi-eye"></i>
+						</button>
+						<button
+							class="btn btn-sm btn-outline-primary me-1"
+							@click="editarPromocion(promo.idPromocion)"
+						>
+							<i class="bi bi-pencil"></i>
+						</button>
+						<!-- <button class="btn btn-sm btn-outline-danger">
+							<i class="bi bi-trash"></i>
+						</button> -->
+						</td>
+					</tr>
 
-				<tr v-if="promociones.length === 0">
-					<td colspan="10" class="text-center text-muted">
-					No hay promociones disponibles
-					</td>
-				</tr>
+					<tr v-if="promociones.length === 0">
+						<td colspan="10" class="text-center text-muted">
+						No hay promociones disponibles
+						</td>
+					</tr>
 				</tbody>
 			</table>
 		</div>

@@ -102,7 +102,7 @@
 
         <!-- Contenido -->
         <div>
-            <router-view />
+            <router-view :key="$route.fullPath" />
         </div>
     </div>
 </template>
@@ -115,7 +115,16 @@ const router = useRouter()
 const sidebarRef = ref(null)
 
 const irA = (ruta) => {
-  router.push(ruta)
+
+    // Limpia backdrop y locks del body
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.removeAttribute('style');
+
+    // Elimina backdrops externos
+    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+    document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
+    router.push(ruta)
 }
 </script>
 
