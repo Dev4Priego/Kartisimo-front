@@ -66,31 +66,40 @@
             <div v-else class="col">
                 <table class="table">
                     <thead>
-                        <tr>
+                        <tr class="align-middle text-center">
                             <th>#</th>
                             <th>Cliente</th>
-                            <th>Técnico</th>
-                            <th>Fecha</th>
                             <th>Vehículo</th>
+                            <th>Fecha</th>
+                            <th>Técnico</th>
+                            <th>Tipo OT</th>
                             <th>Pago</th>
                             <th>Factura</th>
                             <th>Estatus</th>
+                            <th>Desechar Llanta</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>                        
-                        <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo">
+                        <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo" class="text-justify">
                             <td>OT-{{ ot.idOrdenTrabajo }}</td>
                             <td>{{ ot.clienteNombre}} {{ot.clienteTelefono}}</td>
-                            <td>{{ot.empleadoNombre}} ({{ ot.empleadoPuesto}})</td>
-                            <td>{{ ot.fechaAlta}}</td>
                             <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
+                            <td>{{ ot.fechaAlta}}</td>
+                            <td>{{ot.empleadoNombre}}</td>
+                            <td>{{ ot.tipoOrdenTrabajo  }}</td>
                             <td>{{ot.metodoPago}}</td>
-                            <td v-if="ot.requiereFactura"><i class="bi bi-check-circle-fill text-success"></i></td>
-                            <td v-else><i class="bi bi-x-circle text-danger"></i></td>
+
+                            <td v-if="ot.requiereFactura" class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                            <td v-else class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+
                             <td v-if="ot.estado == 'En curso'"><span class="badge bg-warning text-dark">{{ot.estado}}</span></td>
                             <td v-else-if="ot.estado == 'Creado'"><span class="badge bg-secondary">{{ ot.estado }}</span></td>
                             <td v-else-if="ot.estado == 'Finalizado'"><span class="badge bg-success">{{ ot.estado }}</span></td>
+                            
+                            <td v-if="ot.desecharLlanta" class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
+                            <td v-else class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
+
                             <td>
                                 <button class="btn btn-sm btn-outline-primary">Ver</button>
                                 <button class="btn btn-sm btn-outline-secondary">Editar</button>

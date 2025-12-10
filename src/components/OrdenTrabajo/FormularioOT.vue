@@ -4,25 +4,7 @@
             <div class="row my-3">
                 <h2 class="text-start">Nueva Orden de Trabajo</h2>
                 <hr>
-            </div>
-            <div class="row">
-                <div class="col-4">
-                    <h5>Técnico a cargo</h5>
-                </div>
-                <div class="col-8">
-                    <label class="form-label" for="slcTecnico">Selecciona el técnico *</label>
-                    <select v-model="ordenTrabajoForm.idEmpleado" class="form-select" name="tecnico" id="slcTecnico">
-                        <option :value="0" disabled selected>
-                            -- Selecciona una cotización --
-                        </option>
-
-                        <option v-for="itm in itmEmpleados" :key="itm.idEmpleado" :value="itm.idEmpleado">
-                            ({{ itm.puesto }}) {{ itm.nombres }} {{ itm.apePaterno }}
-                        </option>
-                    </select>
-                </div>
-            </div>
-            <hr>
+            </div>            
             <div class="row my-3">
                 <div class="col-4">
                     <h5>Cotización</h5>
@@ -40,7 +22,7 @@
                     </select>
                     <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
                 </div>
-            </div>
+            </div>            
             <hr>
             <div class="row">                
                 <div class="col">
@@ -208,6 +190,43 @@
             <hr>
             <div class="row my-3">
                 <div class="col-4">
+                    <h5>Tipo Orden de Trabajo</h5>
+                </div>
+                <div class="col-8">
+                    <label class="form-label" for="slcCotizacion">Selecciona un tipo *</label>
+                    <select v-model="ordenTrabajoForm.idTipoOrdenTrabajo" class="form-select" name="tipoOT" id="slcTipoOrdenTrabajo">
+                        <option :value="0" disabled selected>
+                            -- Selecciona un tipo --
+                        </option>
+
+                        <option v-for="itm in itmTipoOT" :key="itm.idTipoOrdenTrabajo" :value="itm.idTipoOrdenTrabajo">
+                            {{itm.nombre}} ({{ itm.tiempoEstimado }})
+                        </option>
+                    </select>
+                    <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4">
+                    <h5>Técnico a cargo</h5>
+                </div>
+                <div class="col-8">
+                    <label class="form-label" for="slcTecnico">Selecciona el técnico *</label>
+                    <select v-model="ordenTrabajoForm.idEmpleado" class="form-select" name="tecnico" id="slcTecnico">
+                        <option :value="0" disabled selected>
+                            -- Selecciona un técnico --
+                        </option>
+
+                        <option v-for="itm in itmEmpleados" :key="itm.idEmpleado" :value="itm.idEmpleado">
+                            ({{ itm.puesto }}) {{ itm.nombres }} {{ itm.apePaterno }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <hr>
+            <div class="row my-3">
+                <div class="col-4">
                     <h5>Facturar</h5>
                 </div>
                 <div class="col-8">
@@ -366,8 +385,10 @@
                             @click="showModal = true"
                             type="button"
                         >
-                            <i class="bi bi-plus-circle"></i>
+                            <i class="bi bi-plus-circle"></i> Abrir modal
                         </button>
+
+                        <ModalInsumo v-model="showModal" title="Insumos" :insumos="ordenTrabajoForm.insumo"/>
                     </div>
                 </div>
             </div>
@@ -378,6 +399,7 @@
                     <router-link :to="{ name: 'OrdenTrabajo'}">
                         <button 
                             class="btn btn-dark mx-4"
+                            type="button"
                         >
                             Volver
                         </button>
@@ -388,7 +410,7 @@
         </form>
     </div> 
     <!-- MODAL PARA AGREGAR INSUMOS -->
-    <div class="modal" id="modalItems" tabindex="-1" aria-labelledby="modalItemsLabel" aria-hidden="true">
+    <!-- <div class="modal" id="modalItems" tabindex="-1" aria-labelledby="modalItemsLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -417,24 +439,27 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 </template>
 
 <script setup>
 import { ref, watch, getCurrentInstance, onMounted, reactive, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2'
+import ModalInsumo from './ModalInsumo.vue';
 const { proxy } = getCurrentInstance() 
-const boolFactura = ref(false);
+const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 
 /* VARIABLES PARA LA CARGA DE INFO */
 const itmCotizaciones = ref([])
 const itmEmpleados = ref({})
+const itmTipoOT = ref([])
 
 const ordenTrabajoForm = reactive({
     cotSeleccionada: 0,
     idEmpleado: 0,
+    idTipoOrdenTrabajo: 0,
     fechaEntrega:new Date().toISOString().split('T')[0],
     cliente:{
         id_cliente: 0,
@@ -502,106 +527,122 @@ const cargarEmpleados = async () => {
         // console.log('Empleados: '+ JSON.stringify(data))
         // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
     } catch (error) {
-        
+        console.error('Error al cargar empleado:', error);
+    }
+}
+
+
+const cargarTipoOT = async () =>{
+    try {
+        const res = await fetch(proxy.$serverIP + 'api/TipoOrdenTrabajo/getTipoOrdenTrabajo');
+        if(!res.ok) throw new Error('Error en la respuesta')
+
+        const result = await res.json()
+        itmTipoOT.value = result.data
+        // console.log(result)
+        // console.log(itmTipoOT.value)
+    } catch (error) {
+        console.error('Error al cargar tipo OT:', error);
     }
 }
 
 onMounted(() => {
     /* MODAL INSUMOS*/
-    const modalEl = document.getElementById('modalItems')
-    modalInstance = new bootstrap.Modal(modalEl, {
-        backdrop: 'true', // se cierre al hacer clic afuera
-        keyboard: false
-    })
+    // const modalEl = document.getElementById('modalItems')
+    // modalInstance = new bootstrap.Modal(modalEl, {
+    //     backdrop: 'true', // se cierre al hacer clic afuera
+    //     keyboard: false
+    // })
 
-    // Escuchar cuando se cierre manualmente para actualizar showModal
-    modalEl.addEventListener('hidden.bs.modal', () => {
-        showModal.value = false
-    })
+    // // Escuchar cuando se cierre manualmente para actualizar
+    // modalEl.addEventListener('hidden.bs.modal', () => {
+    //     showModal.value = false
+    // })
     /******************/
 
     cargarCotizacionesAprobadasOrRealizadas();
     cargarEmpleados();
+    cargarTipoOT();
 })
 
 /**********************************/
 // FUNCION MODAL AGRGAR INSUMO ADICIONAL
 /**********************************/
 const showModal = ref(false)
-let modalInstance = null
+// let modalInstance = null
 
-const items = ref([
-    { 
-        idDetalleCotizacionServicio: 0,
-        descripcion: '', 
-        cantidad: null, 
-        precioUnitario: null, 
-        get subTotal() {
-            if (this.cantidad != null && this.precioUnitario != null) {
-                return (this.cantidad * this.precioUnitario).toFixed(2);
-            }
-            return '';
-        } 
-    }
-])
+// const items = ref([
+//     { 
+//         idDetalleCotizacionServicio: 0,
+//         descripcion: '', 
+//         cantidad: null, 
+//         precioUnitario: null, 
+//         get subTotal() {
+//             if (this.cantidad != null && this.precioUnitario != null) {
+//                 return (this.cantidad * this.precioUnitario).toFixed(2);
+//             }
+//             return '';
+//         } 
+//     }
+// ])
 
-const limpiarModalInsumo = () => {
-    // Limpiar
-    items.value = [
-        { 
-            descripcion: '', 
-            cantidad: null, 
-            precioUnitario: null, 
-            get subTotal() {
-                if (this.cantidad != null && this.precioUnitario != null) {
-                    return (this.cantidad * this.precioUnitario).toFixed(2);
-                }
-                return '';
-            }  
-        }
-    ]
-}
+// const limpiarModalInsumo = () => {
+//     // Limpiar
+//     items.value = [
+//         { 
+//             descripcion: '', 
+//             cantidad: null, 
+//             precioUnitario: null, 
+//             get subTotal() {
+//                 if (this.cantidad != null && this.precioUnitario != null) {
+//                     return (this.cantidad * this.precioUnitario).toFixed(2);
+//                 }
+//                 return '';
+//             }  
+//         }
+//     ]
+// }
 
-const agregarServicioAdicional = () => {
-    const insumosValidos = items.value.filter(item =>
-        item.descripcion.trim() !== '' &&
-        item.cantidad != null && item.cantidad > 0 &&
-        item.precioUnitario != null && item.precioUnitario > 0
-    )
+// const agregarServicioAdicional = () => {
+//     const insumosValidos = items.value.filter(item =>
+//         item.descripcion.trim() !== '' &&
+//         item.cantidad != null && item.cantidad > 0 &&
+//         item.precioUnitario != null && item.precioUnitario > 0
+//     )
 
-    ordenTrabajoForm.insumo.adicional.push(...insumosValidos)
+//     ordenTrabajoForm.insumo.adicional.push(...insumosValidos)
 
-    limpiarModalInsumo()
+//     limpiarModalInsumo()
 
-    showModal.value = false
-}
+//     showModal.value = false
+// }
 
-const agregarItem = () => {
-    items.value.push({
-        idDetalleCotizacionServicio: 0,
-        descripcion: '', 
-        cantidad: null, 
-        precioUnitario: null, 
-        get subTotal() {
-            if (this.cantidad != null && this.precioUnitario != null) {
-                return (this.cantidad * this.precioUnitario).toFixed(2);
-            }
-            return '';
-        } 
-    })
-}
+// const agregarItem = () => {
+//     items.value.push({
+//         idDetalleCotizacionServicio: 0,
+//         descripcion: '', 
+//         cantidad: null, 
+//         precioUnitario: null, 
+//         get subTotal() {
+//             if (this.cantidad != null && this.precioUnitario != null) {
+//                 return (this.cantidad * this.precioUnitario).toFixed(2);
+//             }
+//             return '';
+//         } 
+//     })
+// }
 
-const cerrarModalInsumo = () => {
-  showModal.value = false;
-  limpiarModalInsumo();
-};
+// const cerrarModalInsumo = () => {
+//   showModal.value = false;
+//   limpiarModalInsumo();
+// };
 
-// Abrir o cerrar el modal al cambiar showModal
-watch(showModal, (val) => {
-  if (modalInstance) {
-    val ? modalInstance.show() : modalInstance.hide()
-  }
-})
+// // Abrir o cerrar el modal al cambiar showModal
+// watch(showModal, (val) => {
+//   if (modalInstance) {
+//     val ? modalInstance.show() : modalInstance.hide()
+//   }
+// })
 
 
 /********************************/
@@ -645,7 +686,7 @@ const buscarSugerencias = async (serie) => {
 const onSerieSeleccionada = () => {
     // buscar coincidencia exacta en sugerencias
     const seleccionado = sugerencias.value.find(s => s.serie === ordenTrabajoForm.vehiculo.numSerie)
-    console.log(seleccionado)
+    // console.log(seleccionado)
     if (seleccionado) {
         ordenTrabajoForm.vehiculo = {
             id_vehiculo: seleccionado.idVehiculo,
@@ -730,12 +771,12 @@ function onClienteSeleccionadoByValue(valor) {
         );
     });
 
-    console.log("Normalizado:", normalizado);
-    console.log("Valor:", valor);
-    console.log("Cliente encontrado:", cliente);
+    // console.log("Normalizado:", normalizado);
+    // console.log("Valor:", valor);
+    // console.log("Cliente encontrado:", cliente);
 
     if (cliente) {
-        console.log('clienteSeleccionado');
+        // console.log('clienteSeleccionado');
         onClienteSeleccionado(cliente);
     }
 }
@@ -907,8 +948,10 @@ const guardarOT = async () => {
     }
 
     const objSeend = {
+        idUsuario: 1,
         idCotizacion: ordenTrabajoForm.cotSeleccionada,
         idEmpleado: ordenTrabajoForm.idEmpleado,
+        idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
         metodoPago: ordenTrabajoForm.cliente.metodoPago,
         fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
         fechaEntrega: ordenTrabajoForm.fechaEntrega,

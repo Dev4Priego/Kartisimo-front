@@ -52,7 +52,7 @@
                 </table>
                 <div class="text-center my-4">
                     <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2 text-muted">Cargando promociones...</p>
+                    <p class="mt-2 text-muted">Cargando Cotizaciones...</p>
                 </div>  
             </div>
 
