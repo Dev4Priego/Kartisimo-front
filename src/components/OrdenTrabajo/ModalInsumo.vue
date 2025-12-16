@@ -6,6 +6,7 @@
 		:style="{ background: 'rgba(0,0,0,0.5)' }"
 		v-if="modelValue"
 		@click="handleBackdropClick"
+
 	>
 		
 		<div class="modal-dialog modal-centered modal-dialog-scrollable modal-xl" style="max-width: 95vw;">
@@ -16,184 +17,500 @@
 					<button type="button" class="btn-close" @click="close"></button>
 				</div>
 
-				<div class="modal-body">
+				<div class="modal-body p-5">
 					
-					<!-- FILTROS -->
-					<div class="d-flex gap-3 mb-3">
-
-						<!-- Buscar -->
-						<input 
-							type="text" 
-							class="form-control"
-							placeholder="Buscar (modelo, marca, medidas...)"
-							v-model="search"
-							@input="onSearch"
-							style="max-width: 300px"
-						/>
-						
-						<!-- Filtro por almacén -->
-						<div class="position-relative">
-							<button
-								type="button"
-								class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
-								@click="dropdownOpen = !dropdownOpen"
-							>
-								<span>{{  'Elegir almacenes' }}</span>
-								<i class="bi bi-caret-down-fill"></i>
-							</button>
-							<div
-								v-if="dropdownOpen"
-								class="border rounded shadow bg-white position-absolute w-100 mt-1 p-2"
-								style="z-index: 1050;"
-								@mouseleave="dropdownOpen = false"
-							>
-								<div class="form-check mb-2">
-									<input
-										type="checkbox"
-										class="form-check-input"
-										id="alm-todos"
-										@change="toggleTodos"
-										:checked="selectedAlmacenes.length === 0"
-									/>
-									<label class="form-check-label" for="alm-todos">
-										Todos
-									</label>
-								</div>
-
-								<div
-									v-for="alm in almacenes"
-									:key="alm.id"
-									class="form-check"
+					<!-- PAQUETES -->
+					<div class="row">
+						<h3 class="text-start mx-5">Paquetes</h3>
+						<div class="col text-start my-3">
+							<div v-for="(paquete, i) in paqueteDisponibles" :key="i" class="form-check-inline">
+								<input 
+									class="form-check-input mx-2" 
+									type="checkbox" 
+									:value="paquete.idPaquete" 
+									v-model="paqueteSeleccionados"
+									@change="onTogglePaquete(paquete)"
 								>
-									<input
-										type="checkbox"
-										class="form-check-input"
-										:id="'alm-' + alm.id"
-										:value="alm.id"
-										v-model="selectedAlmacenes"
-										@change="onAlmacenesChanged"
-									/>
-									<label class="form-check-label" :for="'alm-' + alm.id">
-										{{ alm.nombre }}
-									</label>
-								</div>
+								<label class="form-check-label" :for="'paquete-' + i">
+									{{ paquete.nombre }} - ${{ paquete.precioUnitario }}
+								</label>
 							</div>
 						</div>
 					</div>
 
+					<!-- LLANTAS -->
+					<div class="row">
+						<h3 class="text-start mx-5">Llantas</h3>
+						<!-- Filtros -->
+						<div class="d-flex gap-3 mb-3">
 
-					<!-- TABLA HTML -->
-					<div class="table-responsive fixed-header-table">
-						<table class="table">
-							<thead>
-								<tr>
-									<th>Código</th>
-									<th>Modelo</th>
-									<th>Marca</th>
-									<th>Medidas</th>
-									<th>Rango</th>
-									<th>Precio</th>
-									<th>Almacén</th>
-									<th>Cantidad</th>
-									<th></th>
-								</tr>
-							</thead>
+							<!-- Buscar -->
+							<input 
+								type="text" 
+								class="form-control"
+								placeholder="Buscar (modelo, marca, medidas...)"
+								v-model="search"
+								@input="onSearch"
+								style="max-width: 300px"
+							/>
+							
+							<!-- Filtro por almacén -->
+							<div class="position-relative">
+								<button
+									type="button"
+									class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
+									@click="dropdownOpen = !dropdownOpen"
+								>
+									<span>{{  'Elegir almacenes' }}</span>
+									<i class="bi bi-caret-down-fill"></i>
+								</button>
+								<div
+									v-if="dropdownOpen"
+									class="border rounded shadow bg-white position-absolute w-100 mt-1 p-2"
+									style="z-index: 1050;"
+									@mouseleave="dropdownOpen = false"
+								>
+									<div class="form-check mb-2">
+										<input
+											type="checkbox"
+											class="form-check-input"
+											id="alm-todos"
+											@change="toggleTodos"
+											:checked="selectedAlmacenes.length === 0"
+										/>
+										<label class="form-check-label" for="alm-todos">
+											Todos
+										</label>
+									</div>
 
-							<tbody>
-								<tr v-for="(item, index) in items" :key="index">
-									<td>{{ item.codigo }}</td>
-									<td>{{ item.modelo }}</td>
-									<td>{{ item.marca }}</td>
-									<td>{{ item.medida }}</td>
-									<td>{{ item.rango }}</td>
-									<td>{{ item.precio }}</td>
-									<td>{{ item.ubicacion }}</td>
-									<td>{{ item.cantidad }}</td>
-									<td>
-										<button
-											v-if="!props.insumos.llanta.some(ll => ll.idLlanta === item.idLlanta)"
-											type="button"
-											class="btn btn-success btn-sm d-flex align-items-center gap-1"
-											@click="agregarLlanta(item.objLlanta)"
+									<div
+										v-for="alm in almacenes"
+										:key="alm.id"
+										class="form-check"
+									>
+										<input
+											type="checkbox"
+											class="form-check-input"
+											:id="'alm-' + alm.id"
+											:value="alm.id"
+											v-model="selectedAlmacenes"
+											@change="onAlmacenesChanged"
+										/>
+										<label class="form-check-label" :for="'alm-' + alm.id">
+											{{ alm.nombre }}
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+						<!-- TABLA HTML -->
+						<div class="table-responsive fixed-header-table">
+							<table class="table">
+								<thead>
+									<tr>
+										<th>Código</th>
+										<th>Modelo</th>
+										<th>Marca</th>
+										<th>Medidas</th>
+										<th>Rango</th>
+										<th>Precio</th>
+										<th>Almacén</th>
+										<th>Cantidad</th>
+										<th></th>
+									</tr>
+								</thead>
+
+								<tbody>
+									<tr v-for="(item, index) in items" :key="index">
+										<td>{{ item.codigo }}</td>
+										<td>{{ item.modelo }}</td>
+										<td>{{ item.marca }}</td>
+										<td>{{ item.medida }}</td>
+										<td>{{ item.rango }}</td>
+										<td>{{ item.precio }}</td>
+										<td>{{ item.ubicacion }}</td>
+										<td>{{ item.cantidad }}</td>
+										<td>
+											<button
+												v-if="!llantas.some(ll => ll.idLlanta === item.idLlanta)"
+												type="button"
+												class="btn btn-success btn-sm d-flex align-items-center gap-1"
+												@click="agregarLlanta(item.objLlanta)"
+											>
+												<i class="bi bi-plus"></i>                                            
+											</button>
+											<span v-else class="text-secondary small">
+												Ya agregada
+											</span>
+										</td>
+									</tr>
+
+									<tr v-if="items.length === 0">
+										<td colspan="8" class="text-center py-3">
+											No hay datos disponibles
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+						<!-- PAGINACIÓN -->
+						<div class="d-flex justify-content-between align-items-center mt-3">
+							
+							<!-- Total -->
+							<div>
+								<strong>Página {{ page }}:</strong> 
+								{{ items.length }} resultados (Total: {{ totalRows }})
+							</div>
+
+							<!-- Controles -->
+							<div>
+								<button class="btn btn-secondary me-2"
+									@click="prevPage"
+									:disabled="page <= 1"
+									type="button"
+								>
+									◀ Anterior
+								</button>
+
+								<button class="btn btn-secondary"
+									@click="nextPage"
+									:disabled="page >= totalPages"
+									type="button"
+								>
+									Siguiente ▶
+								</button>
+							</div>
+
+
+
+							<!-- Selector de filas por página -->
+							<div>
+								<select class="form-control" v-model="rowsPerPage" @change="onRowsChange">
+									<option value="10">10</option>
+									<option value="20">20</option>
+									<option value="50">50</option>
+									<option value="100">100</option>
+								</select>
+							</div>
+
+						</div>
+					</div>
+					<hr>
+					<!-- TABLA RESUMEN DE PRODUCTOS Y SERVICIOS -->
+					<div class="mt-4">
+						<h4 class="mb-3">Resumen de productos y servicios</h4>
+
+						<div class="table-responsive">
+							<table class="table fixed-header-table">
+								<thead >
+									<tr>
+										<th>Concepto trabajo</th>
+										<th>Descripción</th>
+										<th>Cantidad</th>
+										<th>P/U</th>
+										<th>Subtotal</th>
+										<th>Acciones</th>
+									</tr>
+								</thead>
+								<tbody>
+
+									<!-- LLANTAS -->
+									<tr v-for="(ll, i) in llantas || []" :key="'ll-' + i">
+										<td>
+											<select
+												class="form-select form-select-sm"
+												v-model="ll.idConceptoTrabajo"
+											>
+												<!-- Default -->
+												<option :value="0">-- Seleccione concepto --</option>
+
+												<option
+													v-for="c in conceptoOT"
+													:key="c.idConceptoOrdenTrabajo"
+													:value="c.idConceptoOrdenTrabajo"
+												>
+													{{ c.nombre }}
+												</option>
+											</select>
+										</td>
+										<td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }} </td>
+										<td>
+											<input
+												type="number"
+												min="1"
+												class="form-control form-control-sm"
+												v-model.number="ll.cantidad"
+												@input="recalcularSubtotal(ll)"
+											/>
+										</td>
+										<td>
+											<input
+												type="number"
+												min="0"
+												step="0.01"
+												class="form-control form-control-sm input-precio-unitario"
+												v-model.number="ll.precioUnitario"
+												@input="recalcularSubtotal(ll)"
+												@keydown="irAlSiguientePrecio"
+											/>
+										</td>
+
+										<td>
+											<div v-if="ll.idPromocion != null && ll.idPromocion !== 0">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (ll.cantidad * ll.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(ll.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(ll.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+										</td>
+										<td>
+											<select
+												class="form-select"
+												v-model="ll.idPromocion"
+												@change="onPromoChange(ll)"
+											>
+												<!-- Default -->
+												<option :value="0">-- Sin promoción --</option>
+
+												<!-- Promociones disponibles -->
+												<option
+													v-for="promo in ll.promosDisponibles"
+													:key="promo.idPromocion"
+													:value="promo.idPromocion"
+												>
+													{{ promo.nombre }} 	( {{ promo.tipo ? promo.valor + '%' : '$' + promo.valor }}	)
+												</option>
+											</select>
+
+											<button 
+												type="button"
+												class="btn btn-danger btn-sm"
+												@click="borrarInsumo(ll)"
+											>
+												<i class="bi bi-trash"></i> Borrar
+											</button>
+										</td>
+									</tr>
+
+									<!-- PAQUETES + DETALLES -->
+									<template v-for="(paq, j) in paquetes || []" :key="'paq-' + j">
+
+										<!-- FILA DEL PAQUETE -->
+										<tr>
+											<td>
+												<select
+													class="form-select form-select-sm"
+													v-model="paq.idConceptoTrabajo"
+												>
+													<option :value="0">-- Seleccione concepto --</option>
+													<option
+														v-for="c in conceptoOT"
+														:key="c.idConceptoOrdenTrabajo"
+														:value="c.idConceptoOrdenTrabajo"
+													>
+														{{ c.nombre }}
+													</option>
+												</select>
+											</td>
+
+											<td>{{ paq.descripcion }}</td>
+											<td>{{ paq.cantidad }}</td>
+
+											<td>
+												{{ Number(paq.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+											</td>
+
+											<td>
+												<div v-if="paq.idPromocion && paq.idPromocion !== 0">
+													<span class="text-decoration-line-through text-muted">
+														{{ (paq.cantidad * paq.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+													</span>
+													<span class="text-success fw-bold mx-2">
+														{{ Number(paq.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+													</span>
+												</div>
+												<div v-else>
+													{{ Number(paq.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+												</div>
+											</td>
+
+											<td>
+												<select
+													class="form-select"
+													v-model="paq.idPromocion"
+													@change="onPromoChange(paq)"
+												>
+													<option :value="0">-- Sin promoción --</option>
+													<option
+														v-for="promo in paq.promosDisponibles"
+														:key="promo.idPromocion"
+														:value="promo.idPromocion"
+													>
+														{{ promo.nombre }} ({{ promo.tipo ? promo.valor + '%' : '$' + promo.valor }})
+													</option>
+												</select>
+
+												<button
+													type="button"
+													class="btn btn-danger btn-sm mt-1"
+													@click="borrarPaquete(paq)"
+												>
+													<i class="bi bi-trash"></i> Borrar
+												</button>
+											</td>
+										</tr>
+
+										<!-- FILAS DE DETALLE DEL PAQUETE -->
+										<tr
+											v-for="(det, k) in paq.detalle || []"
+											:key="'det-' + paq.idPaquete + '-' + k"
 										>
-											<i class="bi bi-plus"></i>                                            
-										</button>
-										<span v-else class="text-secondary small">
-											Ya agregada
-										</span>
-									</td>
-								</tr>
+											<td></td>
+											<td class="ps-4">↳ {{ det.descripcion }}</td>
+											<td>{{ det.cantidad }}</td>
+											<td>
+												{{ Number(det.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+											</td>
+											<td>{{ Number(det.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}</td>
+											<td></td>
+										</tr>
 
-								<tr v-if="items.length === 0">
-									<td colspan="8" class="text-center py-3">
-										No hay datos disponibles
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+									</template>
 
-					<!-- PAGINACIÓN -->
-					<div class="d-flex justify-content-between align-items-center mt-3">
-						
-						<!-- Total -->
-						<div>
-							<strong>Página {{ page }}:</strong> 
-							{{ items.length }} resultados (Total: {{ totalRows }})
-						</div>
 
-						<!-- Controles -->
-						<div>
-							<button class="btn btn-secondary me-2"
-								@click="prevPage"
-								:disabled="page <= 1"
+									<!-- ADICIONALES -->
+									<tr v-for="(ad, m) in adicionales || []" :key="'ad-' + m">
+										<td>
+											<select
+												class="form-select form-select-sm"
+												v-model="ad.idConceptoTrabajo"
+											>
+												<option :value="0">-- Seleccione concepto --</option>
+
+												<option
+													v-for="c in conceptoOT"
+													:key="c.idConceptoOrdenTrabajo"
+													:value="c.idConceptoOrdenTrabajo"
+												>
+													{{ c.nombre }}
+												</option>
+											</select>
+										</td>
+
+										<td>{{ ad.descripcion }}</td>
+
+										<td>{{ ad.cantidad }}</td>
+
+										<td>
+											{{ Number(ad.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+										</td>
+
+										<td>
+											<div v-if="ad.idPromocion && ad.idPromocion !== 0">
+												<span class="text-decoration-line-through text-muted">
+													{{ (ad.cantidad * ad.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+												</span>
+												<span class="text-success fw-bold mx-2">
+													{{ Number(ad.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+												</span>
+											</div>
+											<div v-else>
+												{{ Number(ad.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+											</div>
+										</td>
+
+										<td>
+											<select
+												class="form-select"
+												v-model="ad.idPromocion"
+												@change="onPromoChange(ad)"
+											>
+												<option :value="0">-- Sin promoción --</option>
+
+												<option
+													v-for="promo in ad.promosDisponibles"
+													:key="promo.idPromocion"
+													:value="promo.idPromocion"
+												>
+													{{ promo.nombre }} ({{ promo.tipo ? promo.valor + '%' : '$' + promo.valor }})
+												</option>
+											</select>
+
+											<button
+												type="button"
+												class="btn btn-danger btn-sm mt-1"
+												@click="borrarAdicional(ad)"
+											>
+												<i class="bi bi-trash"></i> Borrar
+											</button>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+
+							<button
 								type="button"
+								class="btn btn-primary"
+								@click="mostrarModalAdicional = true"
 							>
-								◀ Anterior
+								Agregar adicionales
 							</button>
 
-							<button class="btn btn-secondary"
-								@click="nextPage"
-								:disabled="page >= totalPages"
-								type="button"
-							>
-								Siguiente ▶
-							</button>
+							<ModalAdicional
+								v-if="mostrarModalAdicional"
+								v-model:adicionales="adicionales"
+								:conceptoOT="conceptoOT"
+								@cerrar="mostrarModalAdicional = false"
+							/>
 						</div>
-
-						<!-- Selector de filas por página -->
-						<div>
-							<select class="form-control" v-model="rowsPerPage" @change="onRowsChange">
-								<option value="10">10</option>
-								<option value="20">20</option>
-								<option value="50">50</option>
-								<option value="100">100</option>
-							</select>
-						</div>
-
 					</div>
-
 				</div>
 
 				<div class="modal-footer">
 					<button class="btn btn-secondary" @click="close">Cerrar</button>
-				</div>
-
+				</div>			
 			</div>
 		</div>
 	</div>
 </template>
 
 <script setup>
+	
 import { defineProps, defineEmits, watch, onMounted, ref, getCurrentInstance, computed } from "vue";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import ModalAdicional from "./ModalAdicional.vue";
 
 const props = defineProps({
 	modelValue: Boolean,
 	title: { type: String, default: "Modal" },
 	insumos: Object
 });
+
+const mostrarModalAdicional = ref(false);
+
+const llantas = ref([]);
+const paquetes = ref([]);
+const adicionales = ref([]);
+
+// mirar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
+watch(
+    () => props.insumos,
+    (nuevo) => {
+        llantas.value = [...(nuevo.llanta || [])];
+        paquetes.value = [...(nuevo.paquete || [])];
+        adicionales.value = [...(nuevo.adicional || [])];
+    },
+    { immediate: true } // carga inicial
+);
 
 const emit = defineEmits(["update:modelValue"]);
 const close = () => emit("update:modelValue", false);
@@ -210,7 +527,92 @@ const search = ref("");
 
 const almacenes = ref([]);
 const selectedAlmacenes = ref([]);  
-const dropdownOpen = ref(false);        
+const dropdownOpen = ref(false);     
+
+const conceptoOT = ref([]);
+
+const paqueteDisponibles = ref([]);
+const paqueteSeleccionados = ref([]);
+
+
+// Si existe idPromocion, Busca la promo en ll.promosDisponibles, Copia los datos importantes al item, recalcula Subtotal
+const onPromoChange = (item) => {
+    if (!item.idPromocion || item.idPromocion === 0) {
+        // Sin promoción
+        item.valorPromocion = null;
+        item.tipoPromocion = null;
+        item.excluirPromocionGeneral = false;
+    } else {
+        const promo = item.promosDisponibles.find(
+            p => p.idPromocion === item.idPromocion
+        );
+
+        if (promo) {
+			item.nombrePromocion = promo.nombre
+            item.valorPromocion = promo.valor;
+            item.tipoPromocion = promo.tipo; // true = porcentaje, false = monto
+        }
+    }
+
+    recalcularSubtotal(item);
+};
+
+
+
+const precioFinalItem = (item) => {
+    const base = item.precioUnitario ?? 0;
+
+    // Aplica promoción individual si existe
+    if (item.idPromocion && item.valorPromocion != null) {
+        return item.tipoPromocion
+        ? base * (1 - item.valorPromocion / 100) // porcentaje
+        : Math.max(0, base - item.valorPromocion); // monto fijo
+    }
+
+    // Sin promoción
+    return base;
+};
+
+const recalcularSubtotal = (item) => {
+    const precioFinal = precioFinalItem(item); // aplica promo si existe
+    const subtotal = (item.cantidad || 0) * precioFinal;
+
+    item.subTotal = subtotal.toFixed(2);
+};
+
+
+const borrarInsumo = (insumo) => {
+    insumo.eliminado = true;
+
+    llantas.value = llantas.value.filter(
+        x => x.idLlanta !== insumo.idLlanta
+    );
+
+    mostrarToast("success", "Insumo eliminado");
+};
+
+const borrarPaquete = (paquete) => {
+    paquete.eliminado = true;
+
+    paquetes.value = paquetes.value.filter(
+        x => x.idPaquete !== paquete.idPaquete
+    );
+
+    mostrarToast("success", "Paquete eliminado");
+};
+
+
+const borrarAdicional = (adicional) => {
+    adicional.eliminado = true;
+
+    adicionales.value = adicionales.value.filter(
+        x => x.idDetalleCotizacionServicio !== adicional.idDetalleCotizacionServicio
+    );
+
+    mostrarToast("success", "Servicio eliminado");
+};
+
+
 
 const mostrarToast = (type, message) => {
 	const color = type === "success" 
@@ -237,7 +639,7 @@ const mostrarToast = (type, message) => {
 };
 
 const cargarAlmacenes = async () =>{
-		try {
+	try {
 		const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`)
 		
 		if (!response.ok) {
@@ -356,6 +758,22 @@ watch(() => props.modelValue, v => {
 });
 
 
+const obtenerPromosPorPaquete = async (idPaquete) => {
+        try {
+            const res = await fetch(
+                `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`
+            );
+
+            if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
+            const data = await res.json();
+            return Array.isArray(data) ? data.filter(p => p.activo) : [];
+        } catch (error) {
+            console.error("Error al obtener promociones por paquete:", error);
+            return [];
+        }
+    };
+
 
 
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
@@ -374,84 +792,242 @@ const obtenerPromosPorInventario = async (idInventarioInicial) => {
 		return [];
 	}
 };
+const agregarLlanta = async (itm) => {
 
-const agregarLlanta = async (itm) =>{
-	console.log(itm)
+	if (llantas.value.length >= 6) {
+		mostrarToast("warning", "No puedes agregar más de 6 llantas");
+		return;
+	}
 
-	if (props.insumos.llanta.length >= 6) {
-			mostrarToast("warning", "No puedes agregar más de 6 llantas")
-			console.log(props.insumos.llanta)
+	const yaExiste = llantas.value.some(
+		l => l.idInventarioInicial === itm.idInventarioInicial
+	);
+
+	if (yaExiste) {
+		mostrarToast("warning", "Esta llanta ya fue agregada");
 		return;
 	}
 
 	const nuevaLlanta = {
 		idLlanta: itm.idLlanta,
 		idAlmacen: itm.idAlmacen,
-		cantidad: 4,
-		descripcion: `${itm.medidas} ${itm.rango} ${itm.medidas}`,
-		precioUnitario: Math.trunc(parseFloat(itm.precio)) || 0,
-		marca: itm.marca,
-		ubicacion: itm.nombreAlmacen,
+		idPromocion: 0,
+		idConceptoTrabajo: 1,
+		idInventarioInicial: itm.idInventarioInicial,
 
-		
-		promosAplicables: [],
-		idPromocionSeleccionada: 0,
-		promo: null,
-		precioConPromo: null,
-		excluirPromocionGeneral: false,
-		comentario: "",
+		descripcion: `${itm.medidas} ${itm.rango} ${itm.modelo}`,
+		medida: itm.medidas,        // estético
+		modelo: itm.modelo,        // estético
+		marca: itm.nombreMarca,          // estético
+		ubicacion: itm.ubicacion,  // estético
+
+		cantidad: 4,
+		precioUnitario: Math.trunc(itm.precio || 0),
+		subTotal: (4 * Math.trunc(itm.precio || 0)).toFixed(2),
+
+		promosDisponibles: [],
+
+		// valores históricos (vacíos inicialmente)
+		nombrePromocion: null,
+		valorPromocion: null,
+		tipoPromocion: null
 	};
 
 	try {
-		//console.log(nuevaLlanta.idInventarioInicial)
-		const promosDisponibles = await obtenerPromosPorInventario(itm.idInventarioInicial);
-		
-		nuevaLlanta.promosAplicables = promosDisponibles || [];
-		nuevaLlanta.idPromocionSeleccionada = 0;
-		nuevaLlanta.promo = null;
-		nuevaLlanta.precioConPromo = nuevaLlanta.precioUnitario;
-						
+		const promos = await obtenerPromosPorInventario(
+			itm.idInventarioInicial
+		);
+
+		nuevaLlanta.promosDisponibles = promos || [];
 	} catch (error) {
-
-		console.error('Error al consultar promociones:', error);
-		nuevaLlanta.promosAplicables = [];
-		nuevaLlanta.idPromocionSeleccionada = 0;
-		nuevaLlanta.promo = null;
-		nuevaLlanta.precioConPromo = nuevaLlanta.precioUnitario;
-
+		console.error("Error al cargar promociones", error);
+		nuevaLlanta.promosDisponibles = [];
 	}
 
-	props.insumos.llanta.push(nuevaLlanta);  
-            
-	props.insumos.llanta.sort((a, b) => {
+	// agregar
+	llantas.value.push(nuevaLlanta);
+
+	// ordenar (opcional, como ya lo tenías)
+	llantas.value.sort((a, b) => {
 		const prioridad = (llanta) => {
-			const modelo = llanta.modeloMedidas?.toUpperCase() || '';
-			if (modelo.includes('BRIDGESTONE')) return 1;
-			if (modelo.includes('FIRESTONE')) return 2;
-			return 3; // resto de marcas
+			const marca = llanta.marca?.toUpperCase() || '';
+			if (marca.includes('BRIDGESTONE')) return 1;
+			if (marca.includes('FIRESTONE')) return 2;
+			return 3;
 		};
 
-		const aPrioridad = prioridad(a);
-		const bPrioridad = prioridad(b);
+		const pa = prioridad(a);
+		const pb = prioridad(b);
 
-		if (aPrioridad !== bPrioridad) {
-			return aPrioridad - bPrioridad;
-		}
-
-		// Si tienen la misma prioridad, ordenar por precio de mayor a menor
+		if (pa !== pb) return pa - pb;
 		return (b.precioUnitario || 0) - (a.precioUnitario || 0);
 	});
+};
 
-	console.log('agregarLlanta2: '+ JSON.stringify(props.insumos.llanta))
+
+const irAlSiguientePrecio = (event) => {
+
+	const isTab = event.key === "Tab";
+	const isEnter = event.key === "Enter";
+	const isShift = event.shiftKey;
+
+	// Solo intercepta Tab o Enter
+	if (!isTab && !isEnter) return;
+
+	event.preventDefault(); // Evita comportamiento por defecto
+
+	// Obtener todos los inputs
+	const inputs = Array.from(document.querySelectorAll('.input-precio-unitario'));
+	const currentIndex = inputs.indexOf(event.target);
+
+	// ⬅⬅⬅ Retroceder con Shift + Tab
+	if (isTab && isShift) {
+		if (inputs[currentIndex - 1]) {
+			inputs[currentIndex - 1].focus();
+		} else {
+			// Si es el primero, ir al último
+			inputs[inputs.length - 1]?.focus();
+		}
+		return;
+	}
+
+	// ➡➡➡ Avanzar con Tab o Enter
+	if (inputs[currentIndex + 1]) {
+		inputs[currentIndex + 1].focus();
+	} else {
+		// Si está en el último, vuelve al primero
+		inputs[0]?.focus();
+	}
+};
+
+const cargarConcpetoTrabajo = async () => {
+	try {
+		const response = await fetch(`${proxy.$serverIP}api/ConceptoTrabajo/get`)
+		
+		if (!response.ok) {
+			throw new Error(`Error HTTP: ${response.status}`)
+		}
+
+		const data = await response.json()
+
+		conceptoOT.value = data.map(a => ({
+			idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
+			nombre: a.nombre
+		}))
+
+		// console.log('Datos recibidos:', conceptoOT.value)
+		
+	} catch (error) {
+		console.error('Error cargando ConceptoTrabajo:', error)
+	}
 }
+
+const cargarPaquetes = async () => {
+	try {
+		const response = await fetch(`${proxy.$serverIP}api/Paquetes/getPaquete`);
+
+		if (!response.ok) {
+			throw new Error(`Error HTTP: ${response.status}`);
+		}
+
+		const data = await response.json();
+
+		paqueteDisponibles.value = data.map(p => ({
+			idPaquete: p.idPaquete,
+			nombre: p.nombre,
+			descripcion: p.descripcion,
+			precioUnitario: p.precioUnitario,
+
+			// 👉 MISMO NOMBRE que usas después
+			detalle: (p.detalle || []).map(d => ({
+				idDesglosePaquete: d.idDesglosePaquete,
+				nombre: d.descripcion,
+				cantidad: d.cantidad,
+				precioUnitario: d.precioUnitario
+			}))
+		}));
+
+	} catch (error) {
+		console.error('Error cargando paquetes:', error);
+	}
+};
+
+
+// si hay cambios en el arreglo de paquetes, marca los checboxes de los paquetes que existan en el arreglo
+watch(
+	() => paquetes.value,
+	(nuevoValor) => {
+		if (!Array.isArray(nuevoValor)) return;
+
+		paqueteSeleccionados.value = nuevoValor.map(p => p.idPaquete);
+	},
+	{ immediate: true, deep: true }
+);
+
+
+// agregar o quitar a el arreglo paquetes, conforme checbox
+const onTogglePaquete = async (paqueteBase) => {
+	const existe = paquetes.value.some(p => p.idPaquete === paqueteBase.idPaquete);
+
+	// ➖ QUITAR
+	if (existe) {
+		paquetes.value = paquetes.value.filter(
+			p => p.idPaquete !== paqueteBase.idPaquete
+		);
+		return;
+	}
+
+	// ➕ AGREGAR
+	const promosDisponibles =
+		await obtenerPromosPorPaquete(paqueteBase.idPaquete) || [];
+
+	paquetes.value.push({
+		idPaquete: paqueteBase.idPaquete,
+		idPromocion: 0,
+		idConceptoTrabajo: 0,
+
+		descripcion: paqueteBase.nombre,
+		cantidad: 1,
+		precioUnitario: paqueteBase.precioUnitario,
+
+		subTotal: (
+			1 * precioFinalItem({
+				precioUnitario: paqueteBase.precioUnitario,
+				idPromocion: 0,
+				valorPromocion: null,
+				tipoPromocion: null
+			})
+		).toFixed(2),
+
+		detalle: (paqueteBase.detalle || []).map(det => ({
+			idDesglosePaquete: det.idDesglosePaquete,
+			descripcion: det.nombre,
+			cantidad: 1,
+			precioUnitario: 0,
+			subTotal: 0
+		})),
+
+		promosDisponibles,
+
+		nombrePromocion: null,
+		valorPromocion: null,
+		tipoPromocion: null
+	});
+};
+
+
+
+
 
 // Mounted
 onMounted(() => {
 	if (props.modelValue) document.addEventListener("keydown", handleEsc);
 	cargarLlantas();
 	cargarAlmacenes();
+	cargarConcpetoTrabajo();
+	cargarPaquetes();
 
-	console.log(props.insumos)
+	// console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
 </script>
 

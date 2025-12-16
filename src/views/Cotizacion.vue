@@ -396,6 +396,9 @@
                                 <div class="mt-4">
                                     <button class="btn btn-outline-secondary w-100" @click="generarPDF">Descargar PDF</button>
                                 </div>
+
+
+                                
                             </div>
                             <div class="col">
                                 <div class="mt-4">
@@ -1965,6 +1968,7 @@
         const base = item.precioUnitario ?? 0;
 
         // Si tiene promo individual → aplica esa
+        // si tiene tipo Promo false es Monto, si es true es Porcentual
         if (item.promo && item.promo.valor != null) {
             return item.promo.tipo
             ? base * (1 - item.promo.valor / 100)
@@ -3054,8 +3058,16 @@
     };
 
     const generarPDF = async () => {
+        
+
         const pdfMakeModule = await import("pdfmake/build/pdfmake");
         const pdfFontsModule = await import("pdfmake/build/vfs_fonts");
+
+        // si usas este tengo cuidado con con la constante que tienes 
+       // pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
+
+
 
         const pdfMake = pdfMakeModule.default;
 
@@ -3205,8 +3217,30 @@
             }
         };
 
-        pdfMake.createPdf(docDefinition).open();
+        //pdfMake.createPdf(docDefinition).open();
+
+        // usa esta si el problema es download 
+        pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
+
+
     };
 
+    // si ningua de estas te funciona esta este 
 
+    // pdfMake.createPdf(docDefinition).getBase64(data => {
+        
+    //     const pdfData = `data:application/pdf;base64,${data}`;
+    //     document.getElementById('pdfFrame').src = pdfData;
+
+
+        
+
+    //     pdfMake.createPdf(docDefinition).getBase64(data => {
+    //         const pdfData = `data:application/pdf;base64,${data}`;
+    //         document.getElementById('pdfFrame').src = pdfData;
+    //     });                 
+
+        
+
+    // });
 </script>

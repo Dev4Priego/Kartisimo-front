@@ -37,7 +37,13 @@
                                     list="vehiculos"
                                     placeholder="Num. Serie *"
                                     class="form-control"
+                                    @blur="validate('vehiculo.numSerie')"
+                                    :class="{'input-error': errores['vehiculo.numSerie']}"
                                 />
+                                <small v-if="errores['vehiculo.numSerie']" class="error-msg">
+                                    {{ errores['vehiculo.numSerie'] }}
+                                </small>
+
 
                                 <datalist id="vehiculos">
                                     <option
@@ -50,24 +56,90 @@
                                 </datalist>
                             </div>
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.modelo" class="form-control" type="text" placeholder="Modelo *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.modelo" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Modelo *"
+                                    @blur="validate('vehiculo.modelo')"
+                                    :class="{'input-error': errores['vehiculo.modelo']}"
+                                >
+                                <small v-if="errores['vehiculo.modelo']" class="error-msg">
+                                    {{ errores['vehiculo.modelo'] }}
+                                </small>
                             </div>
+
+                            
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.kilometraje" class="form-control" type="text" placeholder="Kilometraje *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.kilometraje"
+                                    class="form-control"
+                                    type="number"
+                                    placeholder="Kilometraje *"
+                                    @blur="validate('vehiculo.kilometraje')"
+                                    :class="{'input-error': errores['vehiculo.kilometraje']}"
+                                >
+                                <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
+                                    {{ errores['vehiculo.kilometraje'] }}
+                                </small>
                             </div>
+
+
+
+
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.anio" class="form-control" type="text" placeholder="Año *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.anio" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Año *"
+                                    @blur="validate('vehiculo.anio')"
+                                    :class="{'input-error': errores['vehiculo.anio']}"
+                                >
+                                <small v-if="errores['vehiculo.anio']" class="error-msg">
+                                    {{ errores['vehiculo.anio'] }}
+                                </small>
                             </div>
                         </div>
                         <div class="col">
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.marca" class="form-control" type="text" placeholder="Marca *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.marca" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Marca *"
+                                    @blur="validate('vehiculo.marca')"
+                                    :class="{'input-error': errores['vehiculo.marca']}"
+                                >
+                                <small v-if="errores['vehiculo.marca']" class="error-msg">
+                                    {{ errores['vehiculo.marca'] }}
+                                </small>
                             </div>
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.color" class="form-control" type="text" placeholder="Color *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.color" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Color *"
+                                    @blur="validate('vehiculo.color')"
+                                    :class="{'input-error': errores['vehiculo.color']}"
+                                >
+                                <small v-if="errores['vehiculo.color']" class="error-msg">
+                                    {{ errores['vehiculo.color'] }}
+                                </small>
                             </div>
                             <div class="mb-3">
-                                <input v-model="ordenTrabajoForm.vehiculo.placas" class="form-control" type="text" placeholder="Placas *">
+                                <input 
+                                    v-model="ordenTrabajoForm.vehiculo.placas" 
+                                    class="form-control" 
+                                    type="text" 
+                                    placeholder="Placas *"
+                                    @blur="validate('vehiculo.placas')"
+                                    :class="{'input-error': errores['vehiculo.placas']}"
+                                >
+                                <small v-if="errores['vehiculo.placas']" class="error-msg">
+                                    {{ errores['vehiculo.placas'] }}
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -86,7 +158,12 @@
                                     list="clientes"
                                     @input="onClienteInput($event.target.value)"
                                     @change="onClienteSeleccionadoByValue($event.target.value)"
+                                    @blur="validate('cliente.clienteNombre')"
+                                    :class="{'input-error': errores['cliente.clienteNombre']}"
                                 >
+                                <small v-if="errores['cliente.clienteNombre']" class="error-msg">
+                                    {{ errores['cliente.clienteNombre'] }}
+                                </small>
                             </div>                                    
 
                             <!-- Apllidos -->
@@ -96,7 +173,12 @@
                                     type="text"
                                     class="form-control"
                                     placeholder="Apellido Paterno *"
+                                    @blur="validate('cliente.apPaterno')"
+                                    :class="{'input-error': errores['cliente.apPaterno']}"
                                 >
+                                <small v-if="errores['cliente.apPaterno']" class="error-msg">
+                                    {{ errores['cliente.apPaterno'] }}
+                                </small>
                             </div>
 
                             <div class="mb-3">
@@ -105,7 +187,12 @@
                                     type="text"
                                     class="form-control"
                                     placeholder="Apellido Materno *"
+                                    @blur="validate('cliente.apMaterno')"
+                                    :class="{'input-error': errores['cliente.apMaterno']}"
                                 >
+                                <small v-if="errores['cliente.apMaterno']" class="error-msg">
+                                    {{ errores['cliente.apMaterno'] }}
+                                </small>
                             </div>
                         </div>
 
@@ -120,7 +207,12 @@
                                     list="clientes"
                                     @input="onClienteInput($event.target.value)"
                                     @change="onClienteSeleccionadoByValue($event.target.value)"
+                                    @blur="validate('cliente.clienteTelefono')"
+                                    :class="{'input-error': errores['cliente.clienteTelefono']}"
                                 >
+                                <small v-if="errores['cliente.clienteTelefono']" class="error-msg">
+                                    {{ errores['cliente.clienteTelefono'] }}
+                                </small>
                             </div>
 
                             <!-- Correo -->
@@ -133,7 +225,12 @@
                                     list="clientes"
                                     @input="onClienteInput($event.target.value)"
                                     @change="onClienteSeleccionadoByValue($event.target.value)"
+                                    @blur="validate('cliente.clienteCorreo')"
+                                    :class="{'input-error': errores['cliente.clienteCorreo']}"
                                 >
+                                <small v-if="errores['cliente.clienteCorreo']" class="error-msg">
+                                    {{ errores['cliente.clienteCorreo'] }}
+                                </small>
                             </div>
 
                             <!-- RFC -->
@@ -143,7 +240,12 @@
                                     type="text"
                                     class="form-control"
                                     placeholder="RFC"
+                                    @blur="validate('cliente.rfc')"
+                                    :class="{'input-error': errores['cliente.rfc']}"
                                 >
+                                <small v-if="errores['cliente.rfc']" class="error-msg">
+                                    {{ errores['cliente.rfc'] }}
+                                </small>
                             </div>
                         </div>
                     </div>                    
@@ -167,43 +269,56 @@
                     <!-- Método de pago -->
                     <div class="mb-3">
                         <label class="form-label" for="formaPago">Método de Pago *</label>
-                        <select v-model="ordenTrabajoForm.cliente.metodoPago" class="form-select" name="formaPago" id="slcFormaPago">
+
+                        <select 
+                            v-model="ordenTrabajoForm.cliente.metodoPago"
+                            @blur="validate('cliente.metodoPago')"
+                            class="form-select"
+                            name="formaPago"
+                            id="slcFormaPago"
+                            :class="{'input-error': errores['cliente.metodoPago']}"
+                        >
                             <option value="">-Selecciona-</option>
                             <option value="Efectivo">Efectivo</option>
                             <option value="Tarjeta">Tarjeta</option>
                         </select>
+
+                        <small v-if="errores['cliente.metodoPago']" class="error-msg">
+                            {{ errores['cliente.metodoPago'] }}
+                        </small>
+
                     </div>
                 </div>
                 <div class="col">
                     <div class="mb-3">
                         <label class="form-label">Fecha Alta *</label>
-                        <input v-model="ordenTrabajoForm.cliente.fechaAlta" class="form-control" type="date">
+                        <input 
+                            v-model="ordenTrabajoForm.cliente.fechaAlta" 
+                            class="form-control" 
+                            type="datetime-local"
+                            @blur="validate('cliente.fechaAlta')"
+                            :class="{'input-error': errores['cliente.fechaAlta']}"
+                            disabled
+                        >
+                        <small v-if="errores['cliente.fechaAlta']" class="error-msg">
+                            {{ errores['cliente.fechaAlta'] }}
+                        </small>
                     </div>                                    
                 </div>
                 <div class="col">
                     <div class="mb-3">
                         <label class="form-label">Fecha de entrega propuesta *</label>
-                        <input v-model="ordenTrabajoForm.fechaEntrega" class="form-control" type="date">
+                        <input 
+                            v-model="ordenTrabajoForm.fechaEntrega"
+                            type="datetime-local"
+                            class="form-control"
+                            @blur="validate('fechaEntrega')"
+                            :class="{'input-error': errores['fechaEntrega']}"
+                        >
+                        <small v-if="errores['fechaEntrega']" class="error-msg">
+                            {{ errores['fechaEntrega'] }}
+                        </small>
                     </div>
-                </div>
-            </div>
-            <hr>
-            <div class="row my-3">
-                <div class="col-4">
-                    <h5>Tipo Orden de Trabajo</h5>
-                </div>
-                <div class="col-8">
-                    <label class="form-label" for="slcCotizacion">Selecciona un tipo *</label>
-                    <select v-model="ordenTrabajoForm.idTipoOrdenTrabajo" class="form-select" name="tipoOT" id="slcTipoOrdenTrabajo">
-                        <option :value="0" disabled selected>
-                            -- Selecciona un tipo --
-                        </option>
-
-                        <option v-for="itm in itmTipoOT" :key="itm.idTipoOrdenTrabajo" :value="itm.idTipoOrdenTrabajo">
-                            {{itm.nombre}} ({{ itm.tiempoEstimado }})
-                        </option>
-                    </select>
-                    <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
                 </div>
             </div>
             <hr>
@@ -213,7 +328,14 @@
                 </div>
                 <div class="col-8">
                     <label class="form-label" for="slcTecnico">Selecciona el técnico *</label>
-                    <select v-model="ordenTrabajoForm.idEmpleado" class="form-select" name="tecnico" id="slcTecnico">
+                    <select 
+                        v-model="ordenTrabajoForm.idEmpleado" 
+                        class="form-select" 
+                        name="tecnico" 
+                        id="slcTecnico"
+                        @blur="validate('idEmpleado')"
+                        :class="{'input-error': errores['idEmpleado']}"
+                    >
                         <option :value="0" disabled selected>
                             -- Selecciona un técnico --
                         </option>
@@ -222,6 +344,9 @@
                             ({{ itm.puesto }}) {{ itm.nombres }} {{ itm.apePaterno }}
                         </option>
                     </select>
+                    <small v-if="errores['idEmpleado']" class="error-msg">
+                        {{ errores['idEmpleado'] }}
+                    </small>
                 </div>
             </div>
             <hr>
@@ -308,7 +433,19 @@
                                         <td>{{llanta.descripcion}}</td>
                                         <td>{{llanta.cantidad}}</td>
                                         <td>{{llanta.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
-                                        <td>{{llanta.subTotal}}</td>
+                                        <td>
+                                            <div v-if="llanta.idPromocion != null && llanta.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (llanta.cantidad * llanta.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(llanta.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(llanta.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
                                         <td>
                                             <button
                                                 class="btn btn-sm btn-outline-danger"
@@ -326,7 +463,19 @@
                                         <td>{{paquete.descripcion}}</td>
                                         <td>{{paquete.cantidad}}</td>
                                         <td>{{paquete.precioUnitario}}</td> <!-- .toFixed(2)-->
-                                        <td>{{paquete.subTotal}}</td>
+                                        <td>
+                                            <div v-if="paquete.idPromocion != null && paquete.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (paquete.cantidad * paquete.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(paquete.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(paquete.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
                                         <td>
                                             <button
                                                 class="btn btn-sm btn-outline-danger"
@@ -352,7 +501,19 @@
                                         <td>{{ad.descripcion}}</td>
                                         <td>{{ad.cantidad}}</td>
                                         <td>{{ad.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
-                                        <td>{{ad.subTotal}}</td>
+                                        <td>
+                                            <div v-if="ad.idPromocion != null && ad.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (ad.cantidad * ad.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(ad.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(ad.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
                                         <td>
                                             <button
                                                 class="btn btn-sm btn-outline-danger"
@@ -404,7 +565,7 @@
                             Volver
                         </button>
                     </router-link>
-                    <button class="btn btn-primary" type="submit">Guardar</button>
+                    <button class="btn btn-primary" type="submit" :disabled="!formValido">Guardar</button>
                 </div>
             </div>            
         </form>
@@ -443,7 +604,7 @@
 </template>
 
 <script setup>
-import { ref, watch, getCurrentInstance, onMounted, reactive, nextTick } from 'vue';
+import { ref, watch, getCurrentInstance, onMounted, reactive, nextTick, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2'
 import ModalInsumo from './ModalInsumo.vue';
@@ -451,16 +612,190 @@ const { proxy } = getCurrentInstance()
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 
+/* VARIABLES PARA VALIDACION DE CAMPOS */
+const errores = reactive({});
+
+// Helper para acceder a propiedades anidadas tipo "cliente.telefono"
+const getValor = (path) => {
+    return path.split(".").reduce((obj, key) => obj[key], ordenTrabajoForm);
+}
+
+
+function validate(path) {
+    const value = getValor(path);
+
+    // ========================= VALIDACIONES ==============================
+
+    const rules = {
+
+        // -------- CLIENTE ----------
+        "cliente.clienteNombre": () =>
+            !value ? "Nombre obligatorio." :
+            !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ ]+$/.test(value) ? "Solo letras." : null,
+
+        "cliente.apPaterno": () =>
+            !value ? "Apellido obligatorio." :
+            !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ]+$/.test(value) ? "Solo letras." : null,
+
+        "cliente.apMaterno": () =>
+            !value ? "Apellido obligatorio." :
+            !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ]+$/.test(value) ? "Solo letras." : null,
+
+        "cliente.rfc": () =>
+            !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(value)
+            ? "Ingresa un RFC válido: 4 letras + fecha (AAMMDD) + 3 caracteres finales. Solo mayúsculas."
+            : null,
+
+        "cliente.clienteTelefono": () =>
+            !/^[0-9]{10}$/.test(value) ? "Debe ser un número de 10 dígitos." : null,
+
+        "cliente.clienteCorreo": () =>
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? "Correo inválido." : null,
+
+        "cliente.metodoPago": () =>
+            !value ? "Método de pago obligatorio." : null,
+
+        "cliente.fechaAlta": () =>
+            !value
+                ? "La fecha y hora de alta son obligatorias."
+                : !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
+                ? "Formato inválido. Usa fecha y hora (AAAA-MM-DDTHH:MM)."
+                : null,
+
+        "fechaEntrega": () => {
+                if (!value) return "La fecha de entrega es obligatoria.";
+
+                // Formato esperado: YYYY-MM-DDTHH:MM
+                const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+                if (!regex.test(value)) return "Formato inválido. Usa AAAA-MM-DDTHH:MM.";
+
+                const fechaInput = new Date(value);
+                const ahora = new Date();
+
+                // Solo fecha: evitar fechas pasadas
+                const hoy = new Date();
+                hoy.setHours(0, 0, 0, 0);
+                if (fechaInput < hoy) return "La fecha de entrega no puede ser anterior a hoy.";
+
+                // Validar hora si es hoy
+                const mismaFecha = 
+                    fechaInput.getFullYear() === ahora.getFullYear() &&
+                    fechaInput.getMonth() === ahora.getMonth() &&
+                    fechaInput.getDate() === ahora.getDate();
+
+                if (mismaFecha && fechaInput.getHours() < ahora.getHours()) {
+                    return "La hora de entrega no puede ser anterior a la hora actual.";
+                }
+
+                // Si la misma hora, validar minutos
+                if (mismaFecha && fechaInput.getHours() === ahora.getHours() && fechaInput.getMinutes() < ahora.getMinutes()) {
+                    return "La hora de entrega no puede ser anterior a la hora actual.";
+                }
+
+                return null;
+            },
+
+
+
+
+
+        // -------- VEHÍCULO ----------
+        "vehiculo.marca": () => !value ? "Marca obligatoria." : null,
+
+        "vehiculo.modelo": () => !value ? "Modelo obligatorio." : null,
+
+        "vehiculo.numSerie": () =>  value.length < 5 ? "Debe tener al menos 5 caracteres." : null,
+
+        "vehiculo.kilometraje": () =>
+            value === "" ? "Kilometraje obligat orio." :
+            isNaN(value) ? "Debe ser un número." :
+            value < 0 ? "No puede ser negativo." :
+            value < kilometrajeBase.value ? `No puede ser menor a ${kilometrajeBase.value}.` :
+            null,
+
+        "vehiculo.color": () =>
+            !value ? "Color obligatorio." : null,
+
+        "vehiculo.placas": () =>
+            !/^[A-Z0-9]{6,7}$/.test(value) ? "Placas inválidas." : null,
+
+        "vehiculo.anio": () => {
+                const y = parseInt(value);
+                const current = new Date().getFullYear();
+                return !y ? "Año obligatorio." :
+                        y < 1950 || y > current ? `Año entre 1950 y ${current}.` : null;
+            },
+
+        "idEmpleado": () =>
+            !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
+                ? "Debes seleccionar un técnico."
+                : null,
+
+
+    };
+
+    // Ejecutar regla
+    const error = rules[path] ? rules[path]() : null;
+
+    if (error) errores[path] = error;
+    else delete errores[path];
+
+}
+
+// Mantiene el boton de guardar deshabilitado hasta que no exista ningun error de validacion
+const formValido = computed(() => {
+    // si hay errores -> formulario inválido
+    if (Object.keys(errores).length > 0) return false;
+
+    // Validar si todos los campos obligatorios tienen valor
+    const requiredFields = [
+
+        ordenTrabajoForm.fechaEntrega,
+
+        // CLIENTE
+        ordenTrabajoForm.cliente.clienteNombre,
+        ordenTrabajoForm.cliente.apPaterno,
+        ordenTrabajoForm.cliente.rfc,
+        ordenTrabajoForm.cliente.clienteTelefono,
+        ordenTrabajoForm.cliente.clienteCorreo,
+        ordenTrabajoForm.cliente.metodoPago,
+
+        // VEHÍCULO
+        ordenTrabajoForm.vehiculo.marca,
+        ordenTrabajoForm.vehiculo.modelo,
+        ordenTrabajoForm.vehiculo.numSerie,
+        ordenTrabajoForm.vehiculo.kilometraje,
+        ordenTrabajoForm.vehiculo.color,
+        ordenTrabajoForm.vehiculo.placas,
+        ordenTrabajoForm.vehiculo.anio,
+        
+        // TECNICO
+        ordenTrabajoForm.idEmpleado
+    ];
+
+    // Si uno está vacío → formulario inválido
+    return requiredFields.every(v => v !== "" && v !== null && v !== undefined);
+});
+
+
 /* VARIABLES PARA LA CARGA DE INFO */
 const itmCotizaciones = ref([])
 const itmEmpleados = ref({})
 const itmTipoOT = ref([])
 
+function getFechaHoraLocal() {
+    const ahora = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+
+    return `${ahora.getFullYear()}-${pad(ahora.getMonth() + 1)}-${pad(ahora.getDate())}T${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`;
+}
+
+
 const ordenTrabajoForm = reactive({
     cotSeleccionada: 0,
     idEmpleado: 0,
     idTipoOrdenTrabajo: 0,
-    fechaEntrega:new Date().toISOString().split('T')[0],
+    fechaEntrega:getFechaHoraLocal(),
     cliente:{
         id_cliente: 0,
         clienteNombre:'',
@@ -469,7 +804,7 @@ const ordenTrabajoForm = reactive({
         rfc:'',
         clienteTelefono:'',
         clienteCorreo:'',
-        fechaAlta: new Date().toISOString().split('T')[0],
+        fechaAlta: getFechaHoraLocal(),
         metodoPago:''
     },
     vehiculo:{
@@ -682,7 +1017,7 @@ const buscarSugerencias = async (serie) => {
         sugerencias.value = []
     }
 }
-
+const kilometrajeBase = ref(0);
 const onSerieSeleccionada = () => {
     // buscar coincidencia exacta en sugerencias
     const seleccionado = sugerencias.value.find(s => s.serie === ordenTrabajoForm.vehiculo.numSerie)
@@ -698,7 +1033,7 @@ const onSerieSeleccionada = () => {
             kilometraje: seleccionado.kilometraje ?? "",
             anio: seleccionado.anio
         }
-
+        kilometrajeBase.value = seleccionado.kilometraje
         //console.log(ordenTrabajoForm.vehiculo)
     } 
 }
@@ -1005,6 +1340,54 @@ const guardarOT = async () => {
     }    
 }
 
+const obtenerPromosPorInventario = async (idInventarioInicial) => {
+	try {
+		const res = await fetch(
+			`${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`
+		);
+
+		if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
+
+		const data = await res.json();
+		// Puedes filtrar por vigencia/activo si quieres
+		return Array.isArray(data) ? data.filter(p => p.activo) : [];
+	} catch (error) {
+		console.error('Error al obtener promociones por inventario:', error);
+		return [];
+	}
+};
+
+
+const obtenerPromosPorPaquete = async (idPaquete) => {
+    try {
+        const res = await fetch(
+            `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`
+        );
+
+        if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
+        const data = await res.json();
+        return Array.isArray(data) ? data.filter(p => p.activo) : [];
+    } catch (error) {
+        console.error("Error al obtener promociones por paquete:", error);
+        return [];
+    }
+};
+
+const obtenerPromosGeneralesParaServicio = async () => {
+	try {
+		const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromocionesGenerales`);
+		if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
+		const data = await res.json();
+
+		// Solo promociones activas
+		return Array.isArray(data) ? data.filter(p => p.activo) : [];
+	} catch (error) {
+		console.error("Error al obtener promociones generales para servicios:", error);
+		return [];
+	}
+};
 
 const cargarInfoCotizacion = async () => {
     const res = await fetch(proxy.$serverIP + 'api/Cotizacion/getDetalleCotizacion?id='+ordenTrabajoForm.cotSeleccionada);
@@ -1019,39 +1402,138 @@ const cargarInfoCotizacion = async () => {
     ordenTrabajoForm.cliente.clienteCorreo = data.correo || '';
 
     ordenTrabajoForm.insumo = {
-        llanta: data.llantas.map((llanta) => ({
-            idLlanta: llanta.idLlanta,
-            idAlmacen: llanta.idAlmacen,
-            descripcion: llanta.modeloMedidas,
-            cantidad: llanta.cantidad,
-            precioUnitario: llanta.precioUnitario,
-            subTotal: (llanta.cantidad * llanta.precioUnitario).toFixed(2)
-        })),
-        paquete: data.paquetes.map((paquete) => ({
-            idPaquete: paquete.idPaquete,
-            descripcion: paquete.nombre,
-            cantidad: 1,
-            precioUnitario: paquete.precioUnitario,
-            subTotal: (1 * paquete.precioUnitario).toFixed(2),
-            detalle: paquete.detallePaquete.map((detalle) => ({
-                idDesglosePaquete: detalle.idDesglosePaquete,
-                descripcion:detalle.nombre,
-                cantidad: 1,
-                precioUnitario: 0,
-                subTotal: 0
-            }))
-        })),        
-        adicional: data.servicios.map( (s) => ({
-            idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-            descripcion: s.descripcion,
-            observacion: s.observacion,
-            cantidad: s.cantidad,
-            precioUnitario: s.precioUnitario,
-            comentario: s.comentario
-        }))  
+        llanta: await Promise.all(
+            data.llantas.map(async (llanta) => {
+
+                const promosDisponibles = await obtenerPromosPorInventario(llanta.idInventarioInicial);
+
+                return {
+                    idLlanta: llanta.idLlanta,
+                    idAlmacen: llanta.idAlmacen,
+                    idPromocion: llanta.idPromocion ?? 0,
+                    idConceptoTrabajo: 1,
+                    idInventarioInicial: llanta.idInventarioInicial, // para buscar promo
+
+                    descripcion: llanta.modeloMedidas,
+                    medida: llanta.medida, // campo estetico
+                    modelo: llanta.modelo,// campo estetico
+                    marca: llanta.marca,// campo estetico
+                    ubicacion: llanta.ubicacion, // campo estetico
+
+                    cantidad: llanta.cantidad,
+                    precioUnitario: llanta.precioUnitario,
+                    subTotal: (llanta.cantidad * precioFinalItem(llanta)).toFixed(2), // campo estetico
+
+                    promosDisponibles: promosDisponibles || [], 
+                    
+                    // si ya tiene promo existente rellenar valores
+                    nombrePromocion: llanta.nombrePromocion,
+                    valorPromocion: llanta.valorPromocion,
+                    tipoPromocion: llanta.tipoPromocion
+                };
+            })
+        ),
+        paquete: await Promise.all(
+            data.paquetes.map(async (paquete) => {
+
+                const promosDisponibles = await obtenerPromosPorPaquete(paquete.idPaquete) || [];
+
+                return {
+                    idPaquete: paquete.idPaquete,
+                    idPromocion: paquete.idPromocion ?? 0,
+                    idConceptoTrabajo: 0,
+
+                    descripcion: paquete.nombre,
+                    cantidad: 1,
+                    precioUnitario: paquete.precioUnitario,
+
+                    subTotal: (
+                        1 * precioFinalItem({
+                            precioUnitario: paquete.precioUnitario,
+                            idPromocion: paquete.idPromocion,
+                            valorPromocion: paquete.valorPromocion,
+                            tipoPromocion: paquete.tipoPromocion
+                        })
+                    ).toFixed(2),
+
+                    detalle: paquete.detallePaquete.map(detalle => ({
+                        idDesglosePaquete: detalle.idDesglosePaquete,
+                        descripcion: detalle.nombre,
+                        cantidad: 1,
+                        precioUnitario: 0,
+                        subTotal: 0
+                    })),
+
+                    promosDisponibles,
+
+                    // info histórica (si viene de backend)
+                    nombrePromocion: paquete.nombrePromocion,
+                    valorPromocion: paquete.valorPromocion,
+                    tipoPromocion: paquete.tipoPromocion
+                };
+            })
+        ),
+        
+        adicional: await Promise.all(
+            data.servicios.map(async (s) => {
+
+                const promosDisponibles = await obtenerPromosGeneralesParaServicio() || [];
+
+                return {
+                    idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
+                    idPromocion: s.idPromocion ?? 0,
+                    idConceptoTrabajo: 0,
+
+                    descripcion: s.descripcion,
+                    observacion: s.observacion,
+                    comentario: s.comentario,
+
+                    cantidad: s.cantidad,
+                    precioUnitario: s.precioUnitario,
+
+                    subTotal: (
+                        s.cantidad * precioFinalItem({
+                            precioUnitario: s.precioUnitario,
+                            idPromocion: s.idPromocion,
+                            valorPromocion: s.valorPromocion,
+                            tipoPromocion: s.tipoPromocion
+                        })
+                    ).toFixed(2),
+
+                    promosDisponibles,
+
+                    // info histórica
+                    nombrePromocion: s.nombrePromocion,
+                    valorPromocion: s.valorPromocion,
+                    tipoPromocion: s.tipoPromocion
+                };
+            })
+        )
     };
     console.log(JSON.stringify(ordenTrabajoForm.insumo))
 }
+
+const precioFinalItem = (item, promoGlobal) => {
+    const base = item.precioUnitario ?? 0;
+
+    // Aplica promoción individual si existe
+    if (item.idPromocion && item.valorPromocion != null) {
+        return item.tipoPromocion
+        ? base * (1 - item.valorPromocion / 100) // porcentaje
+        : Math.max(0, base - item.valorPromocion); // monto fijo
+    }
+
+    // Aplica promo global si no está excluido
+    if (promoGlobal && promoGlobal.valor != null && !item.excluirPromocionGeneral) {
+        return promoGlobal.tipo
+        ? base * (1 - promoGlobal.valor / 100) // porcentaje
+        : Math.max(0, base - promoGlobal.valor); // monto fijo
+    }
+
+    // Sin promoción
+    return base;
+};
+
 
 const limpiarOrdenTrabajoForm = () => {
     ordenTrabajoForm.cotSeleccionada = 0;
@@ -1098,5 +1580,19 @@ const limpiarOrdenTrabajoForm = () => {
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
   transform: translateY(10px);
+}
+
+.input-error {
+  border: 1px solid red;
+}
+
+.error-msg {
+  color: red;
+  font-size: 12px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>
