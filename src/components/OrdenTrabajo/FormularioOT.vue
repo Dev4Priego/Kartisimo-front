@@ -24,10 +24,15 @@
                 </div>
             </div>            
             <hr>
-            <div class="row">                
-                <div class="col">
-                    <h5 class="text-center">Vehículo</h5>
+
+            
+
+            <div class="row">  
+                              
+                <div class="col-md-8">
+                    <h5 class="text-center fw-semibold mb-3">Vehículo</h5>
                     <div class="row">
+                        
                         <div class="col">
                             <div class="mb-3">
                                 <input
@@ -144,9 +149,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col">
+
+
+                <div class="col-md-6 border-start ps-md-4">
                     <div class="row">                        
-                        <h5 class="text-center">Cliente</h5>
+                        <h5 class="text-center fw-semibold mb-3">Cliente</h5>
                         <div class="col">
                             <!-- Nombre -->
                             <div class="mb-3">
@@ -251,6 +258,8 @@
                     </div>                    
                 </div>
 
+                
+
                 <!-- datalist único para los 3 inputs -->
                 <datalist id="clientes">
                     <option 
@@ -264,6 +273,11 @@
                     </option>
                 </datalist>
             </div>
+
+
+
+
+
             <div class="row">
                 <div class="col">
                     <!-- Método de pago -->
@@ -321,6 +335,11 @@
                     </div>
                 </div>
             </div>
+
+
+
+
+
             <hr>
             <div class="row">
                 <div class="col-4">
