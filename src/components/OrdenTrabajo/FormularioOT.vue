@@ -26,8 +26,8 @@
             <hr>
             <div class="row">                
                 <div class="col">
+                    <div class="row separador p-2">
                     <h5 class="text-center">Vehículo</h5>
-                    <div class="row">
                         <div class="col">
                             <div class="mb-3">
                                 <input
@@ -145,19 +145,17 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class="row">                        
+                    <div class="row separador p-2">                        
                         <h5 class="text-center">Cliente</h5>
                         <div class="col">
                             <!-- Nombre -->
                             <div class="mb-3">
                                 <input 
-                                    v-model="ordenTrabajoForm.cliente.clienteNombre" 
+                                    v-model="ordenTrabajoForm.cliente.clienteNombres" 
                                     class="form-control" 
                                     type="text" 
-                                    placeholder="Nombres *"
+                                    placeholder="Nombre's *"
                                     list="clientes"
-                                    @input="onClienteInput($event.target.value)"
-                                    @change="onClienteSeleccionadoByValue($event.target.value)"
                                     @blur="validate('cliente.clienteNombre')"
                                     :class="{'input-error': errores['cliente.clienteNombre']}"
                                 >
@@ -169,10 +167,10 @@
                             <!-- Apllidos -->
                             <div class="mb-3">
                                 <input 
-                                    v-model="ordenTrabajoForm.cliente.apPaterno" 
+                                    v-model="ordenTrabajoForm.cliente.cleinteApllidos" 
                                     type="text"
                                     class="form-control"
-                                    placeholder="Apellido Paterno *"
+                                    placeholder="Apellido's *"
                                     @blur="validate('cliente.apPaterno')"
                                     :class="{'input-error': errores['cliente.apPaterno']}"
                                 >
@@ -181,7 +179,7 @@
                                 </small>
                             </div>
 
-                            <div class="mb-3">
+                            <!-- <div class="mb-3">
                                 <input 
                                     v-model="ordenTrabajoForm.cliente.apMaterno" 
                                     type="text"
@@ -193,7 +191,7 @@
                                 <small v-if="errores['cliente.apMaterno']" class="error-msg">
                                     {{ errores['cliente.apMaterno'] }}
                                 </small>
-                            </div>
+                            </div> -->
                         </div>
 
                         <div class="col">
@@ -240,6 +238,9 @@
                                     type="text"
                                     class="form-control"
                                     placeholder="RFC"
+                                    list="clientes"
+                                    @input="onClienteInput($event.target.value)"
+                                    @change="onClienteSeleccionadoByValue($event.target.value)"
                                     @blur="validate('cliente.rfc')"
                                     :class="{'input-error': errores['cliente.rfc']}"
                                 >
@@ -258,8 +259,8 @@
                         :key="c.id_cliente" 
                         :value="c.nombre"
                     >
-                        {{ (c.nombres || '') + ' ' + (c.apPaterno || '') + ' ' + (c.apMaterno || '') }}
-                        <span v-if="c.telefono">  {{ c.telefono }}</span>
+                        {{ (c.nombres || '') + ' ' + (c.apPaterno || ' ') + ' ' + (c.apMaterno || ' ') }}
+                        <span v-if="c.telefono">  {{ c.telefono + ' ' }} </span>
                         <span v-if="c.correo">  {{ c.correo }}</span>
                     </option>
                 </datalist>
@@ -268,7 +269,7 @@
                 <div class="col">
                     <!-- Método de pago -->
                     <div class="mb-3">
-                        <label class="form-label" for="formaPago">Método de Pago *</label>
+                        <label class="form-label" for="formaPago">Forma de pago *</label>
 
                         <select 
                             v-model="ordenTrabajoForm.cliente.metodoPago"
@@ -279,8 +280,29 @@
                             :class="{'input-error': errores['cliente.metodoPago']}"
                         >
                             <option value="">-Selecciona-</option>
-                            <option value="Efectivo">Efectivo</option>
-                            <option value="Tarjeta">Tarjeta</option>
+                            <option value="01">01 - Efectivo</option>
+                            <option value="02">02 - Cheque nominativo</option>
+                            <option value="03">03 - Transferencia electrónica de fondos</option>
+                            <option value="04">04 - Tarjeta de crédito</option>
+                            <option value="05">05 - Monedero electrónico</option>
+                            <option value="06">06 - Dinero electrónico</option>
+                            <option value="08">08 - Vales de despensa</option>
+                            <option value="12">12 - Dación en pago</option>
+                            <option value="13">13 - Pago por subrogación</option>
+                            <option value="14">14 - Pago por consignación</option>
+                            <option value="15">15 - Condonación</option>
+                            <option value="17">17 - Compensación</option>
+                            <option value="23">23 - Novación</option>
+                            <option value="24">24 - Confusión</option>
+                            <option value="25">25 - Remisión de deuda</option>
+                            <option value="26">26 - Prescripción o caducidad</option>
+                            <option value="27">27 - A satisfacción del acreedor</option>
+                            <option value="28">28 - Tarjeta de débito</option>
+                            <option value="29">29 - Tarjeta de servicios</option>
+                            <option value="30">30 - Aplicación de anticipos</option>
+                            <option value="31">31 - Intermediario pagos</option>
+                            <option value="99">99 - Por definir</option>
+
                         </select>
 
                         <small v-if="errores['cliente.metodoPago']" class="error-msg">
@@ -570,37 +592,6 @@
             </div>            
         </form>
     </div> 
-    <!-- MODAL PARA AGREGAR INSUMOS -->
-    <!-- <div class="modal" id="modalItems" tabindex="-1" aria-labelledby="modalItemsLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalItemsLabel">Agregar Insumo</h5>
-                    <button type="button" class="btn-close" @click="showModal = false" aria-label="Cerrar"></button>
-                </div>
-                <div class="modal-body">
-                    <div v-for="(item, index) in items" :key="index" class="row mb-3">
-                        <div class="col-md-4">
-                            <input v-model="item.descripcion" class="form-control" placeholder="Descripción" />
-                        </div>
-                        <div class="col-md-4">
-                            <input v-model.number="item.cantidad" type="number" class="form-control" placeholder="Cantidad" />
-                        </div>
-                        <div class="col-md-4">
-                            <input v-model.number="item.precioUnitario" type="number" class="form-control" placeholder="Precio Unitario" />
-                        </div>
-                    </div>
-                    <button class="btn btn-outline-secondary w-100" @click="agregarItem" type="button">
-                        <i class="bi bi-plus-circle"></i> Agregar otro ítem
-                    </button>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" @click="cerrarModalInsumo" type="button">Cancelar</button>
-                    <button class="btn btn-success" @click="agregarServicioAdicional" type="button">Finalizar</button>
-                </div>
-            </div>
-        </div>
-    </div> -->
 </template>
 
 <script setup>
@@ -611,7 +602,7 @@ import ModalInsumo from './ModalInsumo.vue';
 const { proxy } = getCurrentInstance() 
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
-
+const showModal = ref(false)
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
 
@@ -899,85 +890,6 @@ onMounted(() => {
     cargarEmpleados();
     cargarTipoOT();
 })
-
-/**********************************/
-// FUNCION MODAL AGRGAR INSUMO ADICIONAL
-/**********************************/
-const showModal = ref(false)
-// let modalInstance = null
-
-// const items = ref([
-//     { 
-//         idDetalleCotizacionServicio: 0,
-//         descripcion: '', 
-//         cantidad: null, 
-//         precioUnitario: null, 
-//         get subTotal() {
-//             if (this.cantidad != null && this.precioUnitario != null) {
-//                 return (this.cantidad * this.precioUnitario).toFixed(2);
-//             }
-//             return '';
-//         } 
-//     }
-// ])
-
-// const limpiarModalInsumo = () => {
-//     // Limpiar
-//     items.value = [
-//         { 
-//             descripcion: '', 
-//             cantidad: null, 
-//             precioUnitario: null, 
-//             get subTotal() {
-//                 if (this.cantidad != null && this.precioUnitario != null) {
-//                     return (this.cantidad * this.precioUnitario).toFixed(2);
-//                 }
-//                 return '';
-//             }  
-//         }
-//     ]
-// }
-
-// const agregarServicioAdicional = () => {
-//     const insumosValidos = items.value.filter(item =>
-//         item.descripcion.trim() !== '' &&
-//         item.cantidad != null && item.cantidad > 0 &&
-//         item.precioUnitario != null && item.precioUnitario > 0
-//     )
-
-//     ordenTrabajoForm.insumo.adicional.push(...insumosValidos)
-
-//     limpiarModalInsumo()
-
-//     showModal.value = false
-// }
-
-// const agregarItem = () => {
-//     items.value.push({
-//         idDetalleCotizacionServicio: 0,
-//         descripcion: '', 
-//         cantidad: null, 
-//         precioUnitario: null, 
-//         get subTotal() {
-//             if (this.cantidad != null && this.precioUnitario != null) {
-//                 return (this.cantidad * this.precioUnitario).toFixed(2);
-//             }
-//             return '';
-//         } 
-//     })
-// }
-
-// const cerrarModalInsumo = () => {
-//   showModal.value = false;
-//   limpiarModalInsumo();
-// };
-
-// // Abrir o cerrar el modal al cambiar showModal
-// watch(showModal, (val) => {
-//   if (modalInstance) {
-//     val ? modalInstance.show() : modalInstance.hide()
-//   }
-// })
 
 
 /********************************/
@@ -1394,7 +1306,7 @@ const cargarInfoCotizacion = async () => {
     if (!res.ok) throw new Error('Error en la respuesta');
     const data = await res.json();
 
-    console.log(JSON.stringify(data.llantas))
+    //console.log(JSON.stringify(data.llantas))
     ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
 
     ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre || '';
@@ -1459,7 +1371,7 @@ const cargarInfoCotizacion = async () => {
                     detalle: paquete.detallePaquete.map(detalle => ({
                         idDesglosePaquete: detalle.idDesglosePaquete,
                         descripcion: detalle.nombre,
-                        cantidad: 1,
+                        cantidad: detalle.cantidad,
                         precioUnitario: 0,
                         subTotal: 0
                     })),
@@ -1510,7 +1422,7 @@ const cargarInfoCotizacion = async () => {
             })
         )
     };
-    console.log(JSON.stringify(ordenTrabajoForm.insumo))
+    //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 }
 
 const precioFinalItem = (item, promoGlobal) => {
@@ -1595,4 +1507,12 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+.separador {
+    min-height: 290px;          /* 🔹 mínimo, puede crecer */
+    border: 1px solid #dee2e6; /* gris claro tipo hr */
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
 </style>

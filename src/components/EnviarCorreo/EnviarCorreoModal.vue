@@ -108,8 +108,8 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				CorreoOrigen: 'desarrollo4@priego8a.com',
-				Contrasenia: 'K@633751140520oz',
+				CorreoOrigen: 'admin@kartisimo.mx',
+				Contrasenia: 'Tecnologias+5987',
 				Para: email,
 				Asunto: subj,
 				Cuerpo: msg,
