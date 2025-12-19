@@ -57,6 +57,8 @@
             </div>
 
             <div v-else>
+                
+                
                 <table class="table table-hover table-sm">
                     <caption><strong>Lista de cotizaciones</strong></caption>
                     <thead>
@@ -132,6 +134,10 @@
                         </tr>
                     </tbody>
                 </table>
+
+
+
+
             </div>
         </div>
          
@@ -185,7 +191,7 @@
                         </div>
 
                         <!-- Información del cliente -->
-                        <div class="mb-4">
+                        <div class="mb-4 text-center">
                             <span class="mx-2">
                                 <strong>No. Cotización: </strong>{{'COT-'+ vistaCotizacion.codigo || 'N/A' }}
                             </span>
@@ -200,185 +206,127 @@
                             </span>
                         </div>
 
+<!-- Tabla Llantas -->
+<div class="table-responsive mx-auto mt-3" style="max-width: 1200px;">
+  <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
+    <colgroup>
+      <col style="width: 50px;">
+      <col>
+      <col style="width: 120px;">
+      <col style="width: 120px;">
+    </colgroup>
+    <thead class="table-light">
+      <tr>
+        <th class="text-center">CANT</th>
+        <th>Descripción</th>
+        <th class="text-end">PRECIO UNITARIO</th>
+        <th class="text-end">TOTAL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
+        <td class="text-center">{{ llanta.cantidad }}</td>
+        <td>
+          {{ llanta.medidas }}
+          <br>
+          <small class="badge bg-secondary mt-1">{{ llanta.comentario }}</small>
+        </td>
+        <td class="text-end">{{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+        <td class="text-end">
+          <div v-if="llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'">
+            <span class="text-decoration-line-through text-muted">
+              {{ (llanta.precioUnitario * llanta.cantidad).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+              <small class="badge bg-danger">{{ llanta.promoLabel }}</small>
+            </span>
+            <br>
+            <span class="text-success fw-bold d-block">{{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</span>
+          </div>
+          <div v-else>
+            {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-                        <div class="mt-4">
-                            <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
-                                <colgroup>
-                                    <col style="width: 50px;">
-                                    <col style="width: 60%;">  <!-- ajusta según necesites -->
-                                    <col style="width: 20%;">
-                                    <col style="width: 20%;">
-                                </colgroup>
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>CANT</th>
-                                        <th>MEDIDA - MARCA - MODELO - RANGO</th>
-                                        <th>PRECIO UNITARIO</th>
-                                        <th>TOTAL</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Llantas -->
-                                    <tr v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas" :key="'ll-' + i">
-                                        
-                                        <td class="text-center">{{ llanta.cantidad }}</td>
+<!-- Tabla Paquetes y Servicios (sin encabezado) -->
+<div class="table-responsive mx-auto mt-3" style="max-width: 1200px;">
+  <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
+    <colgroup>
+      <col style="width: 50px;">
+      <col>
+      <col style="width: 120px;">
+      <col style="width: 120px;">
+    </colgroup>
+    <tbody>
+      <!-- Paquetes -->
+      <tr v-for="(paquete, index) in vistaCotizacion.paquetes" :key="'paq-' + index">
+        <td class="text-center">1</td>
+        <td>
+          {{ paquete.nombre.toUpperCase() }} {{ paquete.descripcion.toUpperCase() }}
+          <p><small class="badge bg-secondary mt-1">{{ paquete.comentario }}</small></p>
+        </td>
+        <td class="text-end">{{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+        <td class="text-end">
+          <div v-if="paquete.promoLabel && paquete.promoLabel !== '(Excluido de promoción)'">
+            <span class="text-decoration-line-through text-muted">
+              {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+              <small class="badge bg-danger">{{ paquete.promoLabel }}</small>
+            </span>
+            <br>
+            <span class="text-success fw-bold d-block">{{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</span>
+          </div>
+          <div v-else>
+            {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+          </div>
+        </td>
+      </tr>
 
-                                        <td>
-                                            {{ llanta.medidas }}
-                                            <br>
-                                            <span>
-                                                <small class="badge bg-secondary mt-1">
-                                                    {{ llanta.comentario }}
-                                                </small>
-                                            </span>
-                                        </td>
+      <!-- Servicios Adicionales -->
+      <tr v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales" :key="'serv-' + i">
+        <td class="text-center">{{ servicio.cantidad }}</td>
+        <td>
+          {{ servicio.nombreServicio }} {{ servicio.observacion }}
+          <p><small class="badge bg-secondary mt-1">{{ servicio.comentario }}</small></p>
+        </td>
+        <td class="text-end">{{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</td>
+        <td class="text-end">
+          <div v-if="servicio.promoLabel && servicio.promoLabel !== '(Excluido de promoción)'">
+            <span class="text-decoration-line-through text-muted">
+              {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+              <small class="badge bg-danger mt-1">{{ servicio.promoLabel }}</small>
+            </span>
+            <br>
+            <span class="text-success fw-bold d-block">{{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</span>
+          </div>
+          <div v-else>
+            {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+          </div>
+        </td>
+      </tr>
 
-                                        <!-- Precio Unitario -->
-                                        <td class="text-end">
-                                            <div>
-                                                {{ llanta.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-                                        </td>
+      <!-- Total -->
+      <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
+        <td colspan="3" class="text-center">Total:</td>
+        <td class="text-end">
+          <div v-if="vistaCotizacion.tienePromocion">
+            <span class="text-decoration-line-through text-muted">
+              {{ vistaCotizacion.totalBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+            </span>
+            <br>
+            <span class="text-success fw-bold d-block">{{ vistaCotizacion.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}</span>
+          </div>
+          <div v-else>
+            {{ vistaCotizacion.totalBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
-                                        <!-- Subtotal -->
-                                        <td class="text-end">
-                                            <div v-if="llanta.promoLabel && llanta.promoLabel !== '(Excluido de promoción)'">
-                                                <span class="text-decoration-line-through text-muted">
-                                                    {{ (llanta.precioUnitario * llanta.cantidad).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                    <span>
-                                                       <small class="badge bg-danger">
-                                                            {{ llanta.promoLabel }}
-                                                        </small>
-                                                    </span>
-                                                </span>
-                                                <br>
-                                                <span class='text-success fw-bold'>
-                                                    {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}                                                    
-                                                </span>
-                                            </div>
-                                            
-                                            <div v-else>
-                                                {{ llanta.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <table class="table table-bordered table-sm align-middle" style="table-layout: fixed;">
-                                <colgroup>
-                                    <col style="width: 50px;">
-                                    <col style="width: 60%;">
-                                    <col style="width: 20%;">
-                                    <col style="width: 20%;">
-                                </colgroup>
-                                <tbody>
-                                    <!-- Paquetes seleccionados -->
-                                    <tr v-for="(paquete, index) in vistaCotizacion.paquetes" :key="'paq-' + index">
-                                        <td class="text-center">1</td>
 
-                                        <td>
-                                            {{ paquete.nombre.toUpperCase() }} {{ paquete.descripcion.toUpperCase() }}
-                                            <p>
-                                                <small class="badge bg-secondary mt-1">
-                                                    {{ paquete.comentario }}
-                                                </small>
-                                            </p>
-                                        </td>
-
-                                        <!-- Precio unitario -->
-                                        <td class="text-end">
-                                            <div>
-                                                {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-                                        </td> 
-
-                                        <!-- Subtotal -->
-                                        <td class="text-end">
-                                            <div v-if="paquete.promoLabel && paquete.promoLabel !== '(Excluido de promoción)'">
-                                                <span class="text-decoration-line-through text-muted">
-                                                    {{ paquete.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                    <span>
-                                                       <small class="badge bg-danger">
-                                                            {{ paquete.promoLabel }}
-                                                        </small>
-                                                    </span>
-                                                </span>
-                                                <br> 
-                                                <span class="text-success fw-bold d-block">
-                                                    {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}                                                    
-                                                </span>
-                                            </div>
-                                            <div v-else>
-                                                {{ paquete.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Servicios adicionales -->
-                                    <tr v-for="(servicio, i) in vistaCotizacion.serviciosAdicionales" :key="'serv-' + i">
-                                        <td class="text-center">{{ servicio.cantidad }}</td>
-                                        <td>
-                                            {{ servicio.nombreServicio }} {{ servicio.observacion }}
-                                            <p>
-                                                <small class="badge bg-secondary mt-1">
-                                                    {{ servicio.comentario }}
-                                                </small>
-                                            </p>
-                                        </td>
-
-                                        <!-- Precio unitario -->
-                                        <td class="text-end">
-                                            <div>
-                                                {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                            </div>
-                                        </td>
-
-                                        <!-- Subtotal -->
-                                        <td class="text-end">
-                                            <div v-if="servicio.promoLabel && servicio.promoLabel !== '(Excluido de promoción)'">
-                                                <span class="text-decoration-line-through text-muted">
-                                                    {{ servicio.precioUnitario.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                    <span>
-                                                        <small class="badge bg-danger mt-1">
-                                                            {{ servicio.promoLabel }}
-                                                        </small>
-                                                    </span>
-                                                </span>
-                                                <br>
-                                                <span class="text-success fw-bold d-block">
-                                                    {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                            </div>
-                                            <div v-else>
-                                                {{ servicio.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}    
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    <!-- Total -->
-                                    <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
-                                        <td colspan="3" class="text-center">Total:</td>
-                                        <td class="text-end">
-                                            <div v-if="vistaCotizacion.tienePromocion">
-                                                <span class="text-decoration-line-through text-muted">
-                                                    {{ vistaCotizacion.totalBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                                <br>
-                                                <span class="text-success fw-bold d-block">
-                                                    {{ vistaCotizacion.total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                            </div>
-                                            <div v-else>
-                                                <span>
-                                                    {{ vistaCotizacion.totalBase.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) }}
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p class="mt-2 fst-italic text-end">Los precios incluyen IVA</p>
-                        </div>
                         
                         <div class="row text-center">
                             <div class="col">
@@ -409,6 +357,10 @@
                     </div>
                 </div>
             </div>
+
+
+
+
         </div>
         <!-- MODAL PARA CRREAR/EDITAR COTIZACION -->
         <div class="modal fade" ref="modalRef" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -2702,6 +2654,7 @@
 
     const tblHeadersModal = [
         { text:"Llanta", value: "llanta", sortable: true},
+        {text: "Rango", value: "rango"},
         { text:"Codigo", value: "codigo"},
         { text:"Medidas", value: "medida", sortable: true},
         { text:"Cantidad", value: "cantidad", sortable: true},

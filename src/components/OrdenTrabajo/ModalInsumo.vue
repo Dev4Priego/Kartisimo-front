@@ -305,21 +305,7 @@
 
 										<!-- FILA DEL PAQUETE -->
 										<tr>
-											<td>
-												<select
-													class="form-select form-select-sm"
-													v-model="paq.idConceptoTrabajo"
-												>
-													<option :value="0">-- Seleccione concepto --</option>
-													<option
-														v-for="c in conceptoOT"
-														:key="c.idConceptoOrdenTrabajo"
-														:value="c.idConceptoOrdenTrabajo"
-													>
-														{{ c.nombre }}
-													</option>
-												</select>
-											</td>
+											<td></td>
 
 											<td>{{ paq.descripcion }}</td>
 											<td>{{ paq.cantidad }}</td>
@@ -373,7 +359,21 @@
 											v-for="(det, k) in paq.detalle || []"
 											:key="'det-' + paq.idPaquete + '-' + k"
 										>
-											<td></td>
+											<td>
+												<select
+													class="form-select form-select-sm"
+													v-model="paq.idConceptoTrabajo"
+												>
+													<option :value="0">-- Seleccione concepto --</option>
+													<option
+														v-for="c in conceptoOT"
+														:key="c.idConceptoOrdenTrabajo"
+														:value="c.idConceptoOrdenTrabajo"
+													>
+														{{ c.nombre }}
+													</option>
+												</select>
+											</td>
 											<td class="ps-4">↳ {{ det.descripcion }}</td>
 											<td>{{ det.cantidad }}</td>
 											<td>
@@ -946,7 +946,7 @@ const cargarPaquetes = async () => {
 				precioUnitario: d.precioUnitario
 			}))
 		}));
-
+		console.log(paqueteDisponibles)
 	} catch (error) {
 		console.error('Error cargando paquetes:', error);
 	}
@@ -1002,7 +1002,7 @@ const onTogglePaquete = async (paqueteBase) => {
 		detalle: (paqueteBase.detalle || []).map(det => ({
 			idDesglosePaquete: det.idDesglosePaquete,
 			descripcion: det.nombre,
-			cantidad: 1,
+			cantidad: det.cantidad,
 			precioUnitario: 0,
 			subTotal: 0
 		})),
