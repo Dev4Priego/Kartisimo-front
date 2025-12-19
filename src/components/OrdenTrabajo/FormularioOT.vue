@@ -252,6 +252,8 @@
                     </div>                    
                 </div>
 
+                
+
                 <!-- datalist único para los 3 inputs -->
                 <datalist id="clientes">
                     <option 
@@ -265,6 +267,11 @@
                     </option>
                 </datalist>
             </div>
+
+
+
+
+
             <div class="row">
                 <div class="col">
                     <!-- Método de pago -->
@@ -343,6 +350,11 @@
                     </div>
                 </div>
             </div>
+
+
+
+
+
             <hr>
             <div class="row">
                 <div class="col-4">
