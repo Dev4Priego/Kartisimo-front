@@ -375,11 +375,17 @@
 												</select>
 											</td>
 											<td class="ps-4">↳ {{ det.descripcion }}</td>
-											<td>{{ det.cantidad }}</td>
 											<td>
-												{{ Number(det.precioUnitario).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}
+												<input
+													type="number"
+													min="1"
+													class="form-control form-control-sm"
+													v-model.number="det.cantidad"
+													@input="recalcularSubtotal(ll)"
+												/>
 											</td>
-											<td>{{ Number(det.subTotal).toLocaleString('es-MX', { style:'currency', currency:'MXN' }) }}</td>
+											<td></td>
+											<td></td>
 											<td></td>
 										</tr>
 
@@ -792,6 +798,7 @@ const obtenerPromosPorInventario = async (idInventarioInicial) => {
 		return [];
 	}
 };
+
 const agregarLlanta = async (itm) => {
 
 	if (llantas.value.length >= 6) {
@@ -809,29 +816,33 @@ const agregarLlanta = async (itm) => {
 	}
 
 	const nuevaLlanta = {
-		idLlanta: itm.idLlanta,
-		idAlmacen: itm.idAlmacen,
-		idPromocion: 0,
-		idConceptoTrabajo: 1,
-		idInventarioInicial: itm.idInventarioInicial,
+	idLlanta: itm.idLlanta,
+	idAlmacen: itm.idAlmacen,
+	idPromocion: 0,
+	idConceptoTrabajo: 1,
+	idInventarioInicial: itm.idInventarioInicial,
 
-		descripcion: `${itm.medidas} ${itm.rango} ${itm.modelo}`,
-		medida: itm.medidas,        // estético
-		modelo: itm.modelo,        // estético
-		marca: itm.nombreMarca,          // estético
-		ubicacion: itm.ubicacion,  // estético
+	descripcion: `${itm.medidas} ${itm.rango} ${itm.modelo}`,
+	medida: itm.medidas,
+	modelo: itm.modelo,
+	marca: itm.nombreMarca,
+	ubicacion: itm.ubicacion,
 
-		cantidad: 4,
-		precioUnitario: Math.trunc(itm.precio || 0),
-		subTotal: (4 * Math.trunc(itm.precio || 0)).toFixed(2),
+	cantidad: 4,
+	precioUnitario: Math.trunc(itm.precio || 0),
+	subTotal: (4 * Math.trunc(itm.precio || 0)).toFixed(2),
 
-		promosDisponibles: [],
+	promosDisponibles: [],
 
-		// valores históricos (vacíos inicialmente)
-		nombrePromocion: null,
-		valorPromocion: null,
-		tipoPromocion: null
-	};
+	// valores históricos
+	nombrePromocion: null,
+	valorPromocion: null,
+	tipoPromocion: null,
+
+	//  activo por defecto → botón rojo
+	activo: true
+};
+
 
 	try {
 		const promos = await obtenerPromosPorInventario(
