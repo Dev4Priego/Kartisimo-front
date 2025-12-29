@@ -452,11 +452,15 @@
                 </div>
             </div>
             <hr>
+
+
+
             <div class="row">
                 <div class="col-4">
                     <h5>Insumos</h5>
                 </div>
-                <div class="col-8">                    
+                <div class="col-8">   
+
                     <div class="row" id="tablaInsumos" style="max-height: 400px; overflow-y: auto;">
                         <table class="table table-hover table-sm">
                             <thead>
@@ -470,7 +474,7 @@
                             </thead>
                             <transition-group name="fade" tag="tbody">
                                 <template v-for="(llanta, index) in ordenTrabajoForm.insumo.llanta" :key="index">
-                                    <tr>
+                                  <tr :class="{ 'fila-eliminada': llanta && llanta.eliminado }">
                                         <td>{{llanta.descripcion}}</td>
                                         <td>{{llanta.cantidad}}</td>
                                         <td>{{llanta.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
@@ -500,7 +504,8 @@
                                     </tr>
                                 </template>
                                 <template v-for="(paquete, index) in ordenTrabajoForm.insumo.paquete" :key="index">
-                                    <tr>
+                                    <tr :class="{ 'fila-eliminada': paquete && paquete.eliminado }">
+
                                         <td>{{paquete.descripcion}}</td>
                                         <td>{{paquete.cantidad}}</td>
                                         <td>{{paquete.precioUnitario}}</td> <!-- .toFixed(2)-->
@@ -538,7 +543,8 @@
                                     </tr>
                                 </template>
                                 <template v-for="(ad, index) in ordenTrabajoForm.insumo.adicional" :key="index">
-                                    <tr>
+                                    <tr :class="{ 'fila-eliminada': ad && ad.eliminado }">
+
                                         <td>{{ad.descripcion}}</td>
                                         <td>{{ad.cantidad}}</td>
                                         <td>{{ad.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
@@ -594,6 +600,9 @@
                     </div>
                 </div>
             </div>
+
+
+
             <div class="row my-3">
                 <div class="col">                 
                 </div>
@@ -611,6 +620,10 @@
             </div>            
         </form>
     </div> 
+
+
+
+
 </template>
 
 <script setup>
@@ -908,6 +921,7 @@ onMounted(() => {
     cargarCotizacionesAprobadasOrRealizadas();
     cargarEmpleados();
     cargarTipoOT();
+    normalizarInsumos();
 })
 
 
@@ -1051,18 +1065,34 @@ function onClienteSeleccionadoByValue(valor) {
 
 /***************************/
 // FUNCIONES INSUMOS
-const eliminarInsumo = (tipo, index) => {
-    const contenedor = document.querySelector('#tablaInsumos')
-    const scrollTop = contenedor.scrollTop
 
-    if (ordenTrabajoForm.insumo[tipo]) {
-        ordenTrabajoForm.insumo[tipo].splice(index, 1)
+const eliminarInsumo = (tipo, index) => {
+    const item = ordenTrabajoForm.insumo[tipo][index]
+
+    if (!item) return
+
+    // Si no existe la propiedad, créala
+    if (item.eliminado === undefined) {
+        item.eliminado = false
     }
 
-    nextTick(() => {
-        contenedor.scrollTop = scrollTop
-    })
+    item.eliminado = true
 }
+
+const normalizarInsumos = () => {
+  Object.values(ordenTrabajoForm.insumo).forEach(lista => {
+    lista.forEach(item => {
+      if (item.eliminado === undefined) {
+        item.eliminado = false
+      }
+    })
+  })
+}
+
+
+
+
+
 
 const validarYMostrarPreview = async () => {
     const errores = []
@@ -1533,5 +1563,11 @@ button:disabled {
     border-radius: 10px;
     margin: 10px 0;
 }
+
+.fila-eliminada {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
 
 </style>
