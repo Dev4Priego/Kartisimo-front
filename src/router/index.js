@@ -8,6 +8,7 @@ import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import Promocion from '@/views/Promocion.vue'
 import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
+import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' // agregado solo para desarrollo de componente dinamico, eliminar despues
 const routes = [
     { 
         path: '/', 
@@ -52,7 +53,7 @@ const routes = [
             {
                 path:'Almacen',
                 name:'almacen',
-                component: AlmacenOT
+                component: TablaCargarLlantas
             }
         ]
     }
