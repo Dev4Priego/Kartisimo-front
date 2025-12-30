@@ -441,112 +441,135 @@
 
 
 
-
             <div class="row">
                 <div class="col-4">
                     <h5>Insumos</h5>
                 </div>
-                <div class="col-8">
-                        <div id="tablaInsumos" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-hover table-sm">
-                                <thead>
-                                    <tr>
-                                        <th>Descripción</th>
-                                        <th>Cantidad</th>
-                                        <th>P/U</th>
-                                        <th>Subtotal</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <transition-group name="fade" tag="tbody">
+                <div class="col-8">   
 
-                                    <!-- LLANTAS -->
-                                    <template v-for="(llanta, index) in ordenTrabajoForm.insumo.llanta" :key="index">
-                                        <tr :class="{ 'insumo-inactivo': llanta.activo === false }">
-                                            <td>{{ llanta.descripcion }}</td>
-                                            <td>{{ llanta.cantidad }}</td>
-                                            <td>{{ llanta.precioUnitario.toFixed(2) }}</td>
-                                            <td>
-                                                {{ Number(llanta.subTotal).toLocaleString('es-MX',{style:'currency',currency:'MXN'}) }}
-                                            </td>
-                                            <td>
-                                               <button
+                    <div class="row" id="tablaInsumos" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>P/U</th>
+                                    <th>Subtotal</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <transition-group name="fade" tag="tbody">
+                                <template v-for="(llanta, index) in ordenTrabajoForm.insumo.llanta" :key="index">
+                                  <tr :class="{ 'fila-eliminada': llanta && llanta.eliminado }">
+                                        <td>{{llanta.descripcion}}</td>
+                                        <td>{{llanta.cantidad}}</td>
+                                        <td>{{llanta.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
+                                        <td>
+                                            <div v-if="llanta.idPromocion != null && llanta.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (llanta.cantidad * llanta.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(llanta.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(llanta.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button
                                                 class="btn btn-sm btn-outline-danger"
                                                 @click="eliminarInsumo('llanta', index)"
                                                 type="button"
                                             >
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                                <template v-for="(paquete, index) in ordenTrabajoForm.insumo.paquete" :key="index">
+                                    <tr :class="{ 'fila-eliminada': paquete && paquete.eliminado }">
 
-                                            </td>
-                                        </tr>
-                                    </template>
-
-                                    <!-- PAQUETES -->
-                                    <template v-for="(paquete, index) in ordenTrabajoForm.insumo.paquete" :key="index">
-                                        <tr :class="{ 'insumo-inactivo': paquete.activo === false }">
-                                            <td>{{ paquete.descripcion }}</td>
-                                            <td>{{ paquete.cantidad }}</td>
-                                            <td>{{ paquete.precioUnitario.toFixed(2) }}</td>
-                                            <td>{{ Number(paquete.subTotal).toLocaleString('es-MX',{style:'currency',currency:'MXN'}) }}</td>
-                                            <td>
-                                               <button
+                                        <td>{{paquete.descripcion}}</td>
+                                        <td>{{paquete.cantidad}}</td>
+                                        <td>{{paquete.precioUnitario}}</td> <!-- .toFixed(2)-->
+                                        <td>
+                                            <div v-if="paquete.idPromocion != null && paquete.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (paquete.cantidad * paquete.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(paquete.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(paquete.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button
                                                 class="btn btn-sm btn-outline-danger"
                                                 @click="eliminarInsumo('paquete', index)"
                                                 type="button"
                                             >
                                                 <i class="bi bi-x-circle"></i>
                                             </button>
+                                        </td>
+                                    </tr>
+                                    <tr v-for="(detalle, dIndex) in paquete.detalle" :key="`detalle-${index}-${dIndex}`"
+                                        class="table-light"
+                                    >
+                                        <td class="ps-4">↳ {{ detalle.descripcion }}</td>
+                                        <td>{{ detalle.cantidad }}</td>
+                                        <td>{{ detalle.precioUnitario }}</td>
+                                        <td>{{ detalle.subTotal }}</td>
+                                    </tr>
+                                </template>
+                                <template v-for="(ad, index) in ordenTrabajoForm.insumo.adicional" :key="index">
+                                    <tr :class="{ 'fila-eliminada': ad && ad.eliminado }">
 
-
-
-                                                
-                                            </td>
-                                        </tr>
-
-                                        <tr v-for="(detalle, dIndex) in paquete.detalle"
-                                            :key="`detalle-${index}-${dIndex}`"
-                                            class="table-light"
-                                            :class="{ 'insumo-inactivo': paquete.activo === false }"
-                                        >
-                                            <td class="ps-4">↳ {{ detalle.descripcion }}</td>
-                                            <td>{{ detalle.cantidad }}</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                        </tr>
-                                    </template>
-
-                                    <!-- ADICIONALES -->
-                                    <template v-for="(ad, index) in ordenTrabajoForm.insumo.adicional" :key="index">
-                                        <tr :class="{ 'insumo-inactivo': ad.activo === false }">
-                                            <td>{{ ad.descripcion }}</td>
-                                            <td>{{ ad.cantidad }}</td>
-                                            <td>{{ ad.precioUnitario.toFixed(2) }}</td>
-                                            <td>{{ Number(ad.subTotal).toLocaleString('es-MX',{style:'currency',currency:'MXN'}) }}</td>
-                                            <td>
-                                         <button
-                                            class="btn btn-sm btn-outline-danger"
-                                            @click="eliminarInsumo('adicional', index)"
-                                            type="button"
-                                        >
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-
-
-
-
-                                            </td>
-                                        </tr>
-                                    </template>
-
-                                </transition-group>
-                            </table>
-                        </div>
-
-
-
-
+                                        <td>{{ad.descripcion}}</td>
+                                        <td>{{ad.cantidad}}</td>
+                                        <td>{{ad.precioUnitario.toFixed(2)}}</td> <!-- .toFixed(2)-->
+                                        <td>
+                                            <div v-if="ad.idPromocion != null && ad.idPromocion != ''">
+                                                <span class="text-decoration-line-through text-muted">
+                                                    {{ (ad.cantidad * ad.precioUnitario).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                                <span class="text-success fw-bold mx-2">
+                                                    {{ (Number(ad.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                                </span>
+                                            </div>
+                                            <div v-else>
+                                                {{ (Number(ad.subTotal)).toLocaleString('es-MX', { style: 'currency', currency:'MXN'}) }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button
+                                                class="btn btn-sm btn-outline-danger"
+                                                @click="eliminarInsumo('adicional', index)"
+                                                title="Eliminar insumo"
+                                                type="button"
+                                            >
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </transition-group>
+                            <tfoot>                            
+                                <!-- <tr>
+                                    <td colspan="3" class="text-center">
+                                        Total:
+                                    </td>
+                                    <td colspan="2" class="text-start">
+                                         {{ totalInsumos }} 
+                                    </td>
+                                </tr> -->
+                            </tfoot>
+                        </table>
+                    </div>
                     <div class="text-center">
                         <button
                             class="btn btn-sm btn-outline-success"                        
@@ -561,7 +584,6 @@
                     </div>
                 </div>
             </div>
-
 
 
 
@@ -582,6 +604,10 @@
             </div>            
         </form>
     </div> 
+
+
+
+
 </template>
 
 <script setup>
@@ -824,6 +850,8 @@ const irAOrdenTrabajo = () => {
     router.push({ name: 'OrdenTrabajo' })
 }
 
+
+// eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
 const unirFechaHora = () => {
     if (fechaEntregaFecha.value && fechaEntregaHora.value) {
         ordenTrabajoForm.fechaEntrega =  `${fechaEntregaFecha.value}T${fechaEntregaHora.value}`
@@ -1034,35 +1062,30 @@ const onClienteSeleccionadoByValue = (valor) => {
 
 
 /***************************/
-// FUNCIONES INSUMOS/
+// FUNCIONES INSUMOS
 
 const eliminarInsumo = (tipo, index) => {
-  const insumo = ordenTrabajoForm.insumo[tipo][index];
-  insumo.activo = !insumo.activo;
-  
-  // Para paquetes, desactivar/activar los detalles también
-  if (tipo === 'paquete' && insumo.detalle) {
-    insumo.detalle.forEach(d => d.activo = insumo.activo);
-  }
-};
+    const item = ordenTrabajoForm.insumo[tipo][index]
+
+    if (!item) return
+
+    // Si no existe la propiedad, créala
+    if (item.eliminado === undefined) {
+        item.eliminado = false
+    }
+
+    item.eliminado = true
+}
 
 const normalizarInsumos = () => {
-  ['llanta', 'paquete', 'adicional'].forEach(tipo => {
-    ordenTrabajoForm.insumo[tipo].forEach((item, i) => {
-      if (!item.id) item.id = `${tipo}-${i}-${Date.now()}`;
-      if (item.activo === undefined) item.activo = true;
-
-      if (tipo === 'paquete' && item.detalle) {
-        item.detalle.forEach((d, j) => {
-          if (!d.id) d.id = `detalle-${i}-${j}-${Date.now()}`;
-          if (d.activo === undefined) d.activo = true;
-        });
+  Object.values(ordenTrabajoForm.insumo).forEach(lista => {
+    lista.forEach(item => {
+      if (item.eliminado === undefined) {
+        item.eliminado = false
       }
-    });
-  });
-};
-
-
+    })
+  })
+}
 
 
 
@@ -1554,12 +1577,10 @@ button:disabled {
     margin: 10px 0;
 }
 
-
-.insumo-inactivo td {
-    text-decoration: line-through !important;
-    opacity: 0.5;
+.fila-eliminada {
+  opacity: 0.5;
+  text-decoration: line-through;
 }
-
 
 
 </style>
