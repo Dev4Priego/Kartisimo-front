@@ -59,6 +59,8 @@ const abrirModal = async () => {
 		await generarPDFyEnviar(formValues)
 	}
 }
+
+
 const generarPDFyEnviar = async ({ email, subj, msg }) => {
 	try {
 
@@ -67,32 +69,188 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		// Crear un contenedor temporal para el PDF
 		const pdfContent = document.createElement('div')
 		pdfContent.innerHTML = `
-			<h2>Cotización ${props.cotizacion.codigo}</h2>
-			<p><strong>Cliente:</strong> ${props.cotizacion.cliente.nombre}</p>
-			<p><strong>Teléfono:</strong> ${props.cotizacion.cliente.telefono}</p>
-			<p><strong>Correo:</strong> ${props.cotizacion.cliente.correo}</p>
-			<hr>
-			<h3>Llantas</h3>
-			<ul>
-				${props.cotizacion.llantasSelecionadas.map(l =>
-				`<li>${l.medidas} - ${l.cantidad} × $${l.precioConPromo.toFixed(2)} = $${l.total.toFixed(2)}</li>`
-				).join('')}
-			</ul>
-			<h3>Paquetes</h3>
-			<ul>
-				${props.cotizacion.paquetes.map(p =>
-				`<li>${p.nombre} - $${p.total.toFixed(2)}</li>`
-				).join('')}
-			</ul>
-			<h3>Servicios adicionales</h3>
-			<ul>
-				${props.cotizacion.serviciosAdicionales.map(s =>
-				`<li>${s.nombreServicio} - ${s.cantidad} × $${s.precioConPromo.toFixed(2)} = $${s.total.toFixed(2)}</li>`
-				).join('')}
-			</ul>
-			<hr>
-			<h3>Total: $${props.cotizacion.total.toFixed(2)}</h3>
-		`		// Generar el PDF en base64
+		<style>
+			body {
+				font-family: Arial, Helvetica, sans-serif;
+				font-size: 12px;
+				color: #000;
+			}
+
+			.header {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 20px;
+			}
+
+			.branch {
+				width: 32%;
+				font-size: 11px;
+				line-height: 1.4;
+			}
+
+			hr {
+				border: none;
+				border-top: 1px solid #000;
+				margin: 15px 0;
+			}
+
+			.info {
+				display: flex;
+				justify-content: space-between;
+				margin-bottom: 10px;
+				font-size: 12px;
+			}
+
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 10px;
+				font-size: 12px;
+			}
+
+			thead th {
+				border-top: 2px solid #000;
+				border-bottom: 2px solid #000;
+				padding: 6px;
+				text-align: center;
+			}
+
+			tbody td {
+				padding: 6px;
+				border-bottom: 1px solid #000;
+			}
+
+			.center { text-align: center; }
+			.right { text-align: right; }
+
+			.footer {
+				margin-top: 15px;
+				text-align: right;
+				font-style: italic;
+				font-size: 11px;
+			}
+
+			.header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-start;
+				margin-bottom: 20px;
+			}
+
+			.logo {
+				width: 180px;
+			}
+
+			.company {
+				font-size: 14px;
+				font-weight: bold;
+				text-align: right;
+			}
+
+			.branches {
+				display: flex;
+				justify-content: space-between;
+				margin-top: 10px;
+				font-size: 11px;
+			}
+
+			.branch {
+				width: 32%;
+				line-height: 1.4;
+			}
+		</style>
+
+		<!-- ENCABEZADO -->
+		<div class="header">
+			<img src="/images/Logo-Kartisimo.png" class="logo" />
+
+			<div class="company">
+				Kartisimo Bajio S.A. de C.V.
+			</div>
+		</div>
+
+		<div class="branches">
+			<div class="branch">
+				<strong>Blvd. Delta 2002 esq. Rio Mayo</strong><br>
+				Col. Valle de Jerez C.P. 37538<br>
+				Tel. 477 330 6060 y 477 390 5090<br>
+				delta@kartisimo.mx
+			</div>
+
+			<div class="branch">
+				<strong>Blvd. Lopez Mateos 827 esq. Apolo</strong><br>
+				Col. Obrera C.P. 37340<br>
+				Tel. 477 717 7440 y 477 470 9419<br>
+				apolo@kartisimo.mx
+			</div>
+
+			<div class="branch">
+				<strong>Blvd. Torres Landa 1901 esq San Jacobo</strong><br>
+				Col. La Pisina C.P. 37440<br>
+				Tel. 477 390 0290 y 477 461 0028<br>
+				torreslanda@kartisimo.mx
+			</div>
+			<div class="branch">
+				<strong>Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong><br>
+				Col. La Martinica, C.P. 37500<br>
+				Tel. 477 763 3285 y 477 763 3284
+			</div>
+		</div>
+
+		<hr>
+
+		<!-- DATOS CLIENTE -->
+		<div class="info">
+			<div><strong>No. Cotización:</strong> ${props.cotizacion.codigo}</div>
+			<div><strong>Cliente:</strong> ${props.cotizacion.cliente.nombre}</div>
+			<div><strong>Teléfono:</strong> ${props.cotizacion.cliente.telefono}</div>
+		</div>
+
+		<!-- TABLA -->
+		<table>
+			<thead>
+				<tr>
+					<th>CANT</th>
+					<th>MARCA - MODELO - MEDIDA</th>
+					<th>PRECIO UNITARIO</th>
+					<th>TOTAL</th>
+				</tr>
+			</thead>
+			<tbody>
+				${props.cotizacion.llantasSelecionadas.map(l => `
+				<tr>
+					<td class="center">${l.cantidad}</td>
+					<td>${l.medidas}</td>
+					<td class="right">$${l.precioConPromo.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+					<td class="right">$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+				</tr>
+				`).join('')}
+
+				${props.cotizacion.paquetes.map(p => `
+				<tr>
+					<td class="center">1</td>
+					<td><em>${p.nombre}</em></td>
+					<td class="right">$${p.precio.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+					<td class="right">$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+				</tr>
+				`).join('')}
+
+				${props.cotizacion.serviciosAdicionales.map(s => `
+				<tr>
+					<td class="center">${s.cantidad}</td>
+					<td><em>${s.nombreServicio}</em></td>
+					<td class="right">$${s.precioConPromo.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+					<td class="right">$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+				</tr>
+				`).join('')}
+			</tbody>
+		</table>
+
+		<div class="footer">
+			Los precios incluyen IVA
+		</div>
+		`;		// Generar el PDF en base64
+
 		const opt = {
 			margin: 10,
 			filename: `${props.cotizacion.codigo}.pdf`,
@@ -108,8 +266,8 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				CorreoOrigen: 'admin@kartisimo.mx',
-				Contrasenia: 'Tecnologias+5987',
+				CorreoOrigen: '',
+				Contrasenia: '',
 				Para: email,
 				Asunto: subj,
 				Cuerpo: msg,

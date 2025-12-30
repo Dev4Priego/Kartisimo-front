@@ -38,12 +38,11 @@ const routes = [
                 name:'OrdenTrabajo',
                 component: OrdenTrabajo
             },
-            {
-                
-                path:'FormularioOT',
+            {                
+                path:'FormularioOT/:idCotizacion?',
                 name:'formOT',
-                component: FormularioOT
-                      
+                component: FormularioOT,
+                props: true                      
             },
             {
                 path: 'Promocion',

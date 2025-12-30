@@ -122,7 +122,7 @@
                                     </button>
 
                                     <button
-                                        v-if="item.estatus === 'Aprobada'"
+                                        v-if="item.estatus === 'Aprobada'" 
                                         class="btn btn-sm btn-outline-secondary"
                                         @click="finalizarCotizacion(item.acciones)"
                                         title="Finalizar"
@@ -134,10 +134,6 @@
                         </tr>
                     </tbody>
                 </table>
-
-
-
-
             </div>
         </div>
          
@@ -218,7 +214,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th class="text-center">CANT</th>
-                                        <th>Descripción</th>
+                                        <th>MEDIDA -  MODELO - RANGO</th>
                                         <th class="text-end">PRECIO UNITARIO</th>
                                         <th class="text-end">TOTAL</th>
                                     </tr>
@@ -333,24 +329,30 @@
                                 <!-- Botón enviar correo -->                            
                                 <EnviarCorreoModal :cotizacion="vistaCotizacion" />                       
                             </div>
+
                             <div class="col">
                                 <!-- Botón enviar pdf a imprimir -->
                                 <div class="mt-4">
                                     <button class="btn btn-outline-primary w-100">Imprimir</button>
                                 </div>
                             </div>
+
                             <div class="col">
                                 <!-- Botón PDF -->
                                 <div class="mt-4">
                                     <button class="btn btn-outline-secondary w-100" @click="generarPDF">Descargar PDF</button>
-                                </div>
-
-
-                                
+                                </div>                                
                             </div>
+
                             <div class="col">
                                 <div class="mt-4">
                                     <button class="btn btn-outline-warning w-100" @click="abrirModalCotizacion(vistaCotizacion)">Editar</button>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="mt-4">
+                                    <button class="btn btn-outline-warning w-100" @click="confirmarAccion(vistaCotizacion)">Generar OT</button>
                                 </div>
                             </div>
                         </div>
@@ -1129,13 +1131,17 @@
 <script setup>
     import { ref, watch, computed, onMounted, getCurrentInstance, reactive, onBeforeUnmount, nextTick, toRaw, onUnmounted } from 'vue';
     import EasyDataTable from "vue3-easy-data-table";
-    import html2pdf from 'html2pdf.js'; 
     import Swal from 'sweetalert2'
     import EnviarCorreoModal from '@/components/EnviarCorreo/EnviarCorreoModal.vue'
     import Toastify from "toastify-js";
     import "toastify-js/src/toastify.css";
+    import pdfMake from "pdfmake/build/pdfmake";
+    import pdfFonts from "pdfmake/build/vfs_fonts";
+    import { useRouter } from 'vue-router';
 
     const { proxy } = getCurrentInstance()
+    const router = useRouter()
+    
     const modalRef = ref(null);
     let modalInstance = null;
     const paquetesDisponibles = ref([]);
@@ -1327,11 +1333,17 @@
 
     const aprobarCotizacion = (cotizacion) => {
         
+        const idCotizacion = Number(
+            String(cotizacion.codigo).replace('COT-', '')
+        )
+
+
         const json = {
-            idCotizacion: parseInt(cotizacion.codigo.replace('COT-', ''), 10),
+            idCotizacion: idCotizacion, // parseInt(cotizacion.codigo.replace('COT-', ''), 10),
             idEstadoCotizacion: 2,
             idUsuario: 1 //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
         }
+
         fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -1345,8 +1357,17 @@
             return res.json();
         })
         .then(data => {
-            //console.log("Cotización actualizada:", data);
+            console.log("Cotización actualizada:" + data + ' idCot: ' + json.idCotizacion);
             cargarCotizaciones();
+
+           
+            router.push({
+                name: 'formOT',
+                params: {
+                    idCotizacion: json.idCotizacion
+                }
+            })
+     
         })
         .catch(error => {
             // Aquí capturas cualquier error de la API o de red
@@ -2990,7 +3011,24 @@
         }
     };
 
+    const confirmarAccion = async (vistaCotizacion) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, continuar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true
+        })
 
+        if (!result.isConfirmed) return
+
+        // console.log('confirmar: ' + vistaCotizacion.codigo)
+        aprobarCotizacion(vistaCotizacion)
+    }
 
     // GENERAR PDF
 
@@ -3010,14 +3048,11 @@
         });
     };
 
-    import pdfMake from "pdfmake/build/pdfmake";
-    import pdfFonts from "pdfmake/build/vfs_fonts";
-
-    // 🔑 ESTA es la línea correcta
+    
     pdfMake.vfs = pdfFonts.vfs;
 
     const generarPDF = async () => {
-        
+
         const logo = await loadLogoBase64();
         const v = vistaCotizacion.value;
 
@@ -3083,6 +3118,11 @@
                             { text: 'Col. La Pisina C.P. 37440', fontSize: 9 },
                             { text: 'Tel. 477 390 0290 y 477 461 0028', fontSize: 9 },
                             { text: 'torreslanda@kartisimo.mx', fontSize: 9 }
+                        ],
+                        [
+                            { text: 'Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián', bold: true, fontSize: 10 },
+                            { text: 'Col. La Martinica, C.P. 37500', fontSize: 9 },
+                            { text: 'Tel. 477 763 3285 y 477 763 3284', fontSize: 9 }
                         ]
                     ],
                     columnGap: 20,

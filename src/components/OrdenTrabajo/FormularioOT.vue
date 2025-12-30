@@ -291,21 +291,10 @@
                             <option value="02">02 - Cheque nominativo</option>
                             <option value="03">03 - Transferencia electrónica de fondos</option>
                             <option value="04">04 - Tarjeta de crédito</option>
-                            <option value="05">05 - Monedero electrónico</option>
-                            <option value="06">06 - Dinero electrónico</option>
-                            <option value="08">08 - Vales de despensa</option>
-                            <option value="12">12 - Dación en pago</option>
-                            <option value="13">13 - Pago por subrogación</option>
-                            <option value="14">14 - Pago por consignación</option>
                             <option value="15">15 - Condonación</option>
                             <option value="17">17 - Compensación</option>
-                            <option value="23">23 - Novación</option>
-                            <option value="24">24 - Confusión</option>
-                            <option value="25">25 - Remisión de deuda</option>
                             <option value="26">26 - Prescripción o caducidad</option>
-                            <option value="27">27 - A satisfacción del acreedor</option>
                             <option value="28">28 - Tarjeta de débito</option>
-                            <option value="29">29 - Tarjeta de servicios</option>
                             <option value="30">30 - Aplicación de anticipos</option>
                             <option value="31">31 - Intermediario pagos</option>
                             <option value="99">99 - Por definir</option>
@@ -604,10 +593,23 @@ import { ref, watch, getCurrentInstance, onMounted, reactive, nextTick, computed
 import { useRouter } from 'vue-router';
 import Swal from 'sweetalert2'
 import ModalInsumo from './ModalInsumo.vue';
+
+const router = useRouter()
+
+
 const { proxy } = getCurrentInstance() 
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 const showModal = ref(false)
+
+const props = defineProps({
+    idCotizacion: {
+        type: [String, Number],
+        required: true
+    }
+})
+
+
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
 
@@ -821,7 +823,6 @@ const ordenTrabajoForm = reactive({
     }    
 })
 
-const router = useRouter()
 
 const irAOrdenTrabajo = () => {
     router.push({ name: 'OrdenTrabajo' })
@@ -860,8 +861,9 @@ const cargarCotizacionesAprobadasOrRealizadas = async () => {
 };
 
 const cargarEmpleados = async () => {
+    const userSession = JSON.parse(sessionStorage.getItem('userSession'))
     try {
-        const res = await fetch(proxy.$serverIP + 'api/Empleado/getEmpleado');
+        const res = await fetch(proxy.$serverIP + 'api/Empleado/getEmpleado?idSucursal='+ userSession.usuario.idSucursal);
         if (!res.ok) throw new Error('Error en la respuesta');
         const data = await res.json();
 
@@ -1048,22 +1050,22 @@ const eliminarInsumo = (tipo, index) => {
   }
 };
 
-
 const normalizarInsumos = () => {
   ['llanta', 'paquete', 'adicional'].forEach(tipo => {
-    ordenTrabajoForm.insumo[tipo].forEach(item => {
-      //  agregar activo si no existe
+    ordenTrabajoForm.insumo[tipo].forEach((item, i) => {
+      if (!item.id) item.id = `${tipo}-${i}-${Date.now()}`;
       if (item.activo === undefined) item.activo = true;
 
-      // Para paquetes, también los detalles
       if (tipo === 'paquete' && item.detalle) {
-        item.detalle.forEach(d => {
+        item.detalle.forEach((d, j) => {
+          if (!d.id) d.id = `detalle-${i}-${j}-${Date.now()}`;
           if (d.activo === undefined) d.activo = true;
         });
       }
     });
   });
 };
+
 
 
 
@@ -1396,6 +1398,7 @@ const cargarInfoCotizacion = async () => {
 
                     detalle: paquete.detallePaquete.map(detalle => ({
                         idDesglosePaquete: detalle.idDesglosePaquete,
+                        idConceptoTrabajo: detalle.idConceptoTrabajo,
                         descripcion: detalle.nombre,
                         cantidad: detalle.cantidad,
                         precioUnitario: 0,
@@ -1509,6 +1512,20 @@ const limpiarOrdenTrabajoForm = () => {
     }
 }
 
+
+
+// observa idCotizacion prop, en cuanto se envie un valor nuevo actualiza y carga la informacion de la cotizacion
+watch(
+    () => props.idCotizacion,
+    async (newValue) => {
+        if (!newValue) return
+
+        ordenTrabajoForm.cotSeleccionada = newValue
+        console.log('watch: ' + ordenTrabajoForm.cotSeleccionada)
+        await cargarInfoCotizacion()
+    },
+    { immediate: true } 
+)
 </script>
 
 <style scoped>

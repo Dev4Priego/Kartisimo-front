@@ -362,7 +362,7 @@
 											<td>
 												<select
 													class="form-select form-select-sm"
-													v-model="paq.idConceptoTrabajo"
+													v-model="det.idConceptoTrabajo"
 												>
 													<option :value="0">-- Seleccione concepto --</option>
 													<option
