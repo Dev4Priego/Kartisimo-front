@@ -309,7 +309,27 @@
                 </div>
                 <div class="col">
                     <div class="mb-3">
-                        <label class="form-label">Fecha Alta *</label>
+
+                     <label class="form-label">Fecha de entrega propuesta *</label>
+                        <input 
+                            v-model="ordenTrabajoForm.fechaEntrega"
+                            type="datetime-local"
+                            class="form-control"
+                            @blur="validate('fechaEntrega')"
+                            :class="{'input-error': errores['fechaEntrega']}"
+                        >
+                        
+                        <small v-if="errores['fechaEntrega']" class="error-msg">
+                            {{ errores['fechaEntrega'] }}
+                        </small>
+
+                     
+
+                    </div>                                    
+                </div>
+                <div class="col">
+                    <div class="mb-3">
+                     <label class="form-label">Fecha Alta *</label>
                         <input 
                             v-model="ordenTrabajoForm.cliente.fechaAlta" 
                             class="form-control" 
@@ -321,32 +341,8 @@
                         <small v-if="errores['cliente.fechaAlta']" class="error-msg">
                             {{ errores['cliente.fechaAlta'] }}
                         </small>
-                    </div>                                    
-                </div>
-                <div class="col">
-                    <div class="mb-3">
-                        <label class="form-label">Fecha de entrega propuesta *</label>
-                        <div class="row">
-                            <div class="col">                        
-                                <input
-                                    type="date"
-                                    class="form-control"
-                                    v-model="fechaEntregaFecha"
-                                    @change="unirFechaHora"
-                                />                                
-                            </div>
-                            <div class="col">
-                                <input
-                                    type="time"
-                                    class="form-control"
-                                    v-model="fechaEntregaHora"
-                                    @change="unirFechaHora"
-                                />
-                            </div>
-                            <small v-if="errores.fechaEntrega" class="text-danger">
-                                {{ errores.fechaEntrega }}
-                            </small>
-                        </div>
+                       
+
                     </div>
                 </div>
             </div>
