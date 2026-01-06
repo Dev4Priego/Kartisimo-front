@@ -1,10 +1,10 @@
 <template>
-  <div class="mt-4">
-    <!-- Botón que abre el modal -->
-    <button class="btn btn-outline-danger w-100" @click="abrirModal">
-      Enviar por correo
-    </button>
-  </div>
+	<div class="mt-4">
+		<!-- Botón que abre el modal -->
+		<button class="btn btn-outline-danger w-100" @click="abrirModal">
+			Enviar por correo
+		</button>
+	</div>
 </template>
 
 <script setup>
@@ -14,9 +14,6 @@ import html2pdf from 'html2pdf.js';
 
 
 const { proxy } = getCurrentInstance()
-const correo = ref('')
-const asunto = ref('')
-const mensaje = ref('')
 
 
 const props = defineProps({
@@ -25,6 +22,17 @@ const props = defineProps({
 
 
 const abrirModal = async () => {
+	// console.log('enviar correo componente: ' + JSON.stringify(props.cotizacion))
+
+	// console.log('llanta ' + JSON.stringify(props.cotizacion.llantasSelecionadas[1].medidas))
+
+	const texto = props.cotizacion.llantasSelecionadas[0].medidas;
+
+	const match = texto.match(/\d{3}\/\d{2}\s*r?\d{2}/i);
+
+	const medida = match ? match[0].toUpperCase() : null;
+
+	// console.log(medida);
 
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
@@ -35,7 +43,7 @@ const abrirModal = async () => {
 		title: 'Enviar por correo',
 		html: `
 			<input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email">
-			<input id="asunto" class="swal2-input" placeholder="Asunto">
+			<input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo">
 			<textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..."></textarea>
 		`,
 		confirmButtonText: 'Enviar',
@@ -158,6 +166,32 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 				width: 32%;
 				line-height: 1.4;
 			}
+
+			 /* --- PROMOS --- */
+			.precio-original {
+				text-decoration: line-through;
+				color: #888;
+				font-size: 11px;
+				display: block;
+			}
+
+			.precio-final {
+				color: #2e7d32;
+				font-weight: bold;
+				font-size: 12px;
+				display: block;
+			}
+
+			.promo-label {
+				display: inline-block;
+				background: #e53935;
+				color: #fff;
+				font-size: 10px;
+				font-weight: bold;
+				padding: 2px 6px;
+				border-radius: 4px;
+				margin: 2px 0;
+			}
 		</style>
 
 		<!-- ENCABEZADO -->
@@ -217,32 +251,121 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 				</tr>
 			</thead>
 			<tbody>
-				${props.cotizacion.llantasSelecionadas.map(l => `
-				<tr>
-					<td class="center">${l.cantidad}</td>
-					<td>${l.medidas}</td>
-					<td class="right">$${l.precioConPromo.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-					<td class="right">$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-				</tr>
-				`).join('')}
+				${props.cotizacion.llantasSelecionadas.map(l => {
+					const tienePromo =
+						l.promoLabel && l.precioConPromo < l.precioUnitario
 
-				${props.cotizacion.paquetes.map(p => `
-				<tr>
-					<td class="center">1</td>
-					<td><em>${p.nombre}</em></td>
-					<td class="right">$${p.precio.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-					<td class="right">$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-				</tr>
-				`).join('')}
+					const totalOriginal = l.precioUnitario * l.cantidad
 
-				${props.cotizacion.serviciosAdicionales.map(s => `
-				<tr>
-					<td class="center">${s.cantidad}</td>
-					<td><em>${s.nombreServicio}</em></td>
-					<td class="right">$${s.precioConPromo.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-					<td class="right">$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-				</tr>
-				`).join('')}
+					return `
+					<tr>
+						<td class="center">${l.cantidad}</td>
+						<td>${l.medidas}</td>
+
+						<!-- PRECIO UNITARIO -->
+						<td class="right">
+						$${l.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+						</td>
+
+						<!-- TOTAL -->
+						<td class="right">
+						${
+							tienePromo
+							? `
+								<span class="precio-original">
+								$${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+								<span class="promo-label">${l.promoLabel}</span>
+								<span class="precio-final">
+								$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+							: `
+								<span>
+								$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+						}
+						</td>
+					</tr>
+					`
+				}).join('')}
+
+
+				${props.cotizacion.paquetes.map(p => {
+					const tienePromo = p.promoLabel && p.precio < p.precioUnitario
+
+					return `
+					<tr>
+						<td class="center">1</td>
+						<td><em>${p.nombre}</em></td>
+
+						<td class="right">
+						$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+						</td>
+
+						<td class="right">
+						${
+							tienePromo
+							? `
+								<span class="precio-original">
+								$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+								<span class="promo-label">${p.promoLabel}</span>
+								<span class="precio-final">
+								$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+							: `
+								<span>
+								$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+						}
+						</td>
+					</tr>
+					`
+				}).join('')}
+
+
+				${props.cotizacion.serviciosAdicionales.map(s => {
+					const tienePromo =
+						s.promoLabel && s.precioConPromo < s.precioUnitario
+
+					const totalOriginal = s.precioUnitario * s.cantidad
+
+					return `
+					<tr>
+						<td class="center">${s.cantidad}</td>
+						<td><em>${s.nombreServicio}</em></td>
+
+						<td class="right">
+						$${s.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+						</td>
+
+						<td class="right">
+						${
+							tienePromo
+							? `
+								<span class="precio-original">
+								$${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+								<span class="promo-label">${s.promoLabel}</span>
+								<span class="precio-final">
+								$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+							: `
+								<span>
+								$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+								</span>
+							`
+						}
+						</td>
+					</tr>
+					`
+				}).join('')}
+
 			</tbody>
 		</table>
 

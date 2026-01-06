@@ -495,6 +495,12 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import ModalAdicional from "./ModalAdicional.vue";
 
+const { proxy } = getCurrentInstance();
+
+const llantas = ref([]);
+const paquetes = ref([]);
+const adicionales = ref([]);
+
 const props = defineProps({
 	modelValue: Boolean,
 	title: { type: String, default: "Modal" },
@@ -502,10 +508,6 @@ const props = defineProps({
 });
 
 const mostrarModalAdicional = ref(false);
-
-const llantas = ref([]);
-const paquetes = ref([]);
-const adicionales = ref([]);
 
 // mirar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
 watch(
@@ -521,7 +523,6 @@ watch(
 const emit = defineEmits(["update:modelValue"]);
 const close = () => emit("update:modelValue", false);
 
-const { proxy } = getCurrentInstance();
 
 // Estados
 const items = ref([]);
@@ -655,6 +656,7 @@ const cargarAlmacenes = async () =>{
 		const data = await response.json()   // <- aquí parseas el JSON real
 
 		//console.log('Datos recibidos:', data)
+		
 		// Aquí mapeamos para que tenga el mismo formato que esperabas
 		almacenes.value = data.map(a => ({
 			id: a.idAlmacen,
@@ -949,7 +951,7 @@ const cargarPaquetes = async () => {
 			descripcion: p.descripcion,
 			precioUnitario: p.precioUnitario,
 
-			// 👉 MISMO NOMBRE que usas después
+			// MISMO NOMBRE que usas después
 			detalle: (p.detalle || []).map(d => ({
 				idDesglosePaquete: d.idDesglosePaquete,
 				nombre: d.descripcion,
