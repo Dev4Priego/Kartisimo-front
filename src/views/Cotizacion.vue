@@ -869,8 +869,7 @@
                         <small>apolo@kartisimo.mx</small><br />
                       </div>
                       <div class="col">
-                        <small
-                          ><strong
+                        <small><strong
                             >Blvd. Torres Landa 1901 esq. San Jacobo</strong
                           ></small
                         ><br />

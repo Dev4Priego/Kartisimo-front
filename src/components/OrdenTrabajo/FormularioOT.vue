@@ -10,28 +10,21 @@
           <h5>Cotización</h5>
         </div>
         <div class="col-8">
-          <label class="form-label" for="slcCotizacion"
-            >Selecciona una cotización</label
-          >
-          <select
-            v-model="ordenTrabajoForm.cotSeleccionada"
-            class="form-select"
-            name="cotizacion"
+          <input
+            class="form-control"
+            list="cotizacionesList"
             id="slcCotizacion"
-            @change="cargarInfoCotizacion()"
-          >
-            <option :value="0" disabled selected>
-              -- Selecciona una cotización --
-            </option>
+            placeholder="Buscar cotización: Num. Cotizacion, medida (225/55 R20), rango (97Y) o fecha (año-mes-dia)"
+            v-model="busquedaCotizacion"
+            @input="onInputCotizacion()"
+            @change="validarSeleccionCotizacion()"
+          />
 
-            <option
-              v-for="itm in itmCotizaciones"
-              :key="itm.idCotizacion"
-              :value="itm.idCotizacion"
-            >
+          <datalist id="cotizacionesList">
+            <option v-for="itm in itmCotizaciones" :key="itm.idCotizacion" :value="itm.idCotizacion" :label="`COT-${itm.idCotizacion} · ${itm.medidas} ${itm.rango}`">
               COT-{{ itm.idCotizacion }}
             </option>
-          </select>
+          </datalist>
           <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
         </div>
       </div>
@@ -1029,19 +1022,59 @@ const unirFechaHora = () => {
 const itmCotizaciones = ref([]);
 const itmEmpleados = ref({});
 const itmTipoOT = ref([]);
+const busquedaCotizacion = ref('')
 
-const cargarCotizacionesAprobadasOrRealizadas = async () => {
+let timeout = null
+
+const onInputCotizacion = () => {
+  clearTimeout(timeout)
+
+  timeout = setTimeout(() => {
+    cargarCotizacionesAprobadasOrRealizadas(busquedaCotizacion.value)
+  }, 300)
+}
+
+const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
   try {
-    const res = await fetch(
-      proxy.$serverIP + "api/Cotizacion/getCotizacionIdAprobadaOrRealizada"
-    );
-    if (!res.ok) throw new Error("Error en la respuesta");
-    const data = await res.json();
-    itmCotizaciones.value = data;
+    const url = new URL(
+      proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada'
+    )
+
+    // parámetro opcional
+    if (busqueda && busqueda.trim() !== '') {
+      url.searchParams.append('busqueda', busqueda)
+    }
+
+    const res = await fetch(url)
+    if (!res.ok) throw new Error('Error en la respuesta')
+
+    const data = await res.json()
+    itmCotizaciones.value = data
   } catch (e) {
-    console.error("Error al cargar paquetes:", e);
+    console.error('Error al cargar cotizaciones:', e)
   }
-};
+}
+// input de seleccionar cot existente
+const validarSeleccionCotizacion = () => {
+  const valor = busquedaCotizacion.value?.trim()
+
+  const encontrada = itmCotizaciones.value.find(
+    x => x.idCotizacion.toString() === valor
+  )
+
+  if (encontrada) {
+    // ✔ Existe → guardar valor real
+    ordenTrabajoForm.cotSeleccionada = encontrada.idCotizacion
+    cargarInfoCotizacion()
+  } else {
+    // ❌ No existe → limpiar
+    ordenTrabajoForm.cotSeleccionada = null
+    busquedaCotizacion.value = ''
+    alert('Selecciona una cotización válida')
+  }
+}
+
+
 
 const cargarEmpleados = async () => {
   const userSession = JSON.parse(sessionStorage.getItem("userSession"));
