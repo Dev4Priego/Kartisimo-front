@@ -814,12 +814,12 @@
                   />
                 </div>
                 <!-- <div class="col-3">
-                                    <input 
-                                        class="form-control" 
-                                        placeholder="Observaciones" 
-                                        v-model="nuevaObservacion"
-                                    />
-                                </div> -->
+                  <input 
+                  class="form-control" 
+                  placeholder="Observaciones" 
+                  v-model="nuevaObservacion"
+                  />
+                </div> -->
                 <div class="col">
                   <input
                     class="form-control"
@@ -1088,17 +1088,17 @@
                               </select>
                             </div>
                             <!--                                                         
-                                                        <div class="form-check mb-2">
-                                                            <input
-                                                                class="form-check-input"
-                                                                type="checkbox"
-                                                                v-model="item.excluirPromocionGeneral"
-                                                                :id="'excluir-llanta-' + item.idLlanta"
-                                                            />
-                                                            <label class="form-check-label small" :for="'excluir-llanta-' + item.idLlanta">
-                                                                Excluir promoción
-                                                            </label>
-                                                        </div> -->
+                            <div class="form-check mb-2">
+                             <input
+                             class="form-check-input"
+                             type="checkbox"
+                             v-model="item.excluirPromocionGeneral"
+                            :id="'excluir-llanta-' + item.idLlanta"
+                            />
+                          <label class="form-check-label small" :for="'excluir-llanta-' + item.idLlanta">
+                           Excluir promoción
+                           </label>
+                               </div> -->
 
                             <button
                               class="btn btn-sm btn-outline-danger"
@@ -1443,16 +1443,16 @@
                             </div>
 
                             <!-- <div class="form-check mb-2">
-                                                            <input
-                                                                class="form-check-input"
-                                                                type="checkbox"
-                                                                v-model="extra.excluirPromocionGeneral"
-                                                                :id="'excluir-serv-' + i"
-                                                            />
-                                                            <label class="form-check-label small" :for="'excluir-serv-' + i">
-                                                                Excluir promoción
-                                                            </label>
-                                                        </div> -->
+                              <input
+                              class="form-check-input"
+                                type="checkbox"
+                              v-model="extra.excluirPromocionGeneral"
+                             :id="'excluir-serv-' + i"
+                             />
+                             <label class="form-check-label small" :for="'excluir-serv-' + i">
+                             Excluir promoción
+                             </label>
+                         </div> -->
 
                             <button
                               class="btn btn-sm btn-outline-danger"
@@ -1477,17 +1477,17 @@
                           <td colspan="2" class="fs-5 fw-bold text-end">
                             <!-- Si hay promoción general, mostrar ambos -->
                             <!-- <div v-if="promoGeneral">
-                                                            <span class="text-decoration-line-through text-muted me-2">
-                                                                {{ formatoMoneda(totalCotizacion) }}
-                                                            </span>
-                                                            <span class="text-success fw-bold">
-                                                                {{ formatoMoneda(totalGeneralConPromo) }}
-                                                            </span>
-                                                            <small class="badge bg-info ms-2">
-                                                                {{ promoGeneral.nombre }}
-                                                                ({{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }})
-                                                            </small>
-                                                        </div> -->
+                             <span class="text-decoration-line-through text-muted me-2">
+                             {{ formatoMoneda(totalCotizacion) }}
+                             </span>
+                            <span class="text-success fw-bold">
+                            {{ formatoMoneda(totalGeneralConPromo) }}
+                            </span>
+                           <small class="badge bg-info ms-2">
+                           {{ promoGeneral.nombre }}
+                           ({{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }})
+                            </small>
+                           </div> -->
 
                             <!-- Si NO hay promoción -->
                             <!-- <div v-else>
@@ -1520,9 +1520,9 @@
                                                                 {{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }} 
                                                                 aplicado
                                                             </span>
-                                                        </div>
-                                                    </td>
-                                                </tr> -->
+                         </div>
+                    </td>
+                     </tr> -->
                       </tfoot>
                     </table>
 

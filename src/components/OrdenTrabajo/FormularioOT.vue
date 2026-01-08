@@ -9,7 +9,7 @@
         <div class="col-4">
           <h5>Cotización</h5>
         </div>
-        <div class="col-8">
+        <div class="col-8" >
           <input
             class="form-control"
             list="cotizacionesList"
@@ -17,14 +17,27 @@
             placeholder="Buscar cotización: Num. Cotizacion, medida (225/55 R20), rango (97Y) o fecha (año-mes-dia)"
             v-model="busquedaCotizacion"
             @input="onInputCotizacion()"
-            @change="validarSeleccionCotizacion()"
+            @focus="mostrarLista = true"
           />
 
-          <datalist id="cotizacionesList">
-            <option v-for="itm in itmCotizaciones" :key="itm.idCotizacion" :value="itm.idCotizacion" :label="`COT-${itm.idCotizacion} · ${itm.medidas} ${itm.rango}`">
-              COT-{{ itm.idCotizacion }}
-            </option>
-          </datalist>
+          <ul
+            v-if="mostrarLista && itmCotizaciones.length"
+            class="list-group position-absolute shadow mt-2"
+            style="z-index: 1000"
+            @mouseleave="mostrarLista = false"
+          >
+            <li
+              v-for="c in itmCotizaciones"
+              :key="c.idCotizacion"
+              class="list-group-item list-group-item-action"
+              @click="seleccionarCotizacion(c)"
+            >
+              <strong>COT-{{ c.idCotizacion }}</strong>
+              <div class="text-muted small">
+                {{ formatearFecha(c.fecha) }} · {{ c.medidas }} · {{ c.rango }}
+              </div>
+            </li>
+          </ul>
           <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
         </div>
       </div>
@@ -885,8 +898,7 @@ function validate(path) {
 
     "vehiculo.color": () => (!value ? "Color obligatorio." : null),
 
-    "vehiculo.placas": () =>
-      !/^[A-Z0-9]{6,7}$/.test(value) ? "Placas inválidas." : null,
+    "vehiculo.placas": () => (!value ? "Placas obligatorias." : null),
 
     "vehiculo.anio": () => {
       const y = parseInt(value);
@@ -1019,10 +1031,14 @@ const unirFechaHora = () => {
 /*************************************************/
 
 /* VARIABLES PARA LA CARGA DE INFO */
-const itmCotizaciones = ref([]);
+
 const itmEmpleados = ref({});
 const itmTipoOT = ref([]);
+
+/****************************************************/
+const itmCotizaciones = ref([]);
 const busquedaCotizacion = ref('')
+const mostrarLista = ref(false)
 
 let timeout = null
 
@@ -1055,24 +1071,43 @@ const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
   }
 }
 // input de seleccionar cot existente
-const validarSeleccionCotizacion = () => {
-  const valor = busquedaCotizacion.value?.trim()
-
-  const encontrada = itmCotizaciones.value.find(
-    x => x.idCotizacion.toString() === valor
+const seleccionarCotizacion = (c) => {
+  const existe = itmCotizaciones.value.some(
+    x => x.idCotizacion === c.idCotizacion
   )
 
-  if (encontrada) {
-    // ✔ Existe → guardar valor real
-    ordenTrabajoForm.cotSeleccionada = encontrada.idCotizacion
-    cargarInfoCotizacion()
-  } else {
-    // ❌ No existe → limpiar
+  if (!existe) {
     ordenTrabajoForm.cotSeleccionada = null
     busquedaCotizacion.value = ''
-    alert('Selecciona una cotización válida')
+    itmCotizaciones.value = []
+    mostrarLista.value = false
+    alert('La cotización seleccionada no es válida')
+    return
   }
+
+  busquedaCotizacion.value = `${c.idCotizacion}`
+  ordenTrabajoForm.cotSeleccionada = c.idCotizacion
+
+  itmCotizaciones.value = [c]
+  mostrarLista.value = false
+
+  cargarInfoCotizacion()
 }
+
+const formatearFecha = (fechaIso) => {
+  if (!fechaIso) return ''
+
+  const fecha = new Date(fechaIso)
+
+  return fecha.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+/****************************************************/
 
 
 
