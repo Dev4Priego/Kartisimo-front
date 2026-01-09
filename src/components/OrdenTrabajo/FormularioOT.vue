@@ -9,7 +9,7 @@
         <div class="col-4">
           <h5>Cotización</h5>
         </div>
-        <div class="col-8" >
+        <div class="col-8">
           <input
             class="form-control"
             list="cotizacionesList"
@@ -332,7 +332,7 @@
         <div class="col">
           <div class="mb-3">
             <label class="form-label">Fecha de entrega propuesta *</label>
-            <div class="row"> 
+            <div class="row">
               <div class="col">
                 <input
                   type="date"
@@ -533,208 +533,216 @@
             id="tablaInsumos"
             style="max-height: 400px; overflow-y: auto"
           >
+            <table class="table table-hover table-sm">
+              <thead>
+                <tr>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                  <th>P/U</th>
+                  <th>Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
 
-          <table class="table table-hover table-sm">
-  <thead>
-    <tr>
-      <th>Descripción</th>
-      <th>Cantidad</th>
-      <th>P/U</th>
-      <th>Subtotal</th>
-      <th></th>
-    </tr>
-  </thead>
+              <transition-group name="fade" tag="tbody">
+                <!-- ================= LLANTAS ================= -->
+                <template
+                  v-for="(llanta, index) in ordenTrabajoForm.insumo.llanta"
+                  :key="`llanta-${index}`"
+                >
+                  <tr :class="{ 'fila-eliminada': llanta.eliminado }">
+                    <td>{{ llanta.descripcion }}</td>
+                    <td>{{ llanta.cantidad }}</td>
+                    <td>{{ Number(llanta.precioUnitario).toFixed(2) }}</td>
+                    <td>
+                      <div v-if="llanta.idPromocion">
+                        <span class="text-decoration-line-through text-muted">
+                          {{
+                            (
+                              llanta.cantidad * llanta.precioUnitario
+                            ).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })
+                          }}
+                        </span>
+                        <span class="text-success fw-bold mx-2">
+                          {{
+                            Number(llanta.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })
+                          }}
+                        </span>
+                      </div>
+                      <div v-else>
+                        {{
+                          Number(llanta.subTotal).toLocaleString("es-MX", {
+                            style: "currency",
+                            currency: "MXN",
+                          })
+                        }}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-sm"
+                        :class="
+                          llanta.eliminado
+                            ? 'btn-outline-success'
+                            : 'btn-outline-danger'
+                        "
+                        @click="eliminarInsumo('llanta', index)"
+                        type="button"
+                      >
+                        <i
+                          :class="
+                            llanta.eliminado
+                              ? 'bi bi-arrow-counterclockwise'
+                              : 'bi bi-x-circle'
+                          "
+                        ></i>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
 
-  <transition-group name="fade" tag="tbody">
+                <!-- ================= PAQUETES ================= -->
+                <template
+                  v-for="(paquete, index) in ordenTrabajoForm.insumo.paquete"
+                  :key="`paquete-${index}`"
+                >
+                  <tr :class="{ 'fila-eliminada': paquete.eliminado }">
+                    <td>{{ paquete.descripcion }}</td>
+                    <td>{{ paquete.cantidad }}</td>
+                    <td>{{ Number(paquete.precioUnitario).toFixed(2) }}</td>
+                    <td>
+                      <div v-if="paquete.idPromocion">
+                        <span class="text-decoration-line-through text-muted">
+                          {{
+                            (
+                              paquete.cantidad * paquete.precioUnitario
+                            ).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })
+                          }}
+                        </span>
+                        <span class="text-success fw-bold mx-2">
+                          {{
+                            Number(paquete.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })
+                          }}
+                        </span>
+                      </div>
+                      <div v-else>
+                        {{
+                          Number(paquete.subTotal).toLocaleString("es-MX", {
+                            style: "currency",
+                            currency: "MXN",
+                          })
+                        }}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-sm"
+                        :class="
+                          paquete.eliminado
+                            ? 'btn-outline-success'
+                            : 'btn-outline-danger'
+                        "
+                        @click="eliminarInsumo('paquete', index)"
+                        type="button"
+                      >
+                        <i
+                          :class="
+                            paquete.eliminado
+                              ? 'bi bi-arrow-counterclockwise'
+                              : 'bi bi-x-circle'
+                          "
+                        ></i>
+                      </button>
+                    </td>
+                  </tr>
 
-    <!-- ================= LLANTAS ================= -->
-    <template
-      v-for="(llanta, index) in ordenTrabajoForm.insumo.llanta"
-      :key="`llanta-${index}`"
-    >
-      <tr :class="{ 'fila-eliminada': llanta.eliminado }">
-        <td>{{ llanta.descripcion }}</td>
-        <td>{{ llanta.cantidad }}</td>
-        <td>{{ Number(llanta.precioUnitario).toFixed(2) }}</td>
-        <td>
-          <div v-if="llanta.idPromocion">
-            <span class="text-decoration-line-through text-muted">
-              {{
-                (llanta.cantidad * llanta.precioUnitario).toLocaleString(
-                  "es-MX",
-                  { style: "currency", currency: "MXN" }
-                )
-              }}
-            </span>
-            <span class="text-success fw-bold mx-2">
-              {{
-                Number(llanta.subTotal).toLocaleString("es-MX", {
-                  style: "currency",
-                  currency: "MXN",
-                })
-              }}
-            </span>
-          </div>
-          <div v-else>
-            {{
-              Number(llanta.subTotal).toLocaleString("es-MX", {
-                style: "currency",
-                currency: "MXN",
-              })
-            }}
-          </div>
-        </td>
-        <td>
-          <button
-            class="btn btn-sm"
-            :class="llanta.eliminado
-              ? 'btn-outline-success'
-              : 'btn-outline-danger'"
-            @click="eliminarInsumo('llanta', index)"
-            type="button"
-          >
-            <i
-              :class="llanta.eliminado
-                ? 'bi bi-arrow-counterclockwise'
-                : 'bi bi-x-circle'"
-            ></i>
-          </button>
-        </td>
-      </tr>
-    </template>
+                  <!-- Detalle del paquete -->
+                  <tr
+                    v-for="(detalle, dIndex) in paquete.detalle"
+                    :key="`detalle-${index}-${dIndex}`"
+                    class="table-light"
+                  >
+                    <td class="ps-4">↳ {{ detalle.descripcion }}</td>
+                    <td>{{ detalle.cantidad }}</td>
+                    <td>{{ detalle.precioUnitario }}</td>
+                    <td>{{ detalle.subTotal }}</td>
+                    <td></td>
+                  </tr>
+                </template>
 
-    <!-- ================= PAQUETES ================= -->
-    <template
-      v-for="(paquete, index) in ordenTrabajoForm.insumo.paquete"
-      :key="`paquete-${index}`"
-    >
-      <tr :class="{ 'fila-eliminada': paquete.eliminado }">
-        <td>{{ paquete.descripcion }}</td>
-        <td>{{ paquete.cantidad }}</td>
-        <td>{{ Number(paquete.precioUnitario).toFixed(2) }}</td>
-        <td>
-          <div v-if="paquete.idPromocion">
-            <span class="text-decoration-line-through text-muted">
-              {{
-                (paquete.cantidad * paquete.precioUnitario).toLocaleString(
-                  "es-MX",
-                  { style: "currency", currency: "MXN" }
-                )
-              }}
-            </span>
-            <span class="text-success fw-bold mx-2">
-              {{
-                Number(paquete.subTotal).toLocaleString("es-MX", {
-                  style: "currency",
-                  currency: "MXN",
-                })
-              }}
-            </span>
-          </div>
-          <div v-else>
-            {{
-              Number(paquete.subTotal).toLocaleString("es-MX", {
-                style: "currency",
-                currency: "MXN",
-              })
-            }}
-          </div>
-        </td>
-        <td>
-          <button
-            class="btn btn-sm"
-            :class="paquete.eliminado
-              ? 'btn-outline-success'
-              : 'btn-outline-danger'"
-            @click="eliminarInsumo('paquete', index)"
-            type="button"
-          >
-            <i
-              :class="paquete.eliminado
-                ? 'bi bi-arrow-counterclockwise'
-                : 'bi bi-x-circle'"
-            ></i>
-          </button>
-        </td>
-      </tr>
-
-      <!-- Detalle del paquete -->
-      <tr
-        v-for="(detalle, dIndex) in paquete.detalle"
-        :key="`detalle-${index}-${dIndex}`"
-        class="table-light"
-      >
-        <td class="ps-4">↳ {{ detalle.descripcion }}</td>
-        <td>{{ detalle.cantidad }}</td>
-        <td>{{ detalle.precioUnitario }}</td>
-        <td>{{ detalle.subTotal }}</td>
-        <td></td>
-      </tr>
-    </template>
-
-    <!-- ================= ADICIONALES ================= -->
-    <template
-      v-for="(ad, index) in ordenTrabajoForm.insumo.adicional"
-      :key="`ad-${index}`"
-    >
-      <tr :class="{ 'fila-eliminada': ad.eliminado }">
-        <td>{{ ad.descripcion }}</td>
-        <td>{{ ad.cantidad }}</td>
-        <td>{{ Number(ad.precioUnitario).toFixed(2) }}</td>
-        <td>
-          <div v-if="ad.idPromocion">
-            <span class="text-decoration-line-through text-muted">
-              {{
-                (ad.cantidad * ad.precioUnitario).toLocaleString(
-                  "es-MX",
-                  { style: "currency", currency: "MXN" }
-                )
-              }}
-            </span>
-            <span class="text-success fw-bold mx-2">
-              {{
-                Number(ad.subTotal).toLocaleString("es-MX", {
-                  style: "currency",
-                  currency: "MXN",
-                })
-              }}
-            </span>
-          </div>
-          <div v-else>
-            {{
-              Number(ad.subTotal).toLocaleString("es-MX", {
-                style: "currency",
-                currency: "MXN",
-              })
-            }}
-          </div>
-        </td>
-        <td>
-          <button
-            class="btn btn-sm"
-            :class="ad.eliminado
-              ? 'btn-outline-success'
-              : 'btn-outline-danger'"
-            @click="eliminarInsumo('adicional', index)"
-            type="button"
-          >
-            <i
-              :class="ad.eliminado
-                ? 'bi bi-arrow-counterclockwise'
-                : 'bi bi-trash'"
-            ></i>
-          </button>
-        </td>
-      </tr>
-    </template>
-
-  </transition-group>
-</table>
-
-
-
-
-
+                <!-- ================= ADICIONALES ================= -->
+                <template
+                  v-for="(ad, index) in ordenTrabajoForm.insumo.adicional"
+                  :key="`ad-${index}`"
+                >
+                  <tr :class="{ 'fila-eliminada': ad.eliminado }">
+                    <td>{{ ad.descripcion }}</td>
+                    <td>{{ ad.cantidad }}</td>
+                    <td>{{ Number(ad.precioUnitario).toFixed(2) }}</td>
+                    <td>
+                      <div v-if="ad.idPromocion">
+                        <span class="text-decoration-line-through text-muted">
+                          {{
+                            (ad.cantidad * ad.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            )
+                          }}
+                        </span>
+                        <span class="text-success fw-bold mx-2">
+                          {{
+                            Number(ad.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })
+                          }}
+                        </span>
+                      </div>
+                      <div v-else>
+                        {{
+                          Number(ad.subTotal).toLocaleString("es-MX", {
+                            style: "currency",
+                            currency: "MXN",
+                          })
+                        }}
+                      </div>
+                    </td>
+                    <td>
+                      <button
+                        class="btn btn-sm"
+                        :class="
+                          ad.eliminado
+                            ? 'btn-outline-success'
+                            : 'btn-outline-danger'
+                        "
+                        @click="eliminarInsumo('adicional', index)"
+                        type="button"
+                      >
+                        <i
+                          :class="
+                            ad.eliminado
+                              ? 'bi bi-arrow-counterclockwise'
+                              : 'bi bi-trash'
+                          "
+                        ></i>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </transition-group>
+            </table>
           </div>
           <div class="text-center m-3">
             <button
@@ -771,7 +779,15 @@
 </template>
 
 <script setup>
-import {  ref,  watch,  getCurrentInstance,  onMounted,  reactive,  nextTick,  computed,} from "vue";
+import {
+  ref,
+  watch,
+  getCurrentInstance,
+  onMounted,
+  reactive,
+  nextTick,
+  computed,
+} from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import ModalInsumo from "./ModalInsumo.vue";
@@ -805,77 +821,37 @@ function validate(path) {
 
   const rules = {
     // -------- CLIENTE ----------
-    "cliente.clienteNombre": () =>
-      !value
-        ? "Nombre obligatorio."
-        : !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ ]+$/.test(value)
-        ? "Solo letras."
-        : null,
+   
+    fechaEntrega: () => {
+      let fechaEntrega = ordenTrabajoForm.fechaEntrega;
+      const fechaAlta = ordenTrabajoForm.cliente?.fechaAlta;
 
-    "cliente.apPaterno": () =>
-      !value
-        ? "Apellido obligatorio."
-        : !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ]+$/.test(value)
-        ? "Solo letras."
-        : null,
+      // 1 Si no hay fechaEntrega, asignar la fecha y hora actual automáticamente
+      if (!fechaEntrega) {
+        // Forma corta usando toISOString()
+        fechaEntrega = new Date().toISOString().slice(0, 16); // AAAA-MM-DDTHH:MM
+        ordenTrabajoForm.fechaEntrega = fechaEntrega; // actualizar el formulario
+      }
 
-    "cliente.apMaterno": () =>
-      !value
-        ? "Apellido obligatorio."
-        : !/^[a-zA-ZÁÉÍÓÚÑáéíóúñ]+$/.test(value)
-        ? "Solo letras."
-        : null,
+      // 2 Validar el formato
+      const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+      if (!regex.test(fechaEntrega)) {
+        return "Formato inválido. Usa AAAA-MM-DDTHH:MM.";
+      }
 
-    "cliente.rfc": () =>
-      !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(value)
-        ? "Ingresa un RFC válido: 4 letras + fecha (AAMMDD) + 3 caracteres finales. Solo mayúsculas."
-        : null,
+      // 3️⃣ Si no hay fechaAlta, no validar la comparación
+      if (!fechaAlta) return null;
 
-    "cliente.clienteTelefono": () =>
-      !/^[0-9]{10}$/.test(value) ? "Debe ser un número de 10 dígitos." : null,
+      // 4️⃣ Comparar fechas
+      const entrega = new Date(fechaEntrega);
+      const alta = new Date(fechaAlta);
+      if (entrega < alta) {
+        return "La fecha y hora de entrega no pueden ser anteriores a la fecha de alta.";
+      }
 
-    "cliente.clienteCorreo": () =>
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? "Correo inválido." : null,
-
-    "cliente.metodoPago": () => (!value ? "Método de pago obligatorio." : null),
-
-    "cliente.fechaAlta": () =>
-      !value
-        ? "La fecha y hora de alta son obligatorias."
-        : !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)
-        ? "Formato inválido. Usa fecha y hora (AAAA-MM-DDTHH:MM)."
-        : null,
-    "fechaEntrega": () => {
-        let fechaEntrega = ordenTrabajoForm.fechaEntrega;
-        const fechaAlta = ordenTrabajoForm.cliente?.fechaAlta;
-
-        // 1 Si no hay fechaEntrega, asignar la fecha y hora actual automáticamente
-        if (!fechaEntrega) {
-            // Forma corta usando toISOString()
-            fechaEntrega = new Date().toISOString().slice(0, 16); // AAAA-MM-DDTHH:MM
-            ordenTrabajoForm.fechaEntrega = fechaEntrega; // actualizar el formulario
-        }
-
-        // 2 Validar el formato
-        const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-        if (!regex.test(fechaEntrega)) {
-            return "Formato inválido. Usa AAAA-MM-DDTHH:MM.";
-        }
-
-        // 3️⃣ Si no hay fechaAlta, no validar la comparación
-        if (!fechaAlta) return null;
-
-        // 4️⃣ Comparar fechas
-        const entrega = new Date(fechaEntrega);
-        const alta = new Date(fechaAlta);
-        if (entrega < alta) {
-            return "La fecha y hora de entrega no pueden ser anteriores a la fecha de alta.";
-        }
-
-        // 5️⃣ Todo bien
-        return null;
+      // 5️⃣ Todo bien
+      return null;
     },
-
 
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () => (!value ? "Marca obligatoria." : null),
@@ -1037,79 +1013,77 @@ const itmTipoOT = ref([]);
 
 /****************************************************/
 const itmCotizaciones = ref([]);
-const busquedaCotizacion = ref('')
-const mostrarLista = ref(false)
+const busquedaCotizacion = ref("");
+const mostrarLista = ref(false);
 
-let timeout = null
+let timeout = null;
 
 const onInputCotizacion = () => {
-  clearTimeout(timeout)
+  clearTimeout(timeout);
 
   timeout = setTimeout(() => {
-    cargarCotizacionesAprobadasOrRealizadas(busquedaCotizacion.value)
-  }, 300)
-}
+    cargarCotizacionesAprobadasOrRealizadas(busquedaCotizacion.value);
+  }, 300);
+};
 
-const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
+const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = "") => {
   try {
     const url = new URL(
-      proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada'
-    )
+      proxy.$serverIP + "api/Cotizacion/getCotizacionIdAprobadaOrRealizada"
+    );
 
     // parámetro opcional
-    if (busqueda && busqueda.trim() !== '') {
-      url.searchParams.append('busqueda', busqueda)
+    if (busqueda && busqueda.trim() !== "") {
+      url.searchParams.append("busqueda", busqueda);
     }
 
-    const res = await fetch(url)
-    if (!res.ok) throw new Error('Error en la respuesta')
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Error en la respuesta");
 
-    const data = await res.json()
-    itmCotizaciones.value = data
+    const data = await res.json();
+    itmCotizaciones.value = data;
   } catch (e) {
-    console.error('Error al cargar cotizaciones:', e)
+    console.error("Error al cargar cotizaciones:", e);
   }
-}
+};
 // input de seleccionar cot existente
 const seleccionarCotizacion = (c) => {
   const existe = itmCotizaciones.value.some(
-    x => x.idCotizacion === c.idCotizacion
-  )
+    (x) => x.idCotizacion === c.idCotizacion
+  );
 
   if (!existe) {
-    ordenTrabajoForm.cotSeleccionada = null
-    busquedaCotizacion.value = ''
-    itmCotizaciones.value = []
-    mostrarLista.value = false
-    alert('La cotización seleccionada no es válida')
-    return
+    ordenTrabajoForm.cotSeleccionada = null;
+    busquedaCotizacion.value = "";
+    itmCotizaciones.value = [];
+    mostrarLista.value = false;
+    alert("La cotización seleccionada no es válida");
+    return;
   }
 
-  busquedaCotizacion.value = `${c.idCotizacion}`
-  ordenTrabajoForm.cotSeleccionada = c.idCotizacion
+  busquedaCotizacion.value = `${c.idCotizacion}`;
+  ordenTrabajoForm.cotSeleccionada = c.idCotizacion;
 
-  itmCotizaciones.value = [c]
-  mostrarLista.value = false
+  itmCotizaciones.value = [c];
+  mostrarLista.value = false;
 
-  cargarInfoCotizacion()
-}
+  cargarInfoCotizacion();
+};
 
 const formatearFecha = (fechaIso) => {
-  if (!fechaIso) return ''
+  if (!fechaIso) return "";
 
-  const fecha = new Date(fechaIso)
+  const fecha = new Date(fechaIso);
 
-  return fecha.toLocaleDateString('es-MX', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
+  return fecha.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
 /****************************************************/
-
-
 
 const cargarEmpleados = async () => {
   const userSession = JSON.parse(sessionStorage.getItem("userSession"));
@@ -1154,9 +1128,7 @@ onMounted(() => {
   normalizarLlantas();
 
   // asignar por default  la fecha actual
-  fechaEntregaFecha.value = new Date()
-    .toISOString()
-    .split("T")[0];
+  fechaEntregaFecha.value = new Date().toISOString().split("T")[0];
 });
 
 /********************************/
@@ -1328,38 +1300,20 @@ const normalizarInsumos = () => {
       }
     });
   });
-
 };
-
 
 const normalizarLlantas = () => {
-  ordenTrabajoForm.insumo.llanta =
-    ordenTrabajoForm.insumo.llanta
-      .filter(l => l) // elimina undefined
-      .map(l => ({
-        ...l,
-        eliminado: l.eliminado ?? false
-      }));
+  ordenTrabajoForm.insumo.llanta = ordenTrabajoForm.insumo.llanta
+    .filter((l) => l) // elimina undefined
+    .map((l) => ({
+      ...l,
+      eliminado: l.eliminado ?? false,
+    }));
 };
-
 
 const validarYMostrarPreview = async () => {
   const errores = [];
 
-  // Cliente
-  if (!ordenTrabajoForm.cliente.clienteNombre)
-    errores.push("El nombre del cliente es obligatorio.");
-  if (
-    !ordenTrabajoForm.cliente.clienteTelefono ||
-    !/^\d{10}$/.test(ordenTrabajoForm.cliente.clienteTelefono)
-  )
-    errores.push("El teléfono debe tener 10 dígitos.");
-  if (!ordenTrabajoForm.cliente.metodoPago)
-    errores.push("El método de pago es obligatorio.");
-  if (!ordenTrabajoForm.cliente.fechaAlta)
-    errores.push("La fecha de alta es obligatoria.");
-  if (!ordenTrabajoForm.fechaEntrega)
-    errores.push("La fecha de entrega es obligatoria.");
 
   // Vehículo
   if (!ordenTrabajoForm.vehiculo.numSerie)
