@@ -360,6 +360,7 @@
 											:key="'det-' + paq.idPaquete + '-' + k"
 										>
 											<td>
+												{{ det.idConceptoTrabajo }}
 												<select
 													class="form-select form-select-sm"
 													v-model="det.idConceptoTrabajo"
@@ -644,6 +645,7 @@ const mostrarToast = (type, message) => {
 		},
 	}).showToast();
 };
+
 
 const cargarAlmacenes = async () =>{
 	try {
@@ -954,12 +956,13 @@ const cargarPaquetes = async () => {
 			// MISMO NOMBRE que usas después
 			detalle: (p.detalle || []).map(d => ({
 				idDesglosePaquete: d.idDesglosePaquete,
+				idConceptoTrabajo: d.idConceptoTrabajo,
 				nombre: d.descripcion,
 				cantidad: d.cantidad,
 				precioUnitario: d.precioUnitario
 			}))
 		}));
-		console.log(paqueteDisponibles)
+		// console.log(paqueteDisponibles)
 	} catch (error) {
 		console.error('Error cargando paquetes:', error);
 	}
@@ -1014,6 +1017,7 @@ const onTogglePaquete = async (paqueteBase) => {
 
 		detalle: (paqueteBase.detalle || []).map(det => ({
 			idDesglosePaquete: det.idDesglosePaquete,
+			idConceptoTrabajo: det.idConceptoTrabajo,
 			descripcion: det.nombre,
 			cantidad: det.cantidad,
 			precioUnitario: 0,

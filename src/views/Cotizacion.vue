@@ -146,7 +146,6 @@
 
     <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
     <div
-      id="cotizacion-print"
       v-if="mostrarVista"
       class="modal fade show d-block"
       tabindex="-1"
@@ -166,6 +165,7 @@
             ></button>
           </div>
           <div
+            id="area-imprimir"
             ref="pdfContent"
             class="modal-body bg-white p-4 fs-6 print-area"
             :style="{ fontSize: '14px' }"
@@ -297,9 +297,10 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger">{{
-                            llanta.promoLabel
-                          }}</small>
+                          <small class="badge bg-danger d-inline-block mt-1 text-wrap">
+                            {{ llanta.promoLabel }}
+                          </small>
+
                         </span>
                         <br />
                         <span class="text-success fw-bold d-block">{{
@@ -585,13 +586,23 @@
             <div class="row m-2">
               <div class="col d-flex flex-column">
                 <div class="row m-2">
-                  <label for="clienteNuevo" class="mb-1">Cliente Nuevo:</label>
+                  <label for="nombre" class="mb-1">Nombre's cliente:</label>
                   <input
-                    id="clienteNuevo"
-                    v-model="cotizacionForm.clienteNombre"
+                    id="nombre"
+                    v-model="cotizacionForm.nombre"
                     class="form-control"
                     type="text"
-                    placeholder="Ej. Nombre Apellido"
+                    placeholder="Ej. Nombre"
+                  />
+                </div>
+                <div class="row m-2">                  
+                  <label for="apellido" class="mb-1">Apellido's cliente:</label>
+                  <input
+                    id="apellido"
+                    v-model="cotizacionForm.apellidos"
+                    class="form-control"
+                    type="text"
+                    placeholder="Ej. Apellido"
                   />
                 </div>
                 <div class="row m-2">
@@ -912,15 +923,15 @@
                       </span>
                     </div>
 
-                    <table class="table align-middle cotizacion-table ">
+                    <table class="table align-middle">
                       <thead>
                         <tr>
-                          <th style="width: 450px">
+                          <th>
                             MEDIDA - MARCA - MODELO - RANGO
                           </th>
                           <th>Cantidad</th>
                           <th>Precio Unitario</th>
-                          <th style="width: 200px; text-align: right">Total</th>
+                          <th style="width: 100px; text-align: right">Total</th>
                           <th></th>
                           <!-- <th></th> -->
                         </tr>
@@ -1656,6 +1667,8 @@ const resetTabla = () => {
 const cotizacionForm = reactive({
   codigo: "", // ← Para saber si es edición
   clienteNombre: "",
+  nombre: "",
+  apellidos: "",
   clienteTelefono: "",
   clienteCorreo: "",
   clienteExistente: false,
@@ -2445,6 +2458,8 @@ const cargarFormulario = async (cotizacion = null) => {
     Object.assign(cotizacionForm, {
       codigo: "",
       clienteNombre: "",
+      nombre: "",
+      apellidos: "",
       clienteTelefono: "",
       clienteCorreo: "",
       clienteExistente: false,
@@ -2499,6 +2514,8 @@ const cargarFormulario = async (cotizacion = null) => {
     cotizacionForm.codigo = "COT-" + data.idCotizacion;
     cotizacionForm.fechaCreacion = data.fechaCreacion;
     cotizacionForm.clienteNombre = data.clienteNombre;
+    cotizacionForm.nombre = data.nombres;
+    cotizacionForm.apellidos = data.apPaterno + " " + data.apMaterno;
     cotizacionForm.clienteTelefono = data.telefono;
     cotizacionForm.clienteCorreo = data.correo;
     cotizacionForm.clienteExistente = false;
@@ -2850,6 +2867,28 @@ const guardarCotizacion = async () => {
     );
   }
 
+  cotizacionForm.clienteNombre = cotizacionForm.nombre + " " + cotizacionForm.apellidos
+
+  cliente = cliente
+    ? 
+    {
+      idCliente: cliente.idCliente,
+      nombre: cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno, // eliminar si ya no es necesario
+      nombres: cliente.nombres,
+      apellidos: cliente.apPaterno + " " + cliente.apMaterno,
+      telefono: cliente.telefono,
+      correo: cliente.correo,
+    }
+    : 
+    {
+      idCliente: null,
+      nombre: cotizacionForm.clienteNombre,
+      nombres: cotizacionForm.nombre,
+      apellidos: cotizacionForm.apellidos,
+      telefono: cotizacionForm.clienteTelefono,
+      correo: cotizacionForm.clienteCorreo,
+    };
+
   // Mapear llantas al formato esperado
   const llantas = cotizacionForm.llantas.map((ll) => ({
     idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null,
@@ -2888,22 +2927,9 @@ const guardarCotizacion = async () => {
     excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
     comentario: s.comentario || "",
   }));
-  //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras))
+  //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras)) 
 
-  cliente = cliente
-    ? {
-        idCliente: cliente.idCliente,
-        nombre:
-          cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno,
-        telefono: cliente.telefono,
-        correo: cliente.correo,
-      }
-    : {
-        idCliente: null,
-        nombre: cotizacionForm.clienteNombre,
-        telefono: cotizacionForm.clienteTelefono,
-        correo: cotizacionForm.clienteCorreo,
-      };
+  
 
   const nuevaCotizacion = {
     codigo: rawId,
@@ -2918,7 +2944,6 @@ const guardarCotizacion = async () => {
       : null,
   };
 
-  //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   // Decide si POST o PUT
   const url = cotizacionForm.codigo
     ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
@@ -2944,7 +2969,7 @@ const guardarCotizacion = async () => {
     cargarCotizaciones();
     mostrarVistaPrevia(obj, "ver");
 
-    //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+    // console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("Error al guardar cotización:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -3248,8 +3273,9 @@ watch(
       (c) => c.nombres === nuevoNombre
     );
     if (cliente) {
-      cotizacionForm.clienteNombre =
-        cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno;
+      cotizacionForm.clienteNombre = cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno;
+      cotizacionForm.nombre = cliente.nombres;
+      cotizacionForm.apellidos = cliente.apPaterno + " " + cliente.apMaterno;
       cotizacionForm.clienteTelefono = cliente.telefono;
       cotizacionForm.clienteCorreo = cliente.correo;
     } else {
@@ -3580,6 +3606,7 @@ const imprimirCotizacion = () => {
 };
 
 
+
 // GENERAR PDF
 
 const logoBase64 = ref(null);
@@ -3899,57 +3926,78 @@ const generarPDF = async () => {
 
 @media print {
 
-  /* OCULTA TODO */
-  body * {
-    visibility: hidden !important;
+  /* Quitar márgenes gigantes */
+  @page {
+    margin: 8mm;
   }
 
-  /* MUESTRA SOLO EL CONTENIDO */
-  .print-area,
-  .print-area * {
-    visibility: visible !important;
-  }
-
-  /* QUITA SCROLL Y ALTURAS */
-  .print-area {
-    position: static !important;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
-
-  /* REVIENTA EL MODAL */
-  .modal,
-  .modal-dialog,
-  .modal-content,
-  .modal-body {
-    position: static !important;
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-    box-shadow: none !important;
-    background: white !important;
-  }
-
-  /* QUITA BACKDROP */
-  .modal-backdrop {
-    display: none !important;
-  }
-
-  /* EVITA PAGINAS VACIAS */
-  html, body {
-    height: auto !important;
-    min-height: 0 !important;
+  body {
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  /* TABLAS BIEN */
-  table, tr, td, th {
-    page-break-inside: avoid !important;
+  /* Ocultar TODO */
+  body * {
+    visibility: hidden;
   }
 
+  /* Mostrar solo el área a imprimir */
+  #area-imprimir,
+  #area-imprimir * {
+    visibility: visible;
+  }
+
+  #area-imprimir {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+  
+
+  /* 🔥 CLAVE: desactivar table-responsive */
+  .table-responsive {
+    overflow: visible !important;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  thead {
+    display: table-header-group; /* Permite encabezado correcto */
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  /* Botones fuera */
+  button,
+  .btn,
+  .no-imprimir {
+    display: none !important;
+  }
+
+  .modal,
+  .modal-dialog,
+  .modal-content {
+    position: static !important;
+    overflow: visible !important;
+  }
 }
+
 
 
 </style>

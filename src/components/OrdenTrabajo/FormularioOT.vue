@@ -9,7 +9,7 @@
         <div class="col-4">
           <h5>Cotización</h5>
         </div>
-        <div class="col-8">
+        <div class="col-8" @blur = "mostrarLista = false">
           <input
             class="form-control"
             list="cotizacionesList"
@@ -17,14 +17,13 @@
             placeholder="Buscar cotización: Num. Cotizacion, medida (225/55 R20), rango (97Y) o fecha (año-mes-dia)"
             v-model="busquedaCotizacion"
             @input="onInputCotizacion()"
-            @focus="mostrarLista = true"
+            @focus="mostrarLista = true"            
           />
 
           <ul
             v-if="mostrarLista && itmCotizaciones.length"
             class="list-group position-absolute shadow mt-2"
             style="z-index: 1000"
-            @mouseleave="mostrarLista = false"
           >
             <li
               v-for="c in itmCotizaciones"
@@ -164,50 +163,25 @@
               <!-- Nombre -->
               <div class="mb-3">
                 <input
-                  v-model="ordenTrabajoForm.cliente.clienteNombres"
+                  v-model="ordenTrabajoForm.cliente.nombres"
                   class="form-control"
                   type="text"
                   placeholder="Nombre's *"
                   list="clientes"
-                  @blur="validate('cliente.clienteNombre')"
-                  :class="{ 'input-error': errores['cliente.clienteNombre'] }"
                 />
-                <small
-                  v-if="errores['cliente.clienteNombre']"
-                  class="error-msg"
-                >
-                  {{ errores["cliente.clienteNombre"] }}
-                </small>
+            
               </div>
 
-              <!-- Apllidos -->
+              <!-- Apellidos -->
               <div class="mb-3">
                 <input
-                  v-model="ordenTrabajoForm.cliente.cleinteApllidos"
+                  v-model="ordenTrabajoForm.cliente.apellidos"
                   type="text"
                   class="form-control"
                   placeholder="Apellido's *"
-                  @blur="validate('cliente.apPaterno')"
-                  :class="{ 'input-error': errores['cliente.apPaterno'] }"
                 />
-                <small v-if="errores['cliente.apPaterno']" class="error-msg">
-                  {{ errores["cliente.apPaterno"] }}
-                </small>
+               
               </div>
-
-              <!-- <div class="mb-3">
-                                <input 
-                                    v-model="ordenTrabajoForm.cliente.apMaterno" 
-                                    type="text"
-                                    class="form-control"
-                                    placeholder="Apellido Materno *"
-                                    @blur="validate('cliente.apMaterno')"
-                                    :class="{'input-error': errores['cliente.apMaterno']}"
-                                >
-                                <small v-if="errores['cliente.apMaterno']" class="error-msg">
-                                    {{ errores['cliente.apMaterno'] }}
-                                </small>
-                            </div> -->
             </div>
 
             <div class="col">
@@ -221,8 +195,6 @@
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.clienteTelefono')"
-                  :class="{ 'input-error': errores['cliente.clienteTelefono'] }"
                 />
                 <small
                   v-if="errores['cliente.clienteTelefono']"
@@ -266,9 +238,6 @@
                   @blur="validate('cliente.rfc')"
                   :class="{ 'input-error': errores['cliente.rfc'] }"
                 />
-                <small v-if="errores['cliente.rfc']" class="error-msg">
-                  {{ errores["cliente.rfc"] }}
-                </small>
               </div>
             </div>
           </div>
@@ -309,19 +278,19 @@
               :class="{ 'input-error': errores['cliente.metodoPago'] }"
             >
               <option value="">-Selecciona-</option>
-              <option value="01">01 - Efectivo</option>
-              <option value="02">02 - Cheque nominativo</option>
-              <option value="03">
+              <option value="Efectivo">01 - Efectivo</option>
+              <option value="Cheque nominativo">02 - Cheque nominativo</option>
+              <option value="Transferencia electrónica de fondos">
                 03 - Transferencia electrónica de fondos
               </option>
-              <option value="04">04 - Tarjeta de crédito</option>
-              <option value="15">15 - Condonación</option>
-              <option value="17">17 - Compensación</option>
-              <option value="26">26 - Prescripción o caducidad</option>
-              <option value="28">28 - Tarjeta de débito</option>
-              <option value="30">30 - Aplicación de anticipos</option>
-              <option value="31">31 - Intermediario pagos</option>
-              <option value="99">99 - Por definir</option>
+              <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+              <option value="Condonación">15 - Condonación</option>
+              <option value="Compensación">17 - Compensación</option>
+              <option value="Prescripción o caducidad">26 - Prescripción o caducidad</option>
+              <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
+              <option value="Aplicación de anticipos">30 - Aplicación de anticipos</option>
+              <option value="Intermediario pagos">31 - Intermediario pagos</option>
+              <option value="Por definir">99 - Por definir</option>
             </select>
 
             <small v-if="errores['cliente.metodoPago']" class="error-msg">
@@ -471,7 +440,7 @@
             <div class="col">
               <div class="mb-3">
                 <input
-                  v-model="ordenTrabajoForm.factura.rfc"
+                  v-model="ordenTrabajoForm.cliente.rfc"
                   class="form-control"
                   type="text"
                   placeholder="RFC *"
@@ -820,39 +789,7 @@ function validate(path) {
   // ========================= VALIDACIONES ==============================
 
   const rules = {
-    // -------- CLIENTE ----------
-   
-    fechaEntrega: () => {
-      let fechaEntrega = ordenTrabajoForm.fechaEntrega;
-      const fechaAlta = ordenTrabajoForm.cliente?.fechaAlta;
-
-      // 1 Si no hay fechaEntrega, asignar la fecha y hora actual automáticamente
-      if (!fechaEntrega) {
-        // Forma corta usando toISOString()
-        fechaEntrega = new Date().toISOString().slice(0, 16); // AAAA-MM-DDTHH:MM
-        ordenTrabajoForm.fechaEntrega = fechaEntrega; // actualizar el formulario
-      }
-
-      // 2 Validar el formato
-      const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
-      if (!regex.test(fechaEntrega)) {
-        return "Formato inválido. Usa AAAA-MM-DDTHH:MM.";
-      }
-
-      // 3️⃣ Si no hay fechaAlta, no validar la comparación
-      if (!fechaAlta) return null;
-
-      // 4️⃣ Comparar fechas
-      const entrega = new Date(fechaEntrega);
-      const alta = new Date(fechaAlta);
-      if (entrega < alta) {
-        return "La fecha y hora de entrega no pueden ser anteriores a la fecha de alta.";
-      }
-
-      // 5️⃣ Todo bien
-      return null;
-    },
-
+    
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () => (!value ? "Marca obligatoria." : null),
 
@@ -909,9 +846,6 @@ const formValido = computed(() => {
     ordenTrabajoForm.fechaEntrega,
 
     // CLIENTE
-    ordenTrabajoForm.cliente.clienteNombre,
-    ordenTrabajoForm.cliente.apPaterno,
-    ordenTrabajoForm.cliente.rfc,
     ordenTrabajoForm.cliente.clienteTelefono,
     ordenTrabajoForm.cliente.clienteCorreo,
     ordenTrabajoForm.cliente.metodoPago,
@@ -952,7 +886,8 @@ const ordenTrabajoForm = reactive({
   fechaEntrega: "",
   cliente: {
     id_cliente: 0,
-    clienteNombre: "",
+    nombres: "",
+    apellidos: "",
     apPaterno: "",
     apMaterno: "",
     rfc: "",
@@ -1255,7 +1190,7 @@ const onClienteSeleccionadoByValue = (valor) => {
     const telefono = c.telefono?.toLowerCase() || "";
     const correo = c.correo?.toLowerCase() || "";
 
-    // 🔍 Coincidencias parciales o exactas
+    // Coincidencias parciales o exactas
     return (
       nombreCompleto.includes(normalizado) ||
       normalizado.includes(nombreCompleto) ||
@@ -1275,6 +1210,8 @@ const onClienteSeleccionadoByValue = (valor) => {
     onClienteSeleccionado(cliente);
   }
 };
+
+
 
 /***************************/
 // FUNCIONES INSUMOS
@@ -1313,7 +1250,6 @@ const normalizarLlantas = () => {
 
 const validarYMostrarPreview = async () => {
   const errores = [];
-
 
   // Vehículo
   if (!ordenTrabajoForm.vehiculo.numSerie)
@@ -1354,10 +1290,10 @@ const validarYMostrarPreview = async () => {
         <table style="width:100%; border-collapse: collapse; font-size: 14px;" border="1">
             <thead>
                 <tr style="background:#f0f0f0; text-align:center;">
-                <th>Descripción</th>
-                <th>Cantidad</th>
-                <th>P/U</th>
-                <th>Subtotal</th>
+                  <th>Descripción</th>
+                  <th>Cantidad</th>
+                  <th>P/U</th>
+                  <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
@@ -1458,7 +1394,7 @@ const validarYMostrarPreview = async () => {
                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
                     <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.factura.rfc}</td></tr>
+                    <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
                     <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
                     <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
                     <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
@@ -1481,16 +1417,11 @@ const validarYMostrarPreview = async () => {
   });
 
   if (result.isConfirmed) {
-    Swal.fire(
-      "Enviado",
-      "La información fue enviada correctamente.",
-      "success"
-    );
     return true;
   }
-
   return false;
 };
+
 
 const guardarOT = async () => {
   //console.log(ordenTrabajoForm.vehiculo.numSerie)
@@ -1500,7 +1431,7 @@ const guardarOT = async () => {
     factura = {
       razonSocial: ordenTrabajoForm.factura.razonSocial,
       direccion: ordenTrabajoForm.factura.direccion,
-      rfc: ordenTrabajoForm.factura.rfc,
+      rfc: ordenTrabajoForm.cliente.rfc,
       eMail: ordenTrabajoForm.factura.eMail,
       cp: ordenTrabajoForm.factura.cp,
       usoCFDI: ordenTrabajoForm.factura.usoCFDI,
@@ -1523,7 +1454,7 @@ const guardarOT = async () => {
       nombres: ordenTrabajoForm.cliente.clienteNombre,
       apPaterno: ordenTrabajoForm.cliente.apPaterno,
       apMaterno: ordenTrabajoForm.cliente.apMaterno,
-      rfc: ordenTrabajoForm.cliente.rfc,
+      rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
       telefono: ordenTrabajoForm.cliente.clienteTelefono,
       correo: ordenTrabajoForm.cliente.clienteCorreo,
     },
@@ -1544,8 +1475,8 @@ const guardarOT = async () => {
   };
 
   if (await validarYMostrarPreview()) {
-    console.log("Valido");
-    console.log("GUARDAR OT: " + JSON.stringify(objSeend));
+    // console.log("Valido");
+    // console.log("GUARDAR OT: " + JSON.stringify(objSeend));
     fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -1554,7 +1485,7 @@ const guardarOT = async () => {
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
-          console.log("OT guardada:", data);
+          // console.log("OT guardada:", data);
           limpiarOrdenTrabajoForm(); // Limpia formulario
           irAOrdenTrabajo();
         } else {
@@ -1628,10 +1559,12 @@ const cargarInfoCotizacion = async () => {
 
   const data = await res.json();
 
-  //console.log(JSON.stringify(data.llantas))
+  console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
 
   ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre || "";
+  ordenTrabajoForm.cliente.nombres = data.nombres || "";
+  ordenTrabajoForm.cliente.apellidos = data.apPaterno != null && data.apMaterno != null ? data.apPaterno + " " + data.apMaterno : "";
   ordenTrabajoForm.cliente.clienteTelefono = data.telefono || "";
   ordenTrabajoForm.cliente.clienteCorreo = data.correo || "";
 
@@ -1819,7 +1752,7 @@ watch(
     if (!newValue) return;
 
     ordenTrabajoForm.cotSeleccionada = newValue;
-    console.log("watch: " + ordenTrabajoForm.cotSeleccionada);
+    //console.log("watch: " + ordenTrabajoForm.cotSeleccionada);
     await cargarInfoCotizacion();
   },
   { immediate: true }
