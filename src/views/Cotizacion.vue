@@ -3580,19 +3580,20 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
 };
 
 const confirmarAccion = async (vistaCotizacion) => {
-  const result = await Swal.fire({
-    title: "¿Estás seguro?",
-    text: "Esta acción no se puede deshacer.",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: "Sí, continuar",
-    cancelButtonText: "Cancelar",
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#6c757d",
-    reverseButtons: true,
-  });
+  // SE AGREGA VALIDACION PORQUE ESTO HACE UN PUT Y ACTUALIZA ESTADO DE UNA COTIZACION, EL CLIENTE PIDIO QUITAR LA CONFIRMACION
+  // const result = await Swal.fire({
+  //   title: "¿Estás seguro?",
+  //   text: "Esta acción no se puede deshacer.",
+  //   icon: "warning",
+  //   showCancelButton: true,
+  //   confirmButtonText: "Sí, continuar",
+  //   cancelButtonText: "Cancelar",
+  //   confirmButtonColor: "#d33",
+  //   cancelButtonColor: "#6c757d",
+  //   reverseButtons: true,
+  // });
 
-  if (!result.isConfirmed) return;
+  // if (!result.isConfirmed) return;
 
   // console.log('confirmar: ' + vistaCotizacion.codigo)
   aprobarCotizacion(vistaCotizacion);

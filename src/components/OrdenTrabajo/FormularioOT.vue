@@ -9,35 +9,11 @@
         <div class="col-4">
           <h5>Cotización</h5>
         </div>
-        <div class="col-8" @blur = "mostrarLista = false">
-          <input
-            class="form-control"
-            list="cotizacionesList"
-            id="slcCotizacion"
-            placeholder="Buscar cotización: Num. Cotizacion, medida (225/55 R20), rango (97Y) o fecha (año-mes-dia)"
-            v-model="busquedaCotizacion"
-            @input="onInputCotizacion()"
-            @focus="mostrarLista = true"            
+        <div class="col-8">
+          <ModalBuscarCotizacion
+            v-model="ordenTrabajoForm.cotSeleccionada"
+            @seleccionar-cotizacion="onCotizacionSeleccionada"
           />
-
-          <ul
-            v-if="mostrarLista && itmCotizaciones.length"
-            class="list-group position-absolute shadow mt-2"
-            style="z-index: 1000"
-          >
-            <li
-              v-for="c in itmCotizaciones"
-              :key="c.idCotizacion"
-              class="list-group-item list-group-item-action"
-              @click="seleccionarCotizacion(c)"
-            >
-              <strong>COT-{{ c.idCotizacion }}</strong>
-              <div class="text-muted small">
-                {{ formatearFecha(c.fecha) }} · {{ c.medidas }} · {{ c.rango }}
-              </div>
-            </li>
-          </ul>
-          <!-- <p>El valor de la variable 'productoSeleccionado' es: <strong>{{ ordenTrabajoForm.cotSeleccionada }}</strong></p> -->
         </div>
       </div>
       <hr />
@@ -760,6 +736,7 @@ import {
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import ModalInsumo from "./ModalInsumo.vue";
+import ModalBuscarCotizacion from "./ModalBuscarCotizacion.vue";
 
 const router = useRouter();
 
@@ -946,79 +923,11 @@ const unirFechaHora = () => {
 const itmEmpleados = ref({});
 const itmTipoOT = ref([]);
 
-/****************************************************/
-const itmCotizaciones = ref([]);
-const busquedaCotizacion = ref("");
-const mostrarLista = ref(false);
 
-let timeout = null;
-
-const onInputCotizacion = () => {
-  clearTimeout(timeout);
-
-  timeout = setTimeout(() => {
-    cargarCotizacionesAprobadasOrRealizadas(busquedaCotizacion.value);
-  }, 300);
+const onCotizacionSeleccionada = async (idCotizacion) => {
+  ordenTrabajoForm.cotSeleccionada = idCotizacion;
+  await cargarInfoCotizacion();
 };
-
-const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = "") => {
-  try {
-    const url = new URL(
-      proxy.$serverIP + "api/Cotizacion/getCotizacionIdAprobadaOrRealizada"
-    );
-
-    // parámetro opcional
-    if (busqueda && busqueda.trim() !== "") {
-      url.searchParams.append("busqueda", busqueda);
-    }
-
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Error en la respuesta");
-
-    const data = await res.json();
-    itmCotizaciones.value = data;
-  } catch (e) {
-    console.error("Error al cargar cotizaciones:", e);
-  }
-};
-// input de seleccionar cot existente
-const seleccionarCotizacion = (c) => {
-  const existe = itmCotizaciones.value.some(
-    (x) => x.idCotizacion === c.idCotizacion
-  );
-
-  if (!existe) {
-    ordenTrabajoForm.cotSeleccionada = null;
-    busquedaCotizacion.value = "";
-    itmCotizaciones.value = [];
-    mostrarLista.value = false;
-    alert("La cotización seleccionada no es válida");
-    return;
-  }
-
-  busquedaCotizacion.value = `${c.idCotizacion}`;
-  ordenTrabajoForm.cotSeleccionada = c.idCotizacion;
-
-  itmCotizaciones.value = [c];
-  mostrarLista.value = false;
-
-  cargarInfoCotizacion();
-};
-
-const formatearFecha = (fechaIso) => {
-  if (!fechaIso) return "";
-
-  const fecha = new Date(fechaIso);
-
-  return fecha.toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-/****************************************************/
 
 const cargarEmpleados = async () => {
   const userSession = JSON.parse(sessionStorage.getItem("userSession"));
@@ -1056,7 +965,7 @@ const cargarTipoOT = async () => {
 };
 
 onMounted(() => {
-  cargarCotizacionesAprobadasOrRealizadas();
+  
   cargarEmpleados();
   cargarTipoOT();
   normalizarInsumos();
@@ -1752,6 +1661,7 @@ watch(
     if (!newValue) return;
 
     ordenTrabajoForm.cotSeleccionada = newValue;
+    // busquedaCotizacion.value = newValue;
     //console.log("watch: " + ordenTrabajoForm.cotSeleccionada);
     await cargarInfoCotizacion();
   },
