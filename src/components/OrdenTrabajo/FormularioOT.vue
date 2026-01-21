@@ -284,6 +284,7 @@
                   class="form-control"
                   v-model="fechaEntregaFecha"
                   @change="unirFechaHora"
+                  :class="{ 'input-error': errores['fechaEntrega'] }"
                 />
               </div>
               <div class="col">
@@ -292,6 +293,7 @@
                   class="form-control"
                   v-model="fechaEntregaHora"
                   @change="unirFechaHora"
+                  :class="{ 'input-error': errores['fechaEntrega'] }"
                 />
               </div>
             </div>
@@ -308,8 +310,7 @@
               v-model="ordenTrabajoForm.cliente.fechaAlta"
               class="form-control"
               type="datetime-local"
-              @blur="validate('cliente.fechaAlta')"
-              :class="{ 'input-error': errores['cliente.fechaAlta'] }"
+              
               disabled
             />
             <small v-if="errores['cliente.fechaAlta']" class="error-msg">
@@ -407,9 +408,19 @@
                   id="slcUsoCFDI"
                 >
                   <option value="">Selecciona</option>
-                  <option value="">Uso CFDI 1</option>
-                  <option value="">Uso CFDI 2</option>
-                  <option value="">Uso CFDI 3</option>
+                  <option value="G01">G01 - Adquisición de mercancías</option>
+                  <option value="G02">G02 - Devoluciones, descuentos o bonificaciones</option>
+                  <option value="G03">G03 - Gastos en general</option>
+
+                  <option value="I01">I01 - Construcciones</option>
+                  <option value="I02">I02 - Mobiliario y equipo de oficina por inversiones</option>
+                  <option value="I03">I03 - Equipo de transporte</option>
+                  <option value="I04">I04 - Equipo de cómputo y accesorios</option>
+                  <option value="I05">I05 - Dados, troqueles, moldes, matrices y herramental</option>
+                  <option value="I06">I06 - Comunicaciones telefónicas</option>
+                  <option value="I07">I07 - Comunicaciones satelitales</option>
+                  <option value="I08">I08 - Otra maquinaria y equipo</option>
+                  <option value="S01">S01 - Sin efectos fiscales</option>
                 </select>
               </div>
             </div>
@@ -621,8 +632,8 @@
                   >
                     <td class="ps-4">↳ {{ detalle.descripcion }}</td>
                     <td>{{ detalle.cantidad }}</td>
-                    <td>{{ detalle.precioUnitario }}</td>
-                    <td>{{ detalle.subTotal }}</td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                   </tr>
                 </template>
@@ -701,8 +712,8 @@
 
             <ModalInsumo
               v-model="showModal"
-              title="Insumos"
               :insumos="ordenTrabajoForm.insumo"
+              @update:insumos="actualizarInsumos"
             />
           </div>
         </div>
@@ -711,7 +722,7 @@
       <div class="row my-3">
         <div class="col"></div>
         <div class="col text-end">
-          <router-link :to="{ name: 'OrdenTrabajo' }">
+          <router-link :to="{ name: 'orden-trabajo-list' }">
             <button class="btn btn-dark mx-4" type="button">Volver</button>
           </router-link>
           <button class="btn btn-primary" type="submit" :disabled="!formValido">
@@ -798,6 +809,19 @@ function validate(path) {
         : y < 1950 || y > current
         ? `Año entre 1950 y ${current}.`
         : null;
+    },
+
+    "fechaEntrega": () => {
+      if (!ordenTrabajoForm.fechaEntrega)
+        return "La fecha y hora de entrega son obligatorias.";
+
+      const entrega = new Date(ordenTrabajoForm.fechaEntrega);
+      const ahora = new Date();
+
+      if (entrega < ahora)
+        return "La fecha de entrega no puede ser menor a la actual.";
+
+      return null;
     },
 
     idEmpleado: () =>
@@ -1082,6 +1106,8 @@ const onClienteSeleccionado = (cliente) => {
   ordenTrabajoForm.cliente.rfc = cliente.rfc || "";
   ordenTrabajoForm.cliente.clienteTelefono = cliente.telefono || "";
   ordenTrabajoForm.cliente.clienteCorreo = cliente.correo || "";
+  ordenTrabajoForm.cliente.apellidos = cliente.apPaterno + " " + cliente.apMaterno;
+  ordenTrabajoForm.cliente.nombres = cliente.nombres
 };
 
 const onClienteSeleccionadoByValue = (valor) => {
@@ -1206,49 +1232,58 @@ const validarYMostrarPreview = async () => {
                 </tr>
             </thead>
             <tbody>
-                ${ordenTrabajoForm.insumo.llanta
-                  .map(
-                    (i) => `
+              ${ordenTrabajoForm.insumo.llanta
+                .map(
+                  (i) => `
                 <tr>
-                    <td>${i.descripcion}</td>
-                    <td style="text-align:center">${i.cantidad}</td>
-                    <td style="text-align:right">$${i.precioUnitario.toFixed(
-                      2
-                    )}</td>
-                    <td style="text-align:right">$${i.subTotal}</td>
+                  <td>${i.descripcion}</td>
+                  <td style="text-align:center">${i.cantidad}</td>
+                  <td style="text-align:right">$${i.precioUnitario.toFixed(2)}</td>
+                  <td style="text-align:right">$${i.subTotal}</td>
                 </tr>
-                `
-                  )
-                  .join("")}
-                ${ordenTrabajoForm.insumo.paquete
-                  .map(
-                    (p) => `
+              `
+                )
+                .join("")}
+
+              ${ordenTrabajoForm.insumo.paquete
+                .map(
+                  (p) => `
                 <tr style="font-weight:bold; background:#fafafa;">
-                    <td>${p.descripcion}</td>
-                    <td style="text-align:center">${p.cantidad}</td>
-                    <td style="text-align:right">$${p.precioUnitario.toFixed(
-                      2
-                    )}</td>
-                    <td style="text-align:right">$${p.subTotal}</td>
+                  <td>${p.descripcion}</td>
+                  <td style="text-align:center">${p.cantidad}</td>
+                  <td style="text-align:right">$${p.precioUnitario.toFixed(2)}</td>
+                  <td style="text-align:right">$${p.subTotal}</td>
                 </tr>
                 ${p.detalle
                   .map(
                     (d) => `
-                    <tr style="color:#555;">
+                  <tr style="color:#555;">
                     <td style="padding-left:20px;">↳ ${d.descripcion}</td>
                     <td style="text-align:center">${d.cantidad}</td>
-                    <td style="text-align:right">$${d.precioUnitario.toFixed(
-                      2
-                    )}</td>
+                    <td style="text-align:right">$${d.precioUnitario.toFixed(2)}</td>
                     <td style="text-align:right">$${d.subTotal}</td>
-                    </tr>
+                  </tr>
                 `
                   )
                   .join("")}
-                `
-                  )
-                  .join("")}
+              `
+                )
+                .join("")}
+
+              ${ordenTrabajoForm.insumo.adicional
+                .map(
+                  (a) => `
+                <tr>
+                  <td>${a.descripcion}</td>
+                  <td style="text-align:center">${a.cantidad}</td>
+                  <td style="text-align:right">$${Number(a.precioUnitario).toFixed(2)}</td>
+                  <td style="text-align:right">$${a.subTotal}</td>
+                </tr>
+              `
+                )
+                .join("")}
             </tbody>
+
         </table>
     `;
 
@@ -1263,7 +1298,7 @@ const validarYMostrarPreview = async () => {
                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
                         <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
-                          ordenTrabajoForm.cliente.clienteNombre
+                          ordenTrabajoForm.cliente.nombres + " " + ordenTrabajoForm.cliente.apellidos
                         }</td></tr>
                         <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
                           ordenTrabajoForm.cliente.clienteTelefono
@@ -1329,6 +1364,8 @@ const validarYMostrarPreview = async () => {
     return true;
   }
   return false;
+
+  
 };
 
 
@@ -1360,9 +1397,8 @@ const guardarOT = async () => {
     descripcion: "",
     cliente: {
       idCliente: ordenTrabajoForm.cliente.id_cliente,
-      nombres: ordenTrabajoForm.cliente.clienteNombre,
-      apPaterno: ordenTrabajoForm.cliente.apPaterno,
-      apMaterno: ordenTrabajoForm.cliente.apMaterno,
+      nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
+      apellidos: ordenTrabajoForm.cliente.apellidos,
       rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
       telefono: ordenTrabajoForm.cliente.clienteTelefono,
       correo: ordenTrabajoForm.cliente.clienteCorreo,
@@ -1661,12 +1697,19 @@ watch(
     if (!newValue) return;
 
     ordenTrabajoForm.cotSeleccionada = newValue;
-    // busquedaCotizacion.value = newValue;
-    //console.log("watch: " + ordenTrabajoForm.cotSeleccionada);
     await cargarInfoCotizacion();
   },
   { immediate: true }
 );
+
+const actualizarInsumos = (nuevoInsumo) => {
+  console.log("ejecuto actualizarInsumo", nuevoInsumo)
+
+  ordenTrabajoForm.insumo.llanta = nuevoInsumo.llanta
+  ordenTrabajoForm.insumo.paquete = nuevoInsumo.paquete
+  ordenTrabajoForm.insumo.adicional = nuevoInsumo.adicional
+}
+
 </script>
 
 <style scoped>

@@ -102,6 +102,7 @@
                   </button>
 
                   <button
+                    type="button"
                     v-if="item.estatus != 'Cancelada'"
                     class="btn btn-sm btn-outline-danger"
                     @click="cancelarCotizacion(item.acciones)"
@@ -111,6 +112,7 @@
                   </button>
 
                   <button
+                    type="button"
                     v-if="item.estatus === 'Cancelada'"
                     class="btn btn-sm btn-outline-success"
                     @click="reactivarCotizacion(item.acciones)"
@@ -120,6 +122,7 @@
                   </button>
 
                   <button
+                    type="button"
                     v-if="item.estatus === 'Creada'"
                     class="btn btn-sm btn-outline-primary"
                     @click="aprobarCotizacion(item.acciones)"
@@ -129,6 +132,7 @@
                   </button>
 
                   <button
+                    type="button"
                     v-if="item.estatus === 'Aprobada'"
                     class="btn btn-sm btn-outline-secondary"
                     @click="finalizarCotizacion(item.acciones)"
@@ -219,7 +223,7 @@
 
             <!-- Información del cliente -->
             <div class="mb-4 cotizacion-header">
-              <span class="mx-3">
+              <span class="mx-2">
                 <strong>No. Cotización: </strong
                 >{{ "COT-" + vistaCotizacion.codigo || "N/A" }}
               </span>
@@ -253,12 +257,15 @@
                   <col style="width: 120px" />
                 </colgroup>
                 <thead class="table-light">
+                  
                   <tr>
                     <th class="text-center">CANT</th>
                     <th>MEDIDA - MODELO - RANGO</th>
                     <th class="text-end">PRECIO UNITARIO</th>
                     <th class="text-end">TOTAL</th>
                   </tr>
+
+
                 </thead>
                 <tbody>
                   <tr
@@ -326,9 +333,11 @@
 
             <!-- Tabla Paquetes y Servicios (sin encabezado) -->
             <div
-              class="table-responsive mx-auto mt-3 cotizacion-header"
+              class="table-responsive  mt-3 cotizacion-header"
               
             >
+
+
               <table
                 class="table table-bordered table-sm align-middle"
                 style="table-layout: fixed"
@@ -336,8 +345,8 @@
                 <colgroup>
                   <col style="width: 50px" />
                   <col />
-                  <col style="width: 120px" />
-                  <col style="width: 120px" />
+                  <col style="width: 150px" />
+                  <col style="width: 210px" />
                 </colgroup>
                 <tbody>
                   <!-- Paquetes -->
@@ -494,6 +503,11 @@
                   </tr>
                 </tbody>
               </table>
+
+
+
+
+
             </div>
 
             <div class="row text-center">
@@ -549,7 +563,7 @@
         </div>
       </div>
     </div>
-    <!-- MODAL PARA CRREAR/EDITAR COTIZACION -->
+    <!-- MODAL PARA CREAR/EDITAR COTIZACION -->
     <div
       class="modal fade"
       ref="modalRef"

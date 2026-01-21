@@ -5,7 +5,7 @@
                 <h2>Orden de Trabajo</h2>
             </div>
             <div class="col-4">
-                <router-link :to="{ name: 'formOT'}">
+                <router-link :to="{ name: 'orden-trabajo-form' }">
                     <button 
                         class="btn btn-outline-primary form-control"
                     >
@@ -72,7 +72,6 @@
                             <th>Vehículo</th>
                             <th>Fecha</th>
                             <th>Técnico</th>
-                            <th>Tipo OT</th>
                             <th>Pago</th>
                             <th>Factura</th>
                             <th>Estatus</th>
@@ -87,7 +86,6 @@
                             <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
                             <td>{{ ot.fechaAlta}}</td>
                             <td>{{ot.empleadoNombre}}</td>
-                            <td>{{ ot.tipoOrdenTrabajo  }}</td>
                             <td>{{ot.metodoPago}}</td>
 
                             <td v-if="ot.requiereFactura" class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
@@ -101,7 +99,13 @@
                             <td v-else class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
 
                             <td>
-                                <button class="btn btn-sm btn-outline-primary">Ver</button>
+                                <button
+                                    class="btn btn-sm btn-outline-primary"
+                                    @click="router.push(`/content/orden-trabajo/${ot.idOrdenTrabajo}`)"
+                                >
+                                    Ver
+                                </button>
+
                                 <button class="btn btn-sm btn-outline-secondary">Editar</button>
                             </td>
                         </tr>
@@ -118,10 +122,6 @@ import { getCurrentInstance, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
 const { proxy } = getCurrentInstance() 
-
-const irA = (ruta) => {
-    router.push(ruta)
-}
 
 const loading =  ref(true)
 const listaOrdenTrabajo = ref({

@@ -10,7 +10,7 @@
 			class="form-control"
 			:value="modelValue ? `${modelValue}` : ''"
 			placeholder="Seleccione una cotización"
-			disabled
+			@input="onInput"
 		/>
 	</div>
 
@@ -33,7 +33,7 @@
 					<!-- Input búsqueda -->
 					<input
 						class="form-control mb-3"
-						placeholder="Buscar por número, medida, rango o fecha"
+						placeholder="Buscar por número cotización, nombre, telefono o fecha"
 						v-model="busquedaCotizacion"
 						@input="onInputCotizacion"
 					/>
@@ -101,6 +101,10 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'seleccionar-cotizacion'])
+
+const onInput = (e) => {
+  emit('update:modelValue', e.target.value)
+}
 
 const mostrarModal = ref(false)
 const busquedaCotizacion = ref('')

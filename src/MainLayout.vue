@@ -2,7 +2,9 @@
     
     <div>
         <!-- Header -->
-        <header class="bg-danger text-white py-3 px-4 d-flex align-items-center justify-content-between">
+        <header
+        class="bg-danger text-white py-3 px-4 d-flex align-items-center justify-content-between header-fixed"
+        >
             <div class="d-flex align-items-center">
                 <button
                     class="btn btn-light me-3"
@@ -13,10 +15,17 @@
                 >
                     ☰
                 </button>
-                <!-- <img src="../public/images/Logo-Kartisimo2.png" style="width: 120px; height: 30px;"> -->
-                <h5>Kartisimo</h5>
+
+                <h5 class="mb-0">Kartisimo</h5>
             </div>
+
+            <!-- Botón cerrar sesión -->
+            <button class="btn btn-light" @click="cerrarSesion">
+                <i class="bi bi-box-arrow-right me-2"></i>
+                Cerrar sesión
+            </button>
         </header>
+
 
         <!-- Sidebar (offcanvas Bootstrap) -->
         <div
@@ -71,7 +80,7 @@
                         <button
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
-                            @click.prevent="irA('/content/OrdenTrabajo')"
+                            @click.prevent="irA('/content/orden-trabajo')"
                         >
                             Orden de Trabajo
                         </button>
@@ -101,7 +110,7 @@
         </div>
 
         <!-- Contenido -->
-        <div>
+        <div class="contenido">
             <router-view :key="$route.fullPath" />
         </div>
     </div>
@@ -126,8 +135,27 @@ const irA = (ruta) => {
     document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
     router.push(ruta)
 }
+
+const cerrarSesion = () => {
+    // Limpia sesión
+    sessionStorage.clear()
+
+    // Redirige al login
+    router.replace('/')
+}
 </script>
 
 <style scoped>
+.header-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1050; /* encima del contenido */
+}
+
+.contenido {
+    margin-top: 70px;
+}
 
 </style>

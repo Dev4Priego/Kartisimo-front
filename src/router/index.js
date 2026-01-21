@@ -4,11 +4,15 @@ import Inventario from '@/views/Inventario.vue'
 import MainLayout from '@/MainLayout.vue'
 import Inicio from '@/views/Inicio.vue'
 import Cotizacion from '@/views/Cotizacion.vue'
-import OrdenTrabajo from '@/views/OrdenTrabajo.vue'
+import OrdenTrabajo from '@/views/OrdenTrabajo/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import Promocion from '@/views/Promocion.vue'
 import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
 import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' // agregado solo para desarrollo de componente dinamico, eliminar despues
+import OrdenTrabajoPreview from '@/views/OrdenTrabajo/OrdenTrabajoPreview.vue'
+import OrdenTrabajoEdit from '@/views/OrdenTrabajo/OrdenTrabajoEdit.vue'
+import OrdenTrabajoLayout from '@/views/OrdenTrabajo/OrdenTrabajoLayout.vue'
+
 const routes = [
     { 
         path: '/', 
@@ -34,17 +38,47 @@ const routes = [
                 name:'cotizacion',
                 component: Cotizacion
             },
+
+
             {
-                path: 'OrdenTrabajo',
-                name:'OrdenTrabajo',
-                component: OrdenTrabajo
+                path: 'orden-trabajo',
+                component: OrdenTrabajoLayout, 
+                children: [
+                    {
+                        path: '',
+                        name: 'orden-trabajo-list',
+                        component: OrdenTrabajo
+                    },
+                    {
+                        path: 'nueva/:idCotizacion?',
+                        name: 'orden-trabajo-form',
+                        component: FormularioOT,
+                        props: true
+                    },
+                    {
+                        path: ':id',
+                        name: 'orden-trabajo-preview',
+                        component: OrdenTrabajoPreview
+                    },
+                    {
+                        path: ':id/work',
+                        name: 'orden-trabajo-work',
+                        component: OrdenTrabajoEdit
+                    }
+                ]
             },
-            {                
-                path:'FormularioOT/:idCotizacion?',
-                name:'formOT',
-                component: FormularioOT,
-                props: true                      
-            },
+
+            // {
+            //     path: 'orden-trabajo', //path: 'OrdenTrabajo',
+            //     name:'OrdenTrabajo',
+            //     component: OrdenTrabajo
+            // },
+            // {                
+            //     path:'FormularioOT/:idCotizacion?',
+            //     name:'formOT',
+            //     component: FormularioOT,
+            //     props: true                      
+            // },
             {
                 path: 'Promocion',
                 name:'Promocion',
