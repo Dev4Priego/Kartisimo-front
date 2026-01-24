@@ -26,13 +26,14 @@ const abrirModal = async () => {
 
 	// console.log('llanta ' + JSON.stringify(props.cotizacion.llantasSelecionadas[1].medidas))
 
-	const texto = props.cotizacion.llantasSelecionadas[0].medidas;
+	const texto = props.cotizacion?.llantasSelecionadas[0]?.medidas || "";
 
 	const match = texto.match(/\d{3}\/\d{2}\s*r?\d{2}/i);
 
-	const medida = match ? match[0].toUpperCase() : null;
+	const medida = match ? match[0].toUpperCase() : null || "";
 
-	// console.log(medida);
+	const correo = props.cotizacion.cliente.correo ;
+	// console.log(correo);
 
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
@@ -42,7 +43,7 @@ const abrirModal = async () => {
 	const { value: formValues } = await Swal.fire({
 		title: 'Enviar por correo',
 		html: `
-			<input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email">
+			<input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}">
 			<input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo">
 			<textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..."></textarea>
 		`,
@@ -54,7 +55,7 @@ const abrirModal = async () => {
 			const subj = document.getElementById('asunto').value
 			const msg = document.getElementById('mensaje').value
 
-			if (!email || !subj || !msg) {
+			if (!email || !subj) {
 				Swal.showValidationMessage('Completa todos los campos')
 				return false
 			}

@@ -94,24 +94,24 @@ const routes = [
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
-  routes
+    history: createWebHistory(),
+    routes
 })
 
 router.beforeEach((to, from, next) => {
-  const userSession = sessionStorage.getItem('userSession')
+    const userSession =  localStorage.getItem('userSession');
 
-  // Si la ruta requiere auth y no hay sesión
-  if (to.matched.some(route => route.meta.requiereAuth) && !userSession) {
-    next('/') // login
-  }
-  // Si ya está logueado, no dejar volver al login
-  else if (to.path === '/' && userSession) {
-    next('/content/inventario')
-  }
-  else {
-    next()
-  }
+    // Si la ruta requiere auth y no hay sesión
+    if (to.matched.some(route => route.meta.requiereAuth) && !userSession) {
+        next('/') // login
+    }
+    // Si ya está logueado, no dejar volver al login
+    else if (to.path === '/' && userSession) {
+        next('/content/orden-trabajo')
+    }
+    else {
+        next()
+    }
 })
 
 export default router

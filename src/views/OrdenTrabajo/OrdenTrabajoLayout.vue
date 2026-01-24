@@ -1,4 +1,4 @@
 // este archivo solo existe para Routing
 <template>
-	<router-view/>>
+	<router-view/>
 </template>

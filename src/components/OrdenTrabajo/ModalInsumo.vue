@@ -1212,9 +1212,16 @@ const mapearInsumosParaPadre = () => {
 
 const guardarInsumo = () => {
   const insumosMapeados = mapearInsumosParaPadre();
-  emit("update:insumos", insumosMapeados);
+  const totales = calcularTotalesDesdeInsumos(insumosMapeados);
+
+  emit("update:insumos", {
+    insumo: insumosMapeados,
+    totales,
+  });
+
   emit("update:modelValue", false);
 };
+
 
 // Mounted
 onMounted(() => {
@@ -1226,6 +1233,30 @@ onMounted(() => {
 
   // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
+
+const calcularTotalesDesdeInsumos = (insumos) => {
+  const totalLlantas = insumos.llanta
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const totalPaquetes = insumos.paquete
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const totalAdicionales = insumos.adicional
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const subtotal = totalLlantas + totalPaquetes + totalAdicionales;
+  const descuento = 0; // si luego manejas descuentos globales
+  const iva = (subtotal - descuento) * 0.16;
+  const total = subtotal - descuento;
+
+  return {
+    subtotal: Number(subtotal.toFixed(2)),
+    descuento: Number(descuento.toFixed(2)),
+    iva: Number(iva.toFixed(2)),
+    total: Number(total.toFixed(2)),
+  };
+};
+
 </script>
 
 <style>

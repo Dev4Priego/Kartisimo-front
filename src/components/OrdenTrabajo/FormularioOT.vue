@@ -214,6 +214,13 @@
                   @blur="validate('cliente.rfc')"
                   :class="{ 'input-error': errores['cliente.rfc'] }"
                 />
+
+                <small
+                  v-if="errores['cliente.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["cliente.rfc"] }}
+                </small>
               </div>
             </div>
           </div>
@@ -240,7 +247,7 @@
       </div>
 
       <div class="row">
-        <div class="col">
+        <div class="col-3">
           <!-- Método de pago -->
           <div class="mb-3">
             <label class="form-label" for="formaPago">Forma de pago *</label>
@@ -274,7 +281,7 @@
             </small>
           </div>
         </div>
-        <div class="col">
+        <div class="col-6">
           <div class="mb-3">
             <label class="form-label">Fecha de entrega propuesta *</label>
             <div class="row">
@@ -303,7 +310,7 @@
             </small>
           </div>
         </div>
-        <div class="col">
+        <div class="col-3">
           <div class="mb-3">
             <label class="form-label">Fecha Alta *</label>
             <input
@@ -389,14 +396,22 @@
                   class="form-control"
                   type="text"
                   placeholder="Razón Social *"
+                  @blur="validate('factura.razonSocial')"
+                  :class="{ 'input-error': errores['factura.razonSocial'] }"
                 />
+                <small
+                  v-if="errores['factura.razonSocial']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.razonSocial'] }}
+                </small>
               </div>
               <div class="mb-3">
                 <input
                   v-model="ordenTrabajoForm.factura.direccion"
                   class="form-control"
                   type="text"
-                  placeholder="Dirección *"
+                  placeholder="Dirección "
                 />
               </div>
               <div class="mb-3">
@@ -404,8 +419,8 @@
                 <select
                   v-model="ordenTrabajoForm.factura.usoCFDI"
                   class="form-select"
-                  name="usoCFDI"
-                  id="slcUsoCFDI"
+                  @blur="validate('factura.usoCFDI')"
+                  :class="{ 'input-error': errores['factura.usoCFDI'] }"
                 >
                   <option value="">Selecciona</option>
                   <option value="G01">G01 - Adquisición de mercancías</option>
@@ -422,6 +437,12 @@
                   <option value="I08">I08 - Otra maquinaria y equipo</option>
                   <option value="S01">S01 - Sin efectos fiscales</option>
                 </select>
+                <small
+                  v-if="errores['factura.usoCFDI']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.usoCFDI'] }}
+                </small>
               </div>
             </div>
             <div class="col">
@@ -431,7 +452,16 @@
                   class="form-control"
                   type="text"
                   placeholder="RFC *"
+                  @blur="validate('cliente.rfc')"
+                  :class="{ 'input-error': errores['cliente.rfc'] }"
                 />
+
+                <small
+                  v-if="errores['cliente.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["cliente.rfc"] }}
+                </small>
               </div>
               <div class="mb-3">
                 <input
@@ -439,7 +469,15 @@
                   class="form-control"
                   type="text"
                   placeholder="E-mail *"
+                  @blur="validate('factura.eMail')"
+                  :class="{ 'input-error': errores['factura.eMail'] }"
                 />
+                <small
+                  v-if="errores['factura.eMail']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.eMail'] }}
+                </small>
               </div>
               <div class="mb-3">
                 <input
@@ -447,7 +485,15 @@
                   class="form-control"
                   type="text"
                   placeholder="C.P. *"
+                  @blur="validate('factura.cp')"
+                  :class="{ 'input-error': errores['factura.cp'] }"
                 />
+                <small
+                  v-if="errores['factura.cp']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.cp'] }}
+                </small>
               </div>
             </div>
           </div>
@@ -459,8 +505,7 @@
           <h5>Desechar Llantas</h5>
         </div>
         <div class="col-8">
-          <label class="form-label">¿Se desea desechar llantas antiguas?</label
-          ><br />
+          <label class="form-label">¿Se desea desechar llantas antiguas?</label><br/>
           Si
           <input
             v-model="boolDesecharLlanta"
@@ -487,7 +532,6 @@
           <div
             class="row"
             id="tablaInsumos"
-            style="max-height: 400px; overflow-y: auto"
           >
             <table class="table table-hover table-sm">
               <thead>
@@ -698,6 +742,47 @@
                   </tr>
                 </template>
               </transition-group>
+              
+              <tfoot class="table-light">
+                <!-- <tr>
+                  <th colspan="3" class="text-end">Subtotal</th>
+                  <th class="text-end">
+                    {{
+                      ordenTrabajoForm.totales.subtotal.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr>
+
+                <tr>
+                  <th colspan="3" class="text-end">IVA (16%)</th>
+                  <th class="text-end">
+                    {{
+                      ordenTrabajoForm.totales.iva.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr> -->
+
+                <tr class="table-secondary fw-bold">
+                  <th colspan="3" class="text-end fs-6">TOTAL</th>
+                  <th class="text-end fs-6">
+                    {{
+                      ordenTrabajoForm.totales.total.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr>
+              </tfoot>
             </table>
           </div>
           <div class="text-center m-3">
@@ -828,6 +913,48 @@ function validate(path) {
       !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
         ? "Debes seleccionar un técnico."
         : null,
+
+    
+    // -------- FACTURA ----------
+    "factura.razonSocial": () =>
+      !value || !value.trim()
+        ? "Razón social obligatoria."
+        : null,
+
+    "factura.usoCFDI": () =>
+      !value
+        ? "Debes seleccionar un uso CFDI."
+        : null,
+
+    "factura.eMail": () => {
+      if (!value || !value.trim()) return "E-mail obligatorio.";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
+        : null;
+    },
+
+    "factura.cp": () => {
+      if (!value || !value.trim()) return "Código postal obligatorio.";
+
+      const cpRegex = /^\d{5}$/;
+      return !cpRegex.test(value)
+        ? "El código postal debe tener 5 dígitos."
+        : null;
+    },
+
+    "cliente.rfc": () => {
+      if (!value || !value.trim()) return "RFC obligatorio.";
+
+      const rfcRegex =
+        /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+
+      return !rfcRegex.test(value.toUpperCase())
+        ? "RFC no válido."
+        : null;
+    },
+
   };
 
   // Ejecutar regla
@@ -837,12 +964,11 @@ function validate(path) {
   else delete errores[path];
 }
 
-// Mantiene el boton de guardar deshabilitado hasta que no exista ningun error de validacion
+// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
 const formValido = computed(() => {
-  // si hay errores -> formulario inválido
+  // Si hay errores → inválido
   if (Object.keys(errores).length > 0) return false;
-
-  // Validar si todos los campos obligatorios tienen valor
+  // Campos obligatorios SIEMPRE
   const requiredFields = [
     ordenTrabajoForm.fechaEntrega,
 
@@ -860,13 +986,28 @@ const formValido = computed(() => {
     ordenTrabajoForm.vehiculo.placas,
     ordenTrabajoForm.vehiculo.anio,
 
-    // TECNICO
+    // TÉCNICO
     ordenTrabajoForm.idEmpleado,
   ];
 
-  // Si uno está vacío → formulario inválido
-  return requiredFields.every((v) => v !== "" && v !== null && v !== undefined);
+  // 3️⃣ Campos obligatorios SOLO si se desea factura
+  if (boolFactura.value === true) {
+    requiredFields.push(
+      ordenTrabajoForm.factura.razonSocial,
+      ordenTrabajoForm.factura.usoCFDI,
+      ordenTrabajoForm.factura.eMail,
+      ordenTrabajoForm.factura.cp,
+      ordenTrabajoForm.cliente.rfc
+    );
+  }
+
+  // 4️⃣ Validación final (no vacío / no null)
+  return requiredFields.every(
+    (v) => v !== "" && v !== null && v !== undefined
+  );
 });
+
+
 
 const getFechaHoraLocal = () => {
   const ahora = new Date();
@@ -920,10 +1061,16 @@ const ordenTrabajoForm = reactive({
     paquete: [],
     adicional: [],
   },
+  totales: {
+    subtotal: 0,
+    descuento: 0,
+    iva: 0,
+    total: 0,
+  },
 });
 
 const irAOrdenTrabajo = () => {
-  router.push({ name: "OrdenTrabajo" });
+  router.push({ name: "orden-trabajo-list" });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
@@ -1626,6 +1773,7 @@ const cargarInfoCotizacion = async () => {
       })
     ),
   };
+  calcularTotales();
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };
 
@@ -1690,6 +1838,29 @@ const limpiarOrdenTrabajoForm = () => {
   };
 };
 
+const calcularTotales = () => {
+  const totalLlantas = ordenTrabajoForm.insumo.llanta
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const totalPaquetes = ordenTrabajoForm.insumo.paquete
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const totalAdicionales = ordenTrabajoForm.insumo.adicional
+    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+
+  const subtotal = totalLlantas + totalPaquetes + totalAdicionales;
+  const descuento = ordenTrabajoForm.totales.descuento || 0;
+  const iva = (subtotal - descuento) * 0.16;
+
+  ordenTrabajoForm.totales.subtotal = Number(subtotal.toFixed(2));
+  ordenTrabajoForm.totales.iva = Number(iva.toFixed(2));
+  ordenTrabajoForm.totales.total = Number(
+    //(subtotal - descuento + iva).toFixed(2)
+    (subtotal - descuento).toFixed(2)
+  );
+};
+
+
 // observa idCotizacion prop, en cuanto se envie un valor nuevo actualiza y carga la informacion de la cotizacion
 watch(
   () => props.idCotizacion,
@@ -1702,13 +1873,19 @@ watch(
   { immediate: true }
 );
 
-const actualizarInsumos = (nuevoInsumo) => {
-  console.log("ejecuto actualizarInsumo", nuevoInsumo)
+const actualizarInsumos = (payload) => {
+  // payload = { insumo, totales }
 
-  ordenTrabajoForm.insumo.llanta = nuevoInsumo.llanta
-  ordenTrabajoForm.insumo.paquete = nuevoInsumo.paquete
-  ordenTrabajoForm.insumo.adicional = nuevoInsumo.adicional
-}
+  ordenTrabajoForm.insumo.llanta = payload.insumo.llanta;
+  ordenTrabajoForm.insumo.paquete = payload.insumo.paquete;
+  ordenTrabajoForm.insumo.adicional = payload.insumo.adicional;
+
+  ordenTrabajoForm.totales.subtotal = payload.totales.subtotal;
+  ordenTrabajoForm.totales.descuento = payload.totales.descuento;
+  ordenTrabajoForm.totales.iva = payload.totales.iva;
+  ordenTrabajoForm.totales.total = payload.totales.total;
+};
+
 
 </script>
 

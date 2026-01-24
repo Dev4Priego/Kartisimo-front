@@ -149,17 +149,15 @@
     </div>
 
     <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
+
     <div
       v-if="mostrarVista"
       class="modal fade show d-block"
       tabindex="-1"
       :style="{ background: 'rgba(0,0,0,0.5)' }"
     >
-      <div
-        class="modal-dialog modal-xl modal-dialog-centered  modal-1000"
-        
-      >
-        <div class="modal-content p-4 ">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-1000">
+        <div class="modal-content p-4">
           <div class="modal-header">
             <h4 class="modal-title">Vista Previa de Cotización</h4>
             <button
@@ -223,29 +221,35 @@
 
             <!-- Información del cliente -->
             <div class="mb-4 cotizacion-header">
-              <span class="mx-2">
-                <strong>No. Cotización: </strong
-                >{{ "COT-" + vistaCotizacion.codigo || "N/A" }}
-              </span>
-              <span class="mx-2">
-                <strong>Fecha emisión: </strong>
-                {{ vistaCotizacion.fechaCreacion || "N/A" }}
-              </span>
-              <span class="mx-2">
-                <strong>Cliente: </strong>
-                {{ vistaCotizacion.cliente?.nombre || "N/A" }}
-              </span>
-              <span class="mx-2">
-                <strong>Teléfono: </strong>
-                {{ telefonoVistaFormateado || "N/A" }}
-              </span>
+              <div class="row">
+                <div class="col-2">
+                  <span class="mx-2">
+                    {{ "COT-" + vistaCotizacion.codigo || "N/A" }}
+                  </span>
+                </div>
+                <div class="col">
+                  <span class="mx-2">
+                    <strong>Fecha emisión: </strong>
+                    {{ vistaCotizacion.fechaCreacion || "N/A" }}
+                  </span>
+                </div>
+                <div class="col">
+                  <span class="mx-2">
+                    <strong>Cliente: </strong>
+                    {{ vistaCotizacion.cliente?.nombre || "N/A" }}
+                  </span>
+                </div>
+                <div class="col">
+                  <span class="mx-2">
+                    <strong>Teléfono: </strong>
+                    {{ telefonoVistaFormateado || "N/A" }}
+                  </span>
+                </div>
+              </div>
             </div>
 
             <!-- Tabla Llantas -->
-            <div
-              class="table-responsive mx-auto mt-3  cotizacion-header"
-              
-            >
+            <div class="table-responsive mx-auto mt-3 cotizacion-header">
               <table
                 class="table table-bordered table-sm align-middle"
                 style="table-layout: fixed"
@@ -257,15 +261,12 @@
                   <col style="width: 120px" />
                 </colgroup>
                 <thead class="table-light">
-                  
                   <tr>
                     <th class="text-center">CANT</th>
                     <th>MEDIDA - MODELO - RANGO</th>
                     <th class="text-end">PRECIO UNITARIO</th>
                     <th class="text-end">TOTAL</th>
                   </tr>
-
-
                 </thead>
                 <tbody>
                   <tr
@@ -304,10 +305,11 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger d-inline-block mt-1 text-wrap">
+                          <small
+                            class="badge bg-danger d-inline-block mt-1 text-wrap"
+                          >
                             {{ llanta.promoLabel }}
                           </small>
-
                         </span>
                         <br />
                         <span class="text-success fw-bold d-block">{{
@@ -332,12 +334,7 @@
             </div>
 
             <!-- Tabla Paquetes y Servicios (sin encabezado) -->
-            <div
-              class="table-responsive  mt-3 cotizacion-header"
-              
-            >
-
-
+            <div class="table-responsive mt-3 cotizacion-header">
               <table
                 class="table table-bordered table-sm align-middle"
                 style="table-layout: fixed"
@@ -503,11 +500,6 @@
                   </tr>
                 </tbody>
               </table>
-
-
-
-
-
             </div>
 
             <div class="row text-center">
@@ -519,7 +511,10 @@
               <div class="col">
                 <!-- Botón enviar pdf a imprimir -->
                 <div class="mt-4">
-                  <button class="btn btn-outline-primary w-100" @click="imprimirCotizacion">
+                  <button
+                    class="btn btn-outline-primary w-100"
+                    @click="imprimirCotizacion"
+                  >
                     Imprimir
                   </button>
                 </div>
@@ -583,10 +578,11 @@
             flexDirection: 'column',
           }"
         >
-          <div class="modal-header">
-            <div class="row modal-title align-items-center text-center">
-              <h3>{{ tituloModal }}</h3>
+          <div class="modal-header bg-light border-bottom">
+            <div class="modal-title w-100 text-center">
+              <h3 class="mb-0 fw-semibold">{{ tituloModal }}</h3>
             </div>
+
             <button
               type="button"
               class="btn-close"
@@ -597,55 +593,67 @@
 
           <div class="modal-body" :style="{ overflowY: 'auto' }">
             <!-- Seccion informacion cliente -->
+
             <div class="row m-2">
               <div class="col d-flex flex-column">
-                <div class="row m-2">
-                  <label for="nombre" class="mb-1">Nombre's cliente:</label>
-                  <input
-                    id="nombre"
-                    v-model="cotizacionForm.nombre"
-                    class="form-control"
-                    type="text"
-                    placeholder="Ej. Nombre"
-                  />
+                <div class="row g-3 m-2">
+                  <div class="col-md-6">
+                    <label for="nombre" class="form-label"
+                      >Nombre del cliente</label
+                    >
+                    <input
+                      id="nombre"
+                      v-model="cotizacionForm.nombre"
+                      class="form-control"
+                      type="text"
+                      placeholder="Ej. Nombre"
+                    />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="apellido" class="form-label"
+                      >Apellido del cliente</label
+                    >
+                    <input
+                      id="apellido"
+                      v-model="cotizacionForm.apellidos"
+                      class="form-control"
+                      type="text"
+                      placeholder="Ej. Apellido"
+                    />
+                  </div>
                 </div>
-                <div class="row m-2">                  
-                  <label for="apellido" class="mb-1">Apellido's cliente:</label>
-                  <input
-                    id="apellido"
-                    v-model="cotizacionForm.apellidos"
-                    class="form-control"
-                    type="text"
-                    placeholder="Ej. Apellido"
-                  />
-                </div>
-                <div class="row m-2">
-                  <label for="numTelefono">Num. Telefono:</label>
-                  <input
-                    id="numTelefono"
-                    v-model="telefonoFormateado"
-                    type="text"
-                    maxlength="12"
-                    class="form-control"
-                    placeholder="Ej. XXX-XXX-XXXX"
-                  />
-                </div>
-                <div class="row m-2">
-                  <label for="correoCliente">Correo:</label>
-                  <input
-                    id="correoCliente"
-                    v-model="cotizacionForm.clienteCorreo"
-                    type="email"
-                    class="form-control"
-                    placeholder="Ej. ejemplo@correo.com"
-                  />
+
+                <div class="row g-3 m-2">
+                  <div class="col-md-6">
+                    <label for="numTelefono" class="form-label">Teléfono</label>
+                    <input
+                      id="numTelefono"
+                      v-model="telefonoFormateado"
+                      type="text"
+                      maxlength="12"
+                      class="form-control"
+                      placeholder="XXX-XXX-XXXX"
+                    />
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="correoCliente" class="form-label">Correo</label>
+                    <input
+                      id="correoCliente"
+                      v-model="cotizacionForm.clienteCorreo"
+                      type="email"
+                      class="form-control"
+                      placeholder="ejemplo@correo.com"
+                    />
+                  </div>
                 </div>
               </div>
 
               <!-- Select de cliente existente -->
               <div class="col d-flex flex-column">
                 <div class="row m-2">
-                  <label for="clienteExistente" class="mb-1"
+                  <label for="clienteExistente" class="mb-1 form-label"
                     >Cliente Existente</label
                   >
                   <select
@@ -654,6 +662,7 @@
                     v-model="cotizacionForm.clienteExistente"
                   >
                     <option value="">Selecciona un cliente</option>
+
                     <option
                       v-for="(cliente, i) in clientesDisponibles"
                       :key="i"
@@ -665,7 +674,7 @@
                 </div>
                 <div class="row m-2">
                   <div class="col">
-                    <div class="form-check m-4">
+                    <div class="form-check my-3">
                       <input
                         class="form-check-input"
                         type="checkbox"
@@ -677,6 +686,7 @@
                       </label>
                     </div>
                   </div>
+
                   <div class="col">
                     <div
                       v-for="(paquete, i) in paquetesDisponibles"
@@ -699,6 +709,7 @@
               </div>
             </div>
             <!-- Seccion seleccion de llantas -->
+
             <div class="row m-4">
               <div class="col">
                 <label for="" class="m-2"
@@ -794,7 +805,7 @@
                       <button
                         v-if="
                           !cotizacionForm.llantas.some(
-                            (ll) => ll.idLlanta === slotProps.id
+                            (ll) => ll.idLlanta === slotProps.id,
                           )
                         "
                         type="button"
@@ -802,7 +813,7 @@
                         @click="agregarLlanta(slotProps)"
                         :title="
                           cotizacionForm.llantas.some(
-                            (ll) => ll.idLlanta === slotProps.id
+                            (ll) => ll.idLlanta === slotProps.id,
                           )
                             ? 'Llanta ya agregada'
                             : 'Agregar llanta'
@@ -838,13 +849,7 @@
                     v-model="nuevaCantidad"
                   />
                 </div>
-                <!-- <div class="col-3">
-                  <input 
-                  class="form-control" 
-                  placeholder="Observaciones" 
-                  v-model="nuevaObservacion"
-                  />
-                </div> -->
+
                 <div class="col">
                   <input
                     class="form-control"
@@ -894,7 +899,8 @@
                         <small>apolo@kartisimo.mx</small><br />
                       </div>
                       <div class="col">
-                        <small><strong
+                        <small
+                          ><strong
                             >Blvd. Torres Landa 1901 esq. San Jacobo</strong
                           ></small
                         ><br />
@@ -914,7 +920,7 @@
                       </div>
                     </div>
 
-                    <div class="mb-2 d-flex  cotizacion-table">
+                    <div class="mb-2 d-flex cotizacion-table">
                       <span class="mx-2">
                         <strong>No. Cotización: </strong>
                         {{ cotizacionForm.codigo || "N/A" }}
@@ -940,9 +946,7 @@
                     <table class="table align-middle">
                       <thead>
                         <tr>
-                          <th>
-                            MEDIDA - MARCA - MODELO - RANGO
-                          </th>
+                          <th>MEDIDA - MARCA - MODELO - RANGO</th>
                           <th>Cantidad</th>
                           <th>Precio Unitario</th>
                           <th style="width: 100px; text-align: right">Total</th>
@@ -1007,7 +1011,7 @@
                                 {{
                                   formatoMoneda(
                                     (item.precioUnitario || 0) *
-                                      (item.cantidad ?? 1)
+                                      (item.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1021,7 +1025,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(item, item.promo) *
-                                      (item.cantidad ?? 1)
+                                      (item.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1039,7 +1043,7 @@
                                 {{
                                   formatoMoneda(
                                     (item.precioUnitario || 0) *
-                                      (item.cantidad ?? 1)
+                                      (item.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1053,7 +1057,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(item, promoGeneral) *
-                                      (item.cantidad ?? 1)
+                                      (item.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1067,7 +1071,7 @@
                               {{
                                 formatoMoneda(
                                   (item.precioUnitario || 0) *
-                                    (item.cantidad ?? 1)
+                                    (item.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1077,7 +1081,7 @@
                               {{
                                 formatoMoneda(
                                   (item.precioUnitario || 0) *
-                                    (item.cantidad ?? 1)
+                                    (item.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1112,18 +1116,6 @@
                                 </option>
                               </select>
                             </div>
-                            <!--                                                         
-                            <div class="form-check mb-2">
-                             <input
-                             class="form-check-input"
-                             type="checkbox"
-                             v-model="item.excluirPromocionGeneral"
-                            :id="'excluir-llanta-' + item.idLlanta"
-                            />
-                          <label class="form-check-label small" :for="'excluir-llanta-' + item.idLlanta">
-                           Excluir promoción
-                           </label>
-                               </div> -->
 
                             <button
                               class="btn btn-sm btn-outline-danger"
@@ -1185,7 +1177,7 @@
                               >
                                 {{
                                   formatoMoneda(
-                                    (p.precioUnitario || 0) * (p.cantidad ?? 1)
+                                    (p.precioUnitario || 0) * (p.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1199,7 +1191,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(p, p.promo) *
-                                      (p.cantidad ?? 1)
+                                      (p.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1216,7 +1208,7 @@
                               >
                                 {{
                                   formatoMoneda(
-                                    (p.precioUnitario || 0) * (p.cantidad ?? 1)
+                                    (p.precioUnitario || 0) * (p.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1229,7 +1221,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(p, promoGeneral) *
-                                      (p.cantidad ?? 1)
+                                      (p.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1242,7 +1234,7 @@
                             >
                               {{
                                 formatoMoneda(
-                                  (p.precioUnitario || 0) * (p.cantidad ?? 1)
+                                  (p.precioUnitario || 0) * (p.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1251,7 +1243,7 @@
                             <div v-else>
                               {{
                                 formatoMoneda(
-                                  (p.precioUnitario || 0) * (p.cantidad ?? 1)
+                                  (p.precioUnitario || 0) * (p.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1285,18 +1277,6 @@
                                 </option>
                               </select>
                             </div>
-
-                            <!-- <div class="form-check mb-2">
-                                                            <input
-                                                                class="form-check-input"
-                                                                type="checkbox"
-                                                                v-model="p.excluirPromocionGeneral"
-                                                                :id="'excluir-paquete-' + p.idPaquete"
-                                                            />
-                                                            <label class="form-check-label small" :for="'excluir-paquete-' + p.idPaquete">
-                                                                Excluir promoción
-                                                            </label>
-                                                        </div> -->
 
                             <button
                               class="btn btn-sm btn-outline-danger"
@@ -1362,7 +1342,7 @@
                                 {{
                                   formatoMoneda(
                                     (extra.precioUnitario || 0) *
-                                      (extra.cantidad ?? 1)
+                                      (extra.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1376,7 +1356,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(extra, extra.promo) *
-                                      (extra.cantidad ?? 1)
+                                      (extra.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1394,7 +1374,7 @@
                                 {{
                                   formatoMoneda(
                                     (extra.precioUnitario || 0) *
-                                      (extra.cantidad ?? 1)
+                                      (extra.cantidad ?? 1),
                                   )
                                 }}
                                 <span>
@@ -1407,7 +1387,7 @@
                                 {{
                                   formatoMoneda(
                                     precioFinalItem(extra, promoGeneral) *
-                                      (extra.cantidad ?? 1)
+                                      (extra.cantidad ?? 1),
                                   )
                                 }}
                               </span>
@@ -1421,7 +1401,7 @@
                               {{
                                 formatoMoneda(
                                   (extra.precioUnitario || 0) *
-                                    (extra.cantidad ?? 1)
+                                    (extra.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1431,7 +1411,7 @@
                               {{
                                 formatoMoneda(
                                   (extra.precioUnitario || 0) *
-                                    (extra.cantidad ?? 1)
+                                    (extra.cantidad ?? 1),
                                 )
                               }}
                             </div>
@@ -1466,24 +1446,11 @@
                                 </option>
                               </select>
                             </div>
-
-                            <!-- <div class="form-check mb-2">
-                              <input
-                              class="form-check-input"
-                                type="checkbox"
-                              v-model="extra.excluirPromocionGeneral"
-                             :id="'excluir-serv-' + i"
-                             />
-                             <label class="form-check-label small" :for="'excluir-serv-' + i">
-                             Excluir promoción
-                             </label>
-                         </div> -->
-
                             <button
                               class="btn btn-sm btn-outline-danger"
                               @click="
                                 eliminarServicioExtra(
-                                  extra.idDetalleCotizacionServicio ?? i
+                                  extra.idDetalleCotizacionServicio ?? i,
                                 )
                               "
                               title="Eliminar servicio"
@@ -1500,62 +1467,11 @@
                             Total:
                           </td>
                           <td colspan="2" class="fs-5 fw-bold text-end">
-                            <!-- Si hay promoción general, mostrar ambos -->
-                            <!-- <div v-if="promoGeneral">
-                             <span class="text-decoration-line-through text-muted me-2">
-                             {{ formatoMoneda(totalCotizacion) }}
-                             </span>
-                            <span class="text-success fw-bold">
-                            {{ formatoMoneda(totalGeneralConPromo) }}
-                            </span>
-                           <small class="badge bg-info ms-2">
-                           {{ promoGeneral.nombre }}
-                           ({{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }})
-                            </small>
-                           </div> -->
-
-                            <!-- Si NO hay promoción -->
-                            <!-- <div v-else>
-                                                            {{ formatoMoneda(totalCotizacion) }}
-                                                        </div> -->
                             {{ formatoMoneda(totalCotizacion) }}
                           </td>
                         </tr>
-
-                        <!-- Fila para aplicar promoción general -->
-                        <!-- <tr>
-                                                    <td colspan="4" class="align-middle">
-                                                        <button 
-                                                            class="btn btn-outline-primary btn-sm"
-                                                            @click="aplicarPromocionGeneral()"
-                                                        >
-                                                            Ver Promos disponibles
-                                                            <span 
-                                                                v-if="promosGeneralesDisponibles.length > 0"
-                                                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success"
-                                                            >
-                                                                {{ promosGeneralesDisponibles.length }}
-                                                            </span>
-                                                        </button>
-                                                    </td>
-                                                    <td colspan="2" class="text-start">
-                                                        <div v-if="promoGeneral" class="alert alert-success py-1 mb-0">
-                                                            <strong>{{ promoGeneral.nombre }}</strong>
-                                                            <span> 
-                                                                {{ promoGeneral.tipo ? promoGeneral.valor + '%' : '$' + promoGeneral.valor }} 
-                                                                aplicado
-                                                            </span>
-                         </div>
-                    </td>
-                     </tr> -->
                       </tfoot>
                     </table>
-
-
-
-
-
-
                   </div>
                 </div>
               </div>
@@ -1578,8 +1494,6 @@
     </div>
   </div>
 </template>
-
-
 
 <script setup>
 import {
@@ -1821,12 +1735,12 @@ const aprobarCotizacion = (cotizacion) => {
     })
     .then((data) => {
       console.log(
-        "Cotización actualizada:" + data + " idCot: " + json.idCotizacion
+        "Cotización actualizada:" + data + " idCot: " + json.idCotizacion,
       );
       cargarCotizaciones();
 
       router.push({
-        name: "formOT",
+        name: "orden-trabajo-form",
         params: {
           idCotizacion: json.idCotizacion,
         },
@@ -1949,7 +1863,7 @@ const cargarCotizaciones = async () => {
   loading.value = true;
   try {
     const res = await fetch(
-      proxy.$serverIP + "api/Cotizacion/resumenCotizaciones"
+      proxy.$serverIP + "api/Cotizacion/resumenCotizaciones",
     );
     if (!res.ok) throw new Error("Error al obtener cotizaciones");
     const data = await res.json();
@@ -2049,7 +1963,7 @@ const irAlSiguientePrecio = (event) => {
 
   // Obtener todos los inputs
   const inputs = Array.from(
-    document.querySelectorAll(".input-precio-unitario")
+    document.querySelectorAll(".input-precio-unitario"),
   );
   const currentIndex = inputs.indexOf(event.target);
 
@@ -2077,7 +1991,7 @@ const irAlSiguientePrecio = (event) => {
 const eliminarPaquete = (idPaquete) => {
   // Elimina el paquete del arreglo
   cotizacionForm.paquetes = cotizacionForm.paquetes.filter(
-    (p) => p.idPaquete !== idPaquete
+    (p) => p.idPaquete !== idPaquete,
   );
 
   // Limpia el detalle asociado (si existe)
@@ -2102,7 +2016,7 @@ watch(
         delete cotizacionForm.paquetesDetalles[idPaquete];
       }
     });
-  }
+  },
 );
 
 // Paquetes: colocarlo por default cuando de carge el componente
@@ -2119,7 +2033,7 @@ watch(
       cotizacionForm.paquetes = [nuevoValor[0]];
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 // Agrega Servicio Adicionales al arreglo CotizacionesForm
@@ -2143,7 +2057,7 @@ const agregarServicioExtra = async () => {
   }
 
   const duplicado = cotizacionForm.serviciosExtras.some(
-    (s) => s.nombre.trim().toUpperCase() === nombre
+    (s) => s.nombre.trim().toUpperCase() === nombre,
   );
   if (duplicado) {
     mostrarToast("warning", "Ya existe un servicio con ese nombre.");
@@ -2184,7 +2098,7 @@ const agregarServicioExtra = async () => {
 const eliminarServicioExtra = (id) => {
   // Si el idDetalleCotizacionServicio es nulo, usa el índice (i) como respaldo
   cotizacionForm.serviciosExtras = cotizacionForm.serviciosExtras.filter(
-    (s, i) => (s.idDetalleCotizacionServicio ?? i) !== id
+    (s, i) => (s.idDetalleCotizacionServicio ?? i) !== id,
   );
 };
 
@@ -2192,7 +2106,7 @@ const eliminarServicioExtra = (id) => {
 // Opcional: elimina también su cantidad para limpiar el objeto
 const eliminarLlanta = (idLlanta) => {
   cotizacionForm.llantas = cotizacionForm.llantas.filter(
-    (ll) => ll.idLlanta !== idLlanta
+    (ll) => ll.idLlanta !== idLlanta,
   );
 };
 
@@ -2236,7 +2150,7 @@ const agregarLlanta = async (item) => {
   try {
     //console.log(nuevaLlanta.idInventarioInicial)
     const promosDisponibles = await obtenerPromosPorInventario(
-      nuevaLlanta.idInventarioInicial
+      nuevaLlanta.idInventarioInicial,
     );
 
     nuevaLlanta.promosAplicables = promosDisponibles || [];
@@ -2279,7 +2193,7 @@ const agregarLlanta = async (item) => {
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
   try {
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`
+      `${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`,
     );
 
     if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
@@ -2296,7 +2210,7 @@ const obtenerPromosPorInventario = async (idInventarioInicial) => {
 const obtenerPromosPorPaquete = async (idPaquete) => {
   try {
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`
+      `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`,
     );
 
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
@@ -2312,7 +2226,7 @@ const obtenerPromosPorPaquete = async (idPaquete) => {
 const obtenerPromosGeneralesParaServicio = async () => {
   try {
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`
+      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
     );
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
 
@@ -2323,7 +2237,7 @@ const obtenerPromosGeneralesParaServicio = async () => {
   } catch (error) {
     console.error(
       "Error al obtener promociones generales para servicios:",
-      error
+      error,
     );
     return [];
   }
@@ -2355,7 +2269,7 @@ const onCambioPromoLlanta = (llanta) => {
   }
 
   const promo = (llanta.promosAplicables || []).find(
-    (p) => p.idPromocion === idSel
+    (p) => p.idPromocion === idSel,
   );
 
   llanta.promo = promo || null;
@@ -2463,7 +2377,7 @@ watch(
       p.promosAplicables = promos || [];
     }
   },
-  { deep: true }
+  { deep: true },
 );
 
 // carga de informacion y limpia la informacion, modal creacion/edicion
@@ -2505,7 +2419,7 @@ const cargarFormulario = async (cotizacion = null) => {
       : codigoStr;
 
     const res = await fetch(
-      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`
+      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`,
     );
     const data = await res.json();
 
@@ -2541,7 +2455,7 @@ const cargarFormulario = async (cotizacion = null) => {
     cotizacionForm.paquetes = await Promise.all(
       data.paquetes.map(async (p) => {
         const base = paquetesDisponibles.value.find(
-          (q) => q.idPaquete === p.idPaquete
+          (q) => q.idPaquete === p.idPaquete,
         );
         if (!base) return null;
 
@@ -2565,7 +2479,7 @@ const cargarFormulario = async (cotizacion = null) => {
             promo: promoIndividual,
             excluirPromocionGeneral: p.excluirPromocionGeneral,
           },
-          promoGeneral.value
+          promoGeneral.value,
         );
 
         return {
@@ -2582,7 +2496,7 @@ const cargarFormulario = async (cotizacion = null) => {
             ? promoIndividual.idPromocion
             : 0,
         };
-      })
+      }),
     );
 
     // Registrar idDetalle para edición
@@ -2609,7 +2523,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
         // 2. Obtener promociones aplicables desde API
         const promosAplicables = await obtenerPromosPorInventario(
-          ll.idInventarioInicial
+          ll.idInventarioInicial,
         );
 
         // 3. Calcular precio con promo
@@ -2620,7 +2534,7 @@ const cargarFormulario = async (cotizacion = null) => {
             promo: promoIndividual,
             excluirPromocionGeneral: ll.excluirPromocionGeneral,
           },
-          promoGeneral.value
+          promoGeneral.value,
         );
 
         return {
@@ -2643,7 +2557,7 @@ const cargarFormulario = async (cotizacion = null) => {
           excluirPromocionGeneral: ll.excluirPromocionGeneral ?? false,
           comentario: ll.comentario || "",
         };
-      })
+      }),
     );
 
     // ===============================
@@ -2671,7 +2585,7 @@ const cargarFormulario = async (cotizacion = null) => {
             promo: promoIndividual,
             excluirPromocionGeneral: s.excluirPromocionGeneral,
           },
-          promoGeneral.value
+          promoGeneral.value,
         );
 
         return {
@@ -2691,7 +2605,7 @@ const cargarFormulario = async (cotizacion = null) => {
           excluirPromocionGeneral: s.excluirPromocionGeneral ?? false,
           comentario: s.comentario || "",
         };
-      })
+      }),
     );
 
     //console.log(data)
@@ -2704,7 +2618,7 @@ const cargarFormulario = async (cotizacion = null) => {
 const cargarPromosGenerales = async () => {
   try {
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`
+      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
     );
     if (!res.ok) throw new Error("Error al obtener promociones generales");
 
@@ -2728,7 +2642,7 @@ const aplicarPromocionGeneral = async () => {
     Swal.fire(
       "Sin promociones",
       "No hay promociones generales activas.",
-      "info"
+      "info",
     );
     return;
   }
@@ -2760,7 +2674,7 @@ const aplicarPromocionGeneral = async () => {
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const checked = document.querySelector(
-        'input[name="promoGeneral"]:checked'
+        'input[name="promoGeneral"]:checked',
       );
       return checked ? checked.value : null;
     },
@@ -2776,7 +2690,7 @@ const aplicarPromocionGeneral = async () => {
     ll.precioConPromo = aplicarPromo(
       ll.precioUnitario,
       ll.promo,
-      promoGeneral.value
+      promoGeneral.value,
     );
   });
 
@@ -2784,7 +2698,7 @@ const aplicarPromocionGeneral = async () => {
     p.precioConPromo = aplicarPromo(
       p.precioUnitario,
       p.promo,
-      promoGeneral.value
+      promoGeneral.value,
     );
   });
 
@@ -2792,20 +2706,20 @@ const aplicarPromocionGeneral = async () => {
     s.precioConPromo = aplicarPromo(
       s.precioUnitario,
       s.promo,
-      promoGeneral.value
+      promoGeneral.value,
     );
   });
 
   // Forzar reactividad profunda
   await nextTick(() => {
     cotizacionForm.llantas = JSON.parse(
-      JSON.stringify(toRaw(cotizacionForm.llantas))
+      JSON.stringify(toRaw(cotizacionForm.llantas)),
     );
     cotizacionForm.paquetes = JSON.parse(
-      JSON.stringify(toRaw(cotizacionForm.paquetes))
+      JSON.stringify(toRaw(cotizacionForm.paquetes)),
     );
     cotizacionForm.serviciosExtras = JSON.parse(
-      JSON.stringify(toRaw(cotizacionForm.serviciosExtras))
+      JSON.stringify(toRaw(cotizacionForm.serviciosExtras)),
     );
   });
 
@@ -2824,7 +2738,7 @@ const guardarCotizacion = async () => {
       isNaN(Number(l.cantidad)) ||
       Number(l.cantidad) <= 0 ||
       isNaN(Number(l.precioUnitario)) ||
-      Number(l.precioUnitario) <= 0
+      Number(l.precioUnitario) <= 0,
   );
 
   if (llantaInvalida) {
@@ -2838,7 +2752,7 @@ const guardarCotizacion = async () => {
   }
 
   const paqueteInvalido = cotizacionForm.paquetes.find(
-    (p) => isNaN(Number(p.precioUnitario)) || Number(p.precioUnitario) <= 0
+    (p) => isNaN(Number(p.precioUnitario)) || Number(p.precioUnitario) <= 0,
   );
 
   if (paqueteInvalido) {
@@ -2856,7 +2770,7 @@ const guardarCotizacion = async () => {
       isNaN(Number(s.cantidad)) ||
       Number(s.cantidad) <= 0 ||
       isNaN(Number(s.precioUnitario)) ||
-      Number(s.precioUnitario) <= 0
+      Number(s.precioUnitario) <= 0,
   );
 
   if (servicioInvalido) {
@@ -2877,31 +2791,31 @@ const guardarCotizacion = async () => {
   let cliente = null;
   if (cotizacionForm.clienteExistente) {
     cliente = clientesDisponibles.value.find(
-      (c) => c.nombres === cotizacionForm.clienteExistente
+      (c) => c.nombres === cotizacionForm.clienteExistente,
     );
   }
 
-  cotizacionForm.clienteNombre = cotizacionForm.nombre + " " + cotizacionForm.apellidos
+  cotizacionForm.clienteNombre =
+    cotizacionForm.nombre + " " + cotizacionForm.apellidos;
 
   cliente = cliente
-    ? 
-    {
-      idCliente: cliente.idCliente,
-      nombre: cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno, // eliminar si ya no es necesario
-      nombres: cliente.nombres,
-      apellidos: cliente.apPaterno + " " + cliente.apMaterno,
-      telefono: cliente.telefono,
-      correo: cliente.correo,
-    }
-    : 
-    {
-      idCliente: null,
-      nombre: cotizacionForm.clienteNombre,
-      nombres: cotizacionForm.nombre,
-      apellidos: cotizacionForm.apellidos,
-      telefono: cotizacionForm.clienteTelefono,
-      correo: cotizacionForm.clienteCorreo,
-    };
+    ? {
+        idCliente: cliente.idCliente,
+        nombre:
+          cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno, // eliminar si ya no es necesario
+        nombres: cliente.nombres,
+        apellidos: cliente.apPaterno + " " + cliente.apMaterno,
+        telefono: cliente.telefono,
+        correo: cliente.correo,
+      }
+    : {
+        idCliente: null,
+        nombre: cotizacionForm.clienteNombre,
+        nombres: cotizacionForm.nombre,
+        apellidos: cotizacionForm.apellidos,
+        telefono: cotizacionForm.clienteTelefono,
+        correo: cotizacionForm.clienteCorreo,
+      };
 
   // Mapear llantas al formato esperado
   const llantas = cotizacionForm.llantas.map((ll) => ({
@@ -2941,9 +2855,7 @@ const guardarCotizacion = async () => {
     excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
     comentario: s.comentario || "",
   }));
-  //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras)) 
-
-  
+  //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras))
 
   const nuevaCotizacion = {
     codigo: rawId,
@@ -3044,7 +2956,7 @@ function parsePrecio(v) {
       .toString()
       .replace(/[^\d.,-]/g, "")
       .replace(/\./g, "")
-      .replace(",", ".")
+      .replace(",", "."),
   );
 
   return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
@@ -3084,7 +2996,7 @@ const preparedItems = computed(() =>
       _code: codigo,
       _idInventarioInicial: idInventarioInicial,
     };
-  })
+  }),
 );
 
 /* ====== 3) Orden base (una sola vez) ====== */
@@ -3284,10 +3196,11 @@ watch(
   () => cotizacionForm.clienteExistente,
   (nuevoNombre) => {
     const cliente = clientesDisponibles.value.find(
-      (c) => c.nombres === nuevoNombre
+      (c) => c.nombres === nuevoNombre,
     );
     if (cliente) {
-      cotizacionForm.clienteNombre = cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno;
+      cotizacionForm.clienteNombre =
+        cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno;
       cotizacionForm.nombre = cliente.nombres;
       cotizacionForm.apellidos = cliente.apPaterno + " " + cliente.apMaterno;
       cotizacionForm.clienteTelefono = cliente.telefono;
@@ -3297,7 +3210,7 @@ watch(
       cotizacionForm.clienteTelefono = "";
       cotizacionForm.clienteCorreo = "";
     }
-  }
+  },
 );
 
 /*********************************************
@@ -3328,7 +3241,7 @@ watch(
       }
     });
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Paquetes
@@ -3350,7 +3263,7 @@ watch(
         : precio;
     });
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Servicios
@@ -3363,7 +3276,7 @@ watch(
   (nuevosValores) => {
     nuevosValores.forEach(({ nombre, precio }) => {
       const servicio = cotizacionForm.serviciosExtras.find(
-        (s) => s.nombre === nombre
+        (s) => s.nombre === nombre,
       );
       if (!servicio) return;
       const promo = servicio.promo || promoGeneral.value;
@@ -3374,7 +3287,7 @@ watch(
         : precio;
     });
   },
-  { deep: true }
+  { deep: true },
 );
 
 /*********************************************
@@ -3397,8 +3310,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           proxy.$serverIP
         }api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace(
           "COT-",
-          ""
-        )}`
+          "",
+        )}`,
       );
       const data = await res.json();
 
@@ -3546,7 +3459,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         paquetes.reduce((s, p) => s + p.precioUnitario, 0) +
         serviciosAdicionales.reduce(
           (s, s2) => s + s2.precioUnitario * s2.cantidad,
-          0
+          0,
         );
 
       const totalFinal =
@@ -3565,12 +3478,13 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             day: "2-digit",
             month: "2-digit",
             year: "numeric",
-          }
+          },
         ),
         cliente: {
           nombre: data.clienteNombre,
           telefono: data.telefono || "Sin teléfono",
           correo: data.correo || "Sin correo",
+          fecha: data.fechaCreacion,
         },
         llantasSelecionadas: llantasConPromo,
         paquetes,
@@ -3613,14 +3527,11 @@ const confirmarAccion = async (vistaCotizacion) => {
   aprobarCotizacion(vistaCotizacion);
 };
 
-
 // MANDAR A IMPRIMIR
 
 const imprimirCotizacion = () => {
   window.print();
 };
-
-
 
 // GENERAR PDF
 
@@ -3645,30 +3556,33 @@ pdfMake.vfs = pdfFonts.vfs;
 const generarPDF = async () => {
   const logo = await loadLogoBase64();
   const v = vistaCotizacion.value;
+
+
+  const celdaCentroY = (text, alignment = "left") => ({
+    text,
+    alignment,
+    fontSize: 9,
+    margin: [0, 10, 0, 10], // 🔥 CLAVE
+  });
+
+
   //consolelog(JSON.stringfy(v))
   // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
   const llantasRows = v.llantasSelecionadas.map((ll) => {
-    const tienePromo =
-      ll.promoLabel && ll.precioConPromo < ll.precioUnitario;
+    const tienePromo = ll.promoLabel && ll.precioConPromo < ll.precioUnitario;
 
     return [
-      { text: String(ll.cantidad), alignment: "center", fontSize: 11 },
+      celdaCentroY(String(ll.cantidad), "center"),
 
-      {
-        text: ll.medidas,
-        fontSize: 11,
-      },
+      celdaCentroY(ll.medidas),
 
-      // PRECIO UNITARIO
-      {
-        text: `$${ll.precioUnitario.toLocaleString("en-US", {
+      celdaCentroY(
+        `$${ll.precioUnitario.toLocaleString("en-US", {
           minimumFractionDigits: 2,
         })}`,
-        alignment: "right",
-        fontSize: 11,
-      },
+        "right"
+      ),
 
-      // TOTAL (con promo)
       {
         stack: tienePromo
           ? [
@@ -3679,11 +3593,12 @@ const generarPDF = async () => {
                 )}`,
                 decoration: "lineThrough",
                 color: "#888",
-                fontSize: 10,
+                fontSize: 8,
                 alignment: "right",
               },
               {
                 text: ll.promoLabel,
+                fontSize: 8,
                 style: "promoLabel",
                 alignment: "right",
                 margin: [0, 2, 0, 2],
@@ -3694,7 +3609,7 @@ const generarPDF = async () => {
                 })}`,
                 color: "green",
                 bold: true,
-                fontSize: 11,
+                fontSize: 9,
                 alignment: "right",
               },
             ]
@@ -3704,37 +3619,32 @@ const generarPDF = async () => {
                   minimumFractionDigits: 2,
                 })}`,
                 alignment: "right",
-                fontSize: 11,
+                fontSize: 9,
               },
             ],
+        margin: [0, 6, 0, 6], 
       },
     ];
   });
 
 
   const paquetesRows = v.paquetes.map((p) => [
-    { text: "1", alignment: "center", fontSize: 11 },
-    { text: p.nombre, italics: true, fontSize: 11 },
-    {
-      text: `$${
-        p.precio?.toLocaleString("en-US", { minimumFractionDigits: 2 }) ||
-        "0.00"
-      }`,
-      alignment: "right",
-      fontSize: 11,
-    },
-    {
-      text: `$${
-        p.total?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"
-      }`,
-      alignment: "right",
-      fontSize: 11,
-    },
+    celdaCentroY("1", "center"),
+    celdaCentroY(p.nombre),
+    celdaCentroY(
+      `$${p.precio?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"}`,
+      "right"
+    ),
+    celdaCentroY(
+      `$${p.total?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"}`,
+      "right"
+    ),
   ]);
 
+
   const serviciosRows = v.serviciosAdicionales.map((s) => [
-    { text: String(s.cantidad), alignment: "center", fontSize: 11 },
-    { text: s.nombreServicio, italics: true, fontSize: 11 },
+    { text: String(s.cantidad), alignment: "center", fontSize: 9,margin: [0, 6, 0, 6], },
+    { text: s.nombreServicio, italics: true, fontSize: 9, margin: [0, 6, 0, 6], },
     {
       text: `$${
         s.precioUnitario?.toLocaleString("en-US", {
@@ -3742,16 +3652,69 @@ const generarPDF = async () => {
         }) || "0.00"
       }`,
       alignment: "right",
-      fontSize: 11,
+      fontSize: 9,
+      margin: [0, 6, 0, 6],
     },
     {
       text: `$${
         s.total?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"
       }`,
       alignment: "right",
-      fontSize: 11,
+      fontSize: 9,
+      margin: [0, 6, 0, 6],
     },
   ]);
+
+  const separador = (textoColumna2) => [
+    {
+      text: "CANT",
+      alignment: "center",
+      style: "tableHeaderBorder",
+      fillColor: "#ededed",
+    },
+    {
+      text: textoColumna2,
+      alignment: "center",
+      style: "tableHeaderBorder",
+      fillColor: "#ededed",
+    },
+    {
+      text: "PRECIO UNITARIO",
+      alignment: "center",
+      style: "tableHeaderBorder",
+      fillColor: "#ededed",
+    },
+    {
+      text: "TOTAL",
+      alignment: "center",
+      style: "tableHeaderBorder",
+      fillColor: "#ededed",
+    },
+  ];
+
+
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+
 
   // Definición del PDF
   const docDefinition = {
@@ -3766,15 +3729,7 @@ const generarPDF = async () => {
           },
           {
             width: "auto",
-            stack: [
-              {
-                text: "Kartisimo Bajio S.A. de C.V.",
-                bold: true,
-                fontSize: 14,
-                alignment: "right",
-                margin: [0, 0, 0, 10],
-              },
-            ],
+            stack: [],
           },
         ],
       },
@@ -3784,40 +3739,40 @@ const generarPDF = async () => {
             {
               text: "Blvd. Delta 2002 esq. Rio Mayo",
               bold: true,
-              fontSize: 10,
+              fontSize: 8,
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 9 },
-            { text: "Tel. 477 330 6060 y 477 390 5090", fontSize: 9 },
-            { text: "delta@kartisimo.mx", fontSize: 9 },
+            { text: "Col. Valle de Jerez C.P 37538", fontSize: 7 },
+            { text: "Tel. 477 330 6060 y 477 390 5090", fontSize: 7 },
+            { text: "delta@kartisimo.mx", fontSize: 7 },
           ],
           [
             {
               text: "Blvd. Lopez Mateos 827 esq. Apolo",
               bold: true,
-              fontSize: 10,
+              fontSize: 8,
             },
-            { text: "Col. Obrera C.P. 37340", fontSize: 9 },
-            { text: "Tel. 477 717 7440 y 477 470 9419", fontSize: 9 },
-            { text: "apolo@kartisimo.mx", fontSize: 9 },
+            { text: "Col. Obrera C.P. 37340", fontSize: 7 },
+            { text: "Tel. 477 717 7440 y 477 470 9419", fontSize: 7 },
+            { text: "apolo@kartisimo.mx", fontSize: 7 },
           ],
           [
             {
               text: "Blvd. Torres Landa 1901 esq San Jacobo",
               bold: true,
-              fontSize: 10,
+              fontSize: 8,
             },
-            { text: "Col. La Pisina C.P. 37440", fontSize: 9 },
-            { text: "Tel. 477 390 0290 y 477 461 0028", fontSize: 9 },
-            { text: "torreslanda@kartisimo.mx", fontSize: 9 },
+            { text: "Col. La Pisina C.P. 37440", fontSize: 7 },
+            { text: "Tel. 477 390 0290 y 477 461 0028", fontSize: 7 },
+            { text: "torreslanda@kartisimo.mx", fontSize: 7 },
           ],
           [
             {
               text: "Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián",
               bold: true,
-              fontSize: 10,
+              fontSize: 8,
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 9 },
-            { text: "Tel. 477 763 3285 y 477 763 3284", fontSize: 9 },
+            { text: "Col. La Martinica, C.P. 37500", fontSize: 7 },
+            { text: "Tel. 477 763 3285 y 477 763 3284", fontSize: 7 },
           ],
         ],
         columnGap: 20,
@@ -3840,19 +3795,41 @@ const generarPDF = async () => {
       {
         columns: [
           {
-            text: `No. Cotizacion: ${v.codigo || ""}`,
-            fontSize: 11,
-            margin: [0, 0, 10, 6],
-            bold: true,
-          },
-          {
-            text: `Cliente: ${v.cliente.nombre || ""}`,
-            fontSize: 11,
+            text: `COT-${v.codigo}`,
+            fontSize:9,
             margin: [0, 0, 10, 6],
           },
           {
-            text: `Teléfono: ${v.cliente.telefono || ""}`,
-            fontSize: 11,
+            text: [
+              {
+                text: "Cliente: ",
+                bold: true,
+              },
+              `${v.cliente.nombre || "N/A"}`
+            ],
+            fontSize: 9,
+            margin: [0, 0, 10, 6],
+          },
+          {
+            text: [
+              {
+                text: "Fecha Emisión: ",
+                bold:true
+              },
+              `${ formatearFecha(v.cliente.fecha) || ""}`
+            ],
+            fontSize: 9,
+            margin: [0, 0, 10, 6],
+          },
+          {
+            text: [
+              {
+                text:"Teléfono: ",
+                bold: true
+              },
+              { text: v.cliente.telefono || "N/A", color: "#444" },
+            ],
+            fontSize: 9,
             margin: [0, 0, 10, 6],
           },
         ],
@@ -3864,8 +3841,16 @@ const generarPDF = async () => {
           widths: [40, "*", 90, 90],
           body: [
             [
-              { text: "CANT", alignment: "center", style: "tableHeaderBorder" },
-              { text: "MARCA - MODELO - MEDIDA" },
+              { 
+                text: "CANT",
+                style: "tableHeaderBorder" ,
+                alignment: "center",
+              },
+              { 
+                text: "MARCA - MODELO - MEDIDA",
+                style: "tableHeaderBorder" ,
+                alignment: "center",
+               },
               {
                 text: "PRECIO UNITARIO",
                 style: "tableHeaderBorder",
@@ -3878,18 +3863,19 @@ const generarPDF = async () => {
               },
             ],
             ...llantasRows,
+            separador("PAQUETE - SERVICIOS"),
             ...paquetesRows,
             ...serviciosRows,
           ],
         },
         layout: {
           fillColor: (rowIndex) => (rowIndex === 0 ? "#ededed" : null),
-          hLineWidth: (i, node) => {
-            // Quita todas las líneas horizontales menos la del encabezado y las divisiones
-            if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
-            // Puedes agregar condiciones aquí para las divisiones
-            return 0;
-          },
+          // hLineWidth: (i, node) => {
+          //   // Quita todas las líneas horizontales menos la del encabezado y las divisiones
+          //   if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
+          //   // Puedes agregar condiciones aquí para las divisiones
+          //   return 0;
+          // },
           vLineWidth: (i, node) => 0,
         },
         margin: [0, 12, 0, 0],
@@ -3904,13 +3890,13 @@ const generarPDF = async () => {
     styles: {
       tableHeaderBorder: {
         bold: true,
-        fontSize: 11,
+        fontSize: 9,
         border: [true, true, true, true], // bordes en todas las direcciones
         alignment: "center",
       },
       notaIVA: {
         italics: true,
-        fontSize: 10,
+        fontSize: 8,
       },
     },
   };
@@ -3921,7 +3907,6 @@ const generarPDF = async () => {
   pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
 };
 </script>
-
 
 <style>
 .cotizacion-table {
@@ -3940,7 +3925,6 @@ const generarPDF = async () => {
 }
 
 @media print {
-
   /* Quitar márgenes gigantes */
   @page {
     margin: 8mm;
@@ -3974,7 +3958,6 @@ const generarPDF = async () => {
     max-height: none !important;
     height: auto !important;
   }
-  
 
   /* 🔥 CLAVE: desactivar table-responsive */
   .table-responsive {
@@ -4012,7 +3995,4 @@ const generarPDF = async () => {
     overflow: visible !important;
   }
 }
-
-
-
 </style>

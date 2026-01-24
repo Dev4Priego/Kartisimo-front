@@ -141,8 +141,8 @@ async function handleLogin () {
     const result = await response.json()
 
     if (result.success) {
-      sessionStorage.setItem('userSession', JSON.stringify(result))
-      router.push('/content/inventario')
+      localStorage.setItem('userSession', JSON.stringify(result))
+      router.push('/content/orden-trabajo')
     } else {
       errorMsg.value = result.error || 'Usuario o contraseña incorrectos'
     }

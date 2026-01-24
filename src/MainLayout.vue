@@ -138,7 +138,7 @@ const irA = (ruta) => {
 
 const cerrarSesion = () => {
     // Limpia sesión
-    sessionStorage.clear()
+    localStorage.removeItem('userSession');
 
     // Redirige al login
     router.replace('/')

@@ -8,9 +8,10 @@ let inactivityTimer = null;
 const INACTIVITY_TIME = 30 * 60 * 1000; // 15 minutos
 
 const logoutUser = () => {
-	sessionStorage.clear();
+	localStorage.removeItem('userSession'); // o el token
 	router.push("/");
 };
+
 
 const startTimer = () => {
 	inactivityTimer = setTimeout(() => {
