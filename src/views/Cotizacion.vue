@@ -244,7 +244,23 @@
                     <strong>Teléfono: </strong>
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
+                  
                 </div>
+                 <div class="col">
+                  <span class="mx-2"> <div class="col">
+                  <span class="mx-2">
+                   <strong>Observaciones: </strong>
+                    {{ observacionesVista || "No disponible" }}
+
+                  </span>
+                  
+                </div>
+        
+                    
+                  </span>
+                  
+                </div>
+
               </div>
             </div>
 
@@ -558,6 +574,8 @@
         </div>
       </div>
     </div>
+
+
     <!-- MODAL PARA CREAR/EDITAR COTIZACION -->
     <div
       class="modal fade"
@@ -647,6 +665,20 @@
                       placeholder="ejemplo@correo.com"
                     />
                   </div>
+                  <div class="col-md-12">
+                  <label for="ObservacionCliente" class="form-label">Observaciones</label>
+                  <textarea
+                    id="ObservacionCliente"
+                    v-model="cotizacionForm.observaciones"
+                    class="form-control"
+                    rows="2"
+                    maxlength="255"
+                    placeholder=""
+                  ></textarea>
+                </div>
+
+
+
                 </div>
               </div>
 
@@ -864,6 +896,9 @@
                 </button>
               </div>
             </div>
+
+
+
             <div class="row">
               <div class="col border">
                 <div class="row justify-content-center">
@@ -940,6 +975,10 @@
                       <span class="mx-2">
                         <strong>Correo: </strong>
                         {{ cotizacionForm.clienteCorreo || "N/A" }}
+                      </span>
+                      <span class="mx-2">
+                        <strong>Observaciones</strong>
+                        {{ cotizacionForm.observaciones || "N/A" }}
                       </span>
                     </div>
 
@@ -1532,7 +1571,10 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
+
 const vistaCotizacion = ref({});
+
+
 const mostrarVista = ref(false);
 const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
 const tituloModal = ref("Nueva Cotización");
@@ -1605,6 +1647,7 @@ const cotizacionForm = reactive({
   llantas: [],
   serviciosExtras: [],
   mostrarTotal: false,
+  observaciones :"",
   fechaCreacion: new Date().toLocaleDateString("es-MX", {
     day: "2-digit",
     month: "2-digit",
@@ -1712,6 +1755,7 @@ const reactivarCotizacion = (cotizacion) => {
     });
 };
 
+
 const aprobarCotizacion = (cotizacion) => {
   const idCotizacion = Number(String(cotizacion.codigo).replace("COT-", ""));
 
@@ -1751,6 +1795,15 @@ const aprobarCotizacion = (cotizacion) => {
       console.error("Error en la petición:", error.message);
     });
 };
+
+const observacionesVista = computed(() => {
+  const obs = vistaCotizacion.value.cliente?.observaciones;
+  console.log("observaciones raw:", obs);
+  return obs === null || obs === undefined ? "No disponible" : obs;
+});
+
+
+
 
 const finalizarCotizacion = (cotizacion) => {
   const json = {
@@ -1858,6 +1911,7 @@ const cargarLlantas = async () => {
   }
 };
 
+
 // Función para cargar cotizaciones
 const cargarCotizaciones = async () => {
   loading.value = true;
@@ -1879,6 +1933,8 @@ const cargarCotizaciones = async () => {
         nombre: c.clienteNombre,
         telefono: c.telefono,
         correo: c.correo,
+       observaciones: c.observaciones || "", // <-- agregado
+
       },
       paquetes:
         c.nombresPaquetes === "Ninguno"
@@ -1895,7 +1951,7 @@ const cargarCotizaciones = async () => {
   } catch (error) {
     console.error("Error al cargar cotizaciones:", error);
   }
-};
+}
 
 const registrarCerrarConEsc = (mostrarVista) => {
   //console.log()
@@ -2807,6 +2863,8 @@ const guardarCotizacion = async () => {
         apellidos: cliente.apPaterno + " " + cliente.apMaterno,
         telefono: cliente.telefono,
         correo: cliente.correo,
+        observaciones: cotizacionForm.observaciones, // ← AÑADE ESTO
+
       }
     : {
         idCliente: null,
@@ -2815,6 +2873,8 @@ const guardarCotizacion = async () => {
         apellidos: cotizacionForm.apellidos,
         telefono: cotizacionForm.clienteTelefono,
         correo: cotizacionForm.clienteCorreo,
+        observaciones: cotizacionForm.observaciones, // ← AÑADE ESTO
+
       };
 
   // Mapear llantas al formato esperado
@@ -2895,7 +2955,7 @@ const guardarCotizacion = async () => {
     cargarCotizaciones();
     mostrarVistaPrevia(obj, "ver");
 
-    // console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+     console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("Error al guardar cotización:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -3173,6 +3233,8 @@ const cotizacionesTransformadas = computed(() => {
       fechaCreacion: c.fechaCreacion || "—",
       cliente: c.cliente?.nombre || "—",
       telefono: c.cliente?.telefono || "—",
+       observaciones: c.cliente?.observaciones || "No disponible", // <-- agregado
+
       paquete: c.paquetes?.length
         ? c.paquetes.map((p) => p.nombre).join(", ")
         : "—",
@@ -3294,13 +3356,7 @@ watch(
         FUNCIONES PARA MODAL SCREENSHOT Y PDF
     **********************************************/
 
-// const tieneElementosConPromoGeneral = computed(() => {
-//     const llantasAplican = vistaCotizacion.value.llantasSelecionadas?.some(l => l.promoLabel !== '(Excluido de promoción)');
-//     const paquetesAplican = vistaCotizacion.value.paquetes?.some(p => p.promoLabel !== '(Excluido de promoción)');
-//     const serviciosAplican = vistaCotizacion.value.serviciosAdicionales?.some(s => s.promoLabel !== '(Excluido de promoción)');
 
-//     return llantasAplican || paquetesAplican || serviciosAplican;
-// });
 
 const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
   if (modo === "ver") {
@@ -3485,6 +3541,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           telefono: data.telefono || "Sin teléfono",
           correo: data.correo || "Sin correo",
           fecha: data.fechaCreacion,
+         observaciones: data.observaciones || "", // ⚡ AQUI
+
         },
         llantasSelecionadas: llantasConPromo,
         paquetes,
