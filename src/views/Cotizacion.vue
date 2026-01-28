@@ -245,8 +245,14 @@
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
                 </div>
+                <div class="col">
+                 <span class="mx-2">
+                   <strong>Observaciones</strong>
+                    {{ cotizacionForm.observaciones || "N/A" }}
+                 </span>
               </div>
             </div>
+          </div>
 
             <!-- Tabla Llantas -->
             <div class="table-responsive mx-auto mt-3 cotizacion-header">
@@ -342,8 +348,8 @@
                 <colgroup>
                   <col style="width: 50px" />
                   <col />
-                  <col style="width: 150px" />
-                  <col style="width: 210px" />
+                  <col style="width: 120px" />
+                  <col style="width: 120px" />
                 </colgroup>
                 <tbody>
                   <!-- Paquetes -->
@@ -558,6 +564,7 @@
         </div>
       </div>
     </div>
+
     <!-- MODAL PARA CREAR/EDITAR COTIZACION -->
     <div
       class="modal fade"
@@ -630,7 +637,7 @@
                     <input
                       id="numTelefono"
                       v-model="telefonoFormateado"
-                      type="text"
+                      type="number"
                       maxlength="12"
                       class="form-control"
                       placeholder="XXX-XXX-XXXX"
@@ -646,6 +653,27 @@
                       class="form-control"
                       placeholder="ejemplo@correo.com"
                     />
+                  </div>
+                  <div class="col-md-12">
+                    
+
+                  <!------------
+                  <label for="ObservacionCliente" class="form-label"
+                      >Observaciones</label
+                    >
+            
+                  
+                        <textarea
+                  id="ObservacionCliente"
+                  v-model="cotizacionForm.observaciones"
+                  @input="console.log(' escribiendo:', cotizacionForm.observaciones)"
+                  class="form-control"
+                  rows="2"
+                  maxlength="255"
+                  ></textarea>
+
+                  -->
+
                   </div>
                 </div>
               </div>
@@ -864,6 +892,7 @@
                 </button>
               </div>
             </div>
+
             <div class="row">
               <div class="col border">
                 <div class="row justify-content-center">
@@ -941,6 +970,12 @@
                         <strong>Correo: </strong>
                         {{ cotizacionForm.clienteCorreo || "N/A" }}
                       </span>
+
+                      <span class="mx-2">
+                        <strong>Observaciones</strong>
+                        {{ cotizacionForm.observaciones || "N/A" }}
+                      </span>
+
                     </div>
 
                     <table class="table align-middle">
@@ -1532,7 +1567,9 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
+
 const vistaCotizacion = ref({});
+
 const mostrarVista = ref(false);
 const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
 const tituloModal = ref("Nueva Cotización");
@@ -1605,6 +1642,7 @@ const cotizacionForm = reactive({
   llantas: [],
   serviciosExtras: [],
   mostrarTotal: false,
+  observaciones: "",
   fechaCreacion: new Date().toLocaleDateString("es-MX", {
     day: "2-digit",
     month: "2-digit",
@@ -1619,22 +1657,30 @@ const preciosLlantas = reactive({});
  ***********************************/
 const telefonoFormateado = computed({
   get() {
-    let valor = cotizacionForm.clienteTelefono.replace(/\D/g, "");
-    if (valor.length > 10) valor = valor.substring(0, 10);
+    const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
-    if (valor.length > 6) {
-      return valor.replace(/(\d{3})(\d{3})(\d{0,4})/, "$1 $2 $3");
-    } else if (valor.length > 3) {
-      return valor.replace(/(\d{3})(\d{0,3})/, "$1 $2");
-    } else {
-      return valor;
+    // Primeros 10 dígitos (teléfono base)
+    const base = soloNumeros.slice(0, 10);
+    const extra = soloNumeros.slice(10); 
+    // extensiones u otros teléfonos
+
+    let formateado = base;
+
+    if (base.length > 6) {
+      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+    } else if (base.length > 3) {
+      formateado = base.replace(/(\d{3})(\d{0,3})/, "$1 $2");
     }
+
+    // Si hay más números, los agregamos separados
+    return extra ? `${formateado} ${extra}` : formateado;
   },
   set(v) {
-    // Guardamos solo números limpios en el modelo real
-    cotizacionForm.clienteTelefono = v.replace(/\D/g, "").substring(0, 10);
+    // Guardamos SOLO números, sin límite
+    cotizacionForm.clienteTelefono = v.replace(/\D/g, "");
   },
 });
+
 
 const telefonoVistaFormateado = computed(() => {
   if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
@@ -1751,6 +1797,13 @@ const aprobarCotizacion = (cotizacion) => {
       console.error("Error en la petición:", error.message);
     });
 };
+
+const observacionesVista = computed(() => {
+  const obs = vistaCotizacion.value.cliente?.observaciones;
+  console.log("observaciones raw:", obs);
+  return obs === null || obs === undefined ? "No disponible" : obs;
+});
+
 
 const finalizarCotizacion = (cotizacion) => {
   const json = {
@@ -1879,6 +1932,7 @@ const cargarCotizaciones = async () => {
         nombre: c.clienteNombre,
         telefono: c.telefono,
         correo: c.correo,
+        observaciones: c.observaciones || "", // <-- agregado
       },
       paquetes:
         c.nombresPaquetes === "Ninguno"
@@ -2380,8 +2434,10 @@ watch(
   { deep: true },
 );
 
-// carga de informacion y limpia la informacion, modal creacion/edicion
 const cargarFormulario = async (cotizacion = null) => {
+  // 🔹 Guardamos lo que el usuario haya escrito
+  const observacionesPrevias = cotizacionForm.observaciones || "";
+
   if (!cotizacion) {
     Object.assign(cotizacionForm, {
       codigo: "",
@@ -2403,42 +2459,38 @@ const cargarFormulario = async (cotizacion = null) => {
         month: "2-digit",
         year: "numeric",
       }),
+      observaciones: observacionesPrevias, // 🔹 Conservamos lo escrito
     });
 
     promoGeneral.value = null;
     itemsSelected.value = [];
     paquetesSeleccionados.value = [];
+
+    console.log("🧹 FORM LIMPIO:", JSON.stringify(cotizacionForm)); // 🔹 log claro
     return;
   }
 
+  // Si se carga una cotización existente
   try {
     const codigoStr = String(cotizacion?.codigo ?? "").trim();
-
     const codigoLimpio = codigoStr.startsWith("COT-")
       ? codigoStr.replace("COT-", "")
       : codigoStr;
 
+    console.log("Codigo Info: "+codigoLimpio)
     const res = await fetch(
-      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`,
+      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`
     );
+
+    if (!res.ok) {
+      console.error("❌ Error HTTP:", res.status, res.statusText);
+      mostrarToast("warning", `No se pudo cargar la cotización: ${res.statusText}`);
+      return;
+    }
+
     const data = await res.json();
-
-    // ===============================
-    // 🔹 PROMOCIÓN GENERAL
-    // ===============================
-    promoGeneral.value =
-      data.idPromocionGeneral && data.valorPromocionGeneral != null
-        ? {
-            idPromocion: data.idPromocionGeneral,
-            nombre: data.nombrePromocionGeneral,
-            valor: data.valorPromocionGeneral,
-            tipo: data.tipoPromocionGeneral,
-          }
-        : null;
-
-    // ===============================
-    // 🔹 DATOS GENERALES
-    // ===============================
+    
+    // 🔹 Cargar datos de cliente
     cotizacionForm.codigo = "COT-" + data.idCotizacion;
     cotizacionForm.fechaCreacion = data.fechaCreacion;
     cotizacionForm.clienteNombre = data.clienteNombre;
@@ -2615,6 +2667,7 @@ const cargarFormulario = async (cotizacion = null) => {
   }
 };
 
+
 const cargarPromosGenerales = async () => {
   try {
     const res = await fetch(
@@ -2628,7 +2681,7 @@ const cargarPromosGenerales = async () => {
     if (data.length > 0) {
       //console.log(`Se cargaron ${data.length} promociones generales activas.`);
     } else {
-      console.log("⚠️ No hay promociones generales activas.");
+      console.log(" No hay promociones generales activas.");
     }
   } catch (error) {
     console.error("Error al cargar promociones generales:", error);
@@ -2731,176 +2784,184 @@ const aplicarPromocionGeneral = async () => {
   });
 };
 
-// CREAR/EDITAR COTIZACIONES
+
+// CREAR / EDITAR COTIZACIONES
 const guardarCotizacion = async () => {
-  const llantaInvalida = cotizacionForm.llantas.find(
-    (l) =>
-      isNaN(Number(l.cantidad)) ||
-      Number(l.cantidad) <= 0 ||
-      isNaN(Number(l.precioUnitario)) ||
-      Number(l.precioUnitario) <= 0,
-  );
-
-  if (llantaInvalida) {
-    await Swal.fire({
-      icon: "warning",
-      title: "Datos inválidos en llantas",
-      text: `Verifica las cantidades y precios de las llantas.`,
-      confirmButtonColor: "#3085d6",
-    });
-    return false;
-  }
-
-  const paqueteInvalido = cotizacionForm.paquetes.find(
-    (p) => isNaN(Number(p.precioUnitario)) || Number(p.precioUnitario) <= 0,
-  );
-
-  if (paqueteInvalido) {
-    await Swal.fire({
-      icon: "warning",
-      title: "Datos inválidos en paquetes",
-      text: `Verifica los precios de los paquetes.`,
-      confirmButtonColor: "#3085d6",
-    });
-    return false;
-  }
-
-  const servicioInvalido = cotizacionForm.serviciosExtras.find(
-    (s) =>
-      isNaN(Number(s.cantidad)) ||
-      Number(s.cantidad) <= 0 ||
-      isNaN(Number(s.precioUnitario)) ||
-      Number(s.precioUnitario) <= 0,
-  );
-
-  if (servicioInvalido) {
-    await Swal.fire({
-      icon: "warning",
-      title: "Datos inválidos en servicios adicionales",
-      text: `Verifica las cantidades y precios de los servicios.`,
-      confirmButtonColor: "#3085d6",
-    });
-    return false;
-  }
-
-  const rawId = cotizacionForm.codigo
-    ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
-    : null; // null para nueva
-
-  // Determina el cliente
-  let cliente = null;
-  if (cotizacionForm.clienteExistente) {
-    cliente = clientesDisponibles.value.find(
-      (c) => c.nombres === cotizacionForm.clienteExistente,
-    );
-  }
-
-  cotizacionForm.clienteNombre =
-    cotizacionForm.nombre + " " + cotizacionForm.apellidos;
-
-  cliente = cliente
-    ? {
-        idCliente: cliente.idCliente,
-        nombre:
-          cliente.nombres + " " + cliente.apPaterno + " " + cliente.apMaterno, // eliminar si ya no es necesario
-        nombres: cliente.nombres,
-        apellidos: cliente.apPaterno + " " + cliente.apMaterno,
-        telefono: cliente.telefono,
-        correo: cliente.correo,
-      }
-    : {
-        idCliente: null,
-        nombre: cotizacionForm.clienteNombre,
-        nombres: cotizacionForm.nombre,
-        apellidos: cotizacionForm.apellidos,
-        telefono: cotizacionForm.clienteTelefono,
-        correo: cotizacionForm.clienteCorreo,
-      };
-
-  // Mapear llantas al formato esperado
-  const llantas = cotizacionForm.llantas.map((ll) => ({
-    idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null,
-    idLlanta: ll.idLlanta,
-    idInventarioInicial: ll.idInventarioInicial,
-    cantidad: ll.cantidad,
-    precioUnitario: ll.precioUnitario,
-    idAlmacen: ll.idAlmacen,
-    idPromocion: ll.promo ? ll.promo.idPromocion : null,
-    excluirPromocionGeneral: ll.excluirPromocionGeneral ? 1 : 0,
-    comentario: ll.comentario || "",
-  }));
-  //console.log(''+JSON.stringify(cotizacionForm.llantas))
-
-  // Paquetes
-  const paquetes = cotizacionForm.paquetes.map((p) => ({
-    idDetalleCotizacionPaquete:
-      cotizacionForm.paquetesDetalles[p.idPaquete] || null,
-    idPaquete: p.idPaquete,
-    idPromocion: p.promo ? p.promo.idPromocion : null,
-    cantidad: p.cantidad ?? 1, // o el valor que requieras
-    precioUnitario: p.precioUnitario,
-    excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
-    comentario: p.comentario || "",
-  }));
-  //console.log('GuardarCotizacion: Paquetes' + JSON.stringify(paquetes) + JSON.stringify(cotizacionForm.paquetes))
-
-  // Servicios
-  const serviciosAdicionales = cotizacionForm.serviciosExtras.map((s) => ({
-    idDetalleCotizacionServicio: s.idDetalleCotizacionServicio || null,
-    idPromocion: s.promo ? s.promo.idPromocion : null,
-    descripcionServicio: s.nombre,
-    observacion: s.observacion,
-    cantidad: s.cantidad,
-    precioUnitario: s.precioUnitario,
-    excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
-    comentario: s.comentario || "",
-  }));
-  //console.log('GuardarCotizacion: ServiciosAdicionales'+ JSON.stringify(serviciosAdicionales) + JSON.stringify(cotizacionForm.serviciosExtras))
-
-  const nuevaCotizacion = {
-    codigo: rawId,
-    mostrarTotal: cotizacionForm.mostrarTotal,
-    cliente,
-    llantas,
-    paquetes,
-    serviciosAdicionales,
-    creadoPor: 1,
-    idPromocionGeneral: promoGeneral.value
-      ? promoGeneral.value.idPromocion
-      : null,
-  };
-
-  // Decide si POST o PUT
-  const url = cotizacionForm.codigo
-    ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
-    : `${proxy.$serverIP}api/Cotizacion/crearCotizacion`;
-
   try {
+    /* ================= VALIDACIONES ================= */
+
+    const llantaInvalida = cotizacionForm.llantas.find(
+      (l) =>
+        isNaN(Number(l.cantidad)) ||
+        Number(l.cantidad) <= 0 ||
+        isNaN(Number(l.precioUnitario)) ||
+        Number(l.precioUnitario) <= 0
+    );
+
+    if (llantaInvalida) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Datos inválidos en llantas",
+        text: "Verifica las cantidades y precios de las llantas.",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
+
+    const paqueteInvalido = cotizacionForm.paquetes.find(
+      (p) => isNaN(Number(p.precioUnitario)) || Number(p.precioUnitario) <= 0
+    );
+
+    if (paqueteInvalido) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Datos inválidos en paquetes",
+        text: "Verifica los precios de los paquetes.",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
+
+    const servicioInvalido = cotizacionForm.serviciosExtras.find(
+      (s) =>
+        isNaN(Number(s.cantidad)) ||
+        Number(s.cantidad) <= 0 ||
+        isNaN(Number(s.precioUnitario)) ||
+        Number(s.precioUnitario) <= 0
+    );
+
+    if (servicioInvalido) {
+      await Swal.fire({
+        icon: "warning",
+        title: "Datos inválidos en servicios adicionales",
+        text: "Verifica las cantidades y precios de los servicios.",
+        confirmButtonColor: "#3085d6",
+      });
+      return;
+    }
+
+    /* ================= CLIENTE ================= */
+
+    const rawId = cotizacionForm.codigo
+      ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
+      : null;
+
+    let clienteEncontrado = null;
+
+    if (cotizacionForm.clienteExistente) {
+      clienteEncontrado = clientesDisponibles.value.find(
+        (c) => c.nombres === cotizacionForm.clienteExistente
+      );
+    }
+
+    // ⚠️ IMPORTANTE: NO reconstruir el nombre en editar
+    const cliente = clienteEncontrado
+      ? {
+          idCliente: clienteEncontrado.idCliente,
+          nombre: `${clienteEncontrado.nombres} ${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
+          nombres: clienteEncontrado.nombres,
+          apellidos: `${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
+          telefono: clienteEncontrado.telefono,
+          correo: clienteEncontrado.correo,
+          observaciones: cotizacionForm.observaciones || "",
+        }
+      : {
+          idCliente: null,
+          nombre: cotizacionForm.clienteNombre || "",
+          nombres: cotizacionForm.clienteNombre || "",
+          apellidos: cotizacionForm.apellidos || "",
+          telefono: cotizacionForm.clienteTelefono || "",
+          correo: cotizacionForm.clienteCorreo || "",
+          observaciones: cotizacionForm.observaciones || "",
+        };
+
+    /* ================= MAPEO ================= */
+
+    const llantas = cotizacionForm.llantas.map((ll) => ({
+      idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta || null,
+      idLlanta: ll.idLlanta,
+      idInventarioInicial: ll.idInventarioInicial,
+      cantidad: Number(ll.cantidad),
+      precioUnitario: Number(ll.precioUnitario),
+      idAlmacen: ll.idAlmacen,
+      idPromocion: ll.promo?.idPromocion ?? null,
+      excluirPromocionGeneral: ll.excluirPromocionGeneral ? 1 : 0,
+      comentario: ll.comentario || "",
+    }));
+
+    const paquetes = cotizacionForm.paquetes.map((p) => ({
+      idDetalleCotizacionPaquete:
+        cotizacionForm.paquetesDetalles?.[p.idPaquete] || null,
+      idPaquete: p.idPaquete,
+      idPromocion: p.promo?.idPromocion ?? null,
+      cantidad: p.cantidad ?? 1,
+      precioUnitario: Number(p.precioUnitario),
+      excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
+      comentario: p.comentario || "",
+    }));
+
+    const serviciosAdicionales = cotizacionForm.serviciosExtras.map((s) => ({
+      idDetalleCotizacionServicio: s.idDetalleCotizacionServicio || null,
+      idPromocion: s.promo?.idPromocion ?? null,
+      descripcionServicio: s.nombre,
+      observacion: s.observacion || "",
+      cantidad: Number(s.cantidad),
+      precioUnitario: Number(s.precioUnitario),
+      excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
+      comentario: s.comentario || "",
+    }));
+
+    /* ================= PAYLOAD ================= */
+
+    const nuevaCotizacion = {
+      codigo: rawId,
+      mostrarTotal: cotizacionForm.mostrarTotal,
+      cliente,
+      llantas,
+      paquetes,
+      serviciosAdicionales,
+      creadoPor: 1,
+      idPromocionGeneral: promoGeneral.value?.idPromocion ?? null,
+    };
+
+    console.log("PAYLOAD FINAL:", nuevaCotizacion);
+
+    /* ================= REQUEST ================= */
+
+    const url = cotizacionForm.codigo
+      ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
+      : `${proxy.$serverIP}api/Cotizacion/crearCotizacion`;
+
     const res = await fetch(url, {
       method: cotizacionForm.codigo ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevaCotizacion),
     });
 
-    if (!res.ok) throw new Error(`Error al guardar cotización (${res.status})`);
+    if (!res.ok) {
+      throw new Error(`Error HTTP ${res.status}`);
+    }
 
     const data = await res.json();
-    const obj = { codigo: data.codigo?.toString() };
+    console.log("RESPUESTA BACKEND:", data);
 
-    mostrarToast("success", "Cotizacion Guardada");
+    mostrarToast("success", "Cotización guardada");
 
-    // Actualizar vista
-    cargarFormulario(); // limpia la informacion
+    cargarFormulario();
     closeModal();
     cargarCotizaciones();
-    mostrarVistaPrevia(obj, "ver");
+    mostrarVistaPrevia({ codigo: data?.codigo?.toString() }, "ver");
 
-    // console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
-    console.error("Error al guardar cotización:", error);
+    console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
   }
 };
+
+
+
+
+
 
 const subtotalLlantas = computed(() => {
   return cotizacionForm.llantas.reduce((sum, ll) => {
@@ -3122,19 +3183,25 @@ const formatoMoneda = (valor) => {
   }).format(valor);
 };
 
+
+
+// Abrir modal para nueva cotización o edición
 const abrirModalCotizacion = (cotizacion = null) => {
   if (cotizacion && cotizacion.codigo) {
     tituloModal.value = "Editar Cotización";
   } else {
     tituloModal.value = "Nueva Cotización";
-  }
 
+    // Solo limpiar observaciones para nueva cotización
+    cotizacionForm.observaciones = "";
+  }
+  console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
   openModal();
 
-  // cerrar modal screenshot
   mostrarVista.value = false;
 };
+
 
 const tblHeadersModal = [
   { text: "Llanta", value: "llanta", sortable: true },
@@ -3173,6 +3240,8 @@ const cotizacionesTransformadas = computed(() => {
       fechaCreacion: c.fechaCreacion || "—",
       cliente: c.cliente?.nombre || "—",
       telefono: c.cliente?.telefono || "—",
+      observaciones: c.cliente?.observaciones || "No disponible", // <-- agregado
+
       paquete: c.paquetes?.length
         ? c.paquetes.map((p) => p.nombre).join(", ")
         : "—",
@@ -3293,14 +3362,6 @@ watch(
 /*********************************************
         FUNCIONES PARA MODAL SCREENSHOT Y PDF
     **********************************************/
-
-// const tieneElementosConPromoGeneral = computed(() => {
-//     const llantasAplican = vistaCotizacion.value.llantasSelecionadas?.some(l => l.promoLabel !== '(Excluido de promoción)');
-//     const paquetesAplican = vistaCotizacion.value.paquetes?.some(p => p.promoLabel !== '(Excluido de promoción)');
-//     const serviciosAplican = vistaCotizacion.value.serviciosAdicionales?.some(s => s.promoLabel !== '(Excluido de promoción)');
-
-//     return llantasAplican || paquetesAplican || serviciosAplican;
-// });
 
 const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
   if (modo === "ver") {
@@ -3485,6 +3546,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           telefono: data.telefono || "Sin teléfono",
           correo: data.correo || "Sin correo",
           fecha: data.fechaCreacion,
+          observaciones: data.observaciones || "", // ⚡ AQUI
         },
         llantasSelecionadas: llantasConPromo,
         paquetes,
@@ -3553,20 +3615,68 @@ const loadLogoBase64 = async () => {
 
 pdfMake.vfs = pdfFonts.vfs;
 
+
+
 const generarPDF = async () => {
   const logo = await loadLogoBase64();
   const v = vistaCotizacion.value;
 
-
   const celdaCentroY = (text, alignment = "left") => ({
     text,
     alignment,
-    fontSize: 9,
-    margin: [0, 10, 0, 10], // 🔥 CLAVE
+    fontSize: 10,
+    margin: [0, 10, 0, 10],
   });
 
+  const formatMoney = (v) =>
+  `$${(v ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
 
-  //consolelog(JSON.stringfy(v))
+  const celdaTotalConPromo = ({
+    precioUnitario,
+    cantidad = 1,
+    total,
+    promoLabel,
+  }) => {
+    const tienePromo =
+      promoLabel && total < precioUnitario * cantidad;
+
+    return {
+      stack: tienePromo
+        ? [
+            {
+              text: formatMoney(precioUnitario * cantidad),
+              decoration: "lineThrough",
+              color: "#888",
+              fontSize: 9,
+              alignment: "right",
+            },
+            {
+              text: promoLabel,
+              fontSize: 9,
+              style: "promoLabel",
+              alignment: "right",
+              margin: [0, 2, 0, 2],
+            },
+            {
+              text: formatMoney(total),
+              color: "green",
+              bold: true,
+              fontSize: 9,
+              alignment: "right",
+            },
+          ]
+        : [
+            {
+              text: formatMoney(total),
+              alignment: "right",
+              fontSize: 9,
+            },
+          ],
+      margin: [0, 6, 0, 6],
+    };
+  };
+
+
   // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
   const llantasRows = v.llantasSelecionadas.map((ll) => {
     const tienePromo = ll.promoLabel && ll.precioConPromo < ll.precioUnitario;
@@ -3580,7 +3690,7 @@ const generarPDF = async () => {
         `$${ll.precioUnitario.toLocaleString("en-US", {
           minimumFractionDigits: 2,
         })}`,
-        "right"
+        "right",
       ),
 
       {
@@ -3589,16 +3699,16 @@ const generarPDF = async () => {
               {
                 text: `$${(ll.precioUnitario * ll.cantidad).toLocaleString(
                   "en-US",
-                  { minimumFractionDigits: 2 }
+                  { minimumFractionDigits: 2 },
                 )}`,
                 decoration: "lineThrough",
                 color: "#888",
-                fontSize: 8,
+                fontSize: 9,
                 alignment: "right",
               },
               {
                 text: ll.promoLabel,
-                fontSize: 8,
+                fontSize: 9,
                 style: "promoLabel",
                 alignment: "right",
                 margin: [0, 2, 0, 2],
@@ -3622,48 +3732,54 @@ const generarPDF = async () => {
                 fontSize: 9,
               },
             ],
-        margin: [0, 6, 0, 6], 
+        margin: [0, 6, 0, 6],
       },
     ];
   });
 
-
   const paquetesRows = v.paquetes.map((p) => [
     celdaCentroY("1", "center"),
+
     celdaCentroY(p.nombre),
-    celdaCentroY(
-      `$${p.precio?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"}`,
-      "right"
-    ),
-    celdaCentroY(
-      `$${p.total?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"}`,
-      "right"
-    ),
+
+    celdaCentroY(formatMoney(p.precioUnitario), "right"),
+
+    celdaTotalConPromo({
+      precioUnitario: p.precioUnitario,
+      cantidad: 1,
+      total: p.total,
+      promoLabel: p.promoLabel,
+    }),
   ]);
 
 
   const serviciosRows = v.serviciosAdicionales.map((s) => [
-    { text: String(s.cantidad), alignment: "center", fontSize: 9,margin: [0, 6, 0, 6], },
-    { text: s.nombreServicio, italics: true, fontSize: 9, margin: [0, 6, 0, 6], },
     {
-      text: `$${
-        s.precioUnitario?.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-        }) || "0.00"
-      }`,
-      alignment: "right",
+      text: String(s.cantidad),
+      alignment: "center",
       fontSize: 9,
       margin: [0, 6, 0, 6],
     },
     {
-      text: `$${
-        s.total?.toLocaleString("en-US", { minimumFractionDigits: 2 }) || "0.00"
-      }`,
+      text: s.nombreServicio,
+      italics: true,
+      fontSize: 9,
+      margin: [0, 6, 0, 6],
+    },
+    {
+      text: formatMoney(s.precioUnitario),
       alignment: "right",
       fontSize: 9,
       margin: [0, 6, 0, 6],
     },
+    celdaTotalConPromo({
+      precioUnitario: s.precioUnitario,
+      cantidad: s.cantidad,
+      total: s.total,
+      promoLabel: s.promoLabel,
+    }),
   ]);
+
 
   const separador = (textoColumna2) => [
     {
@@ -3690,9 +3806,9 @@ const generarPDF = async () => {
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
+ 
+
   ];
-
-
 
   const formatearFecha = (fecha) => {
     if (!fecha) return "";
@@ -3713,8 +3829,6 @@ const generarPDF = async () => {
 
     return `${fechaFormateada}, ${horaFormateada}`;
   };
-
-
 
   // Definición del PDF
   const docDefinition = {
@@ -3739,7 +3853,7 @@ const generarPDF = async () => {
             {
               text: "Blvd. Delta 2002 esq. Rio Mayo",
               bold: true,
-              fontSize: 8,
+              fontSize: 9,
             },
             { text: "Col. Valle de Jerez C.P 37538", fontSize: 7 },
             { text: "Tel. 477 330 6060 y 477 390 5090", fontSize: 7 },
@@ -3749,7 +3863,7 @@ const generarPDF = async () => {
             {
               text: "Blvd. Lopez Mateos 827 esq. Apolo",
               bold: true,
-              fontSize: 8,
+              fontSize: 9,
             },
             { text: "Col. Obrera C.P. 37340", fontSize: 7 },
             { text: "Tel. 477 717 7440 y 477 470 9419", fontSize: 7 },
@@ -3759,7 +3873,7 @@ const generarPDF = async () => {
             {
               text: "Blvd. Torres Landa 1901 esq San Jacobo",
               bold: true,
-              fontSize: 8,
+              fontSize: 9,
             },
             { text: "Col. La Pisina C.P. 37440", fontSize: 7 },
             { text: "Tel. 477 390 0290 y 477 461 0028", fontSize: 7 },
@@ -3769,7 +3883,7 @@ const generarPDF = async () => {
             {
               text: "Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián",
               bold: true,
-              fontSize: 8,
+              fontSize: 9,
             },
             { text: "Col. La Martinica, C.P. 37500", fontSize: 7 },
             { text: "Tel. 477 763 3285 y 477 763 3284", fontSize: 7 },
@@ -3796,42 +3910,57 @@ const generarPDF = async () => {
         columns: [
           {
             text: `COT-${v.codigo}`,
-            fontSize:9,
+            fontSize: 10,
             margin: [0, 0, 10, 6],
           },
+
+          {
+            text: [
+              { 
+                text: "Observaciones: ", 
+                bold: true
+              },
+              cotizacionForm.observaciones || "N/A",
+            ],
+            fontSize: 10,
+            margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
+          },
+
           {
             text: [
               {
                 text: "Cliente: ",
                 bold: true,
               },
-              `${v.cliente.nombre || "N/A"}`
+              `${v.cliente.nombre || "N/A"}`,
             ],
-            fontSize: 9,
+            fontSize: 10,
             margin: [0, 0, 10, 6],
           },
           {
             text: [
               {
                 text: "Fecha Emisión: ",
-                bold:true
+                bold: true,
               },
-              `${ formatearFecha(v.cliente.fecha) || ""}`
+              `${formatearFecha(v.cliente.fecha) || ""}`,
             ],
-            fontSize: 9,
+            fontSize: 10,
             margin: [0, 0, 10, 6],
           },
           {
             text: [
               {
-                text:"Teléfono: ",
-                bold: true
+                text: "Teléfono: ",
+                bold: true,
               },
               { text: v.cliente.telefono || "N/A", color: "#444" },
             ],
-            fontSize: 9,
+            fontSize: 10,
             margin: [0, 0, 10, 6],
-          },
+          }
+      
+
         ],
       },
       // Tabla principal
@@ -3841,16 +3970,16 @@ const generarPDF = async () => {
           widths: [40, "*", 90, 90],
           body: [
             [
-              { 
+              {
                 text: "CANT",
-                style: "tableHeaderBorder" ,
+                style: "tableHeaderBorder",
                 alignment: "center",
               },
-              { 
+              {
                 text: "MARCA - MODELO - MEDIDA",
-                style: "tableHeaderBorder" ,
+                style: "tableHeaderBorder",
                 alignment: "center",
-               },
+              },
               {
                 text: "PRECIO UNITARIO",
                 style: "tableHeaderBorder",
@@ -3890,13 +4019,18 @@ const generarPDF = async () => {
     styles: {
       tableHeaderBorder: {
         bold: true,
-        fontSize: 9,
-        border: [true, true, true, true], // bordes en todas las direcciones
+        fontSize: 10,
+        border: [true, true, true, true],
         alignment: "center",
+      },
+      promoLabel: {
+        italics: true,
+        fontSize: 9,
+        color: "#D92300",
       },
       notaIVA: {
         italics: true,
-        fontSize: 8,
+        fontSize: 9,
       },
     },
   };
@@ -3906,6 +4040,11 @@ const generarPDF = async () => {
   // usa esta si el problema es download
   pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
 };
+
+
+
+
+
 </script>
 
 <style>

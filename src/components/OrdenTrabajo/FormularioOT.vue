@@ -1101,7 +1101,7 @@ const onCotizacionSeleccionada = async (idCotizacion) => {
 };
 
 const cargarEmpleados = async () => {
-  const userSession = JSON.parse(sessionStorage.getItem("userSession"));
+  const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
     const res = await fetch(
       proxy.$serverIP +
@@ -1651,12 +1651,12 @@ const cargarInfoCotizacion = async () => {
 
   const data = await res.json();
 
-  console.log(JSON.stringify(data))
+  // console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
 
   ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre || "";
   ordenTrabajoForm.cliente.nombres = data.nombres || "";
-  ordenTrabajoForm.cliente.apellidos = data.apPaterno != null && data.apMaterno != null ? data.apPaterno + " " + data.apMaterno : "";
+  ordenTrabajoForm.cliente.apellidos = `${data?.apPaterno ?? ""} ${data?.apMaterno ?? ""}`.trim();
   ordenTrabajoForm.cliente.clienteTelefono = data.telefono || "";
   ordenTrabajoForm.cliente.clienteCorreo = data.correo || "";
 
