@@ -244,6 +244,7 @@
                     <strong>Teléfono: </strong>
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
+                  
                 </div>
                 <div class="col">
                  <span class="mx-2">
@@ -970,12 +971,10 @@
                         <strong>Correo: </strong>
                         {{ cotizacionForm.clienteCorreo || "N/A" }}
                       </span>
-
                       <span class="mx-2">
                         <strong>Observaciones</strong>
                         {{ cotizacionForm.observaciones || "N/A" }}
                       </span>
-
                     </div>
 
                     <table class="table align-middle">
@@ -1758,6 +1757,7 @@ const reactivarCotizacion = (cotizacion) => {
     });
 };
 
+
 const aprobarCotizacion = (cotizacion) => {
   const idCotizacion = Number(String(cotizacion.codigo).replace("COT-", ""));
 
@@ -1911,6 +1911,7 @@ const cargarLlantas = async () => {
   }
 };
 
+
 // Función para cargar cotizaciones
 const cargarCotizaciones = async () => {
   loading.value = true;
@@ -1949,7 +1950,7 @@ const cargarCotizaciones = async () => {
   } catch (error) {
     console.error("Error al cargar cotizaciones:", error);
   }
-};
+}
 
 const registrarCerrarConEsc = (mostrarVista) => {
   //console.log()
@@ -2952,6 +2953,7 @@ const guardarCotizacion = async () => {
     cargarCotizaciones();
     mostrarVistaPrevia({ codigo: data?.codigo?.toString() }, "ver");
 
+     console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
