@@ -52,7 +52,7 @@
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas" 
                             @click.prevent="irA('/content/inicio')"
-                        >
+                        ><i class="bi bi-house-door-fill me-2"></i>
                             Inicio
                         </button>
                     </li>
@@ -61,7 +61,7 @@
                             class="nav-link text-white"                     
                             data-bs-dismiss="offcanvas"
                             @click.prevent="irA('/content/inventario')" 
-                        >
+                        ><i class="bi bi-box-seam-fill me-2"></i>
                             Inventario
                         </button>
                     </li>
@@ -71,8 +71,8 @@
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
                             @click.prevent="irA('/content/cotizacion')" 
-                        >
-                            Cotizacion
+                        ><i class="bi bi-file-ruled-fill me-2"></i>
+                            Cotizaciones
                         </button>
                     </li>              
                     
@@ -81,8 +81,8 @@
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
                             @click.prevent="irA('/content/orden-trabajo')"
-                        >
-                            Orden de Trabajo
+                        ><i class="bi bi-wrench-adjustable me-2"></i>
+                            Órdenes de Trabajo
                         </button>
                     </li>
                     
@@ -91,8 +91,8 @@
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
                             @click.prevent="irA('/content/Promocion')"
-                        >
-                            Promocion
+                        ><i class="bi bi-currency-dollar me-2"></i>
+                            Promociones
                         </button>
                     </li>
 

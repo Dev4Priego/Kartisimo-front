@@ -1,10 +1,10 @@
 <template>
   <div class="container-fluid mp-4 p-4">
-    <div class="row mx-4">
-      <h2>Cotizaciones</h2>
+    <div class="row mx-4 no-imprimir">
+      <h2><i class="bi bi-file-ruled-fill me-2"></i> Cotizaciones</h2>
     </div>
-    <div class="row mt-4 mx-4">
-      <div class="col d-flex align-items-center">
+    <div class="row m-4 no-imprimir">
+      <div class="col-5 d-flex align-items-center">
         <input
           class="form-control"
           placeholder="Buscar por código, cliente, fecha..."
@@ -13,7 +13,7 @@
         />
       </div>
 
-      <div class="col d-flex align-items-center">
+      <div class="col-5 d-flex align-items-center">
         <label for="select" class="form-label m-2">Estatus: </label>
         <select v-model="filtroEstatus" class="form-select">
           <option value="">Todos</option>
@@ -24,19 +24,20 @@
         </select>
       </div>
 
-      <div class="col-3 m-4">
+      <div class="col-2 d-flex align-items-right">
         <!-- Botón para abrir el modal -->
-        <button class="btn btn-primary" @click="abrirModalCotizacion()">
-          Nueva cotización
+        <button class="btn btn-primary position-relative shadow w-100" @click="abrirModalCotizacion()">
+          <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva cotización
         </button>
       </div>
     </div>
-    <div class="row mx-4">
+    <div class="row mx-4 no-imprimir">
       <div v-if="loading" class="text-center my-4">
         <table class="table table-hover table-sm">
           <thead>
             <tr>
               <th>Código</th>
+              <th>Sucursal</th>
               <th>Fecha</th>
               <th>Cliente</th>
               <th>Teléfono</th>
@@ -62,19 +63,19 @@
           <thead>
             <tr>
               <th>Código</th>
+              <th>Sucursal</th>
               <th>Fecha</th>
               <th>Cliente</th>
               <th>Teléfono</th>
-              <!-- <th>Paquete</th> -->
-              <!-- <th>Total</th> -->
               <th>Llanta</th>
               <th>Estatus</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in cotizacionesTransformadas" :key="item.codigo">
-              <td>{{ item.codigo }}</td>
+            <tr v-for="item in cotizacionesTransformadas" :key="item.idCotizacion">
+              <td>C{{ item.codigo }}</td>
+              <td>{{ item.sucursal }}</td>
               <td>{{ item.fechaCreacion }}</td>
               <td>{{ item.cliente }}</td>
               <td>{{ item.telefono }}</td>
@@ -158,7 +159,7 @@
     >
       <div class="modal-dialog modal-xl modal-dialog-centered modal-1000">
         <div class="modal-content p-4">
-          <div class="modal-header">
+          <div class="modal-header no-imprimir">
             <h4 class="modal-title">Vista Previa de Cotización</h4>
             <button
               type="button"
@@ -184,7 +185,7 @@
               </div>
             </div>
             <div class="row border-bottom pb-3 mb-4">
-              <div class="col">
+              <div class="col-3">
                 <small>
                   <strong>Blvd. Delta 2002 esq. Rio Mayo</strong><br />
                   Col. Valle de Jerez C.P 37538<br />
@@ -192,23 +193,23 @@
                   delta@kartisimo.mx </small
                 ><br />
               </div>
-              <div class="col">
+              <div class="col-3">
                 <small>
-                  <strong>Blvd. Lopez Mateos 827 esq. Apolo</strong><br />
+                  <strong>Blvd. Lopez Mateos 827<br />esq. Apolo</strong><br />
                   Col. Obrera C.P. 37340<br />
                   Tel. 477 717 7440 y 477 470 9419<br />
                   apolo@kartisimo.mx
                 </small>
               </div>
-              <div class="col">
+              <div class="col-3">
                 <small>
-                  <strong>Blvd. Torres Landa 1901 esq. San Jacobo</strong><br />
+                  <strong>Blvd. Torres Landa 1901<br /> esq. San Jacobo</strong><br />
                   Col. La Piscina C.P. 37440<br />
                   Tel. 477 390 0290 y 477 461 0028<br />
                   torreslanda@kartisimo.mx<br />
                 </small>
               </div>
-              <div class="col">
+              <div class="col-3">
                 <small>
                   <strong
                     >Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong
@@ -222,34 +223,50 @@
             <!-- Información del cliente -->
             <div class="mb-4 cotizacion-header">
               <div class="row">
-                <div class="col-2">
-                  <span class="mx-2">
-                    {{ "COT-" + vistaCotizacion.codigo || "N/A" }}
+                <div class="col-1">
+                  <span class="me-2">
+                    {{ "C" + vistaCotizacion.codigo || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-4">
+                  <span>
                     <strong>Fecha emisión: </strong>
                     {{ vistaCotizacion.fechaCreacion || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-3">
+                  <span class="me-2">
+                    <strong>Sucursal: </strong>
+                    {{ vistaCotizacion.sucursal || "N/A" }}
+                  </span>
+                </div>
+                <div class="col-4"></div>
+              </div>
+              <div class="row">
+                <div class="col-1"></div>
+                <div class="col-4">
+                  <span class="me-2">
                     <strong>Cliente: </strong>
                     {{ vistaCotizacion.cliente?.nombre || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-3">
+                  <span class="me-2">
                     <strong>Teléfono: </strong>
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
                   
                 </div>
-                <div class="col">
-                 <span class="mx-2">
-                   <strong>Observaciones</strong>
-                    {{ cotizacionForm.observaciones || "N/A" }}
+                <div class="col-4">
+                  <span class="me-2">
+                    <strong>Correo: </strong>
+                    {{ vistaCotizacion.cliente?.correo || "N/A" }}
+                  </span>
+                </div>
+                <div class="col mt-1">
+                 <span>
+                   <strong>Observaciones: </strong>
+                    {{ vistaCotizacion.observaciones || "N/A" }}
                  </span>
               </div>
             </div>
@@ -270,8 +287,8 @@
                 <thead class="table-light">
                   <tr>
                     <th class="text-center">CANT</th>
-                    <th>MEDIDA - MODELO - RANGO</th>
-                    <th class="text-end">PRECIO UNITARIO</th>
+                    <th>MEDIDA - MARCA - MODELO - RANGO</th>
+                    <th class="text-end">PRECIO UNIT.</th>
                     <th class="text-end">TOTAL</th>
                   </tr>
                 </thead>
@@ -364,7 +381,7 @@
                       {{ paquete.descripcion.toUpperCase() }}
                       <p>
                         <small class="badge bg-secondary mt-1">{{
-                          paquete.comentario
+                          paquete.comentario 
                         }}</small>
                       </p>
                     </td>
@@ -509,7 +526,7 @@
               </table>
             </div>
 
-            <div class="row text-center">
+            <div class="row no-imprimir">
               <div class="col">
                 <!-- Botón enviar correo -->
                 <EnviarCorreoModal :cotizacion="vistaCotizacion" />
@@ -519,9 +536,9 @@
                 <!-- Botón enviar pdf a imprimir -->
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-primary w-100"
+                    class="btn btn-primary position-relative shadow-lg w-100 btn-sm py-2 rounded"
                     @click="imprimirCotizacion"
-                  >
+                  ><i class="bi-printer-fill position-absolute start-0 ms-2"></i>
                     Imprimir
                   </button>
                 </div>
@@ -531,9 +548,9 @@
                 <!-- Botón PDF -->
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-secondary w-100"
+                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="generarPDF"
-                  >
+                  ><i class="bi-file-pdf-fill position-absolute start-0 ms-2"></i>
                     Descargar PDF
                   </button>
                 </div>
@@ -542,20 +559,20 @@
               <div class="col">
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-warning w-100"
+                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="abrirModalCotizacion(vistaCotizacion)"
-                  >
+                  ><i class="bi-pencil-fill position-absolute start-0 ms-2"></i>
                     Editar
                   </button>
                 </div>
               </div>
-
+              
               <div class="col">
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-warning w-100"
+                    class="btn btn-success position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="confirmarAccion(vistaCotizacion)"
-                  >
+                  ><i class="bi-forward-fill position-absolute start-0 ms-2"></i>
                     Generar OT
                   </button>
                 </div>
@@ -568,7 +585,7 @@
 
     <!-- MODAL PARA CREAR/EDITAR COTIZACION -->
     <div
-      class="modal fade"
+      class="modal fade no-imprimir"
       ref="modalRef"
       tabindex="-1"
       aria-labelledby="exampleModalLabel"
@@ -600,110 +617,130 @@
           </div>
 
           <div class="modal-body" :style="{ overflowY: 'auto' }">
+
+            <div class="d-flex justify-content-end">
+              <div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
+                <div class="card-body" style="font-size: 10pt; color: slategray;">
+                  <i class="bi bi-person me-2"></i> <strong>Usuario: </strong>{{ loggeduser.usuario.nombre }}<br />
+                  <i class="bi bi-building-fill me-2"></i> <strong>Sucursal: </strong>{{ sucursales[loggeduser.usuario.idSucursal - 1] }}
+                </div>
+              </div>
+            </div>
+
             <!-- Seccion informacion cliente -->
 
-            <div class="row m-2">
-              <div class="col d-flex flex-column">
-                <div class="row g-3 m-2">
-                  <div class="col-md-6">
+            <div class="card shadow-sm mx-4 my-3">
+              <div class="card-header" style="font-size: 14pt;">
+                <i class="bi bi-person-fill me-2"></i> Datos del cliente
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 col-lg-6">
+                    
+                    <!-- Select de cliente existente -->
+
+                    <label for="clienteExistente" class="mb-1 form-label"
+                      ><i class="bi bi-search"></i> Buscar cliente existente</label
+                    >
+                    <select
+                      id="clienteExistente"
+                      class="form-select mb-3"
+                      v-model="cotizacionForm.clienteExistente"
+                    >
+                      <option value="">Selecciona un cliente</option>
+
+                      <option
+                        v-for="(cliente, i) in clientesDisponibles"
+                        :key="i"
+                        :value="cliente.nombres"
+                      >
+                        {{ cliente.nombres }} {{ cliente.apPaterno ? cliente.apPaterno : '' }} {{ cliente.apMaterno ? cliente.apMaterno : '' }}
+                      </option>
+                    </select>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6 col-lg-3">
                     <label for="nombre" class="form-label"
-                      >Nombre del cliente</label
+                      >Nombre</label
                     >
                     <input
                       id="nombre"
                       v-model="cotizacionForm.nombre"
-                      class="form-control"
+                      class="form-control mb-3"
                       type="text"
                       placeholder="Ej. Nombre"
                     />
                   </div>
-
-                  <div class="col-md-6">
+                  <div class="col-6 col-lg-3">
                     <label for="apellido" class="form-label"
-                      >Apellido del cliente</label
+                      >Apellidos</label
                     >
                     <input
                       id="apellido"
                       v-model="cotizacionForm.apellidos"
-                      class="form-control"
+                      class="form-control mb-3"
                       type="text"
                       placeholder="Ej. Apellido"
                     />
                   </div>
-                </div>
+                  <div class="col-6 col-lg-3">
+                    <label for="numTelefono" class="form-label"><i class="bi bi-telephone-fill"></i> Teléfono(s)</label>
 
-                <div class="row g-3 m-2">
-                  <div class="col-md-6">
-                    <label for="numTelefono" class="form-label">Teléfono</label>
                     <input
                       id="numTelefono"
                       v-model="telefonoFormateado"
-                      type="number"
-                      maxlength="12"
+                      type="text"
                       class="form-control"
-                      placeholder="XXX-XXX-XXXX"
+                      placeholder="XXX XXX XXXX"
+                      :class="{ 'is-invalid': !telefonoEsValido }"
                     />
-                  </div>
 
-                  <div class="col-md-6">
-                    <label for="correoCliente" class="form-label">Correo</label>
+                    <div class="invalid-feedback">
+                      El teléfono debe tener al menos 10 dígitos
+                    </div>
+                  </div>
+                  <div class="col-6 col-lg-3">
+                    <label for="correoCliente" class="form-label"><i class="bi bi-envelope-fill"></i> Correo</label>
                     <input
                       id="correoCliente"
                       v-model="cotizacionForm.clienteCorreo"
                       type="email"
                       class="form-control"
                       placeholder="ejemplo@correo.com"
+                      :class="{ 'is-invalid': !correoEsValido }"
                     />
-                  </div>
-                  <div class="col-md-12">
-                    
-
-                  <!------------
-                  <label for="ObservacionCliente" class="form-label"
-                      >Observaciones</label
-                    >
-            
-                  
-                        <textarea
-                  id="ObservacionCliente"
-                  v-model="cotizacionForm.observaciones"
-                  @input="console.log(' escribiendo:', cotizacionForm.observaciones)"
-                  class="form-control"
-                  rows="2"
-                  maxlength="255"
-                  ></textarea>
-
-                  -->
-
+                    <div class="invalid-feedback">
+                      capture un correo válido
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Select de cliente existente -->
-              <div class="col d-flex flex-column">
-                <div class="row m-2">
-                  <label for="clienteExistente" class="mb-1 form-label"
-                    >Cliente Existente</label
-                  >
-                  <select
-                    id="clienteExistente"
-                    class="form-select"
-                    v-model="cotizacionForm.clienteExistente"
-                  >
-                    <option value="">Selecciona un cliente</option>
-
-                    <option
-                      v-for="(cliente, i) in clientesDisponibles"
+            <div class="card shadow-sm mx-4 my-4">
+              <div class="card-body">
+                <div class="row">
+                <div class="col-6 col-lg-3">
+                  <div
+                      v-for="(paquete, i) in paquetesDisponibles"
                       :key="i"
-                      :value="cliente.nombres"
+                      class="form-check mx-3 my-2"
                     >
-                      {{ cliente.nombres }}
-                    </option>
-                  </select>
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        :id="'paquete-' + i"
+                        :value="paquete"
+                        v-model="cotizacionForm.paquetes"
+                      />
+                      <label class="form-check-label" :for="'paquete-' + i">
+                        {{ paquete.nombre }} - $ {{ paquete.precioUnitario }}.00
+                      </label>
+                    </div>
                 </div>
-                <div class="row m-2">
-                  <div class="col">
-                    <div class="form-check my-3">
+                <div class="col-6 col-lg-3">
+                  <div class="form-check my-2">
                       <input
                         class="form-check-input"
                         type="checkbox"
@@ -714,37 +751,30 @@
                         Mostrar total en la vista previa
                       </label>
                     </div>
-                  </div>
-
-                  <div class="col">
-                    <div
-                      v-for="(paquete, i) in paquetesDisponibles"
-                      :key="i"
-                      class="form-check m-4"
+                </div>
+                <div class="col-12 col-lg-6">
+                  <label for="ObservacionCliente" class="form-label mt-2"
+                      ><i class="bi bi-sticky-fill"></i> Observaciones</label
                     >
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        :id="'paquete-' + i"
-                        :value="paquete"
-                        v-model="cotizacionForm.paquetes"
-                      />
-                      <label class="form-check-label" :for="'paquete-' + i">
-                        {{ paquete.nombre }} - ${{ paquete.precioUnitario }}
-                      </label>
-                    </div>
-                  </div>
+                  <textarea
+                    id="ObservacionCliente"
+                    v-model="cotizacionForm.observaciones"
+                    class="form-control mb-2"
+                    rows="2"
+                    maxlength="255"
+                    placeholder="Notas adicionales de la cotización"
+                  ></textarea>
                 </div>
               </div>
+              </div>
             </div>
+
             <!-- Seccion seleccion de llantas -->
 
             <div class="row m-4">
               <div class="col">
-                <label for="" class="m-2"
-                  >Selecciona las llantas deseadas:</label
-                >
-                <div class="row m-2">
+                <h5>Seleccionar las llantas deseadas</h5>
+                <div class="row m-2 mt-3">
                   <div class="col-9">
                     <input
                       v-model="busquedaLlantas"
@@ -861,7 +891,7 @@
 
             <div class="row mt-3 mx-3">
               <h5>Agregar servicio adicional</h5>
-              <div class="d-flex gap-3 mb-3">
+              <div class="d-flex gap-3 my-3">
                 <div class="col">
                   <input
                     class="form-control"
@@ -888,8 +918,9 @@
                     v-model="nuevoPrecio"
                   />
                 </div>
-                <button class="btn btn-success" @click="agregarServicioExtra">
-                  Agregar
+                <button class="btn btn-primary position-relative shadow" style="width: 130px;" @click="agregarServicioExtra">
+                  <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i> 
+                  &nbsp;Agregar
                 </button>
               </div>
             </div>
@@ -950,33 +981,40 @@
                       </div>
                     </div>
 
-                    <div class="mb-2 d-flex cotizacion-table">
-                      <span class="mx-2">
-                        <strong>No. Cotización: </strong>
-                        {{ cotizacionForm.codigo || "N/A" }}
-                      </span>
-                      <span class="mx-2">
-                        <strong>Fecha emisión: </strong>
-                        {{ cotizacionForm.fechaCreacion || "N/A" }}
-                      </span>
-                      <span class="mx-2">
+                    <div class="row mb-2 d-flex ">
+                      <div class="col-2">
+                        C{{ cotizacionForm.codigo || "N/A" }}
+                      </div>
+                      <div class="col-3">
+                        <strong>Fecha de emisión: </strong>
+                        {{ cotizacionForm.fechaCreacion ? new Date(cotizacionForm.fechaCreacion).toLocaleString("es-MX", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        }) : "N/A" }}
+                      </div>
+                      <div class="col-3">
                         <strong>Cliente: </strong>
                         {{ cotizacionForm.clienteNombre || "N/A" }}
-                      </span>
-                      <span class="mx-2">
-                        <strong>Teléfono: </strong>
+                      </div>
+                      <div class="col-2">
+                        <strong>Teléfono(s): </strong>
                         {{ telefonoFormateado || "N/A" }}
-                      </span>
-                      <span class="mx-2">
+                      </div>
+                      <div class="col-2">
                         <strong>Correo: </strong>
                         {{ cotizacionForm.clienteCorreo || "N/A" }}
-                      </span>
+                      </div>
+                    </div>
+                    <div v-if="cotizacionForm.observaciones" class="mb-2 d-flex">
                       <span class="mx-2">
                         <strong>Observaciones</strong>
                         {{ cotizacionForm.observaciones || "N/A" }}
                       </span>
                     </div>
-
                     <table class="table align-middle">
                       <thead>
                         <tr>
@@ -1512,16 +1550,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeModal">
-              Cerrar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="guardarCotizacion"
-            >
-              Guardar
-            </button>
+                <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="closeModal">
+                  <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
+                </button>
+                <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarCotizacion" :disabled="!telefonoEsValido || !correoEsValido">
+                  <i class="bi-save-fill position-absolute start-0 ms-2"></i> Guardar
+                </button>
           </div>
         </div>
       </div>
@@ -1550,6 +1584,7 @@ import "toastify-js/src/toastify.css";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { useRouter } from "vue-router";
+import { fontStringify } from "pdfmake/src/helpers";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -1566,6 +1601,8 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
+const loggeduser = JSON.parse(localStorage.getItem("userSession"));
+const sucursales = [ '(Ninguna)', 'Delta', 'López Mateos', 'Torres Landa', 'Martinica' ];
 
 const vistaCotizacion = ref({});
 
@@ -1658,28 +1695,36 @@ const telefonoFormateado = computed({
   get() {
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
-    // Primeros 10 dígitos (teléfono base)
-    const base = soloNumeros.slice(0, 10);
-    const extra = soloNumeros.slice(10); 
-    // extensiones u otros teléfonos
+    const base = soloNumeros.slice(0, 10);   // teléfono principal
+    const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
 
-    let formateado = base;
+    let formateado = "";
 
     if (base.length > 6) {
-      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+      formateado = base.replace(
+        /(\d{3})(\d{3})(\d{4})/,
+        "($1) $2 $3"
+      );
     } else if (base.length > 3) {
-      formateado = base.replace(/(\d{3})(\d{0,3})/, "$1 $2");
+      formateado = base.replace(
+        /(\d{3})(\d{0,3})/,
+        "($1) $2"
+      );
+    } else if (base.length > 0) {
+      formateado = base.replace(
+        /(\d{0,3})/,
+        "($1"
+      );
     }
 
-    // Si hay más números, los agregamos separados
-    return extra ? `${formateado} ${extra}` : formateado;
+    return ext ? `${formateado} ext ${ext}` : formateado;
   },
+
   set(v) {
-    // Guardamos SOLO números, sin límite
+    // Guardamos SOLO números
     cotizacionForm.clienteTelefono = v.replace(/\D/g, "");
   },
 });
-
 
 const telefonoVistaFormateado = computed(() => {
   if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
@@ -1696,13 +1741,23 @@ const telefonoVistaFormateado = computed(() => {
     return valor;
   }
 });
+
+const telefonoEsValido = computed(() => {
+  const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
+  return cotizacionForm.clienteTelefono === '' || soloNumeros.length >= 10;
+});
+
+const correoEsValido = computed(() => {
+  return cotizacionForm.clienteCorreo === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cotizacionForm.clienteCorreo);
+});
+
 /***********************************
  *  FUNCIONES PARA TABLA COTIZACION
  ***********************************/
 
 const cancelarCotizacion = (cotizacion) => {
   const json = {
-    idCotizacion: parseInt(cotizacion.codigo.replace("COT-", ""), 10),
+    idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 4, // se puede obtimizar mas los estatus y usar una sola funcion para las 4 operaciones
     idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
   };
@@ -1731,7 +1786,7 @@ const cancelarCotizacion = (cotizacion) => {
 
 const reactivarCotizacion = (cotizacion) => {
   const json = {
-    idCotizacion: parseInt(cotizacion.codigo.replace("COT-", ""), 10),
+    idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 1,
     idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
   };
@@ -1759,7 +1814,7 @@ const reactivarCotizacion = (cotizacion) => {
 
 
 const aprobarCotizacion = (cotizacion) => {
-  const idCotizacion = Number(String(cotizacion.codigo).replace("COT-", ""));
+  const idCotizacion = cotizacion.idCotizacion;
 
   const json = {
     idCotizacion: idCotizacion, // parseInt(cotizacion.codigo.replace('COT-', ''), 10),
@@ -1807,7 +1862,7 @@ const observacionesVista = computed(() => {
 
 const finalizarCotizacion = (cotizacion) => {
   const json = {
-    idCotizacion: parseInt(cotizacion.codigo.replace("COT-", ""), 10),
+    idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 3,
     idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
   };
@@ -1911,6 +1966,8 @@ const cargarLlantas = async () => {
   }
 };
 
+// Función para cargar detalles de la sucursal del usuario
+
 
 // Función para cargar cotizaciones
 const cargarCotizaciones = async () => {
@@ -1923,7 +1980,9 @@ const cargarCotizaciones = async () => {
     const data = await res.json();
 
     cotizacionesRealizadas.value = data.map((c, i) => ({
-      codigo: "COT-" + String(c.idCotizacion).padStart(5, "0"), // Ej: COT-00001
+      codigo: c.prefijo + "-" + String(c.consecutivoSucursal), // Ej: COT-00001
+      idCotizacion: c.idCotizacion,
+      sucursal: c.sucursal,
       fechaCreacion: new Date(c.fechaCreacion).toLocaleDateString("es-MX", {
         day: "2-digit",
         month: "2-digit",
@@ -1962,6 +2021,9 @@ const registrarCerrarConEsc = (mostrarVista) => {
       mostrarVista.value = false;
       return;
     }
+
+
+
 
     // Si el modal de edición está abierto, lo cerramos
     if (modalInstance && modalRef.value.classList.contains("show")) {
@@ -2473,14 +2535,9 @@ const cargarFormulario = async (cotizacion = null) => {
 
   // Si se carga una cotización existente
   try {
-    const codigoStr = String(cotizacion?.codigo ?? "").trim();
-    const codigoLimpio = codigoStr.startsWith("COT-")
-      ? codigoStr.replace("COT-", "")
-      : codigoStr;
-
-    console.log("Codigo Info: "+codigoLimpio)
+    const codigoStr = String(cotizacion?.idCotizacion ?? "").trim();
     const res = await fetch(
-      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoLimpio}`
+      `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${cotizacion.idCotizacion}`
     );
 
     if (!res.ok) {
@@ -2492,7 +2549,8 @@ const cargarFormulario = async (cotizacion = null) => {
     const data = await res.json();
     
     // 🔹 Cargar datos de cliente
-    cotizacionForm.codigo = "COT-" + data.idCotizacion;
+    cotizacionForm.codigo = data.prefijo + "-" + data.consecutivoSucursal;
+    cotizacionForm.idCotizacion = data.idCotizacion;
     cotizacionForm.fechaCreacion = data.fechaCreacion;
     cotizacionForm.clienteNombre = data.clienteNombre;
     cotizacionForm.nombre = data.nombres;
@@ -2501,6 +2559,7 @@ const cargarFormulario = async (cotizacion = null) => {
     cotizacionForm.clienteCorreo = data.correo;
     cotizacionForm.clienteExistente = false;
     cotizacionForm.mostrarTotal = data.mostrarTotal;
+    cotizacionForm.observaciones = data.observaciones;
 
     // ===============================
     // 🔹 PAQUETES
@@ -2843,8 +2902,8 @@ const guardarCotizacion = async () => {
 
     /* ================= CLIENTE ================= */
 
-    const rawId = cotizacionForm.codigo
-      ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
+    const rawId = cotizacionForm.idCotizacion
+      ? cotizacionForm.idCotizacion
       : null;
 
     let clienteEncontrado = null;
@@ -2868,8 +2927,8 @@ const guardarCotizacion = async () => {
         }
       : {
           idCliente: null,
-          nombre: cotizacionForm.clienteNombre || "",
-          nombres: cotizacionForm.clienteNombre || "",
+          nombre: cotizacionForm.nombre || "",
+          nombres: cotizacionForm.nombre || "",
           apellidos: cotizacionForm.apellidos || "",
           telefono: cotizacionForm.clienteTelefono || "",
           correo: cotizacionForm.clienteCorreo || "",
@@ -2917,11 +2976,13 @@ const guardarCotizacion = async () => {
     const nuevaCotizacion = {
       codigo: rawId,
       mostrarTotal: cotizacionForm.mostrarTotal,
+      idSucursal: loggeduser.usuario.idSucursal,
       cliente,
       llantas,
       paquetes,
       serviciosAdicionales,
-      creadoPor: 1,
+      creadoPor: loggeduser.usuario.idUsuario,
+      observaciones: cotizacionForm.observaciones,
       idPromocionGeneral: promoGeneral.value?.idPromocion ?? null,
     };
 
@@ -2951,17 +3012,14 @@ const guardarCotizacion = async () => {
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
-    mostrarVistaPrevia({ codigo: data?.codigo?.toString() }, "ver");
-
-     console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+    console.log(data);
+    mostrarVistaPrevia(data , "ver");
+    console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
   }
 };
-
-
-
 
 
 
@@ -3189,7 +3247,7 @@ const formatoMoneda = (valor) => {
 
 // Abrir modal para nueva cotización o edición
 const abrirModalCotizacion = (cotizacion = null) => {
-  if (cotizacion && cotizacion.codigo) {
+  if (cotizacion && cotizacion.idCotizacion) {
     tituloModal.value = "Editar Cotización";
   } else {
     tituloModal.value = "Nueva Cotización";
@@ -3226,6 +3284,7 @@ const cotizacionesTransformadas = computed(() => {
 
       const valores = [
         c.codigo,
+        c.sucursal,
         c.fechaCreacion,
         c.cliente?.nombre,
         c.cliente?.telefono,
@@ -3239,6 +3298,7 @@ const cotizacionesTransformadas = computed(() => {
     })
     .map((c) => ({
       codigo: c.codigo || "—",
+      sucursal: c.sucursal,
       fechaCreacion: c.fechaCreacion || "—",
       cliente: c.cliente?.nombre || "—",
       telefono: c.cliente?.telefono || "—",
@@ -3371,10 +3431,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       const res = await fetch(
         `${
           proxy.$serverIP
-        }api/Cotizacion/getDetalleCotizacion?id=${cotizacion.codigo.replace(
-          "COT-",
-          "",
-        )}`,
+        }api/Cotizacion/getDetalleCotizacion?id=${cotizacion.idCotizacion}`,
       );
       const data = await res.json();
 
@@ -3534,7 +3591,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       // 🔹 VISTA FINAL
       // ===============================
       vistaCotizacion.value = {
-        codigo: data.idCotizacion,
+        codigo: data.prefijo + "-" + data.consecutivoSucursal,
+        idCotizacion: data.idCotizacion,
         fechaCreacion: new Date(data.fechaCreacion).toLocaleDateString(
           "es-MX",
           {
@@ -3543,6 +3601,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             year: "numeric",
           },
         ),
+        creadoPor: data.idCreador,
         cliente: {
           nombre: data.clienteNombre,
           telefono: data.telefono || "Sin teléfono",
@@ -3561,8 +3620,10 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         tipoPromocionGeneral: data.tipoPromocionGeneral,
         estatus: cotizacion.estatus || "Activa",
         mostrarTotal: data.mostrarTotal,
+        sucursal: data.sucursal,
+        observaciones: data.observaciones
       };
-
+      console.log(data);
       mostrarVista.value = true;
     } catch (error) {
       console.error("Error al cargar detalle de cotización:", error);
@@ -3671,10 +3732,10 @@ const generarPDF = async () => {
             {
               text: formatMoney(total),
               alignment: "right",
-              fontSize: 9,
+              fontSize: 10,
             },
           ],
-      margin: [0, 6, 0, 6],
+      margin: [0, 10, 0, 10],
     };
   };
 
@@ -3721,7 +3782,7 @@ const generarPDF = async () => {
                 })}`,
                 color: "green",
                 bold: true,
-                fontSize: 9,
+                fontSize: 10,
                 alignment: "right",
               },
             ]
@@ -3730,11 +3791,11 @@ const generarPDF = async () => {
                 text: `$${ll.total.toLocaleString("en-US", {
                   minimumFractionDigits: 2,
                 })}`,
+                fontSize: 10,
                 alignment: "right",
-                fontSize: 9,
               },
             ],
-        margin: [0, 6, 0, 6],
+        margin: [0, 10, 0, 10],
       },
     ];
   });
@@ -3750,6 +3811,7 @@ const generarPDF = async () => {
       precioUnitario: p.precioUnitario,
       cantidad: 1,
       total: p.total,
+      fontSize: 10,
       promoLabel: p.promoLabel,
     }),
   ]);
@@ -3760,19 +3822,19 @@ const generarPDF = async () => {
       text: String(s.cantidad),
       alignment: "center",
       fontSize: 9,
-      margin: [0, 6, 0, 6],
+      margin: [0, 10, 0, 10],
     },
     {
       text: s.nombreServicio,
       italics: true,
       fontSize: 9,
-      margin: [0, 6, 0, 6],
+      margin: [0, 10, 0, 10],
     },
     {
       text: formatMoney(s.precioUnitario),
       alignment: "right",
       fontSize: 9,
-      margin: [0, 6, 0, 6],
+      margin: [0, 10, 0, 10],
     },
     celdaTotalConPromo({
       precioUnitario: s.precioUnitario,
@@ -3792,19 +3854,19 @@ const generarPDF = async () => {
     },
     {
       text: textoColumna2,
-      alignment: "center",
+      alignment: "left",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
     {
-      text: "PRECIO UNITARIO",
-      alignment: "center",
+      text: "PRECIO UNIT.",
+      alignment: "right",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
     {
       text: "TOTAL",
-      alignment: "center",
+      alignment: "right",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
@@ -3832,6 +3894,19 @@ const generarPDF = async () => {
     return `${fechaFormateada}, ${horaFormateada}`;
   };
 
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
+
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
@@ -3841,7 +3916,7 @@ const generarPDF = async () => {
         columns: [
           {
             width: "*",
-            stack: [{ image: logo, width: 130, margin: [0, 0, 0, 10] }],
+            stack: [{ image: logo, width: 140, margin: [0, 0, 0, 10] }],
           },
           {
             width: "auto",
@@ -3852,46 +3927,47 @@ const generarPDF = async () => {
       {
         columns: [
           [
+            
             {
-              text: "Blvd. Delta 2002 esq. Rio Mayo",
+              text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 7 },
-            { text: "Tel. 477 330 6060 y 477 390 5090", fontSize: 7 },
-            { text: "delta@kartisimo.mx", fontSize: 7 },
+            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8 },
+            { text: "Tels. 477 330 6060\ny 477 390 5090", fontSize: 8 },
+            { text: "delta@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
-              text: "Blvd. Lopez Mateos 827 esq. Apolo",
+              text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. Obrera C.P. 37340", fontSize: 7 },
-            { text: "Tel. 477 717 7440 y 477 470 9419", fontSize: 7 },
-            { text: "apolo@kartisimo.mx", fontSize: 7 },
+            { text: "Col. Obrera C.P. 37340", fontSize: 8 },
+            { text: "Tels. 477 717 7440\ny 477 470 9419", fontSize: 8 },
+            { text: "apolo@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
-              text: "Blvd. Torres Landa 1901 esq San Jacobo",
+              text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. La Pisina C.P. 37440", fontSize: 7 },
-            { text: "Tel. 477 390 0290 y 477 461 0028", fontSize: 7 },
-            { text: "torreslanda@kartisimo.mx", fontSize: 7 },
+            { text: "Col. La Piscina C.P. 37440", fontSize: 8 },
+            { text: "Tels. 477 390 0290\ny 477 461 0028", fontSize: 8 },
+            { text: "torreslanda@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
               text: "Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 7 },
-            { text: "Tel. 477 763 3285 y 477 763 3284", fontSize: 7 },
+            { text: "Col. La Martinica, C.P. 37500", fontSize: 8 },
+            { text: "Tels. 477 763 3285\ny 477 763 3284", fontSize: 8 },
           ],
         ],
-        columnGap: 20,
+        columnGap: 15,
         margin: [0, 0, 0, 18],
       },
       {
@@ -3911,59 +3987,96 @@ const generarPDF = async () => {
       {
         columns: [
           {
-            text: `COT-${v.codigo}`,
+            width: "auto",
+            text: `C${v.codigo}`,
             fontSize: 10,
-            margin: [0, 0, 10, 6],
+            margin: [0, 0, 16, 6],
           },
-
-          {
-            text: [
-              { 
-                text: "Observaciones: ", 
-                bold: true
-              },
-              cotizacionForm.observaciones || "N/A",
-            ],
-            fontSize: 10,
-            margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
-          },
-
-          {
-            text: [
+          [
+            {
+              width: "auto",
+              text: [
+                {
+                  text: "Fecha de emisión: ",
+                  bold: true,
+                },
+                `${formatearFechaSinHora(v.cliente.fecha) || ""}`,
+              ],
+              fontSize: 10,
+              margin: [0, 0, 10, 6]
+            },
+            {
+              width: "auto",
+              text: [
+                {
+                  text: "Cliente: ",
+                  bold: true,
+                },
+                `${v.cliente.nombre || "N/A"}`,
+              ],
+              fontSize: 10,
+              margin: [0, 0, 10, 6],
+            },
+          ],
+          [
+            {
+              width: "auto",
+              text: [
+                {
+                  text: "Sucursal: ",
+                  bold: true,
+                },
+                `${v.sucursal || "N/A"}`,
+              ],
+              fontSize: 10,
+              margin: [0, 0, 10, 6],
+            },
+            {
+              width: "auto",
+              text: [
+                {
+                  text: "Teléfono(s): ",
+                  bold: true,
+                },
+                { text: v.cliente.telefono || "N/A", color: "#444" },
+              ],
+              fontSize: 10,
+              margin: [0, 0, 10, 6],
+            },
+          ],
+            [
               {
-                text: "Cliente: ",
-                bold: true,
+                width: "auto",
+                text: " ",
+                fontSize: 10,
+                margin: [0, 0, 0, 6],
               },
-              `${v.cliente.nombre || "N/A"}`,
-            ],
-            fontSize: 10,
-            margin: [0, 0, 10, 6],
-          },
-          {
-            text: [
+              
               {
-                text: "Fecha Emisión: ",
-                bold: true,
+                width: "auto",
+                text: [
+                  {
+                    text: "Correo: ",
+                    bold: true,
+                  },
+                  `${v.cliente.correo || "N/A"}`,
+                ],
+                fontSize: 10,
+                margin: [0, 0, 0, 6],
               },
-              `${formatearFecha(v.cliente.fecha) || ""}`,
             ],
-            fontSize: 10,
-            margin: [0, 0, 10, 6],
+        ]
+      },
+      {
+        text: [
+          { 
+            text: "Observaciones: ", 
+            bold: true
           },
-          {
-            text: [
-              {
-                text: "Teléfono: ",
-                bold: true,
-              },
-              { text: v.cliente.telefono || "N/A", color: "#444" },
-            ],
-            fontSize: 10,
-            margin: [0, 0, 10, 6],
-          }
-      
-
+          v.observaciones || "N/A",
         ],
+        fontSize: 10,
+        margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
       },
       // Tabla principal
       {
@@ -3978,23 +4091,23 @@ const generarPDF = async () => {
                 alignment: "center",
               },
               {
-                text: "MARCA - MODELO - MEDIDA",
+                text: "MEDIDA - MARCA - MODELO - RANGO",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "left",
               },
               {
-                text: "PRECIO UNITARIO",
+                text: "PRECIO UNIT.",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "right",
               },
               {
                 text: "TOTAL",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "right",
               },
             ],
             ...llantasRows,
-            separador("PAQUETE - SERVICIOS"),
+            separador("SERVICIOS"),
             ...paquetesRows,
             ...serviciosRows,
           ],
@@ -4011,6 +4124,14 @@ const generarPDF = async () => {
         },
         margin: [0, 12, 0, 0],
       },
+      v.mostrarTotal ?
+      {
+        text: "Total: " + formatMoney(v.total),
+        style: "tableHeaderBorder",
+        alignment: "right",
+        fontSize: 12,
+        margin: [0, 14, 0, 0],
+      } : {},
       {
         text: "Los precios incluyen IVA",
         style: "notaIVA",
@@ -4081,9 +4202,17 @@ const generarPDF = async () => {
     visibility: hidden;
   }
 
+  .container,
+  .row {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
   /* Mostrar solo el área a imprimir */
   #area-imprimir,
   #area-imprimir * {
+    font-size: 8pt;
+    line-height: 1.5;
     visibility: visible;
   }
 
@@ -4134,6 +4263,10 @@ const generarPDF = async () => {
   .modal-content {
     position: static !important;
     overflow: visible !important;
+  }
+
+  .page-break {
+    page-break-before: always;
   }
 }
 </style>

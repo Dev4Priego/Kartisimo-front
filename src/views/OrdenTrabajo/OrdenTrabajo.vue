@@ -2,14 +2,14 @@
     <div class="container-fluid p-4">
         <div class="row mx-4">
             <div class="col">
-                <h2>Orden de Trabajo</h2>
+                <h2><i class="bi bi-wrench-adjustable me-2"></i> Órdenes de Trabajo</h2>
             </div>
-            <div class="col-4">
+            <div class="col-4 col-lg-3">
                 <router-link :to="{ name: 'orden-trabajo-form' }">
                     <button 
-                        class="btn btn-outline-primary form-control"
-                    >
-                        Nueva Orden
+                        class="btn btn-primary position-relative shadow form-control"
+                    ><i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>
+                        &nbsp;Nueva orden de trabajo
                     </button>
                 </router-link>
             </div>
