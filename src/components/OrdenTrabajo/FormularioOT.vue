@@ -17,11 +17,15 @@
         </div>
       </div>
       <hr />
-      <div class="row">
+      <div class="row mb-4 align-items-stretch">
         <div class="col">
-          <div class="row separador p-2">
-            <h5 class="text-center">Vehículo</h5>
-            <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-header" style="font-size: 14pt;">
+              <i class="bi bi-car-front-fill me-2"></i> Vehículo
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
               <div class="mb-3">
                 <input
                   v-model="ordenTrabajoForm.vehiculo.numSerie"
@@ -130,12 +134,19 @@
                 </small>
               </div>
             </div>
+          
+              </div>
+            </div>
           </div>
         </div>
         <div class="col">
-          <div class="row separador p-2">
-            <h5 class="text-center">Cliente</h5>
-            <div class="col">
+          <div class="card shadow-sm h-100">
+            <div class="card-header" style="font-size: 14pt;">
+              <i class="bi bi-person-fill me-2"></i> Cliente
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col">
               <!-- Nombre -->
               <div class="mb-3">
                 <input
@@ -221,6 +232,8 @@
                 >
                   {{ errores["cliente.rfc"] }}
                 </small>
+              </div>
+            </div>
               </div>
             </div>
           </div>
@@ -415,6 +428,23 @@
                 />
               </div>
               <div class="mb-3">
+                <input
+                  v-model="ordenTrabajoForm.factura.eMail"
+                  class="form-control"
+                  type="text"
+                  placeholder="Correo *"
+                  @blur="validate('factura.eMail')"
+                  :class="{ 'input-error': errores['factura.eMail'] }"
+                />
+                <small
+                  v-if="errores['factura.eMail']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.eMail'] }}
+                </small>
+              </div>
+              
+              <div class="mb-3">
                 <label class="form-label">Uso CFDI *</label>
                 <select
                   v-model="ordenTrabajoForm.factura.usoCFDI"
@@ -465,22 +495,6 @@
               </div>
               <div class="mb-3">
                 <input
-                  v-model="ordenTrabajoForm.factura.eMail"
-                  class="form-control"
-                  type="text"
-                  placeholder="E-mail *"
-                  @blur="validate('factura.eMail')"
-                  :class="{ 'input-error': errores['factura.eMail'] }"
-                />
-                <small
-                  v-if="errores['factura.eMail']"
-                  class="error-msg"
-                >
-                  {{ errores['factura.eMail'] }}
-                </small>
-              </div>
-              <div class="mb-3">
-                <input
                   v-model="ordenTrabajoForm.factura.cp"
                   class="form-control"
                   type="text"
@@ -495,6 +509,7 @@
                   {{ errores['factura.cp'] }}
                 </small>
               </div>
+              
             </div>
           </div>
         </div>
@@ -808,10 +823,12 @@
         <div class="col"></div>
         <div class="col text-end">
           <router-link :to="{ name: 'orden-trabajo-list' }">
-            <button class="btn btn-dark mx-4" type="button">Volver</button>
+            <button class="btn btn-primary position-relative shadow mx-3" type="button" style="width: 140px;">
+              <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
+            </button>
           </router-link>
-          <button class="btn btn-primary" type="submit" :disabled="!formValido">
-            Guardar
+          <button class="btn btn-success position-relative shadow ms-3" type="submit" style="width: 140px;" :disabled="!formValido">
+            <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
       </div>
@@ -869,7 +886,7 @@ function validate(path) {
     "vehiculo.modelo": () => (!value ? "Modelo obligatorio." : null),
 
     "vehiculo.numSerie": () =>
-      value.length < 5 ? "Debe tener al menos 5 caracteres." : null,
+      value.length < 17 ? "El número de serie (VIN) debe ser de 17 caracteres." : null,
 
     "vehiculo.kilometraje": () =>
       value === ""
@@ -889,10 +906,11 @@ function validate(path) {
     "vehiculo.anio": () => {
       const y = parseInt(value);
       const current = new Date().getFullYear();
+      const nextyear = current + 1;
       return !y
         ? "Año obligatorio."
-        : y < 1950 || y > current
-        ? `Año entre 1950 y ${current}.`
+        : y < 1950 || y > nextyear
+        ? `Año entre 1950 y ${nextyear}.`
         : null;
     },
 
@@ -923,11 +941,11 @@ function validate(path) {
 
     "factura.usoCFDI": () =>
       !value
-        ? "Debes seleccionar un uso CFDI."
+        ? "Debe seleccionar un uso CFDI."
         : null,
 
     "factura.eMail": () => {
-      if (!value || !value.trim()) return "E-mail obligatorio.";
+      if (!value || !value.trim()) return "Correo obligatorio.";
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return !emailRegex.test(value)
@@ -1517,7 +1535,11 @@ const validarYMostrarPreview = async () => {
 
 
 const guardarOT = async () => {
-  //console.log(ordenTrabajoForm.vehiculo.numSerie)
+  
+  const userStorage = localStorage.getItem("userSession");
+
+  const dataUser = JSON.parse(userStorage)
+
   let factura = {};
 
   if (boolFactura) {
@@ -1532,7 +1554,8 @@ const guardarOT = async () => {
   }
 
   const objSeend = {
-    idUsuario: 1,
+    idUsuario: dataUser.usuario.idUsuario,
+    idSucursal: dataUser.usuario.idSucursal,
     idCotizacion: ordenTrabajoForm.cotSeleccionada,
     idEmpleado: ordenTrabajoForm.idEmpleado,
     idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
@@ -1744,7 +1767,7 @@ const cargarInfoCotizacion = async () => {
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
           idPromocion: s.idPromocion ?? 0,
-          idConceptoTrabajo: 0,
+          idConceptoTrabajo: 7,
 
           descripcion: s.descripcion,
           observacion: s.observacion,

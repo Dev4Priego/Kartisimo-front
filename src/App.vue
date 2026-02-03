@@ -5,7 +5,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 let inactivityTimer = null;
 
-const INACTIVITY_TIME = 30 * 60 * 1000; // 15 minutos
+const INACTIVITY_TIME = 30 * 60 * 1000; // 30 minutos
 
 const logoutUser = () => {
 	localStorage.removeItem('userSession'); // o el token
