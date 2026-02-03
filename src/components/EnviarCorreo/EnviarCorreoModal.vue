@@ -1,8 +1,9 @@
 <template>
 	<div class="mt-4">
 		<!-- Botón que abre el modal -->
-		<button class="btn btn-outline-danger w-100" @click="abrirModal">
-			Enviar por correo
+		<button class="btn btn-primary shadow w-100 position-relative btn-sm py-2 rounded" @click="abrirModal">
+			<i class="bi-envelope-paper-fill position-absolute start-0 ms-2"></i>
+			&nbsp;&nbsp;Enviar por correo
 		</button>
 	</div>
 </template>
@@ -41,14 +42,18 @@ const abrirModal = async () => {
 	}
 
 	const { value: formValues } = await Swal.fire({
-		title: 'Enviar por correo',
+		title: '<h3>Enviar cotización por correo</h3>',
 		html: `
-			<input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}">
-			<input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo">
-			<textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..."></textarea>
+			<table style="margin-left: 0px; margin-right: 0px;">
+			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}" style="width: 280px; font-size: 12pt;"></td></tr>
+			<tr><td><input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo" style="width: 470px; font-size: 12pt;"></td></tr>
+			<tr><td><textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..." style="width: 470px; font-size: 12pt;"></textarea></td></tr>
+			</table>
 		`,
+		width: '600px',
 		confirmButtonText: 'Enviar',
 		showCancelButton: true,
+		cancelButtonText: 'Cancelar',
 		focusConfirm: false,
 		preConfirm: () => {
 			const email = document.getElementById('correo').value
@@ -403,9 +408,9 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		Swal.close()
 		
 		if (response.ok) {
-			Swal.fire('✅ Enviado', 'El correo con el PDF se envió correctamente.', 'success')
+			Swal.fire(' Enviado', 'El correo con el PDF se envió correctamente.', 'success')
 		} else {
-			Swal.fire('❌ Error', 'No se pudo enviar el correo.', 'error')
+			Swal.fire(' Error', 'No se pudo enviar el correo.', 'error')
 			let data = await response.json()
 			console.log(JSON.stringify(data))
 		}

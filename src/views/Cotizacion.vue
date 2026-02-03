@@ -194,15 +194,17 @@
               </div>
               <div class="col">
                 <small>
-                  <strong>Blvd. Lopez Mateos 827 esq. Apolo</strong><br />
+                  <strong>Blvd. Lopez Mateos 827<br />esq. Apolo</strong><br />
                   Col. Obrera C.P. 37340<br />
-                  Tel. 477 717 7440 y 477 470 9419<br />
+                  Tel. 47
+                  
+                  7 717 7440 y 477 470 9419<br />
                   apolo@kartisimo.mx
                 </small>
               </div>
               <div class="col">
                 <small>
-                  <strong>Blvd. Torres Landa 1901 esq. San Jacobo</strong><br />
+                  <strong>Blvd. Torres Landa 1901<br /> esq. San Jacobo</strong><br />
                   Col. La Piscina C.P. 37440<br />
                   Tel. 477 390 0290 y 477 461 0028<br />
                   torreslanda@kartisimo.mx<br />
@@ -223,32 +225,32 @@
             <div class="mb-4 cotizacion-header">
               <div class="row">
                 <div class="col-2">
-                  <span class="mx-2">
+                  <span class="me-2">
                     {{ "COT-" + vistaCotizacion.codigo || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-3">
+                  <span>
                     <strong>Fecha emisión: </strong>
                     {{ vistaCotizacion.fechaCreacion || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-4">
+                  <span class="me-2">
                     <strong>Cliente: </strong>
                     {{ vistaCotizacion.cliente?.nombre || "N/A" }}
                   </span>
                 </div>
-                <div class="col">
-                  <span class="mx-2">
+                <div class="col-3">
+                  <span class="me-2">
                     <strong>Teléfono: </strong>
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
                   
                 </div>
-                <div class="col">
-                 <span class="mx-2">
-                   <strong>Observaciones</strong>
+                <div class="col mt-1">
+                 <span>
+                   <strong>Observaciones: </strong>
                     {{ cotizacionForm.observaciones || "N/A" }}
                  </span>
               </div>
@@ -270,8 +272,8 @@
                 <thead class="table-light">
                   <tr>
                     <th class="text-center">CANT</th>
-                    <th>MEDIDA - MODELO - RANGO</th>
-                    <th class="text-end">PRECIO UNITARIO</th>
+                    <th>MEDIDA - MARCA - MODELO - RANGO</th>
+                    <th class="text-end">PRECIO UNIT.</th>
                     <th class="text-end">TOTAL</th>
                   </tr>
                 </thead>
@@ -364,7 +366,7 @@
                       {{ paquete.descripcion.toUpperCase() }}
                       <p>
                         <small class="badge bg-secondary mt-1">{{
-                          paquete.comentario
+                          paquete.comentario 
                         }}</small>
                       </p>
                     </td>
@@ -509,7 +511,7 @@
               </table>
             </div>
 
-            <div class="row text-center">
+            <div class="row">
               <div class="col">
                 <!-- Botón enviar correo -->
                 <EnviarCorreoModal :cotizacion="vistaCotizacion" />
@@ -519,9 +521,9 @@
                 <!-- Botón enviar pdf a imprimir -->
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-primary w-100"
+                    class="btn btn-primary position-relative shadow-lg w-100 btn-sm py-2 rounded"
                     @click="imprimirCotizacion"
-                  >
+                  ><i class="bi-printer-fill position-absolute start-0 ms-2"></i>
                     Imprimir
                   </button>
                 </div>
@@ -531,9 +533,9 @@
                 <!-- Botón PDF -->
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-secondary w-100"
+                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="generarPDF"
-                  >
+                  ><i class="bi-file-pdf-fill position-absolute start-0 ms-2"></i>
                     Descargar PDF
                   </button>
                 </div>
@@ -542,20 +544,20 @@
               <div class="col">
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-warning w-100"
+                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="abrirModalCotizacion(vistaCotizacion)"
-                  >
+                  ><i class="bi-pencil-fill position-absolute start-0 ms-2"></i>
                     Editar
                   </button>
                 </div>
               </div>
-
+              
               <div class="col">
                 <div class="mt-4">
                   <button
-                    class="btn btn-outline-warning w-100"
+                    class="btn btn-success position-relative shadow w-100 btn-sm py-2 rounded"
                     @click="confirmarAccion(vistaCotizacion)"
-                  >
+                  ><i class="bi-forward-fill position-absolute start-0 ms-2"></i>
                     Generar OT
                   </button>
                 </div>
@@ -620,7 +622,7 @@
 
                   <div class="col-md-6">
                     <label for="apellido" class="form-label"
-                      >Apellido del cliente</label
+                      >Apellidos</label
                     >
                     <input
                       id="apellido"
@@ -633,17 +635,23 @@
                 </div>
 
                 <div class="row g-3 m-2">
-                  <div class="col-md-6">
-                    <label for="numTelefono" class="form-label">Teléfono</label>
+                 <div class="col-md-6">
+                    <label for="numTelefono" class="form-label">Teléfono(s)</label>
+
                     <input
                       id="numTelefono"
                       v-model="telefonoFormateado"
-                      type="number"
-                      maxlength="12"
+                      type="text"
                       class="form-control"
-                      placeholder="XXX-XXX-XXXX"
+                      placeholder="XXX XXX XXXX"
+                      :class="{ 'is-invalid': !telefonoEsValido }"
                     />
+
+                    <div class="invalid-feedback">
+                      El teléfono debe tener al menos 10 dígitos
+                    </div>
                   </div>
+
 
                   <div class="col-md-6">
                     <label for="correoCliente" class="form-label">Correo</label>
@@ -658,7 +666,7 @@
                   <div class="col-md-12">
                     
 
-                  <!------------
+                  
                   <label for="ObservacionCliente" class="form-label"
                       >Observaciones</label
                     >
@@ -673,7 +681,7 @@
                   maxlength="255"
                   ></textarea>
 
-                  -->
+                  
 
                   </div>
                 </div>
@@ -683,7 +691,7 @@
               <div class="col d-flex flex-column">
                 <div class="row m-2">
                   <label for="clienteExistente" class="mb-1 form-label"
-                    >Cliente Existente</label
+                    >Buscar cliente existente</label
                   >
                   <select
                     id="clienteExistente"
@@ -950,33 +958,40 @@
                       </div>
                     </div>
 
-                    <div class="mb-2 d-flex cotizacion-table">
-                      <span class="mx-2">
-                        <strong>No. Cotización: </strong>
+                    <div class="row mb-2 d-flex cotizacion-table">
+                      <div class="col-2">
                         {{ cotizacionForm.codigo || "N/A" }}
-                      </span>
-                      <span class="mx-2">
-                        <strong>Fecha emisión: </strong>
-                        {{ cotizacionForm.fechaCreacion || "N/A" }}
-                      </span>
-                      <span class="mx-2">
+                      </div>
+                      <div class="col-3">
+                        <strong>Fecha de emisión: </strong>
+                        {{ cotizacionForm.fechaCreacion ? new Date(cotizacionForm.fechaCreacion).toLocaleString("es-MX", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        }) : "N/A" }}
+                      </div>
+                      <div class="col-3">
                         <strong>Cliente: </strong>
                         {{ cotizacionForm.clienteNombre || "N/A" }}
-                      </span>
-                      <span class="mx-2">
-                        <strong>Teléfono: </strong>
+                      </div>
+                      <div class="col-2">
+                        <strong>Teléfono(s): </strong>
                         {{ telefonoFormateado || "N/A" }}
-                      </span>
-                      <span class="mx-2">
+                      </div>
+                      <div class="col-2">
                         <strong>Correo: </strong>
                         {{ cotizacionForm.clienteCorreo || "N/A" }}
-                      </span>
+                      </div>
+                    </div>
+                    <div v-if="cotizacionForm.observaciones" class="mb-2 d-flex">
                       <span class="mx-2">
                         <strong>Observaciones</strong>
                         {{ cotizacionForm.observaciones || "N/A" }}
                       </span>
                     </div>
-
                     <table class="table align-middle">
                       <thead>
                         <tr>
@@ -1512,16 +1527,14 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="closeModal">
-              Cerrar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="guardarCotizacion"
-            >
-              Guardar
-            </button>
+                <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="closeModal">
+                  <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
+                </button>
+                <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarCotizacion">
+                  <i class="bi-save-fill position-absolute start-0 ms-2"></i> Guardar
+                </button>
+              
+            
           </div>
         </div>
       </div>
@@ -1658,28 +1671,36 @@ const telefonoFormateado = computed({
   get() {
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
-    // Primeros 10 dígitos (teléfono base)
-    const base = soloNumeros.slice(0, 10);
-    const extra = soloNumeros.slice(10); 
-    // extensiones u otros teléfonos
+    const base = soloNumeros.slice(0, 10);   // teléfono principal
+    const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
 
-    let formateado = base;
+    let formateado = "";
 
     if (base.length > 6) {
-      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+      formateado = base.replace(
+        /(\d{3})(\d{3})(\d{4})/,
+        "($1) $2 $3"
+      );
     } else if (base.length > 3) {
-      formateado = base.replace(/(\d{3})(\d{0,3})/, "$1 $2");
+      formateado = base.replace(
+        /(\d{3})(\d{0,3})/,
+        "($1) $2"
+      );
+    } else if (base.length > 0) {
+      formateado = base.replace(
+        /(\d{0,3})/,
+        "($1"
+      );
     }
 
-    // Si hay más números, los agregamos separados
-    return extra ? `${formateado} ${extra}` : formateado;
+    return ext ? `${formateado} ext ${ext}` : formateado;
   },
+
   set(v) {
-    // Guardamos SOLO números, sin límite
+    // Guardamos SOLO números
     cotizacionForm.clienteTelefono = v.replace(/\D/g, "");
   },
 });
-
 
 const telefonoVistaFormateado = computed(() => {
   if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
@@ -1696,6 +1717,12 @@ const telefonoVistaFormateado = computed(() => {
     return valor;
   }
 });
+
+const telefonoEsValido = computed(() => {
+  const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
+  return soloNumeros.length >= 10;
+});
+
 /***********************************
  *  FUNCIONES PARA TABLA COTIZACION
  ***********************************/
@@ -1962,6 +1989,9 @@ const registrarCerrarConEsc = (mostrarVista) => {
       mostrarVista.value = false;
       return;
     }
+
+
+
 
     // Si el modal de edición está abierto, lo cerramos
     if (modalInstance && modalRef.value.classList.contains("show")) {
@@ -2785,7 +2815,6 @@ const aplicarPromocionGeneral = async () => {
   });
 };
 
-
 // CREAR / EDITAR COTIZACIONES
 const guardarCotizacion = async () => {
   try {
@@ -2843,38 +2872,38 @@ const guardarCotizacion = async () => {
 
     /* ================= CLIENTE ================= */
 
-    const rawId = cotizacionForm.codigo
-      ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
-      : null;
-
     let clienteEncontrado = null;
 
-    if (cotizacionForm.clienteExistente) {
-      clienteEncontrado = clientesDisponibles.value.find(
-        (c) => c.nombres === cotizacionForm.clienteExistente
-      );
+    if (
+      cotizacionForm.clienteExistente &&
+      typeof cotizacionForm.clienteExistente === "object"
+    ) {
+      clienteEncontrado = cotizacionForm.clienteExistente;
     }
+const cliente = clienteEncontrado
+  ? {
+      // 🔹 CLIENTE EXISTENTE
+      idCliente: clienteEncontrado.idCliente,
+      nombres: clienteEncontrado.nombres,
+      apellidos: `${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
+      nombre: `${clienteEncontrado.nombres} ${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
+      telefono: clienteEncontrado.telefono,
+      correo: clienteEncontrado.correo,
+    }
+  : {
+      // 🔹 CLIENTE NUEVO
+      idCliente: null,
 
-    // ⚠️ IMPORTANTE: NO reconstruir el nombre en editar
-    const cliente = clienteEncontrado
-      ? {
-          idCliente: clienteEncontrado.idCliente,
-          nombre: `${clienteEncontrado.nombres} ${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
-          nombres: clienteEncontrado.nombres,
-          apellidos: `${clienteEncontrado.apPaterno} ${clienteEncontrado.apMaterno}`.trim(),
-          telefono: clienteEncontrado.telefono,
-          correo: clienteEncontrado.correo,
-          observaciones: cotizacionForm.observaciones || "",
-        }
-      : {
-          idCliente: null,
-          nombre: cotizacionForm.clienteNombre || "",
-          nombres: cotizacionForm.clienteNombre || "",
-          apellidos: cotizacionForm.apellidos || "",
-          telefono: cotizacionForm.clienteTelefono || "",
-          correo: cotizacionForm.clienteCorreo || "",
-          observaciones: cotizacionForm.observaciones || "",
-        };
+      // ✅ OBLIGATORIOS
+      nombres: cotizacionForm.nombre?.trim(),
+      apellidos: cotizacionForm.apellidos?.trim(),
+
+      // ✅ NOMBRE COMPLETO (solo para mostrar / guardar)
+      nombre: `${cotizacionForm.nombre} ${cotizacionForm.apellidos}`.trim(),
+
+      telefono: cotizacionForm.clienteTelefono?.trim(),
+      correo: cotizacionForm.clienteCorreo?.trim(),
+    };
 
     /* ================= MAPEO ================= */
 
@@ -2915,8 +2944,11 @@ const guardarCotizacion = async () => {
     /* ================= PAYLOAD ================= */
 
     const nuevaCotizacion = {
-      codigo: rawId,
+      codigo: cotizacionForm.codigo
+        ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
+        : null,
       mostrarTotal: cotizacionForm.mostrarTotal,
+      observaciones: cotizacionForm.observaciones || "",
       cliente,
       llantas,
       paquetes,
@@ -2947,20 +2979,16 @@ const guardarCotizacion = async () => {
     console.log("RESPUESTA BACKEND:", data);
 
     mostrarToast("success", "Cotización guardada");
-
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
     mostrarVistaPrevia({ codigo: data?.codigo?.toString() }, "ver");
 
-     console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
   }
 };
-
-
 
 
 
@@ -3194,8 +3222,6 @@ const abrirModalCotizacion = (cotizacion = null) => {
   } else {
     tituloModal.value = "Nueva Cotización";
 
-    // Solo limpiar observaciones para nueva cotización
-    cotizacionForm.observaciones = "";
   }
   console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
@@ -3792,19 +3818,19 @@ const generarPDF = async () => {
     },
     {
       text: textoColumna2,
-      alignment: "center",
+      alignment: "left",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
     {
-      text: "PRECIO UNITARIO",
-      alignment: "center",
+      text: "PRECIO UNIT.",
+      alignment: "right",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
     {
       text: "TOTAL",
-      alignment: "center",
+      alignment: "right",
       style: "tableHeaderBorder",
       fillColor: "#ededed",
     },
@@ -3832,6 +3858,19 @@ const generarPDF = async () => {
     return `${fechaFormateada}, ${horaFormateada}`;
   };
 
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
+
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
@@ -3841,7 +3880,7 @@ const generarPDF = async () => {
         columns: [
           {
             width: "*",
-            stack: [{ image: logo, width: 130, margin: [0, 0, 0, 10] }],
+            stack: [{ image: logo, width: 140, margin: [0, 0, 0, 10] }],
           },
           {
             width: "auto",
@@ -3852,46 +3891,47 @@ const generarPDF = async () => {
       {
         columns: [
           [
+            
             {
-              text: "Blvd. Delta 2002 esq. Rio Mayo",
+              text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 7 },
-            { text: "Tel. 477 330 6060 y 477 390 5090", fontSize: 7 },
-            { text: "delta@kartisimo.mx", fontSize: 7 },
+            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8 },
+            { text: "Tels. 477 330 6060\ny 477 390 5090", fontSize: 8 },
+            { text: "delta@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
-              text: "Blvd. Lopez Mateos 827 esq. Apolo",
+              text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. Obrera C.P. 37340", fontSize: 7 },
-            { text: "Tel. 477 717 7440 y 477 470 9419", fontSize: 7 },
-            { text: "apolo@kartisimo.mx", fontSize: 7 },
+            { text: "Col. Obrera C.P. 37340", fontSize: 8 },
+            { text: "Tels. 477 717 7440\ny 477 470 9419", fontSize: 8 },
+            { text: "apolo@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
-              text: "Blvd. Torres Landa 1901 esq San Jacobo",
+              text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. La Pisina C.P. 37440", fontSize: 7 },
-            { text: "Tel. 477 390 0290 y 477 461 0028", fontSize: 7 },
-            { text: "torreslanda@kartisimo.mx", fontSize: 7 },
+            { text: "Col. La Piscina C.P. 37440", fontSize: 8 },
+            { text: "Tels. 477 390 0290\ny 477 461 0028", fontSize: 8 },
+            { text: "torreslanda@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
               text: "Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián",
               bold: true,
-              fontSize: 9,
+              fontSize: 10,
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 7 },
-            { text: "Tel. 477 763 3285 y 477 763 3284", fontSize: 7 },
+            { text: "Col. La Martinica, C.P. 37500", fontSize: 8 },
+            { text: "Tels. 477 763 3285\ny 477 763 3284", fontSize: 8 },
           ],
         ],
-        columnGap: 20,
+        columnGap: 15,
         margin: [0, 0, 0, 18],
       },
       {
@@ -3911,24 +3951,25 @@ const generarPDF = async () => {
       {
         columns: [
           {
+            width: "auto",
             text: `COT-${v.codigo}`,
             fontSize: 10,
             margin: [0, 0, 10, 6],
           },
-
           {
+            width: "auto",
             text: [
-              { 
-                text: "Observaciones: ", 
-                bold: true
+              {
+                text: "Fecha de emisión: ",
+                bold: true,
               },
-              cotizacionForm.observaciones || "N/A",
+              `${formatearFechaSinHora(v.cliente.fecha) || ""}`,
             ],
             fontSize: 10,
-            margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
+            margin: [0, 0, 10, 6],
           },
-
           {
+            width: "*",
             text: [
               {
                 text: "Cliente: ",
@@ -3940,30 +3981,29 @@ const generarPDF = async () => {
             margin: [0, 0, 10, 6],
           },
           {
+            width: "auto",
             text: [
               {
-                text: "Fecha Emisión: ",
-                bold: true,
-              },
-              `${formatearFecha(v.cliente.fecha) || ""}`,
-            ],
-            fontSize: 10,
-            margin: [0, 0, 10, 6],
-          },
-          {
-            text: [
-              {
-                text: "Teléfono: ",
+                text: "Teléfono(s): ",
                 bold: true,
               },
               { text: v.cliente.telefono || "N/A", color: "#444" },
             ],
             fontSize: 10,
-            margin: [0, 0, 10, 6],
-          }
-      
-
+            margin: [0, 0, 0, 6],
+          },
+        ]
+      },
+      {
+        text: [
+          { 
+            text: "Observaciones: ", 
+            bold: true
+          },
+          cotizacionForm.observaciones || "N/A",
         ],
+        fontSize: 10,
+        margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
       },
       // Tabla principal
       {
@@ -3978,23 +4018,23 @@ const generarPDF = async () => {
                 alignment: "center",
               },
               {
-                text: "MARCA - MODELO - MEDIDA",
+                text: "MEDIDA - MARCA - MODELO - RANGO",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "left",
               },
               {
-                text: "PRECIO UNITARIO",
+                text: "PRECIO UNIT.",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "right",
               },
               {
                 text: "TOTAL",
                 style: "tableHeaderBorder",
-                alignment: "center",
+                alignment: "right",
               },
             ],
             ...llantasRows,
-            separador("PAQUETE - SERVICIOS"),
+            separador("SERVICIOS"),
             ...paquetesRows,
             ...serviciosRows,
           ],
