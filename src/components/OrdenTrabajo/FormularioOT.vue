@@ -18,21 +18,21 @@
       </div>
       <hr />
       <div class="row mb-4 align-items-stretch">
-        <div class="col">
+        <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
             <div class="card-header" style="font-size: 14pt;">
               <i class="bi bi-car-front-fill me-2"></i> Vehículo
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col">
-              <div class="mb-3">
-                <input
+                <div class="col-6 mb-3">
+                  <label for="sumserie" class="form-label">Núm. Serie *</label>
+                <input id="numserie"
                   v-model="ordenTrabajoForm.vehiculo.numSerie"
                   @input="onSerieInput($event.target.value)"
                   @change="onSerieSeleccionada"
                   list="vehiculos"
-                  placeholder="Num. Serie *"
+                  placeholder="(17 caracteres)"
                   class="form-control"
                   @blur="validate('vehiculo.numSerie')"
                   :class="{ 'input-error': errores['vehiculo.numSerie'] }"
@@ -51,8 +51,23 @@
                   </option>
                 </datalist>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="marca" class="form-label">Marca *</label>
+                <input id="marca"
+                  v-model="ordenTrabajoForm.vehiculo.marca"
+                  class="form-control"
+                  type="text"
+                  placeholder="Marca"
+                  @blur="validate('vehiculo.marca')"
+                  :class="{ 'input-error': errores['vehiculo.marca'] }"
+                />
+                <small v-if="errores['vehiculo.marca']" class="error-msg">
+                  {{ errores["vehiculo.marca"] }}
+                </small>
+              </div>
+              <div class="col-6 mb-3">
+                <label for="modelo" class="form-label">Modelo *</label>
+                <input id="modelo"
                   v-model="ordenTrabajoForm.vehiculo.modelo"
                   class="form-control"
                   type="text"
@@ -64,51 +79,9 @@
                   {{ errores["vehiculo.modelo"] }}
                 </small>
               </div>
-
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.kilometraje"
-                  class="form-control"
-                  type="number"
-                  placeholder="Kilometraje *"
-                  @blur="validate('vehiculo.kilometraje')"
-                  :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
-                />
-                <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
-                  {{ errores["vehiculo.kilometraje"] }}
-                </small>
-              </div>
-
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.anio"
-                  class="form-control"
-                  type="text"
-                  placeholder="Año *"
-                  @blur="validate('vehiculo.anio')"
-                  :class="{ 'input-error': errores['vehiculo.anio'] }"
-                />
-                <small v-if="errores['vehiculo.anio']" class="error-msg">
-                  {{ errores["vehiculo.anio"] }}
-                </small>
-              </div>
-            </div>
-            <div class="col">
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.marca"
-                  class="form-control"
-                  type="text"
-                  placeholder="Marca *"
-                  @blur="validate('vehiculo.marca')"
-                  :class="{ 'input-error': errores['vehiculo.marca'] }"
-                />
-                <small v-if="errores['vehiculo.marca']" class="error-msg">
-                  {{ errores["vehiculo.marca"] }}
-                </small>
-              </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="color" class="form-label">Color *</label>
+                <input id="color"
                   v-model="ordenTrabajoForm.vehiculo.color"
                   class="form-control"
                   type="text"
@@ -120,12 +93,42 @@
                   {{ errores["vehiculo.color"] }}
                 </small>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="kilometraje" class="form-label">Kilometraje *</label>
+                <input id="kilometraje"
+                  v-model="ordenTrabajoForm.vehiculo.kilometraje"
+                  class="form-control"
+                  type="number"
+                  placeholder="(Kilometraje actual)"
+                  @blur="validate('vehiculo.kilometraje')"
+                  :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
+                />
+                <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
+                  {{ errores["vehiculo.kilometraje"] }}
+                </small>
+              </div>
+
+              <div class="col-6 mb-3">
+                <label for="aniomodelo" class="form-label">Año *</label>
+                <input id="aniomodelo"
+                  v-model="ordenTrabajoForm.vehiculo.anio"
+                  class="form-control"
+                  type="number"
+                  placeholder="Ej: 2019"
+                  @blur="validate('vehiculo.anio')"
+                  :class="{ 'input-error': errores['vehiculo.anio'] }"
+                />
+                <small v-if="errores['vehiculo.anio']" class="error-msg">
+                  {{ errores["vehiculo.anio"] }}
+                </small>
+              </div>
+              <div class="col-6 mb-3">
+                <label for="placas" class="form-label">Placas *</label>
+                <input id="placas"
                   v-model="ordenTrabajoForm.vehiculo.placas"
                   class="form-control"
                   type="text"
-                  placeholder="Placas *"
+                  placeholder="Ej: GAB-254-A"
                   @blur="validate('vehiculo.placas')"
                   :class="{ 'input-error': errores['vehiculo.placas'] }"
                 />
@@ -133,52 +136,46 @@
                   {{ errores["vehiculo.placas"] }}
                 </small>
               </div>
-            </div>
-          
               </div>
             </div>
           </div>
         </div>
-        <div class="col">
+        <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
             <div class="card-header" style="font-size: 14pt;">
               <i class="bi bi-person-fill me-2"></i> Cliente
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col">
               <!-- Nombre -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="nombrecliente" class="form-label">Nombre(s) *</label>
+                <input id="nombrecliente"
                   v-model="ordenTrabajoForm.cliente.nombres"
                   class="form-control"
                   type="text"
-                  placeholder="Nombre's *"
+                  placeholder="Nombre del cliente"
                   list="clientes"
                 />
-            
               </div>
-
               <!-- Apellidos -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="apellidos" class="form-label">Apellido(s) *</label>
+                <input id="apellidos"
                   v-model="ordenTrabajoForm.cliente.apellidos"
                   type="text"
                   class="form-control"
-                  placeholder="Apellido's *"
+                  placeholder="Apellido(s) del cliente"
                 />
-               
               </div>
-            </div>
-
-            <div class="col">
               <!-- Teléfono -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="telefono" class="form-label">Teléfono(s) *</label>
+                <input id="telefono"
                   v-model="ordenTrabajoForm.cliente.clienteTelefono"
                   class="form-control"
                   type="text"
-                  placeholder="Teléfono *"
+                  placeholder="(10 dígitos)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
@@ -190,14 +187,14 @@
                   {{ errores["cliente.clienteTelefono"] }}
                 </small>
               </div>
-
               <!-- Correo -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="email" class="form-label">Correo electrónico *</label>
+                <input id="email"
                   v-model="ordenTrabajoForm.cliente.clienteCorreo"
                   class="form-control"
                   type="text"
-                  placeholder="Correo *"
+                  placeholder="(Use un correo válido)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
@@ -211,14 +208,14 @@
                   {{ errores["cliente.clienteCorreo"] }}
                 </small>
               </div>
-
               <!-- RFC -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="rfc" class="form-label">RFC</label>
+                <input id="rfc"
                   v-model="ordenTrabajoForm.cliente.rfc"
                   type="text"
                   class="form-control"
-                  placeholder="RFC"
+                  placeholder="(12 ó 13 caracteres)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
@@ -233,7 +230,6 @@
                   {{ errores["cliente.rfc"] }}
                 </small>
               </div>
-            </div>
               </div>
             </div>
           </div>
@@ -402,13 +398,13 @@
         <div class="col-4"></div>
         <div v-if="boolFactura == true" class="col-8">
           <div class="row">
-            <div class="col">
-              <div class="mb-3">
-                <input
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="razonsocial" class="form-label">Razón social *</label>
+                <input id="razonsocial"
                   v-model="ordenTrabajoForm.factura.razonSocial"
                   class="form-control"
                   type="text"
-                  placeholder="Razón Social *"
+                  placeholder="(Razón Social a facturar)"
                   @blur="validate('factura.razonSocial')"
                   :class="{ 'input-error': errores['factura.razonSocial'] }"
                 />
@@ -419,20 +415,56 @@
                   {{ errores['factura.razonSocial'] }}
                 </small>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="rfcfactura" class="form-label">RFC *</label>
+                <input id="rfcfactura"
+                  v-model="ordenTrabajoForm.factura.rfc"
+                  class="form-control"
+                  type="text"
+                  placeholder="(RFC a facturar)"
+                  @blur="validate('cliente.rfc')"
+                  :class="{ 'input-error': errores['cliente.rfc'] }"
+                />
+                <small
+                  v-if="errores['cliente.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["cliente.rfc"] }}
+                </small>
+              </div>
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="direccionfiscal" class="form-label">Dirección</label>
+                <input id="direccionfiscal"
                   v-model="ordenTrabajoForm.factura.direccion"
                   class="form-control"
                   type="text"
-                  placeholder="Dirección "
+                  placeholder="(Domicilio)"
                 />
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="cpfactura" class="form-label">Código postal *</label>
+                <input id="cpfactura"
+                  v-model="ordenTrabajoForm.factura.cp"
+                  class="form-control"
+                  type="text"
+                  placeholder="(C.P.)"
+                  @blur="validate('factura.cp')"
+                  :class="{ 'input-error': errores['factura.cp'] }"
+                />
+                <small
+                  v-if="errores['factura.cp']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.cp'] }}
+                </small>
+              </div>
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="correofactura" class="form-label">Correo *</label>
+                <input id="correofactura"
                   v-model="ordenTrabajoForm.factura.eMail"
                   class="form-control"
                   type="text"
-                  placeholder="Correo *"
+                  placeholder="(Use un correo válido)"
                   @blur="validate('factura.eMail')"
                   :class="{ 'input-error': errores['factura.eMail'] }"
                 />
@@ -444,7 +476,7 @@
                 </small>
               </div>
               
-              <div class="mb-3">
+              <div class="col-12 col-lg-6 mb-3">
                 <label class="form-label">Uso CFDI *</label>
                 <select
                   v-model="ordenTrabajoForm.factura.usoCFDI"
@@ -452,7 +484,7 @@
                   @blur="validate('factura.usoCFDI')"
                   :class="{ 'input-error': errores['factura.usoCFDI'] }"
                 >
-                  <option value="">Selecciona</option>
+                  <option value="">-Selecciona-</option>
                   <option value="G01">G01 - Adquisición de mercancías</option>
                   <option value="G02">G02 - Devoluciones, descuentos o bonificaciones</option>
                   <option value="G03">G03 - Gastos en general</option>
@@ -474,43 +506,6 @@
                   {{ errores['factura.usoCFDI'] }}
                 </small>
               </div>
-            </div>
-            <div class="col">
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.cliente.rfc"
-                  class="form-control"
-                  type="text"
-                  placeholder="RFC *"
-                  @blur="validate('cliente.rfc')"
-                  :class="{ 'input-error': errores['cliente.rfc'] }"
-                />
-
-                <small
-                  v-if="errores['cliente.rfc']"
-                  class="error-msg"
-                >
-                  {{ errores["cliente.rfc"] }}
-                </small>
-              </div>
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.factura.cp"
-                  class="form-control"
-                  type="text"
-                  placeholder="C.P. *"
-                  @blur="validate('factura.cp')"
-                  :class="{ 'input-error': errores['factura.cp'] }"
-                />
-                <small
-                  v-if="errores['factura.cp']"
-                  class="error-msg"
-                >
-                  {{ errores['factura.cp'] }}
-                </small>
-              </div>
-              
-            </div>
           </div>
         </div>
       </div>
@@ -802,12 +797,12 @@
           </div>
           <div class="text-center m-3">
             <button
-              class="btn btn-sm btn-outline-success"
+              class="btn btn-sm btn-primary"
               title="Agregar"
               @click="showModal = true"
               type="button"
             >
-              <i class="bi bi-plus-circle"></i> Abrir modal
+              <i class="bi bi-plus-circle-fill"></i> &nbsp;Editar insumos
             </button>
 
             <ModalInsumo
@@ -820,20 +815,90 @@
       </div>
 
       <div class="row my-3">
-        <div class="col"></div>
         <div class="col text-end">
           <router-link :to="{ name: 'orden-trabajo-list' }">
             <button class="btn btn-primary position-relative shadow mx-3" type="button" style="width: 140px;">
               <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
             </button>
           </router-link>
-          <button class="btn btn-success position-relative shadow ms-3" type="submit" style="width: 140px;" :disabled="!formValido">
+          <button class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" v-on:click="mostrarVista = true">
             <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
       </div>
     </form>
   </div>
+
+  <!-- Modal vista previa OT -->
+
+  <div
+      v-if="mostrarVista"
+      class="modal fade show d-block"
+      tabindex="-1"
+      :style="{ background: 'rgba(0,0,0,0.5)' }"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-1000">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Vista Previa de Orden de trabajo</h4>
+          </div>
+          <div class="modal-body p-4" :style="{ overflowY: 'auto' }">
+            <div class="row">
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header">
+                    <i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo
+                  </div>
+                  <div class="card-body">
+                    <table style="width: 100%;">
+                      <tbody>
+                        <tr><td style="font-weight: bold; color: grey;">Núm. serie: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.numSerie }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Marca: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.marca }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Modelo: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.modelo }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Color: </td><td>{{ ordenTrabajoForm.vehiculo.color }}</td><td style="font-weight: bold; color: grey;">Kilometraje: </td><td>{{ ordenTrabajoForm.vehiculo.kilometraje }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Año: </td><td>{{ ordenTrabajoForm.vehiculo.anio }}</td><td style="font-weight: bold; color: grey;">Placas: </td><td>{{ ordenTrabajoForm.vehiculo.placas }}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header">
+                    <i class="bi bi-person-fill me-2"></i> Datos del Cliente
+                  </div>
+                  <div class="card-body">
+                    <table style="width: 100%;">
+                      <tbody>
+                        <tr><td style="font-weight: bold; color: grey;">Nombre: </td><td>{{ ordenTrabajoForm.cliente.nombres }} {{ ordenTrabajoForm.cliente.apellidos }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">Teléfono: </td><td>{{ ordenTrabajoForm.cliente.clienteTelefono }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">Correo: </td><td>{{ ordenTrabajoForm.cliente.clienteCorreo }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">RFC: </td><td>{{ ordenTrabajoForm.cliente.rfc }}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row m-3">
+              <div class="col-12 col-lg-6">
+                <strong>Fecha de alta: </strong>{{ formatearFecha(ordenTrabajoForm.cliente.fechaAlta) }}
+              </div>
+              <div class="col-12 col-lg-6">
+                <strong>Fecha de entrega propuesta: </strong> {{ formatearFecha(ordenTrabajoForm.fechaEntrega) }}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="row text-end">
+              <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="mostrarVista = false">
+                  <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script setup>
@@ -857,6 +922,7 @@ const { proxy } = getCurrentInstance();
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 const showModal = ref(false);
+const mostrarVista = ref(false);
 
 const props = defineProps({
   idCotizacion: {
@@ -867,6 +933,39 @@ const props = defineProps({
 
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
 
 // Helper para acceder a propiedades anidadas tipo "cliente.telefono"
 const getValor = (path) => {
@@ -890,7 +989,7 @@ function validate(path) {
 
     "vehiculo.kilometraje": () =>
       value === ""
-        ? "Kilometraje obligat orio."
+        ? "Kilometraje obligatorio."
         : isNaN(value)
         ? "Debe ser un número."
         : value < 0
@@ -962,7 +1061,7 @@ function validate(path) {
         : null;
     },
 
-    "cliente.rfc": () => {
+    "factura.rfc": () => {
       if (!value || !value.trim()) return "RFC obligatorio.";
 
       const rfcRegex =
@@ -1015,7 +1114,7 @@ const formValido = computed(() => {
       ordenTrabajoForm.factura.usoCFDI,
       ordenTrabajoForm.factura.eMail,
       ordenTrabajoForm.factura.cp,
-      ordenTrabajoForm.cliente.rfc
+      ordenTrabajoForm.factura.rfc
     );
   }
 
@@ -1327,6 +1426,7 @@ const eliminarInsumo = (tipo, index) => {
 
   // Toggle: eliminar / restaurar
   item.eliminado = !item.eliminado;
+  calcularTotales();
 };
 
 const normalizarInsumos = () => {
@@ -1453,85 +1553,85 @@ const validarYMostrarPreview = async () => {
     `;
 
   // 🔹 Confirmación con SweetAlert
-  const result = await Swal.fire({
-    title: "Confirmar datos",
-    html: `
-            <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
+//   const result = await Swal.fire({
+//     title: "Confirmar datos",
+//     html: `
+//             <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
 
-                <div class="m-2">
-                    <!-- Cliente -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
-                          ordenTrabajoForm.cliente.nombres + " " + ordenTrabajoForm.cliente.apellidos
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
-                          ordenTrabajoForm.cliente.clienteTelefono
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${
-                          ordenTrabajoForm.cliente.metodoPago
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${
-                          ordenTrabajoForm.cliente.fechaAlta
-                        }</td></tr>
-                    </table><br>
+//                 <div class="m-2">
+//                     <!-- Cliente -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
+//                           ordenTrabajoForm.cliente.nombres + " " + ordenTrabajoForm.cliente.apellidos
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
+//                           ordenTrabajoForm.cliente.clienteTelefono
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${
+//                           ordenTrabajoForm.cliente.metodoPago
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${
+//                           ordenTrabajoForm.cliente.fechaAlta
+//                         }</td></tr>
+//                     </table><br>
 
-                    <!-- Vehículo -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${
-                          ordenTrabajoForm.vehiculo.numSerie
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${
-                          ordenTrabajoForm.vehiculo.modelo
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${
-                          ordenTrabajoForm.vehiculo.kilometraje
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${
-                          ordenTrabajoForm.vehiculo.color
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${
-                          ordenTrabajoForm.vehiculo.placas
-                        }</td></tr>
-                    </table>
+//                     <!-- Vehículo -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${
+//                           ordenTrabajoForm.vehiculo.numSerie
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${
+//                           ordenTrabajoForm.vehiculo.modelo
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${
+//                           ordenTrabajoForm.vehiculo.kilometraje
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${
+//                           ordenTrabajoForm.vehiculo.color
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${
+//                           ordenTrabajoForm.vehiculo.placas
+//                         }</td></tr>
+//                     </table>
 
-                    <!-- Factura -->
-                    ${
-                      boolFactura.value
-                        ? `
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
-                    </table>
-                    `
-                        : ""
-                    }
+//                     <!-- Factura -->
+//                     ${
+//                       boolFactura.value
+//                         ? `
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
+//                     </table>
+//                     `
+//                         : ""
+//                     }
 
-                    <!-- Insumos -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
-                    ${insumosHTML}
-                </div>
+//                     <!-- Insumos -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
+//                     ${insumosHTML}
+//                 </div>
 
-            </div>
-        `,
-    showCancelButton: true,
-    confirmButtonText: "Confirmar y enviar",
-    cancelButtonText: "Cancelar",
-    width: "700px",
-  });
+//             </div>
+//         `,
+//     showCancelButton: true,
+//     confirmButtonText: "Confirmar y enviar",
+//     cancelButtonText: "Cancelar",
+//     width: "700px",
+//   });
 
-  if (result.isConfirmed) {
-    return true;
-  }
-  return false;
+//   if (result.isConfirmed) {
+//     return true;
+//   }
+//   return false;
 
   
-};
+ };
 
 
 const guardarOT = async () => {
@@ -1863,13 +1963,13 @@ const limpiarOrdenTrabajoForm = () => {
 
 const calcularTotales = () => {
   const totalLlantas = ordenTrabajoForm.insumo.llanta
-    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
 
   const totalPaquetes = ordenTrabajoForm.insumo.paquete
-    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
 
   const totalAdicionales = ordenTrabajoForm.insumo.adicional
-    .reduce((acc, i) => acc + Number(i.subTotal || 0), 0);
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
 
   const subtotal = totalLlantas + totalPaquetes + totalAdicionales;
   const descuento = ordenTrabajoForm.totales.descuento || 0;

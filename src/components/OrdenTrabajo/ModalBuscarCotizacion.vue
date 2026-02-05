@@ -1,96 +1,71 @@
 <template>
-	<div class="input-group">
-		<!-- Botón -->
-		<button type="button" class="btn btn-outline-primary" @click="abrirModal">
-			🔍
-		</button>
-
-		<!-- Input deshabilitado -->
-		<input
-			class="form-control"
-			:value="modelValue ? `${modelValue}` : ''"
-			placeholder="Seleccione una cotización"
-			@input="onInput"
+	<div class="accordion-item">
+		<div class="accordion-header d-flex">
+			<i class="bi bi-search m-2"></i><input
+			class="form-control" data-bs-toggle="collapse" data-bs-target="#listacotiz"
+			v-model="busquedaCotizacion"
+			placeholder="Buscar cotización"
+			@input="onInputCotizacion"
 		/>
-	</div>
+		</div>
+		<div id="listacotiz" class="accordion-collapse collapse">
+			<div class="accordion-body">
+			<div class="table-responsive">
+				<table class="table table-hover table-sm">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Sucursal</th>
+							<th>Fecha</th>
+							<th>Nombre Cliente</th>
+							<th>Telefono</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="c in itmCotizaciones"
+							:key="c.idCotizacion"
+							style="cursor:pointer"
+							@click="seleccionarCotizacion(c)"
+						>
+							<td><strong>C{{ c.prefijo }} - {{ c.consecutivo }}</strong></td>
+							<td>{{ c.sucursal }}</td>
+							<td>{{ formatearFecha(c.fecha) }}</td>
+							<td>
+								{{ 
+									(c.clienteNombre && c.clienteNombre.trim())
+									|| [c.nombres, c.apPaterno, c.apMaterno].filter(p => p && p.trim()).join(' ')
+									|| 'N/A'
+								}}
+							</td>
+							<td>{{ (c.telefono && c.telefono.trim()) || "N/A"  }}</td>
+						</tr>
 
-	<!-- MODAL -->
-	<div
-		v-if="mostrarModal"
-		class="modal fade show d-block"
-		tabindex="-1"
-		style="background: rgba(0,0,0,.5)"
-	>
-		<div class="modal-dialog modal-lg modal-dialog-centered">
-			<div class="modal-content">
-
-				<div class="modal-header">
-					<h5 class="modal-title">Buscar cotización</h5>
-					<button type="button" class="btn-close" @click="cerrarModal"></button>
-				</div>
-
-				<div class="modal-body">
-					<!-- Input búsqueda -->
-					<input
-						class="form-control mb-3"
-						placeholder="Buscar por número cotización, nombre, telefono o fecha"
-						v-model="busquedaCotizacion"
-						@input="onInputCotizacion"
-					/>
-
-					<!-- Tabla resultados -->
-					<div class="table-responsive">
-						<table class="table table-hover table-sm">
-							<thead>
-								<tr>
-									<th>#</th>
-									<th>Fecha</th>
-									<th>Nombre Cliente</th>
-									<th>Telefono</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr
-									v-for="c in itmCotizaciones"
-									:key="c.idCotizacion"
-									style="cursor:pointer"
-									@click="seleccionarCotizacion(c)"
-								>
-									<td><strong>COT-{{ c.idCotizacion }}</strong></td>
-									<td>{{ formatearFecha(c.fecha) }}</td>
-									<td>
-										{{ 
-											(c.clienteNombre && c.clienteNombre.trim())
-											|| [c.nombres, c.apPaterno, c.apMaterno].filter(p => p && p.trim()).join(' ')
-											|| 'N/A'
-										}}
-									</td>
-									<td>{{ (c.telefono && c.telefono.trim()) || "N/A"  }}</td>
-								</tr>
-
-								<tr v-if="!itmCotizaciones.length">
-									<td colspan="4" class="text-center text-muted">
-										No se encontraron resultados
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-				</div>
-
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" @click="cerrarModal">
-						Cerrar
-					</button>
-				</div>
-
+						<tr v-if="!itmCotizaciones.length">
+							<td colspan="4" class="text-center text-muted">
+								No se encontraron resultados
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="text-end">
+				<button class="btn btn-secondary position-relative shadow ms-3" type="button" style="width: 140px;" v-on:click="cerrarModal">
+            		<i class="bi bi-x-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Cerrar
+          		</button>
 			</div>
 		</div>
+		</div>
+		
+		<!-- Input deshabilitado -->
+		
 	</div>
+
+	
 </template>
 
 <script setup>
-import { getCurrentInstance, ref } from 'vue'
+import { getCurrentInstance, ref, onMounted } from 'vue'
 const { proxy } = getCurrentInstance()
 
 const props = defineProps({
@@ -117,9 +92,9 @@ const abrirModal = () => {
 }
 
 const cerrarModal = () => {
-	mostrarModal.value = false
-	busquedaCotizacion.value = ''
-	itmCotizaciones.value = []
+	const accordion = bootstrap.Collapse.getOrCreateInstance(document.getElementById("listacotiz"))
+  	accordion.hide()
+	
 }
 
 const onInputCotizacion = () => {
@@ -131,6 +106,7 @@ const onInputCotizacion = () => {
 
 const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
 	try {
+		itmCotizaciones.value = []
 		const url = new URL(
 			proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada'
 		)
@@ -162,4 +138,8 @@ const formatearFecha = (fechaIso) => {
 		year: 'numeric'
 	})
 }
+
+onMounted(() => {
+	cargarCotizacionesAprobadasOrRealizadas()
+});
 </script>

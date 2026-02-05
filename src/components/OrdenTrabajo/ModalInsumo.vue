@@ -21,10 +21,9 @@
           <!-- PAQUETES -->
           <div class="row mb-4">
             <div class="col">
-              <div class="border rounded shadow-sm p-4 bg-light text-start">
-                	<h3 class="fw-semibold ms-2">Paquetes</h3>
+              <div class="border rounded shadow-sm p-4 text-start">
 
-						<div class="col text-start my-3">
+						<div class="col text-start my-2">
 						<div
 							v-for="(paquete, i) in paqueteDisponibles"
 							:key="i"
@@ -49,22 +48,21 @@
           <!-- LLANTAS -->
           <div class="row mb-4">
 
-			<div class="col">
-			  <div class="border rounded shadow-sm p-4 bg-light text-start">
-				 <h3 class="fw-semibold mb-3">Llantas</h3>
+			<div class="col text-start my-2">
+				 <h5>Seleccionar las llantas deseadas</h5>
 					<!-- Filtros -->
-					 <div class="d-flex gap-3 mb-3">
-							 <!-- Buscar -->
-							<input
+					 <div class="row">
+            <div class="col-9">
+              <input
 								type="text"
 								class="form-control"
 								placeholder="Buscar (modelo, marca, medidas...)"
 								v-model="search"
 								@input="onSearch"
-								style="max-width: 300px"
 							/>
-
-									<div class="position-relative">
+            </div>
+            <div class="col-3">
+              <div class="position-relative">
 									<button
 									type="button"
 									class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
@@ -112,31 +110,31 @@
             	    				  </div>
                 					</div>
               					</div>
+            </div>
+							 <!-- Buscar -->
+							
+
+
             				</div>
-						</div>
 					</div>
 
 
 				<!-- TABLA LLANTAS CON CONTENEDOR -->
-				<div class="row mb-4">
+				<div class="row my-3">
 					<div class="col">
 
-							<div class="border rounded shadow-sm p-4 bg-light text-start">
-
 							<div class="table-responsive">
-								<table class="table table-sm table-hover align-middle mb-0">
+								<table class="table table-sm table-hover align-middle mb-0" style="font-size: 9pt;">
 
-								<thead class="table-light">
-									<tr class="small text-muted">
-									<th>Código</th>
-									<th>Modelo</th>
-									<th>Marca</th>
-									<th>Medidas</th>
+								<thead class="table-light" style="font-size: 9pt;">
+									<tr>
+                  <th class="text-start">Llanta</th>
 									<th>Rango</th>
-									<th>Almacén</th>
+                  <th>Código</th>
+									<th>Medidas</th>
 									<th class="text-center">Cantidad</th>
+                  <th>Ubicación</th>
 									<th class="text-end">Precio</th>
-
 									<th class="text-end"></th>
 									</tr>
 								</thead>
@@ -144,28 +142,22 @@
 								<tbody>
 									<tr v-for="(item, index) in items" :key="index">
 
-									<td class="fw-medium">{{ item.codigo }}</td>
-									<td>{{ item.modelo }}</td>
-									<td>{{ item.marca }}</td>
+									<td class="text-start">{{ item.marca }} {{ item.modelo }}</td>
+                  <td>{{ item.rango }}</td>
+                  <td>{{ item.codigo }}</td>
 									<td>{{ item.medida }}</td>
-									<td>{{ item.rango }}</td>
-
-									
-
-									<td>{{ item.ubicacion }}</td>
-
 									<td class="text-center">
 										{{ item.cantidad }}
 									</td>
-									<td class="text-end fw-semibold">
+									<td>{{ item.ubicacion }}</td>
+									<td class="text-end">
 										${{ item.precio }}
 									</td>
-
 									<td class="text-end">
 										<button
 										v-if="!llantas.some((ll) => ll.idLlanta === item.idLlanta)"
 										type="button"
-										class="btn btn-outline-success btn-sm"
+										class="btn btn-success btn-sm"
 										@click="agregarLlanta(item.objLlanta)"
 										>
 										<i class="bi bi-plus"></i>
@@ -186,7 +178,6 @@
 
 								</table>
 							</div>
-						</div>
 					</div>
 				</div>
 
@@ -586,11 +577,13 @@
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary mx-4" @click="close">
-            Cerrar
+          <button type="button" class="btn btn-secondary position-relative mx-4" style="width: 130px;" @click="close">
+            <i class="bi bi-x-circle-fill position-absolute start-0 ms-2"></i>
+            &nbsp;Cerrar
           </button>
-          <button type="button" class="btn btn-primary" @click="guardarInsumo">
-            Guardar
+          <button type="button" class="btn btn-success position-relative" style="width: 130px;" @click="guardarInsumo">
+            <i class="bi bi-save-fill position-absolute start-0 ms-2"></i>
+            &nbsp;Guardar
           </button>
         </div>
       </div>

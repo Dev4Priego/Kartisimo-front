@@ -28,6 +28,33 @@
                 <div class="spinner-border text-primary" role="status"></div>
                 <p class="mt-2 text-muted">Cargando órdenes de trabajo...</p>
             </div>
+<<<<<<< HEAD
+=======
+            <div v-else class="col">
+                <table class="table">
+                    <thead>
+                        <tr class="align-middle text-center">
+                            <th>#</th>
+                            <th>Cliente</th>
+                            <th>Vehículo</th>
+                            <th>Fecha</th>
+                            <th>Técnico</th>
+                            <th>Pago</th>
+                            <th>Factura</th>
+                            <th>Estatus</th>
+                            <th>Desechar Llanta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>                        
+                        <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo" class="text-justify">
+                            <td style="white-space: nowrap;">OT-{{ ot.idOrdenTrabajo }}</td>
+                            <td>{{ ot.clienteNombre}} {{ot.clienteTelefono}}</td>
+                            <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
+                            <td>{{ formatearFecha(ot.fechaAlta) }}</td>
+                            <td>{{ ot.empleadoNombre }}</td>
+                            <td>{{ ot.metodoPago }}</td>
+>>>>>>> 3b5003e4f56aa6cd71671520c47ff95706d2c079
 
             <div v-else class="col-12">
                 <div class="table-responsive bg-white rounded shadow-sm">
@@ -65,32 +92,23 @@
                                     <i v-else class="bi bi-dash-circle text-muted"></i>
                                 </td>
 
-                                <td class="text-center">
-                                    <span :class="badgeEstatus(ot.estado)">{{ ot.estado }}</span>
-                                </td>
+                            <td style="white-space: nowrap;">
+                                <div class="d-flex gap-1">
+                                    <button
+                                        class="btn btn-sm btn-outline-info"
+                                        @click="router.push(`/content/orden-trabajo/${ot.idOrdenTrabajo}`)"
+                                    ><i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning"
+                                    ><i class="bi bi-pencil-square"></i></button>
+                                </div>
                                 
-                                <td class="text-center">
-                                    <div class="btn-group">
-                                        <button 
-                                            class="btn btn-sm btn-outline-primary"
-                                            @click="router.push(`/content/orden-trabajo/${ot.idOrdenTrabajo}`)"
-                                            title="Ver detalles"
-                                        >
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button 
-                                            class="btn btn-sm btn-outline-secondary"
-                                            @click="irAEditar(ot)"
-                                            title="Editar Orden, Cliente y Vehículo"
-                                        >
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+
+                                
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -109,6 +127,7 @@ const listaOrdenTrabajo = ref({
     totales: { finalizado: 0, enCurso: 0, creado: 0 }
 });
 
+<<<<<<< HEAD
 // Configuración visual de los totales
 const totalesMap = {
     finalizado: { label: 'Completadas', color: 'border-success text-success' },
@@ -116,6 +135,43 @@ const totalesMap = {
     creado: { label: 'Pendientes', color: 'border-danger text-danger' }
 };
 
+=======
+const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
+
+
+/***** CRAGA DE INFORMACION *****/
+>>>>>>> 3b5003e4f56aa6cd71671520c47ff95706d2c079
 const cargarOrdenTrabajo = async () => {
     loading.value = true
     try {
