@@ -408,9 +408,9 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		Swal.close()
 		
 		if (response.ok) {
-			Swal.fire('✅ Enviado', 'El correo con el PDF se envió correctamente.', 'success')
+			Swal.fire(' Enviado', 'El correo con el PDF se envió correctamente.', 'success')
 		} else {
-			Swal.fire('❌ Error', 'No se pudo enviar el correo.', 'error')
+			Swal.fire(' Error', 'No se pudo enviar el correo.', 'error')
 			let data = await response.json()
 			console.log(JSON.stringify(data))
 		}

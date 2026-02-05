@@ -197,7 +197,9 @@
                 <small>
                   <strong>Blvd. Lopez Mateos 827<br />esq. Apolo</strong><br />
                   Col. Obrera C.P. 37340<br />
-                  Tel. 477 717 7440 y 477 470 9419<br />
+                  Tel. 47
+                  
+                  7 717 7440 y 477 470 9419<br />
                   apolo@kartisimo.mx
                 </small>
               </div>
@@ -264,6 +266,11 @@
                  </span>
               </div>
             </div>
+
+
+
+
+            
           </div>
 
             <!-- Tabla Llantas -->
@@ -2838,7 +2845,6 @@ const aplicarPromocionGeneral = async () => {
   });
 };
 
-
 // CREAR / EDITAR COTIZACIONES
 const guardarCotizacion = async () => {
   try {
@@ -2902,10 +2908,11 @@ const guardarCotizacion = async () => {
 
     let clienteEncontrado = null;
 
-    if (cotizacionForm.clienteExistente) {
-      clienteEncontrado = clientesDisponibles.value.find(
-        (c) => c.nombres === cotizacionForm.clienteExistente
-      );
+    if (
+      cotizacionForm.clienteExistente &&
+      typeof cotizacionForm.clienteExistente === "object"
+    ) {
+      clienteEncontrado = cotizacionForm.clienteExistente;
     }
 
     // ⚠️ IMPORTANTE: NO reconstruir el nombre en editar
@@ -2968,7 +2975,9 @@ const guardarCotizacion = async () => {
     /* ================= PAYLOAD ================= */
 
     const nuevaCotizacion = {
-      codigo: rawId,
+      codigo: cotizacionForm.codigo
+        ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
+        : null,
       mostrarTotal: cotizacionForm.mostrarTotal,
       idSucursal: loggeduser.usuario.idSucursal,
       cliente,
@@ -3002,7 +3011,6 @@ const guardarCotizacion = async () => {
     console.log("RESPUESTA BACKEND:", data);
 
     mostrarToast("success", "Cotización guardada");
-
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
@@ -3246,8 +3254,6 @@ const abrirModalCotizacion = (cotizacion = null) => {
   } else {
     tituloModal.value = "Nueva Cotización";
 
-    // Solo limpiar observaciones para nueva cotización
-    cotizacionForm.observaciones = "";
   }
   console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
