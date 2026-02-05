@@ -32,6 +32,7 @@ import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adi
 const orden = ref(null)
 
 
+
 const cargarOrden = async () => {
   orden.value = {
     paquetes: [],

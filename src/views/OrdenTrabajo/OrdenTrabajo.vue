@@ -81,12 +81,12 @@
                     </thead>
                     <tbody>                        
                         <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo" class="text-justify">
-                            <td>OT-{{ ot.idOrdenTrabajo }}</td>
+                            <td style="white-space: nowrap;">OT-{{ ot.idOrdenTrabajo }}</td>
                             <td>{{ ot.clienteNombre}} {{ot.clienteTelefono}}</td>
                             <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
-                            <td>{{ ot.fechaAlta}}</td>
-                            <td>{{ot.empleadoNombre}}</td>
-                            <td>{{ot.metodoPago}}</td>
+                            <td>{{ formatearFecha(ot.fechaAlta) }}</td>
+                            <td>{{ ot.empleadoNombre }}</td>
+                            <td>{{ ot.metodoPago }}</td>
 
                             <td v-if="ot.requiereFactura" class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
                             <td v-else class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
@@ -98,15 +98,19 @@
                             <td v-if="ot.desecharLlanta" class="text-center"><i class="bi bi-check-circle-fill text-success"></i></td>
                             <td v-else class="text-center"><i class="bi bi-x-circle text-danger"></i></td>
 
-                            <td>
-                                <button
-                                    class="btn btn-sm btn-outline-primary"
-                                    @click="router.push(`/content/orden-trabajo/${ot.idOrdenTrabajo}`)"
-                                >
-                                    Ver
-                                </button>
+                            <td style="white-space: nowrap;">
+                                <div class="d-flex gap-1">
+                                    <button
+                                        class="btn btn-sm btn-outline-info"
+                                        @click="router.push(`/content/orden-trabajo/${ot.idOrdenTrabajo}`)"
+                                    ><i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning"
+                                    ><i class="bi bi-pencil-square"></i></button>
+                                </div>
+                                
 
-                                <button class="btn btn-sm btn-outline-secondary">Editar</button>
+                                
                             </td>
                         </tr>
                     </tbody>
@@ -132,6 +136,40 @@ const listaOrdenTrabajo = ref({
         creado:0
     }
 });
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
+
 
 /***** CRAGA DE INFORMACION *****/
 const cargarOrdenTrabajo = async () => {

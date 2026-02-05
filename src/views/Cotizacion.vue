@@ -187,7 +187,7 @@
             <div class="row border-bottom pb-3 mb-4">
               <div class="col-3">
                 <small>
-                  <strong>Blvd. Delta 2002 esq. Rio Mayo</strong><br />
+                  <strong>Blvd. Delta 2002 <br />esq. Rio Mayo</strong><br />
                   Col. Valle de Jerez C.P 37538<br />
                   Tel. 477 330 6060 y 477 390 5090<br />
                   delta@kartisimo.mx </small
@@ -223,41 +223,35 @@
             <!-- Información del cliente -->
             <div class="mb-4 cotizacion-header">
               <div class="row">
-                <div class="col-1">
+                <div class="col-2">
                   <span class="me-2">
                     {{ "C" + vistaCotizacion.codigo || "N/A" }}
                   </span>
                 </div>
-                <div class="col-4">
+                <div class="col-5">
                   <span>
                     <strong>Fecha emisión: </strong>
                     {{ vistaCotizacion.fechaCreacion || "N/A" }}
                   </span>
                 </div>
-                <div class="col-3">
-                  <span class="me-2">
-                    <strong>Sucursal: </strong>
-                    {{ vistaCotizacion.sucursal || "N/A" }}
-                  </span>
-                </div>
-                <div class="col-4"></div>
-              </div>
-              <div class="row">
-                <div class="col-1"></div>
-                <div class="col-4">
+                <div class="col-5">
                   <span class="me-2">
                     <strong>Cliente: </strong>
                     {{ vistaCotizacion.cliente?.nombre || "N/A" }}
                   </span>
                 </div>
-                <div class="col-3">
+              </div>
+              <div class="row">
+                <div class="col-2"></div>
+                
+                <div class="col-5">
                   <span class="me-2">
                     <strong>Teléfono: </strong>
                     {{ telefonoVistaFormateado || "N/A" }}
                   </span>
                   
                 </div>
-                <div class="col-4">
+                <div class="col-5">
                   <span class="me-2">
                     <strong>Correo: </strong>
                     {{ vistaCotizacion.cliente?.correo || "N/A" }}
@@ -4009,10 +4003,10 @@ const generarPDF = async () => {
               width: "auto",
               text: [
                 {
-                  text: "Cliente: ",
+                  text: "Teléfono(s): ",
                   bold: true,
                 },
-                `${v.cliente.nombre || "N/A"}`,
+                { text: v.cliente.telefono || "N/A", color: "#444" },
               ],
               fontSize: 10,
               margin: [0, 0, 10, 6],
@@ -4023,36 +4017,15 @@ const generarPDF = async () => {
               width: "auto",
               text: [
                 {
-                  text: "Sucursal: ",
+                  text: "Cliente: ",
                   bold: true,
                 },
-                `${v.sucursal || "N/A"}`,
+                `${v.cliente.nombre || "N/A"}`,
               ],
               fontSize: 10,
               margin: [0, 0, 10, 6],
             },
             {
-              width: "auto",
-              text: [
-                {
-                  text: "Teléfono(s): ",
-                  bold: true,
-                },
-                { text: v.cliente.telefono || "N/A", color: "#444" },
-              ],
-              fontSize: 10,
-              margin: [0, 0, 10, 6],
-            },
-          ],
-            [
-              {
-                width: "auto",
-                text: " ",
-                fontSize: 10,
-                margin: [0, 0, 0, 6],
-              },
-              
-              {
                 width: "auto",
                 text: [
                   {
@@ -4064,7 +4037,8 @@ const generarPDF = async () => {
                 fontSize: 10,
                 margin: [0, 0, 0, 6],
               },
-            ],
+          ],
+            
         ]
       },
       {
