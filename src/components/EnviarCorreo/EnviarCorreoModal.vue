@@ -1,8 +1,9 @@
 <template>
 	<div class="mt-4">
 		<!-- Botón que abre el modal -->
-		<button class="btn btn-outline-danger w-100" @click="abrirModal">
-			Enviar por correo
+		<button class="btn btn-primary shadow w-100 position-relative btn-sm py-2 rounded" @click="abrirModal">
+			<i class="bi-envelope-paper-fill position-absolute start-0 ms-2"></i>
+			&nbsp;&nbsp;Enviar por correo
 		</button>
 	</div>
 </template>
@@ -26,13 +27,14 @@ const abrirModal = async () => {
 
 	// console.log('llanta ' + JSON.stringify(props.cotizacion.llantasSelecionadas[1].medidas))
 
-	const texto = props.cotizacion.llantasSelecionadas[0].medidas;
+	const texto = props.cotizacion?.llantasSelecionadas[0]?.medidas || "";
 
 	const match = texto.match(/\d{3}\/\d{2}\s*r?\d{2}/i);
 
-	const medida = match ? match[0].toUpperCase() : null;
+	const medida = match ? match[0].toUpperCase() : null || "";
 
-	// console.log(medida);
+	const correo = props.cotizacion.cliente.correo ;
+	// console.log(correo);
 
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
@@ -40,21 +42,25 @@ const abrirModal = async () => {
 	}
 
 	const { value: formValues } = await Swal.fire({
-		title: 'Enviar por correo',
+		title: '<h3>Enviar cotización por correo</h3>',
 		html: `
-			<input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email">
-			<input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo">
-			<textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..."></textarea>
+			<table style="margin-left: 0px; margin-right: 0px;">
+			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}" style="width: 280px; font-size: 12pt;"></td></tr>
+			<tr><td><input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo" style="width: 470px; font-size: 12pt;"></td></tr>
+			<tr><td><textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..." style="width: 470px; font-size: 12pt;"></textarea></td></tr>
+			</table>
 		`,
+		width: '600px',
 		confirmButtonText: 'Enviar',
 		showCancelButton: true,
+		cancelButtonText: 'Cancelar',
 		focusConfirm: false,
 		preConfirm: () => {
 			const email = document.getElementById('correo').value
 			const subj = document.getElementById('asunto').value
 			const msg = document.getElementById('mensaje').value
 
-			if (!email || !subj || !msg) {
+			if (!email || !subj) {
 				Swal.showValidationMessage('Completa todos los campos')
 				return false
 			}

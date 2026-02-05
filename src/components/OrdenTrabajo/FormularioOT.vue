@@ -17,18 +17,22 @@
         </div>
       </div>
       <hr />
-      <div class="row">
-        <div class="col">
-          <div class="row separador p-2">
-            <h5 class="text-center">Vehículo</h5>
-            <div class="col">
-              <div class="mb-3">
-                <input
+      <div class="row mb-4 align-items-stretch">
+        <div class="col-12 col-lg-6 mb-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-header" style="font-size: 14pt;">
+              <i class="bi bi-car-front-fill me-2"></i> Vehículo
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-6 mb-3">
+                  <label for="sumserie" class="form-label">Núm. Serie *</label>
+                <input id="numserie"
                   v-model="ordenTrabajoForm.vehiculo.numSerie"
                   @input="onSerieInput($event.target.value)"
                   @change="onSerieSeleccionada"
                   list="vehiculos"
-                  placeholder="Num. Serie *"
+                  placeholder="(17 caracteres)"
                   class="form-control"
                   @blur="validate('vehiculo.numSerie')"
                   :class="{ 'input-error': errores['vehiculo.numSerie'] }"
@@ -47,8 +51,23 @@
                   </option>
                 </datalist>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="marca" class="form-label">Marca *</label>
+                <input id="marca"
+                  v-model="ordenTrabajoForm.vehiculo.marca"
+                  class="form-control"
+                  type="text"
+                  placeholder="Marca"
+                  @blur="validate('vehiculo.marca')"
+                  :class="{ 'input-error': errores['vehiculo.marca'] }"
+                />
+                <small v-if="errores['vehiculo.marca']" class="error-msg">
+                  {{ errores["vehiculo.marca"] }}
+                </small>
+              </div>
+              <div class="col-6 mb-3">
+                <label for="modelo" class="form-label">Modelo *</label>
+                <input id="modelo"
                   v-model="ordenTrabajoForm.vehiculo.modelo"
                   class="form-control"
                   type="text"
@@ -60,51 +79,9 @@
                   {{ errores["vehiculo.modelo"] }}
                 </small>
               </div>
-
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.kilometraje"
-                  class="form-control"
-                  type="number"
-                  placeholder="Kilometraje *"
-                  @blur="validate('vehiculo.kilometraje')"
-                  :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
-                />
-                <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
-                  {{ errores["vehiculo.kilometraje"] }}
-                </small>
-              </div>
-
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.anio"
-                  class="form-control"
-                  type="text"
-                  placeholder="Año *"
-                  @blur="validate('vehiculo.anio')"
-                  :class="{ 'input-error': errores['vehiculo.anio'] }"
-                />
-                <small v-if="errores['vehiculo.anio']" class="error-msg">
-                  {{ errores["vehiculo.anio"] }}
-                </small>
-              </div>
-            </div>
-            <div class="col">
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.vehiculo.marca"
-                  class="form-control"
-                  type="text"
-                  placeholder="Marca *"
-                  @blur="validate('vehiculo.marca')"
-                  :class="{ 'input-error': errores['vehiculo.marca'] }"
-                />
-                <small v-if="errores['vehiculo.marca']" class="error-msg">
-                  {{ errores["vehiculo.marca"] }}
-                </small>
-              </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="color" class="form-label">Color *</label>
+                <input id="color"
                   v-model="ordenTrabajoForm.vehiculo.color"
                   class="form-control"
                   type="text"
@@ -116,12 +93,42 @@
                   {{ errores["vehiculo.color"] }}
                 </small>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="kilometraje" class="form-label">Kilometraje *</label>
+                <input id="kilometraje"
+                  v-model="ordenTrabajoForm.vehiculo.kilometraje"
+                  class="form-control"
+                  type="number"
+                  placeholder="(Kilometraje actual)"
+                  @blur="validate('vehiculo.kilometraje')"
+                  :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
+                />
+                <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
+                  {{ errores["vehiculo.kilometraje"] }}
+                </small>
+              </div>
+
+              <div class="col-6 mb-3">
+                <label for="aniomodelo" class="form-label">Año *</label>
+                <input id="aniomodelo"
+                  v-model="ordenTrabajoForm.vehiculo.anio"
+                  class="form-control"
+                  type="number"
+                  placeholder="Ej: 2019"
+                  @blur="validate('vehiculo.anio')"
+                  :class="{ 'input-error': errores['vehiculo.anio'] }"
+                />
+                <small v-if="errores['vehiculo.anio']" class="error-msg">
+                  {{ errores["vehiculo.anio"] }}
+                </small>
+              </div>
+              <div class="col-6 mb-3">
+                <label for="placas" class="form-label">Placas *</label>
+                <input id="placas"
                   v-model="ordenTrabajoForm.vehiculo.placas"
                   class="form-control"
                   type="text"
-                  placeholder="Placas *"
+                  placeholder="Ej: GAB-254-A"
                   @blur="validate('vehiculo.placas')"
                   :class="{ 'input-error': errores['vehiculo.placas'] }"
                 />
@@ -129,45 +136,46 @@
                   {{ errores["vehiculo.placas"] }}
                 </small>
               </div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="col">
-          <div class="row separador p-2">
-            <h5 class="text-center">Cliente</h5>
-            <div class="col">
+        <div class="col-12 col-lg-6 mb-3">
+          <div class="card shadow-sm h-100">
+            <div class="card-header" style="font-size: 14pt;">
+              <i class="bi bi-person-fill me-2"></i> Cliente
+            </div>
+            <div class="card-body">
+              <div class="row">
               <!-- Nombre -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="nombrecliente" class="form-label">Nombre(s) *</label>
+                <input id="nombrecliente"
                   v-model="ordenTrabajoForm.cliente.nombres"
                   class="form-control"
                   type="text"
-                  placeholder="Nombre's *"
+                  placeholder="Nombre del cliente"
                   list="clientes"
                 />
-            
               </div>
-
               <!-- Apellidos -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="apellidos" class="form-label">Apellido(s) *</label>
+                <input id="apellidos"
                   v-model="ordenTrabajoForm.cliente.apellidos"
                   type="text"
                   class="form-control"
-                  placeholder="Apellido's *"
+                  placeholder="Apellido(s) del cliente"
                 />
-               
               </div>
-            </div>
-
-            <div class="col">
               <!-- Teléfono -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="telefono" class="form-label">Teléfono(s) *</label>
+                <input id="telefono"
                   v-model="ordenTrabajoForm.cliente.clienteTelefono"
                   class="form-control"
                   type="text"
-                  placeholder="Teléfono *"
+                  placeholder="(10 dígitos)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
@@ -179,14 +187,14 @@
                   {{ errores["cliente.clienteTelefono"] }}
                 </small>
               </div>
-
               <!-- Correo -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="email" class="form-label">Correo electrónico *</label>
+                <input id="email"
                   v-model="ordenTrabajoForm.cliente.clienteCorreo"
                   class="form-control"
                   type="text"
-                  placeholder="Correo *"
+                  placeholder="(Use un correo válido)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
@@ -200,20 +208,28 @@
                   {{ errores["cliente.clienteCorreo"] }}
                 </small>
               </div>
-
               <!-- RFC -->
-              <div class="mb-3">
-                <input
+              <div class="col-6 mb-3">
+                <label for="rfc" class="form-label">RFC</label>
+                <input id="rfc"
                   v-model="ordenTrabajoForm.cliente.rfc"
                   type="text"
                   class="form-control"
-                  placeholder="RFC"
+                  placeholder="(12 ó 13 caracteres)"
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
                   @blur="validate('cliente.rfc')"
                   :class="{ 'input-error': errores['cliente.rfc'] }"
                 />
+
+                <small
+                  v-if="errores['cliente.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["cliente.rfc"] }}
+                </small>
+              </div>
               </div>
             </div>
           </div>
@@ -240,7 +256,7 @@
       </div>
 
       <div class="row">
-        <div class="col">
+        <div class="col-3">
           <!-- Método de pago -->
           <div class="mb-3">
             <label class="form-label" for="formaPago">Forma de pago *</label>
@@ -274,7 +290,7 @@
             </small>
           </div>
         </div>
-        <div class="col">
+        <div class="col-6">
           <div class="mb-3">
             <label class="form-label">Fecha de entrega propuesta *</label>
             <div class="row">
@@ -284,6 +300,7 @@
                   class="form-control"
                   v-model="fechaEntregaFecha"
                   @change="unirFechaHora"
+                  :class="{ 'input-error': errores['fechaEntrega'] }"
                 />
               </div>
               <div class="col">
@@ -292,6 +309,7 @@
                   class="form-control"
                   v-model="fechaEntregaHora"
                   @change="unirFechaHora"
+                  :class="{ 'input-error': errores['fechaEntrega'] }"
                 />
               </div>
             </div>
@@ -301,15 +319,14 @@
             </small>
           </div>
         </div>
-        <div class="col">
+        <div class="col-3">
           <div class="mb-3">
             <label class="form-label">Fecha Alta *</label>
             <input
               v-model="ordenTrabajoForm.cliente.fechaAlta"
               class="form-control"
               type="datetime-local"
-              @blur="validate('cliente.fechaAlta')"
-              :class="{ 'input-error': errores['cliente.fechaAlta'] }"
+              
               disabled
             />
             <small v-if="errores['cliente.fechaAlta']" class="error-msg">
@@ -381,64 +398,114 @@
         <div class="col-4"></div>
         <div v-if="boolFactura == true" class="col-8">
           <div class="row">
-            <div class="col">
-              <div class="mb-3">
-                <input
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="razonsocial" class="form-label">Razón social *</label>
+                <input id="razonsocial"
                   v-model="ordenTrabajoForm.factura.razonSocial"
                   class="form-control"
                   type="text"
-                  placeholder="Razón Social *"
+                  placeholder="(Razón Social a facturar)"
+                  @blur="validate('factura.razonSocial')"
+                  :class="{ 'input-error': errores['factura.razonSocial'] }"
                 />
+                <small
+                  v-if="errores['factura.razonSocial']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.razonSocial'] }}
+                </small>
               </div>
-              <div class="mb-3">
-                <input
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="rfcfactura" class="form-label">RFC *</label>
+                <input id="rfcfactura"
+                  v-model="ordenTrabajoForm.factura.rfc"
+                  class="form-control"
+                  type="text"
+                  placeholder="(RFC a facturar)"
+                  @blur="validate('cliente.rfc')"
+                  :class="{ 'input-error': errores['cliente.rfc'] }"
+                />
+                <small
+                  v-if="errores['cliente.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["cliente.rfc"] }}
+                </small>
+              </div>
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="direccionfiscal" class="form-label">Dirección</label>
+                <input id="direccionfiscal"
                   v-model="ordenTrabajoForm.factura.direccion"
                   class="form-control"
                   type="text"
-                  placeholder="Dirección *"
+                  placeholder="(Domicilio)"
                 />
               </div>
-              <div class="mb-3">
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="cpfactura" class="form-label">Código postal *</label>
+                <input id="cpfactura"
+                  v-model="ordenTrabajoForm.factura.cp"
+                  class="form-control"
+                  type="text"
+                  placeholder="(C.P.)"
+                  @blur="validate('factura.cp')"
+                  :class="{ 'input-error': errores['factura.cp'] }"
+                />
+                <small
+                  v-if="errores['factura.cp']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.cp'] }}
+                </small>
+              </div>
+              <div class="col-12 col-lg-6 mb-3">
+                <label for="correofactura" class="form-label">Correo *</label>
+                <input id="correofactura"
+                  v-model="ordenTrabajoForm.factura.eMail"
+                  class="form-control"
+                  type="text"
+                  placeholder="(Use un correo válido)"
+                  @blur="validate('factura.eMail')"
+                  :class="{ 'input-error': errores['factura.eMail'] }"
+                />
+                <small
+                  v-if="errores['factura.eMail']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.eMail'] }}
+                </small>
+              </div>
+              
+              <div class="col-12 col-lg-6 mb-3">
                 <label class="form-label">Uso CFDI *</label>
                 <select
                   v-model="ordenTrabajoForm.factura.usoCFDI"
                   class="form-select"
-                  name="usoCFDI"
-                  id="slcUsoCFDI"
+                  @blur="validate('factura.usoCFDI')"
+                  :class="{ 'input-error': errores['factura.usoCFDI'] }"
                 >
-                  <option value="">Selecciona</option>
-                  <option value="">Uso CFDI 1</option>
-                  <option value="">Uso CFDI 2</option>
-                  <option value="">Uso CFDI 3</option>
+                  <option value="">-Selecciona-</option>
+                  <option value="G01">G01 - Adquisición de mercancías</option>
+                  <option value="G02">G02 - Devoluciones, descuentos o bonificaciones</option>
+                  <option value="G03">G03 - Gastos en general</option>
+
+                  <option value="I01">I01 - Construcciones</option>
+                  <option value="I02">I02 - Mobiliario y equipo de oficina por inversiones</option>
+                  <option value="I03">I03 - Equipo de transporte</option>
+                  <option value="I04">I04 - Equipo de cómputo y accesorios</option>
+                  <option value="I05">I05 - Dados, troqueles, moldes, matrices y herramental</option>
+                  <option value="I06">I06 - Comunicaciones telefónicas</option>
+                  <option value="I07">I07 - Comunicaciones satelitales</option>
+                  <option value="I08">I08 - Otra maquinaria y equipo</option>
+                  <option value="S01">S01 - Sin efectos fiscales</option>
                 </select>
+                <small
+                  v-if="errores['factura.usoCFDI']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.usoCFDI'] }}
+                </small>
               </div>
-            </div>
-            <div class="col">
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.cliente.rfc"
-                  class="form-control"
-                  type="text"
-                  placeholder="RFC *"
-                />
-              </div>
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.factura.eMail"
-                  class="form-control"
-                  type="text"
-                  placeholder="E-mail *"
-                />
-              </div>
-              <div class="mb-3">
-                <input
-                  v-model="ordenTrabajoForm.factura.cp"
-                  class="form-control"
-                  type="text"
-                  placeholder="C.P. *"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -448,8 +515,7 @@
           <h5>Desechar Llantas</h5>
         </div>
         <div class="col-8">
-          <label class="form-label">¿Se desea desechar llantas antiguas?</label
-          ><br />
+          <label class="form-label">¿Se desea desechar llantas antiguas?</label><br/>
           Si
           <input
             v-model="boolDesecharLlanta"
@@ -476,7 +542,6 @@
           <div
             class="row"
             id="tablaInsumos"
-            style="max-height: 400px; overflow-y: auto"
           >
             <table class="table table-hover table-sm">
               <thead>
@@ -621,8 +686,8 @@
                   >
                     <td class="ps-4">↳ {{ detalle.descripcion }}</td>
                     <td>{{ detalle.cantidad }}</td>
-                    <td>{{ detalle.precioUnitario }}</td>
-                    <td>{{ detalle.subTotal }}</td>
+                    <td></td>
+                    <td></td>
                     <td></td>
                   </tr>
                 </template>
@@ -687,40 +752,153 @@
                   </tr>
                 </template>
               </transition-group>
+              
+              <tfoot class="table-light">
+                <!-- <tr>
+                  <th colspan="3" class="text-end">Subtotal</th>
+                  <th class="text-end">
+                    {{
+                      ordenTrabajoForm.totales.subtotal.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr>
+
+                <tr>
+                  <th colspan="3" class="text-end">IVA (16%)</th>
+                  <th class="text-end">
+                    {{
+                      ordenTrabajoForm.totales.iva.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr> -->
+
+                <tr class="table-secondary fw-bold">
+                  <th colspan="3" class="text-end fs-6">TOTAL</th>
+                  <th class="text-end fs-6">
+                    {{
+                      ordenTrabajoForm.totales.total.toLocaleString("es-MX", {
+                        style: "currency",
+                        currency: "MXN",
+                      })
+                    }}
+                  </th>
+                  <th></th>
+                </tr>
+              </tfoot>
             </table>
           </div>
           <div class="text-center m-3">
             <button
-              class="btn btn-sm btn-outline-success"
+              class="btn btn-sm btn-primary"
               title="Agregar"
               @click="showModal = true"
               type="button"
             >
-              <i class="bi bi-plus-circle"></i> Abrir modal
+              <i class="bi bi-plus-circle-fill"></i> &nbsp;Editar insumos
             </button>
 
             <ModalInsumo
               v-model="showModal"
-              title="Insumos"
               :insumos="ordenTrabajoForm.insumo"
+              @update:insumos="actualizarInsumos"
             />
           </div>
         </div>
       </div>
 
       <div class="row my-3">
-        <div class="col"></div>
         <div class="col text-end">
-          <router-link :to="{ name: 'OrdenTrabajo' }">
-            <button class="btn btn-dark mx-4" type="button">Volver</button>
+          <router-link :to="{ name: 'orden-trabajo-list' }">
+            <button class="btn btn-primary position-relative shadow mx-3" type="button" style="width: 140px;">
+              <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
+            </button>
           </router-link>
-          <button class="btn btn-primary" type="submit" :disabled="!formValido">
-            Guardar
+          <button class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" v-on:click="mostrarVista = true">
+            <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
       </div>
     </form>
   </div>
+
+  <!-- Modal vista previa OT -->
+
+  <div
+      v-if="mostrarVista"
+      class="modal fade show d-block"
+      tabindex="-1"
+      :style="{ background: 'rgba(0,0,0,0.5)' }"
+    >
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-1000">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Vista Previa de Orden de trabajo</h4>
+          </div>
+          <div class="modal-body p-4" :style="{ overflowY: 'auto' }">
+            <div class="row">
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header">
+                    <i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo
+                  </div>
+                  <div class="card-body">
+                    <table style="width: 100%;">
+                      <tbody>
+                        <tr><td style="font-weight: bold; color: grey;">Núm. serie: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.numSerie }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Marca: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.marca }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Modelo: </td><td colspan="3">{{ ordenTrabajoForm.vehiculo.modelo }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Color: </td><td>{{ ordenTrabajoForm.vehiculo.color }}</td><td style="font-weight: bold; color: grey;">Kilometraje: </td><td>{{ ordenTrabajoForm.vehiculo.kilometraje }}</td></tr>
+                      <tr><td style="font-weight: bold; color: grey;">Año: </td><td>{{ ordenTrabajoForm.vehiculo.anio }}</td><td style="font-weight: bold; color: grey;">Placas: </td><td>{{ ordenTrabajoForm.vehiculo.placas }}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-6">
+                <div class="card shadow-sm h-100">
+                  <div class="card-header">
+                    <i class="bi bi-person-fill me-2"></i> Datos del Cliente
+                  </div>
+                  <div class="card-body">
+                    <table style="width: 100%;">
+                      <tbody>
+                        <tr><td style="font-weight: bold; color: grey;">Nombre: </td><td>{{ ordenTrabajoForm.cliente.nombres }} {{ ordenTrabajoForm.cliente.apellidos }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">Teléfono: </td><td>{{ ordenTrabajoForm.cliente.clienteTelefono }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">Correo: </td><td>{{ ordenTrabajoForm.cliente.clienteCorreo }}</td></tr>
+                        <tr><td style="font-weight: bold; color: grey;">RFC: </td><td>{{ ordenTrabajoForm.cliente.rfc }}</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row m-3">
+              <div class="col-12 col-lg-6">
+                <strong>Fecha de alta: </strong>{{ formatearFecha(ordenTrabajoForm.cliente.fechaAlta) }}
+              </div>
+              <div class="col-12 col-lg-6">
+                <strong>Fecha de entrega propuesta: </strong> {{ formatearFecha(ordenTrabajoForm.fechaEntrega) }}
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <div class="row text-end">
+              <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="mostrarVista = false">
+                  <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 </template>
 
 <script setup>
@@ -744,6 +922,7 @@ const { proxy } = getCurrentInstance();
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 const showModal = ref(false);
+const mostrarVista = ref(false);
 
 const props = defineProps({
   idCotizacion: {
@@ -754,6 +933,39 @@ const props = defineProps({
 
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+  const formatearFechaSinHora = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+    return fechaFormateada;
+  };
 
 // Helper para acceder a propiedades anidadas tipo "cliente.telefono"
 const getValor = (path) => {
@@ -773,11 +985,11 @@ function validate(path) {
     "vehiculo.modelo": () => (!value ? "Modelo obligatorio." : null),
 
     "vehiculo.numSerie": () =>
-      value.length < 5 ? "Debe tener al menos 5 caracteres." : null,
+      value.length < 17 ? "El número de serie (VIN) debe ser de 17 caracteres." : null,
 
     "vehiculo.kilometraje": () =>
       value === ""
-        ? "Kilometraje obligat orio."
+        ? "Kilometraje obligatorio."
         : isNaN(value)
         ? "Debe ser un número."
         : value < 0
@@ -793,17 +1005,73 @@ function validate(path) {
     "vehiculo.anio": () => {
       const y = parseInt(value);
       const current = new Date().getFullYear();
+      const nextyear = current + 1;
       return !y
         ? "Año obligatorio."
-        : y < 1950 || y > current
-        ? `Año entre 1950 y ${current}.`
+        : y < 1950 || y > nextyear
+        ? `Año entre 1950 y ${nextyear}.`
         : null;
+    },
+
+    "fechaEntrega": () => {
+      if (!ordenTrabajoForm.fechaEntrega)
+        return "La fecha y hora de entrega son obligatorias.";
+
+      const entrega = new Date(ordenTrabajoForm.fechaEntrega);
+      const ahora = new Date();
+
+      if (entrega < ahora)
+        return "La fecha de entrega no puede ser menor a la actual.";
+
+      return null;
     },
 
     idEmpleado: () =>
       !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
         ? "Debes seleccionar un técnico."
         : null,
+
+    
+    // -------- FACTURA ----------
+    "factura.razonSocial": () =>
+      !value || !value.trim()
+        ? "Razón social obligatoria."
+        : null,
+
+    "factura.usoCFDI": () =>
+      !value
+        ? "Debe seleccionar un uso CFDI."
+        : null,
+
+    "factura.eMail": () => {
+      if (!value || !value.trim()) return "Correo obligatorio.";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
+        : null;
+    },
+
+    "factura.cp": () => {
+      if (!value || !value.trim()) return "Código postal obligatorio.";
+
+      const cpRegex = /^\d{5}$/;
+      return !cpRegex.test(value)
+        ? "El código postal debe tener 5 dígitos."
+        : null;
+    },
+
+    "factura.rfc": () => {
+      if (!value || !value.trim()) return "RFC obligatorio.";
+
+      const rfcRegex =
+        /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+
+      return !rfcRegex.test(value.toUpperCase())
+        ? "RFC no válido."
+        : null;
+    },
+
   };
 
   // Ejecutar regla
@@ -813,12 +1081,11 @@ function validate(path) {
   else delete errores[path];
 }
 
-// Mantiene el boton de guardar deshabilitado hasta que no exista ningun error de validacion
+// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
 const formValido = computed(() => {
-  // si hay errores -> formulario inválido
+  // Si hay errores → inválido
   if (Object.keys(errores).length > 0) return false;
-
-  // Validar si todos los campos obligatorios tienen valor
+  // Campos obligatorios SIEMPRE
   const requiredFields = [
     ordenTrabajoForm.fechaEntrega,
 
@@ -836,13 +1103,28 @@ const formValido = computed(() => {
     ordenTrabajoForm.vehiculo.placas,
     ordenTrabajoForm.vehiculo.anio,
 
-    // TECNICO
+    // TÉCNICO
     ordenTrabajoForm.idEmpleado,
   ];
 
-  // Si uno está vacío → formulario inválido
-  return requiredFields.every((v) => v !== "" && v !== null && v !== undefined);
+  // 3️⃣ Campos obligatorios SOLO si se desea factura
+  if (boolFactura.value === true) {
+    requiredFields.push(
+      ordenTrabajoForm.factura.razonSocial,
+      ordenTrabajoForm.factura.usoCFDI,
+      ordenTrabajoForm.factura.eMail,
+      ordenTrabajoForm.factura.cp,
+      ordenTrabajoForm.factura.rfc
+    );
+  }
+
+  // 4️⃣ Validación final (no vacío / no null)
+  return requiredFields.every(
+    (v) => v !== "" && v !== null && v !== undefined
+  );
 });
+
+
 
 const getFechaHoraLocal = () => {
   const ahora = new Date();
@@ -896,10 +1178,16 @@ const ordenTrabajoForm = reactive({
     paquete: [],
     adicional: [],
   },
+  totales: {
+    subtotal: 0,
+    descuento: 0,
+    iva: 0,
+    total: 0,
+  },
 });
 
 const irAOrdenTrabajo = () => {
-  router.push({ name: "OrdenTrabajo" });
+  router.push({ name: "orden-trabajo-list" });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
@@ -930,7 +1218,7 @@ const onCotizacionSeleccionada = async (idCotizacion) => {
 };
 
 const cargarEmpleados = async () => {
-  const userSession = JSON.parse(sessionStorage.getItem("userSession"));
+  const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
     const res = await fetch(
       proxy.$serverIP +
@@ -1082,6 +1370,8 @@ const onClienteSeleccionado = (cliente) => {
   ordenTrabajoForm.cliente.rfc = cliente.rfc || "";
   ordenTrabajoForm.cliente.clienteTelefono = cliente.telefono || "";
   ordenTrabajoForm.cliente.clienteCorreo = cliente.correo || "";
+  ordenTrabajoForm.cliente.apellidos = cliente.apPaterno + " " + cliente.apMaterno;
+  ordenTrabajoForm.cliente.nombres = cliente.nombres
 };
 
 const onClienteSeleccionadoByValue = (valor) => {
@@ -1136,6 +1426,7 @@ const eliminarInsumo = (tipo, index) => {
 
   // Toggle: eliminar / restaurar
   item.eliminado = !item.eliminado;
+  calcularTotales();
 };
 
 const normalizarInsumos = () => {
@@ -1206,134 +1497,149 @@ const validarYMostrarPreview = async () => {
                 </tr>
             </thead>
             <tbody>
-                ${ordenTrabajoForm.insumo.llanta
-                  .map(
-                    (i) => `
+              ${ordenTrabajoForm.insumo.llanta
+                .map(
+                  (i) => `
                 <tr>
-                    <td>${i.descripcion}</td>
-                    <td style="text-align:center">${i.cantidad}</td>
-                    <td style="text-align:right">$${i.precioUnitario.toFixed(
-                      2
-                    )}</td>
-                    <td style="text-align:right">$${i.subTotal}</td>
+                  <td>${i.descripcion}</td>
+                  <td style="text-align:center">${i.cantidad}</td>
+                  <td style="text-align:right">$${i.precioUnitario.toFixed(2)}</td>
+                  <td style="text-align:right">$${i.subTotal}</td>
                 </tr>
-                `
-                  )
-                  .join("")}
-                ${ordenTrabajoForm.insumo.paquete
-                  .map(
-                    (p) => `
+              `
+                )
+                .join("")}
+
+              ${ordenTrabajoForm.insumo.paquete
+                .map(
+                  (p) => `
                 <tr style="font-weight:bold; background:#fafafa;">
-                    <td>${p.descripcion}</td>
-                    <td style="text-align:center">${p.cantidad}</td>
-                    <td style="text-align:right">$${p.precioUnitario.toFixed(
-                      2
-                    )}</td>
-                    <td style="text-align:right">$${p.subTotal}</td>
+                  <td>${p.descripcion}</td>
+                  <td style="text-align:center">${p.cantidad}</td>
+                  <td style="text-align:right">$${p.precioUnitario.toFixed(2)}</td>
+                  <td style="text-align:right">$${p.subTotal}</td>
                 </tr>
                 ${p.detalle
                   .map(
                     (d) => `
-                    <tr style="color:#555;">
+                  <tr style="color:#555;">
                     <td style="padding-left:20px;">↳ ${d.descripcion}</td>
                     <td style="text-align:center">${d.cantidad}</td>
-                    <td style="text-align:right">$${d.precioUnitario.toFixed(
-                      2
-                    )}</td>
+                    <td style="text-align:right">$${d.precioUnitario.toFixed(2)}</td>
                     <td style="text-align:right">$${d.subTotal}</td>
-                    </tr>
+                  </tr>
                 `
                   )
                   .join("")}
-                `
-                  )
-                  .join("")}
+              `
+                )
+                .join("")}
+
+              ${ordenTrabajoForm.insumo.adicional
+                .map(
+                  (a) => `
+                <tr>
+                  <td>${a.descripcion}</td>
+                  <td style="text-align:center">${a.cantidad}</td>
+                  <td style="text-align:right">$${Number(a.precioUnitario).toFixed(2)}</td>
+                  <td style="text-align:right">$${a.subTotal}</td>
+                </tr>
+              `
+                )
+                .join("")}
             </tbody>
+
         </table>
     `;
 
   // 🔹 Confirmación con SweetAlert
-  const result = await Swal.fire({
-    title: "Confirmar datos",
-    html: `
-            <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
+//   const result = await Swal.fire({
+//     title: "Confirmar datos",
+//     html: `
+//             <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
 
-                <div class="m-2">
-                    <!-- Cliente -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
-                          ordenTrabajoForm.cliente.clienteNombre
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
-                          ordenTrabajoForm.cliente.clienteTelefono
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${
-                          ordenTrabajoForm.cliente.metodoPago
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${
-                          ordenTrabajoForm.cliente.fechaAlta
-                        }</td></tr>
-                    </table><br>
+//                 <div class="m-2">
+//                     <!-- Cliente -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
+//                           ordenTrabajoForm.cliente.nombres + " " + ordenTrabajoForm.cliente.apellidos
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
+//                           ordenTrabajoForm.cliente.clienteTelefono
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${
+//                           ordenTrabajoForm.cliente.metodoPago
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${
+//                           ordenTrabajoForm.cliente.fechaAlta
+//                         }</td></tr>
+//                     </table><br>
 
-                    <!-- Vehículo -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${
-                          ordenTrabajoForm.vehiculo.numSerie
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${
-                          ordenTrabajoForm.vehiculo.modelo
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${
-                          ordenTrabajoForm.vehiculo.kilometraje
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${
-                          ordenTrabajoForm.vehiculo.color
-                        }</td></tr>
-                        <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${
-                          ordenTrabajoForm.vehiculo.placas
-                        }</td></tr>
-                    </table>
+//                     <!-- Vehículo -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${
+//                           ordenTrabajoForm.vehiculo.numSerie
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${
+//                           ordenTrabajoForm.vehiculo.modelo
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${
+//                           ordenTrabajoForm.vehiculo.kilometraje
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${
+//                           ordenTrabajoForm.vehiculo.color
+//                         }</td></tr>
+//                         <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${
+//                           ordenTrabajoForm.vehiculo.placas
+//                         }</td></tr>
+//                     </table>
 
-                    <!-- Factura -->
-                    ${
-                      boolFactura.value
-                        ? `
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
-                    <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
-                    <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
-                    </table>
-                    `
-                        : ""
-                    }
+//                     <!-- Factura -->
+//                     ${
+//                       boolFactura.value
+//                         ? `
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
+//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
+//                     <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
+//                     </table>
+//                     `
+//                         : ""
+//                     }
 
-                    <!-- Insumos -->
-                    <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
-                    ${insumosHTML}
-                </div>
+//                     <!-- Insumos -->
+//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
+//                     ${insumosHTML}
+//                 </div>
 
-            </div>
-        `,
-    showCancelButton: true,
-    confirmButtonText: "Confirmar y enviar",
-    cancelButtonText: "Cancelar",
-    width: "700px",
-  });
+//             </div>
+//         `,
+//     showCancelButton: true,
+//     confirmButtonText: "Confirmar y enviar",
+//     cancelButtonText: "Cancelar",
+//     width: "700px",
+//   });
 
-  if (result.isConfirmed) {
-    return true;
-  }
-  return false;
-};
+//   if (result.isConfirmed) {
+//     return true;
+//   }
+//   return false;
+
+  
+ };
 
 
 const guardarOT = async () => {
-  //console.log(ordenTrabajoForm.vehiculo.numSerie)
+  
+  const userStorage = localStorage.getItem("userSession");
+
+  const dataUser = JSON.parse(userStorage)
+
   let factura = {};
 
   if (boolFactura) {
@@ -1348,7 +1654,8 @@ const guardarOT = async () => {
   }
 
   const objSeend = {
-    idUsuario: 1,
+    idUsuario: dataUser.usuario.idUsuario,
+    idSucursal: dataUser.usuario.idSucursal,
     idCotizacion: ordenTrabajoForm.cotSeleccionada,
     idEmpleado: ordenTrabajoForm.idEmpleado,
     idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
@@ -1360,9 +1667,8 @@ const guardarOT = async () => {
     descripcion: "",
     cliente: {
       idCliente: ordenTrabajoForm.cliente.id_cliente,
-      nombres: ordenTrabajoForm.cliente.clienteNombre,
-      apPaterno: ordenTrabajoForm.cliente.apPaterno,
-      apMaterno: ordenTrabajoForm.cliente.apMaterno,
+      nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
+      apellidos: ordenTrabajoForm.cliente.apellidos,
       rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
       telefono: ordenTrabajoForm.cliente.clienteTelefono,
       correo: ordenTrabajoForm.cliente.clienteCorreo,
@@ -1468,12 +1774,12 @@ const cargarInfoCotizacion = async () => {
 
   const data = await res.json();
 
-  console.log(JSON.stringify(data))
+  // console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
 
   ordenTrabajoForm.cliente.clienteNombre = data.clienteNombre || "";
   ordenTrabajoForm.cliente.nombres = data.nombres || "";
-  ordenTrabajoForm.cliente.apellidos = data.apPaterno != null && data.apMaterno != null ? data.apPaterno + " " + data.apMaterno : "";
+  ordenTrabajoForm.cliente.apellidos = `${data?.apPaterno ?? ""} ${data?.apMaterno ?? ""}`.trim();
   ordenTrabajoForm.cliente.clienteTelefono = data.telefono || "";
   ordenTrabajoForm.cliente.clienteCorreo = data.correo || "";
 
@@ -1561,7 +1867,7 @@ const cargarInfoCotizacion = async () => {
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
           idPromocion: s.idPromocion ?? 0,
-          idConceptoTrabajo: 0,
+          idConceptoTrabajo: 7,
 
           descripcion: s.descripcion,
           observacion: s.observacion,
@@ -1590,6 +1896,7 @@ const cargarInfoCotizacion = async () => {
       })
     ),
   };
+  calcularTotales();
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };
 
@@ -1654,6 +1961,29 @@ const limpiarOrdenTrabajoForm = () => {
   };
 };
 
+const calcularTotales = () => {
+  const totalLlantas = ordenTrabajoForm.insumo.llanta
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
+
+  const totalPaquetes = ordenTrabajoForm.insumo.paquete
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
+
+  const totalAdicionales = ordenTrabajoForm.insumo.adicional
+    .reduce((acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0), 0);
+
+  const subtotal = totalLlantas + totalPaquetes + totalAdicionales;
+  const descuento = ordenTrabajoForm.totales.descuento || 0;
+  const iva = (subtotal - descuento) * 0.16;
+
+  ordenTrabajoForm.totales.subtotal = Number(subtotal.toFixed(2));
+  ordenTrabajoForm.totales.iva = Number(iva.toFixed(2));
+  ordenTrabajoForm.totales.total = Number(
+    //(subtotal - descuento + iva).toFixed(2)
+    (subtotal - descuento).toFixed(2)
+  );
+};
+
+
 // observa idCotizacion prop, en cuanto se envie un valor nuevo actualiza y carga la informacion de la cotizacion
 watch(
   () => props.idCotizacion,
@@ -1661,12 +1991,25 @@ watch(
     if (!newValue) return;
 
     ordenTrabajoForm.cotSeleccionada = newValue;
-    // busquedaCotizacion.value = newValue;
-    //console.log("watch: " + ordenTrabajoForm.cotSeleccionada);
     await cargarInfoCotizacion();
   },
   { immediate: true }
 );
+
+const actualizarInsumos = (payload) => {
+  // payload = { insumo, totales }
+
+  ordenTrabajoForm.insumo.llanta = payload.insumo.llanta;
+  ordenTrabajoForm.insumo.paquete = payload.insumo.paquete;
+  ordenTrabajoForm.insumo.adicional = payload.insumo.adicional;
+
+  ordenTrabajoForm.totales.subtotal = payload.totales.subtotal;
+  ordenTrabajoForm.totales.descuento = payload.totales.descuento;
+  ordenTrabajoForm.totales.iva = payload.totales.iva;
+  ordenTrabajoForm.totales.total = payload.totales.total;
+};
+
+
 </script>
 
 <style scoped>
