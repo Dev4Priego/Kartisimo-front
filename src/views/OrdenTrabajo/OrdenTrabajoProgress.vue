@@ -5,6 +5,7 @@
     <div class="progress" style="height: 22px">
       <div
         class="progress-bar"
+        role="progressbar"
         :style="{ width: porcentaje + '%' }"
       >
         {{ porcentaje }}%
@@ -26,17 +27,22 @@ const props = defineProps({
   adicionales: { type: Array, default: () => [] }
 })
 
-const todas = computed(() => [
-  ...props.paquetes,
-  ...props.llantas,
-  ...props.adicionales
-])
+/**
+ * 🔒 Blindaje total contra undefined / null
+ */
+const todas = computed(() => {
+  const paquetes = Array.isArray(props.paquetes) ? props.paquetes : []
+  const llantas = Array.isArray(props.llantas) ? props.llantas : []
+  const adicionales = Array.isArray(props.adicionales) ? props.adicionales : []
+
+  return [...paquetes, ...llantas, ...adicionales].filter(Boolean)
+})
 
 const total = computed(() => todas.value.length)
 
-const completadas = computed(() =>
-  todas.value.filter(t => t.completada === true).length
-)
+const completadas = computed(() => {
+  return todas.value.filter(t => t && t.completada === true).length
+})
 
 const porcentaje = computed(() => {
   if (total.value === 0) return 0

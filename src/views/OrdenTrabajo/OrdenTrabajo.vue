@@ -1,102 +1,20 @@
 <template>
-    <div class="container-fluid p-4">
-        <div class="row mx-4">
-            <div class="col">
-                <h2><i class="bi bi-wrench-adjustable me-2"></i> Órdenes de Trabajo</h2>
-            </div>
-            <div class="col-4 col-lg-3">
-                <router-link :to="{ name: 'orden-trabajo-form' }">
-                    <button 
-                        class="btn btn-primary position-relative shadow form-control"
-                    ><i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>
-                        &nbsp;Nueva orden de trabajo
-                    </button>
-                </router-link>
-            </div>
-        </div>
-        <div class="row mt-4 mx-4">
-            <div class="col">
-                <div class="mt-3 mt-md-0">
-                    <div class="border-start border-4 border-success bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-success">{{listaOrdenTrabajo.totales.finalizado}}</h5>
-                        <small class="text-muted">Completadas</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="mt-3 mt-md-0">
-                    <div class="border-start border-4 border-primary bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-primary">{{listaOrdenTrabajo.totales.enCurso}}</h5>
-                        <small class="text-muted">En curso</small>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class=" mt-3 mt-md-0">
-                    <div class="border-start border-4 border-danger bg-white rounded shadow-sm p-3">
-                        <h5 class="mb-0 fw-bold text-danger">{{listaOrdenTrabajo.totales.creado}}</h5>
-                        <small class="text-muted">Pendientes</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="row p-3">
-            <div v-if="loading" class="text-center my-4">
-                <table class="table table-hover table-sm">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Cliente</th>
-                            <th>Técnico</th>
-                            <th>Fecha</th>
-                            <th>Vehículo</th>
-                            <th>Pago</th>
-                            <th>Factura</th>
-                            <th>Total Insumos</th>
-                            <th>Estatus</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>                                      
-                </table>
-                <div class="text-center my-4">
-                    <div class="spinner-border text-primary" role="status"></div>
-                    <p class="mt-2 text-muted">Cargando ordenes de trabajo...</p>
-                </div>  
-            </div>
-            <div v-else class="col">
-                <table class="table">
-                    <thead>
-                        <tr class="align-middle text-center">
-                            <th>#</th>
-                            <th>Cliente</th>
-                            <th>Vehículo</th>
-                            <th>Fecha</th>
-                            <th>Técnico</th>
-                            <th>Pago</th>
-                            <th>Factura</th>
-                            <th>Estatus</th>
-                            <th>Desechar Llanta</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>                        
-                        <tr v-for="ot in listaOrdenTrabajo.ordenes" :key="ot.idOrdenTrabajo" class="text-justify">
-                            <td style="white-space: nowrap;">OT-{{ ot.idOrdenTrabajo }}</td>
-                            <td>{{ ot.clienteNombre}} {{ot.clienteTelefono}}</td>
-                            <td>{{ ot.vehiculoModelo}} {{ot.vehiculoPlacas}}</td>
-                            <td>{{ formatearFecha(ot.fechaAlta) }}</td>
-                            <td>{{ ot.empleadoNombre }}</td>
-                            <td>{{ ot.metodoPago }}</td>
   <div class="container-fluid p-4">
+
     <!-- HEADER -->
-    <div class="row mx-4">
+    <div class="row mx-4 align-items-center">
       <div class="col">
-        <h2>Orden de Trabajo</h2>
+        <h2>
+          <i class="bi bi-wrench-adjustable me-2"></i>
+          Órdenes de Trabajo
+        </h2>
       </div>
-      <div class="col-4">
-        <router-link :to="{ name: 'formOT' }">
-          <button class="btn btn-outline-primary form-control">
-            Nueva Orden
+
+      <div class="col-4 col-lg-3">
+        <router-link :to="{ name: 'orden-trabajo-form' }">
+          <button class="btn btn-primary form-control">
+            <i class="bi bi-plus-lg me-2"></i>
+            Nueva orden
           </button>
         </router-link>
       </div>
@@ -105,8 +23,10 @@
     <!-- TOTALES -->
     <div class="row mt-4 mx-4">
       <div class="col" v-for="(v, k) in listaOrdenTrabajo.totales" :key="k">
-        <div class="border-start border-4 bg-white rounded shadow-sm p-3"
-             :class="colorTotal(k)">
+        <div
+          class="border-start border-4 bg-white rounded shadow-sm p-3"
+          :class="colorTotal(k)"
+        >
           <h5 class="mb-0 fw-bold">{{ v }}</h5>
           <small class="text-muted">{{ nombreTotal(k) }}</small>
         </div>
@@ -115,25 +35,24 @@
 
     <!-- TABLA -->
     <div class="row p-3">
-      <div v-if="loading" class="text-center my-4">
+      <div v-if="loading" class="text-center my-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2">Cargando órdenes...</p>
+        <p class="mt-2 text-muted">Cargando órdenes...</p>
       </div>
 
       <div v-else class="col">
         <table class="table table-hover align-middle text-center">
-          <thead>
+          <thead class="table-light">
             <tr>
               <th>#</th>
               <th>Cliente</th>
               <th>Vehículo</th>
               <th>Fecha</th>
               <th>Técnico</th>
-              <th>Tipo OT</th>
               <th>Pago</th>
               <th>Factura</th>
               <th>Estatus</th>
-              <th>Desechar Llanta</th>
+              <th>Desechar</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -144,11 +63,10 @@
               :key="ot.idOrdenTrabajo"
             >
               <td>OT-{{ ot.idOrdenTrabajo }}</td>
-              <td>{{ ot.clienteNombre }} {{ ot.clienteTelefono }}</td>
+              <td>{{ ot.clienteNombre }}</td>
               <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
               <td>{{ formatearFecha(ot.fechaAlta) }}</td>
               <td>{{ ot.empleadoNombre }}</td>
-              <td>{{ ot.tipoOrdenTrabajo }}</td>
               <td>{{ ot.metodoPago }}</td>
 
               <!-- FACTURA -->
@@ -192,12 +110,16 @@
                     <i class="bi bi-eye"></i>
                   </button>
 
-                  <button
-                    class="btn btn-sm btn-outline-warning"
-                    @click="abrirModalEditar(ot)"
-                  >
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
+                 <button
+                  class="btn btn-sm btn-outline-warning"
+                  @click="editarOT(ot.idOrdenTrabajo)"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+
+
+
+
                 </div>
               </td>
             </tr>
@@ -238,7 +160,10 @@
 
             <div class="col-md-6">
               <label class="form-label">Factura</label>
-              <select class="form-select" v-model="otEditar.requiereFactura">
+              <select
+                class="form-select"
+                v-model="otEditar.requiereFactura"
+              >
                 <option :value="true">Sí</option>
                 <option :value="false">No</option>
               </select>
@@ -256,6 +181,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -273,7 +199,7 @@ const listaOrdenTrabajo = ref({
   totales: { finalizado: 0, enCurso: 0, creado: 0 },
 });
 
-/* ================= MODAL ================= */
+/* ===== MODAL ===== */
 const otEditar = ref({});
 let modalEditar;
 
@@ -293,11 +219,9 @@ const guardarEdicion = async () => {
   cargarOrdenTrabajo();
 };
 
-/* ================= DATA ================= */
+/* ===== DATA ===== */
 const cargarOrdenTrabajo = async () => {
-  const res = await fetch(
-    `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`
-  );
+  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`);
   const result = await res.json();
   listaOrdenTrabajo.value = result.data;
   loading.value = false;
@@ -307,7 +231,7 @@ const verOT = (id) => {
   router.push(`/content/orden-trabajo/${id}`);
 };
 
-/* ================= HELPERS ================= */
+/* ===== HELPERS ===== */
 const formatearFecha = (f) =>
   new Date(f).toLocaleDateString("es-MX");
 
@@ -333,4 +257,10 @@ const nombreTotal = (k) =>
   }[k]);
 
 onMounted(cargarOrdenTrabajo);
+
+const editarOT = (id) => {
+  console.log(' Editar OT:', id)
+  router.push(`/content/orden-trabajo/${id}/work`)
+}
+
 </script>
