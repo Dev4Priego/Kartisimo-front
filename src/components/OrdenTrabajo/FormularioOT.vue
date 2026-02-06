@@ -1,6 +1,6 @@
 <template>
   <div class="container p-4 bs-body">
-    <form @submit.prevent="guardarOT()">
+    <form>
       <div class="row my-3">
         <h2 class="text-start">Nueva Orden de Trabajo</h2>
         <hr />
@@ -807,7 +807,7 @@
 
             <ModalInsumo
               v-model="showModal"
-              :insumos="ordenTrabajoForm.insumo"
+              :insumos="insumosFiltrados"
               @update:insumos="actualizarInsumos"
             />
           </div>
@@ -821,7 +821,7 @@
               <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
             </button>
           </router-link>
-          <button class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" v-on:click="mostrarVista = true">
+          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true">
             <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
@@ -843,8 +843,8 @@
             <h4 class="modal-title">Vista Previa de Orden de trabajo</h4>
           </div>
           <div class="modal-body p-4" :style="{ overflowY: 'auto' }">
-            <div class="row">
-              <div class="col-12 col-lg-6">
+            <div class="row gp-2">
+              <div class="col-12 col-lg-6 mb-3">
                 <div class="card shadow-sm h-100">
                   <div class="card-header">
                     <i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo
@@ -862,7 +862,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-12 col-lg-6">
+              <div class="col-12 col-lg-6 mb-3">
                 <div class="card shadow-sm h-100">
                   <div class="card-header">
                     <i class="bi bi-person-fill me-2"></i> Datos del Cliente
@@ -880,12 +880,85 @@
                 </div>
               </div>
             </div>
-            <div class="row m-3">
+            <div class="row mb-3 mx-3">
               <div class="col-12 col-lg-6">
                 <strong>Fecha de alta: </strong>{{ formatearFecha(ordenTrabajoForm.cliente.fechaAlta) }}
               </div>
               <div class="col-12 col-lg-6">
                 <strong>Fecha de entrega propuesta: </strong> {{ formatearFecha(ordenTrabajoForm.fechaEntrega) }}
+              </div>
+              <div class="col-12 mt-1">
+                <strong>Técnico seleccionado: </strong> {{ tecnicoSeleccionado }}
+              </div>
+              <div class="col-12 mt-1">
+                <strong>Forma de pago: </strong> {{ ordenTrabajoForm.cliente.metodoPago }}
+              </div>
+              <div class="col-12 mt-1">
+                <strong>Desechar llantas antiguas: </strong> {{ boolDesecharLlanta ? "Sí" : "No" }}
+              </div>
+            </div>
+            <div v-if="boolFactura" class="card shadow-sm">
+              <div class="card-header">
+                <i class="bi bi-receipt me-2"></i> Datos de facturación
+              </div>
+              <div class="card-body">
+                <table style="width:100%;">
+                  <tbody>
+                    <tr><td style="font-weight: bold; color: grey;">Razón social:</td><td>{{ ordenTrabajoForm.factura.razonSocial }}</td>
+                    <td style="font-weight: bold; color: grey;">RFC:</td><td>{{ ordenTrabajoForm.cliente.rfc }}</td></tr>
+                    <tr><td style="font-weight: bold; color: grey;">Email:</td><td>{{ ordenTrabajoForm.factura.eMail }}</td>
+                    <td style="font-weight: bold; color: grey;">CP:</td><td>{{ ordenTrabajoForm.factura.cp }}</td></tr>
+                    <tr><td style="font-weight: bold; color: grey;">Uso CFDI:</td><td colspan="3">{{ usoCFDITexto }}</td></tr>
+                  </tbody>
+                </table>
+              </div> 
+            </div>
+            <div v-else class="mx-4 mb-2">
+              El cliente no solicitó factura.
+            </div>
+            <div class="card shadow-sm mt-3">
+              <div class="card-header">
+                <i class="bi bi-nut-fill me-2"></i> Insumos
+              </div>
+              <div class="card-body">
+                <table style="width: 100%;">
+                  <thead>
+                    <tr style="background:#f0f0f0; text-align:center;">
+                      <th>Descripción</th>
+                      <th>Cantidad</th>
+                      <th>P/U</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="i in ordenTrabajoForm.insumo.llanta" :key="i.idLlanta">
+                      <td>{{ i.descripcion }}</td>
+                      <td class="text-center">{{ i.cantidad }}</td>
+                      <td class="text-end">${{ i.precioUnitario.toFixed(2) }}</td>
+                      <td class="text-end">${{ i.subTotal }}</td>
+                    </tr>
+                    <template v-for="p in ordenTrabajoForm.insumo.paquete" :key="p.idPaquete">
+                      <tr style="font-weight:bold; background:#fafafa;">
+                        <td>{{ p.descripcion }}</td>
+                        <td class="text-center">{{ p.cantidad }}</td>
+                        <td class="text-end">${{ p.precioUnitario.toFixed(2) }}</td>
+                        <td class="text-end">${{ p.subTotal }}</td>
+                      </tr>
+                      <tr v-for="d in p.detalle" :key="d.idDetalle" style="color:#555;">
+                        <td style="padding-left:20px;">↳ {{ d.descripcion }}</td>
+                        <td class="text-center">{{ d.cantidad }}</td>
+                        <td class="text-end">-</td>
+                        <td class="text-end">-</td>
+                      </tr>
+                    </template>
+                    <tr v-for="a in ordenTrabajoForm.insumo.adicional" :key="a.idAdicional">
+                      <td>{{ a.descripcion }}</td>
+                      <td class="text-center">{{ a.cantidad }}</td>
+                      <td class="text-end">${{ Number(a.precioUnitario).toFixed(2) }}</td>
+                      <td class="text-end">${{ a.subTotal }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
@@ -893,6 +966,9 @@
             <div class="row text-end">
               <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="mostrarVista = false">
                   <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
+                </button>
+                <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarOT()">
+                  <i class="bi-save-fill position-absolute start-0 ms-2"></i> Guardar OT
                 </button>
             </div>
           </div>
@@ -923,6 +999,21 @@ const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 const showModal = ref(false);
 const mostrarVista = ref(false);
+
+const catalogoUsoCFDI = [
+  { clave: 'G01', texto: 'Adquisición de mercancías' },
+  { clave: 'G02', texto: 'Devoluciones, descuentos o bonificaciones' },
+  { clave: 'G03', texto: 'Gastos en general' },
+  { clave: 'I01', texto: 'Construcciones' },
+  { clave: 'I02', texto: 'Mobiliario y equipo de oficina por inversiones' },
+  { clave: 'I03', texto: 'Equipo de transporte' },
+  { clave: 'I04', texto: 'Equipo de cómputo y accesorios' },
+  { clave: 'I05', texto: 'Dados, troqueles, moldes, matrices y herramental' },
+  { clave: 'I06', texto: 'Comunicaciones telefónicas' },
+  { clave: 'I07', texto: 'Comunicaciones satelitales' },
+  { clave: 'I08', texto: 'Otra maquinaria y equipo' },
+  { clave: 'S01', texto: 'Sin efectos fiscales' },
+]
 
 const props = defineProps({
   idCotizacion: {
@@ -1137,6 +1228,24 @@ const getFechaHoraLocal = () => {
 
 const fechaEntregaFecha = ref("");
 const fechaEntregaHora = ref("");
+
+const tecnicoSeleccionado = computed(() => {
+  const emp = itmEmpleados.value.find(
+    e => e.idEmpleado === ordenTrabajoForm.idEmpleado
+  )
+
+  if (!emp) return ''
+
+  return `(${emp.puesto}) ${emp.nombres} ${emp.apePaterno}`
+});
+
+const usoCFDITexto = computed(() => {
+  const uso = catalogoUsoCFDI.find(
+    u => u.clave === ordenTrabajoForm.factura.usoCFDI
+  )
+
+  return uso ? `${uso.clave} - ${uso.texto}` : ''
+});
 
 const ordenTrabajoForm = reactive({
   cotSeleccionada: 0,
@@ -1415,6 +1524,13 @@ const onClienteSeleccionadoByValue = (valor) => {
 /***************************/
 // FUNCIONES INSUMOS
 
+const insumosFiltrados = computed(() => ({
+  ...ordenTrabajoForm.insumo,
+  llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
+  paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
+  adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
+}))
+
 const eliminarInsumo = (tipo, index) => {
   const item = ordenTrabajoForm.insumo[tipo][index];
   if (!item) return;
@@ -1639,6 +1755,7 @@ const guardarOT = async () => {
   const userStorage = localStorage.getItem("userSession");
 
   const dataUser = JSON.parse(userStorage)
+  console.log('Entró');
 
   let factura = {};
 
@@ -1689,24 +1806,23 @@ const guardarOT = async () => {
     insumos: ordenTrabajoForm.insumo,
   };
 
-  if (await validarYMostrarPreview()) {
-    // console.log("Valido");
-    // console.log("GUARDAR OT: " + JSON.stringify(objSeend));
-    fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(objSeend),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          // console.log("OT guardada:", data);
-          limpiarOrdenTrabajoForm(); // Limpia formulario
-          irAOrdenTrabajo();
-        } else {
-          console.log("No guardada");
-        }
-      });
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      limpiarOrdenTrabajoForm(); // Limpia formulario
+      irAOrdenTrabajo();         // Redirige
+    } else {
+      console.log("No guardada", data);
+    }
+  } catch (err) {
+    console.error("Error al guardar OT:", err);
   }
 };
 

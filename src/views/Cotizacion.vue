@@ -2975,9 +2975,7 @@ const guardarCotizacion = async () => {
     /* ================= PAYLOAD ================= */
 
     const nuevaCotizacion = {
-      codigo: cotizacionForm.codigo
-        ? Number(cotizacionForm.codigo.replace(/^COT-/, ""))
-        : null,
+      codigo: rawId,
       mostrarTotal: cotizacionForm.mostrarTotal,
       idSucursal: loggeduser.usuario.idSucursal,
       cliente,

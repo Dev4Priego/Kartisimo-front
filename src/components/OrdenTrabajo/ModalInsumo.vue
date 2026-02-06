@@ -808,20 +808,23 @@ const cargarLlantas = async () => {
 
     totalRows.value = Number(data.totalRows || 0);
 
-    items.value = data.items.map((l) => ({
-      codigo: l.codigo,
-      modelo: l.modelo,
-      marca: l.nombreMarca,
-      medida: l.medidas,
-      rango: l.rango,
-      precio: Number(l.precio),
-      ubicacion: l.nombreAlmacen,
-      cantidad: Number(l.cantidad),
+    items.value = data.items
+      .filter(l => !l.eliminado)
+      .map((l) => ({
+        codigo: l.codigo,
+        modelo: l.modelo,
+        marca: l.nombreMarca,
+        medida: l.medidas,
+        rango: l.rango,
+        precio: Number(l.precio),
+        ubicacion: l.nombreAlmacen,
+        cantidad: Number(l.cantidad),
+        eliminado: l.eliminado,
 
-      idLlanta: l.idLlanta,
-      idInventarioInicial: l.idInventarioInicial,
-      idAlmacen: l.idAlmacen,
-      objLlanta: l,
+        idLlanta: l.idLlanta,
+        idInventarioInicial: l.idInventarioInicial,
+        idAlmacen: l.idAlmacen,
+        objLlanta: l,
     }));
   } finally {
     loading.value = false;
@@ -1129,7 +1132,8 @@ const onTogglePaquete = async (paqueteBase) => {
 
 const mapearInsumosParaPadre = () => {
   return {
-    llanta: llantas.value.map((l) => ({
+    llanta: llantas.value
+    .map((l) => ({
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
       idPromocion: l.idPromocion,

@@ -1,5 +1,5 @@
 <template>
-	<div class="container py-4">
+	<div class="container py-4" style="font-size: larger; max-width: 1000px;">
 
 		<!-- Header -->
 		<div class="card border-0 shadow-sm mb-4">
@@ -106,7 +106,7 @@
 
 		<!-- LLANTAS -->
 		<template v-if="tieneLlantas">
-			<h6 class="text-uppercase text-muted small mb-2">Llantas</h6>
+			<h4 class="text-uppercase text-muted mb-2">Llantas</h4>
 
 			<div class="card border-0 shadow-sm mb-2">
 				<ul class="list-group list-group-flush">
@@ -143,7 +143,7 @@
 
 		<!-- PAQUETES -->
 		<template v-if="tienePaquetes">
-			<h6 class="text-uppercase text-muted small mb-2">Paquetes</h6>
+			<h4 class="text-uppercase text-muted mb-2">Paquetes</h4>
 
 			<div class="card border-0 shadow-sm mb-2">
 				<ul class="list-group list-group-flush">
@@ -189,7 +189,7 @@
 
 		<!-- SERVICIOS -->
 		<template v-if="tieneServicios">
-			<h6 class="text-uppercase text-muted small mb-2">Servicios</h6>
+			<h4 class="text-uppercase text-muted mb-2">Servicios</h4>
 
 			<div class="card border-0 shadow-sm mb-2">
 				<ul class="list-group list-group-flush">
@@ -240,29 +240,33 @@
 
 
 		<!-- ACCIONES -->
-		<div class="d-flex gap-2">
-		<button
-			class="btn btn-success"
-			:disabled="orden?.estado !== 'Creado'"
-			@click="iniciarOT"
-		>
-			▶ Iniciar OT
+		<div class="d-flex justify-content-between">
+			<button
+			class="btn btn-primary shadow position-relative" style="width: 140px;"
+			@click="volver"
+		><i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i>
+			Volver
 		</button>
 
-		<button
-			class="btn btn-outline-danger"
+		<!-- <button
+			class="btn btn-danger shadow mx-3 position-relative" style="width: 140px;"
 			:disabled="orden?.estado !== 'Creado'"
 			@click="cancelarOT"
-		>
-			❌ Cancelar
-		</button>
+		><i class="bi bi-x-circle-fill position-absolute start-0 ms-2"></i>
+			Cancelar
+		</button> -->
 
 		<button
-			class="btn btn-outline-secondary ms-auto"
-			@click="volver"
-		>
-			⬅ Volver
+			class="btn btn-success shadow position-relative" style="width: 140px;"
+			:disabled="orden?.estado !== 'Creado'"
+			@click="iniciarOT"
+		><i class="bi bi-play-circle-fill position-absolute start-0 ms-2"></i>
+			&nbsp;Iniciar OT
 		</button>
+
+		
+
+		
 		</div>
 
 	</div>

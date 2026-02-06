@@ -56,7 +56,7 @@
                                     <div>{{ ot.vehiculoModelo }}</div>
                                     <span class="badge border text-dark fw-normal">{{ ot.vehiculoPlacas }}</span>
                                 </td>
-                                <td>{{ formatFecha(formatearFecha(ot.fechaAlta) ) }}</td>
+                                <td>{{ formatearFecha(ot.fechaAlta) }}</td>
                                 <td>{{  ot.empleadoNombre  }}</td>
                                 <td><small>{{  ot.metodoPago  }}</small></td>
 
@@ -168,7 +168,7 @@ const cargarOrdenTrabajo = async () => {
 const irAEditar = (ot) => {
     // Redirigimos al mismo formulario de "Nueva Orden" pero pasamos el ID
     router.push({ 
-        name: 'orden-trabajo-form', 
+        name: 'orden-trabajo-work', 
         params: { id: ot.idOrdenTrabajo } 
     });
 }
