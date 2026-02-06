@@ -1,4 +1,15 @@
 <template>
+  <div class="mb-4">
+    <h6 class="mb-1">Progreso de la orden</h6>
+
+    <div class="progress" style="height: 22px">
+      <div
+        class="progress-bar"
+        :style="{ width: porcentaje + '%' }"
+      >
+        {{ porcentaje }}%
+      </div>
+    </div>
 	<div class="container py-4" style="font-size: larger; max-width: 1000px;">
 
 		<!-- Header -->
@@ -270,114 +281,41 @@
 		</div>
 
 	</div>
+    <small class="text-muted">
+      {{ completadas }} / {{ total }} tareas
+    </small>
+  </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted, getCurrentInstance, computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { computed } from 'vue'
 
-const { proxy } = getCurrentInstance();
+const props = defineProps({
+  paquetes: { type: Array, default: () => [] },
+  llantas: { type: Array, default: () => [] },
+  adicionales: { type: Array, default: () => [] }
+})
 
-const route = useRoute()
-const router = useRouter()
+const todas = computed(() => [
+  ...props.paquetes,
+  ...props.llantas,
+  ...props.adicionales
+])
 
-const orden = ref(null)
+const total = computed(() => todas.value.length)
 
-const cargarOrden = async () => {
-  
-	const id = route.params.id
+const completadas = computed(() =>
+  todas.value.filter(t => t.completada === true).length
+)
 
-	const resp = await fetch(
-		`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
-	)
-
-	const data = await resp.json()
-
-	orden.value = data
-
-	console.log("CargarOT " + JSON.stringify(data))
-}
-
-onMounted(cargarOrden)
-
-const iniciarOT = () => {
-	// aquí luego cambiamos estado
-	router.push(`/orden-trabajo/${orden.value.idOrdenTrabajo}/work`)
-}
-
-const cancelarOT = () => {
-	// aquí luego cambiamos estado
-	router.push('/content/orden-trabajo')
-}
-
-const volver = () => {
-  	router.push('/content/orden-trabajo')
-}
-
-const estadoClass = computed(() => {
-	switch (orden.value?.estado) {
-
-		case "Creado":
-			return "bg-secondary";
-		case "En Proceso":
-			return "bg-warning text-dark";
-		case "Finalizado":
-			return "bg-success";
-		case "Cancelado":
-			return "bg-danger";
-		default:
-			return "bg-light text-dark";
-	}
-});
-
-const subtotalLlantas = computed(() => {
-	if (!orden.value?.llantas) return 0;
-
-	return orden.value.llantas.reduce(
-		(total, l) => total + (l.cantidad * l.precioUnitario),
-		0
-	);
-});
-
-const subtotalPaquetes = computed(() => {
-	if (!orden.value?.paquetes) return 0;
-
-	return orden.value.paquetes.reduce(
-		(total, p) => total + p.precioUnitario,
-		0
-	);
-});
-
-const subtotalServicios = computed(() => {
-	if (!orden.value?.adicionales) return 0;
-
-	return orden.value.adicionales.reduce(
-		(total, s) => total + (s.cantidad * s.precioUnitario),
-		0
-	);
-});
-
-const totalOrden = computed(() => {
-	return (
-		subtotalLlantas.value +
-		subtotalPaquetes.value +
-		subtotalServicios.value
-	);
-});
-
-const tieneLlantas = computed(() =>
-  	orden.value?.llantas?.length > 0
-);
-
-const tienePaquetes = computed(() =>
-  	orden.value?.paquetes?.length > 0
-);
-
-const tieneServicios = computed(() =>
-	  orden.value?.adicionales?.length > 0
-);
-
-
+const porcentaje = computed(() => {
+  if (total.value === 0) return 0
+  return Math.round((completadas.value / total.value) * 100)
+})
 </script>
 
+<style scoped>
+.progress-bar {
+  transition: width 0.3s ease;
+}
+</style>
