@@ -62,7 +62,7 @@
               v-for="ot in listaOrdenTrabajo.ordenes"
               :key="ot.idOrdenTrabajo"
             >
-              <td>OT-{{ ot.idOrdenTrabajo }}</td>
+              <td style="white-space: nowrap;">OT-{{ ot.idOrdenTrabajo }}</td>
               <td>{{ ot.clienteNombre }}</td>
               <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
               <td>{{ formatearFecha(ot.fechaAlta) }}</td>
@@ -112,7 +112,7 @@
 
                  <button
                   class="btn btn-sm btn-outline-warning"
-                  @click="editarOT(ot.idOrdenTrabajo)"
+                  @click="abrirModalEditar(ot.idOrdenTrabajo)"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>

@@ -189,7 +189,7 @@
                 <small>
                   <strong>Blvd. Delta 2002 <br />esq. Rio Mayo</strong><br />
                   Col. Valle de Jerez C.P 37538<br />
-                  Tel. 477 330 6060 y 477 390 5090<br />
+                  Tel. 477 330 6060 y<br /> 477 390 5090<br />
                   delta@kartisimo.mx </small
                 ><br />
               </div>
@@ -197,9 +197,7 @@
                 <small>
                   <strong>Blvd. Lopez Mateos 827<br />esq. Apolo</strong><br />
                   Col. Obrera C.P. 37340<br />
-                  Tel. 47
-                  
-                  7 717 7440 y 477 470 9419<br />
+                  Tel. 477 717 7440 y<br /> 477 470 9419<br />
                   apolo@kartisimo.mx
                 </small>
               </div>
@@ -207,7 +205,7 @@
                 <small>
                   <strong>Blvd. Torres Landa 1901<br /> esq. San Jacobo</strong><br />
                   Col. La Piscina C.P. 37440<br />
-                  Tel. 477 390 0290 y 477 461 0028<br />
+                  Tel. 477 390 0290 y<br /> 477 461 0028<br />
                   torreslanda@kartisimo.mx<br />
                 </small>
               </div>
@@ -217,7 +215,7 @@
                     >Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong
                   ><br />
                   Col. La Martinica, C.P. 37500<br />
-                  Tel. 477 763 3285 y 477 763 3284
+                  Tel. 477 763 3285 y<br /> 477 763 3284
                 </small>
               </div>
             </div>
