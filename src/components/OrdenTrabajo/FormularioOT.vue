@@ -931,13 +931,13 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="i in ordenTrabajoForm.insumo.llanta" :key="i.idLlanta">
+                    <tr v-for="i in insumosFiltrados.llanta" :key="i.idLlanta">
                       <td>{{ i.descripcion }}</td>
                       <td class="text-center">{{ i.cantidad }}</td>
                       <td class="text-end">${{ i.precioUnitario.toFixed(2) }}</td>
                       <td class="text-end">${{ i.subTotal }}</td>
                     </tr>
-                    <template v-for="p in ordenTrabajoForm.insumo.paquete" :key="p.idPaquete">
+                    <template v-for="p in insumosFiltrados.paquete" :key="p.idPaquete">
                       <tr style="font-weight:bold; background:#fafafa;">
                         <td>{{ p.descripcion }}</td>
                         <td class="text-center">{{ p.cantidad }}</td>
@@ -951,7 +951,7 @@
                         <td class="text-end">-</td>
                       </tr>
                     </template>
-                    <tr v-for="a in ordenTrabajoForm.insumo.adicional" :key="a.idAdicional">
+                    <tr v-for="a in insumosFiltrados.adicional" :key="a.idAdicional">
                       <td>{{ a.descripcion }}</td>
                       <td class="text-center">{{ a.cantidad }}</td>
                       <td class="text-end">${{ Number(a.precioUnitario).toFixed(2) }}</td>
@@ -1759,6 +1759,13 @@ const guardarOT = async () => {
 
   let factura = {};
 
+  let insumosSelec = ({
+  ...ordenTrabajoForm.insumo,
+  llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
+  paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
+  adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
+})
+
   if (boolFactura) {
     factura = {
       razonSocial: ordenTrabajoForm.factura.razonSocial,
@@ -1782,6 +1789,7 @@ const guardarOT = async () => {
     requiereFactura: boolFactura.value,
     desecharLlanta: boolDesecharLlanta.value,
     descripcion: "",
+    estado: "Creado",
     cliente: {
       idCliente: ordenTrabajoForm.cliente.id_cliente,
       nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
@@ -1803,7 +1811,7 @@ const guardarOT = async () => {
       anio: ordenTrabajoForm.vehiculo.anio,
     },
     factura: factura,
-    insumos: ordenTrabajoForm.insumo,
+    insumos: insumosSelec
   };
 
   try {
