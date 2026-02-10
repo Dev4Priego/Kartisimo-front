@@ -1,5 +1,5 @@
 <template>
-  <div class="container py-3" v-if="orden">
+  <div class="container py-3" v-if="ordenLista">
 
     <OrdenTrabajoProgress
       :paquetes="orden.paquetes"
@@ -24,9 +24,8 @@
 
   </div>
 </template>
-
 <script setup>
-import { ref, onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, computed, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 
 import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue'
@@ -37,19 +36,30 @@ import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adi
 const { proxy } = getCurrentInstance()
 const route = useRoute()
 
+const orden = ref(null)
+
 /**
- * 🔒 Estado inicial seguro
+ * 🔒 No renderizar nada hasta que TODO esté listo
  */
-const orden = ref({
-  llantas: [],
-  paquetes: [],
-  adicionales: []
+const ordenLista = computed(() => {
+  if (!orden.value) return false
+
+  return (
+    Array.isArray(orden.value.paquetes) &&
+    Array.isArray(orden.value.llantas) &&
+    Array.isArray(orden.value.adicionales)
+  )
 })
+
+const normalizar = (arr) =>
+  Array.isArray(arr)
+    ? arr.filter(i => i && typeof i === 'object')
+    : []
 
 const cargarOrden = async () => {
   try {
     const id = route.params.id
-    console.log('📌 Cargando OT:', id)
+    console.log(' Cargando OT:', id)
 
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
@@ -60,30 +70,20 @@ const cargarOrden = async () => {
     const json = await res.json()
     console.log(' RESPUESTA BACKEND:', json)
 
-    /**
-     * 🔒 Normalización total
-     */
     orden.value = {
       ...json,
-      llantas: Array.isArray(json.llantas) ? json.llantas : [],
-      paquetes: Array.isArray(json.paquetes) ? json.paquetes : [],
-      adicionales: Array.isArray(json.adicionales) ? json.adicionales : []
+      paquetes: normalizar(json.paquetes),
+      llantas: normalizar(json.llantas),
+      adicionales: normalizar(json.adicionales)
     }
 
   } catch (err) {
-    console.error('❌ Error cargando OT:', err)
-
-    // fallback seguro
-    orden.value = {
-      llantas: [],
-      paquetes: [],
-      adicionales: []
-    }
+    console.error(' Error cargando OT:', err)
+    orden.value = null
   }
 }
 
 const refrescarOrden = () => {
-  console.log('🔄 Refrescando orden...')
   cargarOrden()
 }
 

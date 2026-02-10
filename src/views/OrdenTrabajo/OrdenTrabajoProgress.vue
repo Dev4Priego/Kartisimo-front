@@ -28,20 +28,23 @@ const props = defineProps({
 })
 
 /**
- * 🔒 Blindaje total contra undefined / null
+ * 🔒 Normaliza TODO antes de usarlo
  */
 const todas = computed(() => {
-  const paquetes = Array.isArray(props.paquetes) ? props.paquetes : []
-  const llantas = Array.isArray(props.llantas) ? props.llantas : []
-  const adicionales = Array.isArray(props.adicionales) ? props.adicionales : []
-
-  return [...paquetes, ...llantas, ...adicionales].filter(Boolean)
+  return [
+    ...(Array.isArray(props.paquetes) ? props.paquetes : []),
+    ...(Array.isArray(props.llantas) ? props.llantas : []),
+    ...(Array.isArray(props.adicionales) ? props.adicionales : [])
+  ].filter(i => i && typeof i === 'object')
 })
 
 const total = computed(() => todas.value.length)
 
 const completadas = computed(() => {
-  return todas.value.filter(t => t && t.completada === true).length
+  return todas.value.reduce((acc, t) => {
+    if (t.completada === true) acc++
+    return acc
+  }, 0)
 })
 
 const porcentaje = computed(() => {
