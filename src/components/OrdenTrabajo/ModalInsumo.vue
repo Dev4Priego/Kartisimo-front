@@ -183,38 +183,15 @@
 
 
             <!-- PAGINACIÓN -->
-            <div class="d-flex justify-content-between align-items-center mt-3">
-              <!-- Total -->
-              <div>
-                <strong>Página {{ page }}:</strong>
-                {{ items.length }} resultados (Total: {{ totalRows }})
-              </div>
-
-              <!-- Controles -->
-              <div>
-                <button
-                  class="btn btn-secondary me-2"
-                  @click="prevPage"
-                  :disabled="page <= 1"
-                  type="button"
-                >
-                  ◀ Anterior
-                </button>
-
-                <button
-                  class="btn btn-secondary"
-                  @click="nextPage"
-                  :disabled="page >= totalPages"
-                  type="button"
-                >
-                  Siguiente ▶
-                </button>
-              </div>
-
+            <div class="d-flex justify-content-end align-items-center mt-3" style="font-size: 9pt;">
+              
               <!-- Selector de filas por página -->
-              <div>
-                <select
-                  class="form-control"
+              <div class="mx-2">
+                <table>
+                  <tbody>
+                    <tr><td style="white-space: nowrap;">Renglones por página: </td>
+                      <td><select
+                  class="form-control" style="font-size: 9pt;"
                   v-model="rowsPerPage"
                   @change="onRowsChange"
                 >
@@ -222,9 +199,55 @@
                   <option value="20">20</option>
                   <option value="50">50</option>
                   <option value="100">100</option>
-                </select>
+                </select></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
+
+              <!-- Total -->
+              <div class="mx-2">
+                <strong>Página {{ page }}:</strong>
+                {{ (rowsPerPage * (page - 1) + 1) }}-{{ (rowsPerPage * page) < totalRows ? (rowsPerPage * page) : totalRows }} de {{ totalRows }}
+              </div>
+
+              <!-- Controles -->
+              <div class="mx-2">
+                <button
+                  class="btn btn-outline-dark btn-sm me-2"
+                  @click="prevPage"
+                  :disabled="page <= 1"
+                  type="button"
+                ><i class="bi bi-chevron-left"></i>
+                </button>
+
+                <button
+                  class="btn btn-outline-dark btn-sm btn-border-radius-sm"
+                  @click="nextPage"
+                  :disabled="page >= totalPages"
+                  type="button"
+                ><i class="bi bi-chevron-right"></i>
+                </button>
+              </div>
+
             </div>
+          </div>
+          <hr />
+          <div class="mt-4">
+            <button
+                type="button"
+                class="btn btn-primary"
+                @click="mostrarModalAdicional = true"
+              >
+                Agregar adicionales
+              </button>
+
+              <ModalAdicional
+                v-if="mostrarModalAdicional"
+                v-model:adicionales="adicionales"
+                :conceptoOT="conceptoOT"
+                @cerrar="mostrarModalAdicional = false"
+              />
           </div>
           <hr />
           <!-- TABLA RESUMEN DE PRODUCTOS Y SERVICIOS -->
@@ -317,7 +340,7 @@
                     </td>
                     <td>
                       <select
-                        class="form-select"
+                        class="form-select form-select-sm"
                         v-model="ll.idPromocion"
                         @change="onPromoChange(ll)"
                       >
@@ -340,7 +363,7 @@
 
                       <button
                         type="button"
-                        class="btn btn-danger btn-sm"
+                        class="btn btn-danger btn-sm mt-1"
                         @click="borrarInsumo(ll)"
                       >
                         <i class="bi bi-trash"></i> Borrar
@@ -402,7 +425,7 @@
 
                       <td>
                         <select
-                          class="form-select"
+                          class="form-select form-select-sm"
                           v-model="paq.idPromocion"
                           @change="onPromoChange(paq)"
                         >
@@ -529,7 +552,7 @@
 
                     <td>
                       <select
-                        class="form-select"
+                        class="form-select form-select-sm"
                         v-model="ad.idPromocion"
                         @change="onPromoChange(ad)"
                       >
@@ -557,21 +580,6 @@
                   </tr>
                 </tbody>
               </table>
-
-              <button
-                type="button"
-                class="btn btn-primary"
-                @click="mostrarModalAdicional = true"
-              >
-                Agregar adicionales
-              </button>
-
-              <ModalAdicional
-                v-if="mostrarModalAdicional"
-                v-model:adicionales="adicionales"
-                :conceptoOT="conceptoOT"
-                @cerrar="mostrarModalAdicional = false"
-              />
             </div>
           </div>
         </div>
@@ -808,20 +816,23 @@ const cargarLlantas = async () => {
 
     totalRows.value = Number(data.totalRows || 0);
 
-    items.value = data.items.map((l) => ({
-      codigo: l.codigo,
-      modelo: l.modelo,
-      marca: l.nombreMarca,
-      medida: l.medidas,
-      rango: l.rango,
-      precio: Number(l.precio),
-      ubicacion: l.nombreAlmacen,
-      cantidad: Number(l.cantidad),
+    items.value = data.items
+      .filter(l => !l.eliminado)
+      .map((l) => ({
+        codigo: l.codigo,
+        modelo: l.modelo,
+        marca: l.nombreMarca,
+        medida: l.medidas,
+        rango: l.rango,
+        precio: Number(l.precio),
+        ubicacion: l.nombreAlmacen,
+        cantidad: Number(l.cantidad),
+        eliminado: l.eliminado,
 
-      idLlanta: l.idLlanta,
-      idInventarioInicial: l.idInventarioInicial,
-      idAlmacen: l.idAlmacen,
-      objLlanta: l,
+        idLlanta: l.idLlanta,
+        idInventarioInicial: l.idInventarioInicial,
+        idAlmacen: l.idAlmacen,
+        objLlanta: l,
     }));
   } finally {
     loading.value = false;
@@ -1129,7 +1140,8 @@ const onTogglePaquete = async (paqueteBase) => {
 
 const mapearInsumosParaPadre = () => {
   return {
-    llanta: llantas.value.map((l) => ({
+    llanta: llantas.value
+    .map((l) => ({
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
       idPromocion: l.idPromocion,
