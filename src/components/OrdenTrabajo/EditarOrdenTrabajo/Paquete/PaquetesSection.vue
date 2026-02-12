@@ -1,7 +1,7 @@
 <template>
-	<div class="card mb-4 shadow-sm rounded-4">
+	<div class="card mb-4 shadow-sm">
 		<div class="card-header bg-light">
-			<strong>📦 Paquetes</strong>
+			<i class="bi bi-box-seam-fill me-2"></i>Paquetes
 		</div>
 
 		<div class="card-body">

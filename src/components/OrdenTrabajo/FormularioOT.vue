@@ -488,7 +488,6 @@
                   <option value="G01">G01 - Adquisición de mercancías</option>
                   <option value="G02">G02 - Devoluciones, descuentos o bonificaciones</option>
                   <option value="G03">G03 - Gastos en general</option>
-
                   <option value="I01">I01 - Construcciones</option>
                   <option value="I02">I02 - Mobiliario y equipo de oficina por inversiones</option>
                   <option value="I03">I03 - Equipo de transporte</option>
@@ -1667,85 +1666,6 @@ const validarYMostrarPreview = async () => {
 
         </table>
     `;
-
-  // 🔹 Confirmación con SweetAlert
-//   const result = await Swal.fire({
-//     title: "Confirmar datos",
-//     html: `
-//             <div style="font-family:Arial, sans-serif; font-size:14px; color:#333; max-height:400px; overflow-y:auto;">
-
-//                 <div class="m-2">
-//                     <!-- Cliente -->
-//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Cliente</h3>
-//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Nombre:</td><td>${
-//                           ordenTrabajoForm.cliente.nombres + " " + ordenTrabajoForm.cliente.apellidos
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Teléfono:</td><td>${
-//                           ordenTrabajoForm.cliente.clienteTelefono
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Método de pago:</td><td>${
-//                           ordenTrabajoForm.cliente.metodoPago
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Fecha alta:</td><td>${
-//                           ordenTrabajoForm.cliente.fechaAlta
-//                         }</td></tr>
-//                     </table><br>
-
-//                     <!-- Vehículo -->
-//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Vehículo</h3>
-//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Num. Serie:</td><td>${
-//                           ordenTrabajoForm.vehiculo.numSerie
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Modelo:</td><td>${
-//                           ordenTrabajoForm.vehiculo.modelo
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Kilometraje:</td><td>${
-//                           ordenTrabajoForm.vehiculo.kilometraje
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Color:</td><td>${
-//                           ordenTrabajoForm.vehiculo.color
-//                         }</td></tr>
-//                         <tr><td style="padding:4px 8px; font-weight:bold;">Placas:</td><td>${
-//                           ordenTrabajoForm.vehiculo.placas
-//                         }</td></tr>
-//                     </table>
-
-//                     <!-- Factura -->
-//                     ${
-//                       boolFactura.value
-//                         ? `
-//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Factura</h3>
-//                     <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
-//                     <tr><td style="padding:4px 8px; font-weight:bold;">Razón social:</td><td>${ordenTrabajoForm.factura.razonSocial}</td></tr>
-//                     <tr><td style="padding:4px 8px; font-weight:bold;">RFC:</td><td>${ordenTrabajoForm.cliente.rfc}</td></tr>
-//                     <tr><td style="padding:4px 8px; font-weight:bold;">Email:</td><td>${ordenTrabajoForm.factura.eMail}</td></tr>
-//                     <tr><td style="padding:4px 8px; font-weight:bold;">CP:</td><td>${ordenTrabajoForm.factura.cp}</td></tr>
-//                     <tr><td style="padding:4px 8px; font-weight:bold;">Uso CFDI:</td><td>${ordenTrabajoForm.factura.usoCFDI}</td></tr>
-//                     </table>
-//                     `
-//                         : ""
-//                     }
-
-//                     <!-- Insumos -->
-//                     <h3 style="margin:10px 0; color:#444; border-bottom:2px solid #eee; padding-bottom:4px;">Insumos</h3>
-//                     ${insumosHTML}
-//                 </div>
-
-//             </div>
-//         `,
-//     showCancelButton: true,
-//     confirmButtonText: "Confirmar y enviar",
-//     cancelButtonText: "Cancelar",
-//     width: "700px",
-//   });
-
-//   if (result.isConfirmed) {
-//     return true;
-//   }
-//   return false;
-
   
  };
 

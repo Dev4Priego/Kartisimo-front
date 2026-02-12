@@ -1,7 +1,9 @@
 <template>
-	<div class="card mb-4 shadow-sm rounded-4">
+	<div class="card mb-4 shadow-sm">
 		<div class="card-header bg-light d-flex justify-content-between align-items-center">
-			<strong>Adicionales</strong>
+			<div>
+				<i class="bi bi-tools me-2"></i>Adicionales
+			</div>
 			<button
 				class="btn btn-sm btn-outline-primary"
 				@click="mostrarInput = !mostrarInput"
