@@ -7,6 +7,7 @@
 			<button
 				class="btn btn-sm btn-outline-primary"
 				@click="mostrarInput = !mostrarInput"
+				
 			>
 				+ Agregar
 			</button>

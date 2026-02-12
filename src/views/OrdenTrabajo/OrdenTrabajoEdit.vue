@@ -81,16 +81,35 @@
         </div>
         <div class="col-auto">
           <button class="btn btn-success shadow-sm">
+          <button class="btn btn-success shadow-sm" @click="avanzarEstado"
+          :disabled="otEditar.estatus != 1  ">
             Avanzar estado <i class="bi bi-arrow-right-short ms-2"></i>
           </button>
         </div>
         <div class="col-12 d-flex justify-content-end mt-3">
           <button class="btn btn-danger btn-sm shadow-sm">
+          <button class="btn btn-danger btn-sm shadow-sm" @click="cambiarEstatusOT(0)"
+          :disabled="otEditar.estatus == 0">
             <i class="bi bi-x-circle-fill me-3"></i>Cancelar OT
           </button>
           <button class="btn btn-warning btn-sm shadow-sm ms-2">
+          <!-- <button class="btn btn-warning btn-sm shadow-sm ms-2" @click="cambiarEstatusOT(2)"
+            :disabled="otEditar.estatus == 0">
             <i class="bi bi-stop-circle-fill me-3"></i>Suspender OT 
+          </button> -->
+          <button
+            class="btn btn-sm shadow-sm ms-2"
+            :class="otEditar.estatus == 2 ? 'btn-success' : 'btn-warning'"
+            @click="cambiarEstatusOT(otEditar.estatus == 2 ? 1 : 2)"
+            :disabled="otEditar.estatus == 0"
+          >
+            <i class="bi me-3"
+              :class="otEditar.estatus == 2 ? 'bi-play-circle-fill' : 'bi-stop-circle-fill'">
+            </i>
+
+            {{ otEditar.estatus == 2 ? 'Retomar OT' : 'Suspender OT' }}
           </button>
+
         </div>
       </div>
       <h5>Datos generales</h5>
@@ -238,6 +257,10 @@ import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/O
 import LlantasSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue'
 import PaquetesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue'
 import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue'
+import { parse } from 'vue/compiler-sfc';
+import axios from 'axios';
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 
 const { proxy } = getCurrentInstance()
 const route = useRoute();
@@ -249,6 +272,12 @@ let modalIncidente;
 /**
  * 🔒 Estado inicial seguro
  */
+
+ 
+
+const data45= JSON.parse(localStorage.getItem('userSession')); // o el nombre de la key que usaste
+const idUsuarioSession = data45?.usuario?.idUsuario;
+
 const orden = ref({
   llantas: [],
   paquetes: [],
@@ -385,6 +414,120 @@ const lineaClase = (estado) => {
     ? 'bg-success'
     : 'bg-secondary'
 }
+
+const avanzarEstado = async () => {
+
+  const idx = estados.indexOf(otEditar.value.estado)
+
+  // si no existe o ya es el último → no hace nada
+  if (idx === -1 || idx >= estados.length - 1) return
+
+  const nuevoEstado = estados[idx + 1]
+
+  try {
+
+    // actualizar en frontend
+    otEditar.value.estado = nuevoEstado
+
+    // guardar en backend
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        estado: nuevoEstado,
+      }
+    )
+
+    mostrarToast("success", "Orden de trabajo avanzada correctamente")
+
+  } catch (error) {
+    console.error("No se pudo actualizar el estado", error)
+  }
+}
+
+const cambiarEstatusOT = async (estatus) => {
+
+  try {
+
+    // guardar en backend
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/cambiarEstatusOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        estatus: estatus,
+      }
+    )
+
+    switch (estatus) {
+      case 0:
+        mostrarToast("success", "Orden de trabajo cancelada correctamente")
+        break
+      case 1:
+        mostrarToast("success", "Orden de trabajo retomada correctamente")
+        break
+      case 2:
+        mostrarToast("success", "Orden de trabajo suspendida correctamente")
+        break
+    } 
+
+    cargarOrden()
+
+  } catch (error) {
+    console.error("No se pudo actualizar el estado", error)
+  }
+}
+
+// funcion para guardar los datos editados de la OT
+const guardarEdicion = async () => {
+
+  const idOT = otEditar.value.idOrdenTrabajo;
+
+  console.log('usuario edita' + idUsuarioSession)
+
+  const payload = {
+    idUsuario: idUsuarioSession,
+    idEmpleado: otEditar.value.empleado.idEmpleado,
+    metodoPago: otEditar.value.metodoPago
+  };
+
+  try {
+    const response = await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${idOT}`,
+      payload
+    );
+
+    mostrarToast("success", "Orden de trabajo editada correctamente");
+    console.log("OT actualizada:", response.data);
+    cargarOrden()
+    //volver()
+
+  } catch (error) {
+    console.error("Error al editar OT:", error);
+  }
+};
+
+const mostrarToast = (type, message) => {
+  const color =
+    type === "success"
+      ? "linear-gradient(to right, #96c93d)"
+      : type === "warning"
+      ? "linear-gradient(to right, #f5af19, #f12711)"
+      : "linear-gradient(to right, #6dd5ed, #2193b0)";
+
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    stopOnFocus: true,
+    style: {
+      background: color,
+      borderRadius: "6px",
+      color: "white",
+      fontSize: "14px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+    },
+  }).showToast();
+};
 
 onMounted(() => {
   cargarOrden();
