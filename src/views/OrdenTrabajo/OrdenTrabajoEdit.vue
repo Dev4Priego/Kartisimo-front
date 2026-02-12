@@ -101,28 +101,32 @@
         </div>
         <div class="col-6 col-lg-3">
         <label class="form-label">Método de pago</label>
-        <select class="form-select" v-model="otEditar.metodoPago">
-          <option value="G01">G01 - Adquisición de mercancías</option>
-          <option value="G02">G02 - Devoluciones, descuentos o bonificaciones</option>
-          <option value="G03">G03 - Gastos en general</option>
-          <option value="I01">I01 - Construcciones</option>
-          <option value="I02">I02 - Mobiliario y equipo de oficina por inversiones</option>
-          <option value="I03">I03 - Equipo de transporte</option>
-          <option value="I04">I04 - Equipo de cómputo y accesorios</option>
-          <option value="I05">I05 - Dados, troqueles, moldes, matrices y herramental</option>
-          <option value="I06">I06 - Comunicaciones telefónicas</option>
-          <option value="I07">I07 - Comunicaciones satelitales</option>
-          <option value="I08">I08 - Otra maquinaria y equipo</option>
-          <option value="S01">S01 - Sin efectos fiscales</option>
-        </select>
+        <select
+              v-model="otEditar.metodoPago"
+              class="form-select"
+              name="formaPago"
+              id="slcFormaPago"
+            >
+              <option value="Efectivo">01 - Efectivo</option>
+              <option value="Cheque nominativo">02 - Cheque nominativo</option>
+              <option value="Transferencia electrónica de fondos">03 - Transferencia electrónica de fondos</option>
+              <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+              <option value="Condonación">15 - Condonación</option>
+              <option value="Compensación">17 - Compensación</option>
+              <option value="Prescripción o caducidad">26 - Prescripción o caducidad</option>
+              <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
+              <option value="Aplicación de anticipos">30 - Aplicación de anticipos</option>
+              <option value="Intermediario pagos">31 - Intermediario pagos</option>
+              <option value="Por definir">99 - Por definir</option>
+            </select>
       </div>
 
-      <div class="col-12 col-lg-6">
+      <div v-if="otEditar.empleado" class="col-12 col-lg-6">
         <label class="form-label" for="slcTecnico"
       >Técnico asignado</label
     >
     <select
-      v-model="otEditar.idEmpleado"
+      v-model="otEditar.empleado.idEmpleado"
       class="form-select"
       name="tecnico"
       id="slcTecnico"
@@ -138,26 +142,7 @@
     </select>
       </div>
 
-      <div class="col-12 col-lg-6">
-        <label class="form-label">Estado</label>
-        <select class="form-select" v-model="otEditar.estado">
-          <option>Creado</option>
-          <option>En curso</option>
-          <option>Finalizado</option>
-          <option>Entregado</option>
-        </select>
-      </div>
-
-      <div class="col-md-6">
-        <label class="form-label">Factura</label>
-        <select
-          class="form-select"
-          v-model="otEditar.requiereFactura"
-        >
-          <option :value="true">Sí</option>
-          <option :value="false">No</option>
-        </select>
-      </div>
+      
       </div>
       <h5>Tareas</h5>
       <div v-if="otEditar.llantas">
@@ -174,10 +159,10 @@
       </div>
       <h5>Otros</h5>
       <div class="my-3 gp-2">
-        <button class="btn btn-primary shadow-sm mx-2">
+        <button class="btn btn-primary shadow mx-2">
           <i class="bi bi-tools me-3"></i>Recibir refacciones
         </button>
-        <button class="btn btn-warning shadow-sm mx-2" @click="abrirModalIncidente()">
+        <button class="btn btn-warning shadow mx-2" @click="abrirModalIncidente()">
           <i class="bi bi-exclamation-triangle-fill me-3"></i>Registrar incidente
         </button>
       </div>
@@ -194,38 +179,54 @@
 
   </div>
 
-    <!-- MODAL INCIDENTE -->
-          <div class="modal fade" id="modalIncidente" tabindex="-1">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h4 class="modal-title">
-                    Agregar incidencia
-                  </h4>
-                  <button class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                  Fecha / hora de la incidencia
-                  <div class="row">
-                    <div class="col-12 col-lg-6">
-                      <input
-                        type="date"
-                        class="form-control"
-                        
-                      />
-                    </div>
-                    <div class="col-12 col-lg-6">
-                      <input
-                        type="time"
-                        class="form-control"
-                        
-                      />
-                    </div>
-                  </div>
-                </div>
+  <!-- MODAL INCIDENTE -->
+  <div class="modal fade" id="modalIncidente" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form>
+          <div class="modal-header">
+            <h4 class="modal-title">
+              Agregar incidencia
+            </h4>
+            <button class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            Fecha / hora de la incidencia
+            <div class="row my-2">
+              <div class="col-12 col-lg-6">
+                <input
+                  v-model="incidenteForm.fecha"
+                  type="date"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-12 col-lg-6">
+                <input
+                  v-model="incidenteForm.hora"
+                  type="time"
+                  class="form-control"
+                />
+              </div>
+            </div>
+            Incidente (detalle)
+            <div class="row my-2">
+              <div class="col-12">
+                <textarea v-model="incidenteForm.incidente" class="form-control" rows="3" maxlength="500"></textarea>
               </div>
             </div>
           </div>
+          <div class="modal-footer">
+            <button class="btn btn-sm btn-secondary shadow mx-2" type="button" data-bs-dismiss="modal">
+              <i class="bi bi-x-circle-fill me-2"></i>Cancelar
+            </button>
+            <button class="btn btn-sm btn-success mx-2" type="button">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 
 </template>
 
@@ -243,6 +244,7 @@ const route = useRoute();
 const router = useRouter();
 const otEditar = ref({});
 const itmEmpleados = ref({});
+const incidenteForm = ref({});
 let modalIncidente;
 /**
  * 🔒 Estado inicial seguro
@@ -331,6 +333,15 @@ const formatearFecha = (fecha) => {
 const refrescarOrden = () => {
   console.log('🔄 Refrescando orden...')
   cargarOrden()
+}
+
+const abrirModalIncidente = () => {
+  const ahora = new Date();
+  incidenteForm.value.fecha = ahora.toISOString().slice(0, 10); // YYYY-MM-DD
+  incidenteForm.value.hora = ahora.toTimeString().slice(0, 5);
+  incidenteForm.value.incidente = "";
+  modalIncidente = new Modal(document.getElementById("modalIncidente"));
+  modalIncidente.show();
 }
 
 const volver = () => {

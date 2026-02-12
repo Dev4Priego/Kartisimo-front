@@ -272,9 +272,7 @@
               <option value="">-Selecciona-</option>
               <option value="Efectivo">01 - Efectivo</option>
               <option value="Cheque nominativo">02 - Cheque nominativo</option>
-              <option value="Transferencia electrónica de fondos">
-                03 - Transferencia electrónica de fondos
-              </option>
+              <option value="Transferencia electrónica de fondos">03 - Transferencia electrónica de fondos</option>
               <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
               <option value="Condonación">15 - Condonación</option>
               <option value="Compensación">17 - Compensación</option>

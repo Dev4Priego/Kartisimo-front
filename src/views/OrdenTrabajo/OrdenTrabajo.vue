@@ -163,11 +163,6 @@ const abrirModalEditar = async(ot) => {
   modalEditar.show();
 };
 
-const abrirModalIncidente = () => {
-  modalIncidente = new Modal(document.getElementById("modalIncidente"));
-  modalIncidente.show();
-}
-
 const guardarEdicion = async () => {
   await fetch(`${proxy.$serverIP}api/OrdenTrabajo/updateOrdenTrabajo`, {
     method: "PUT",
