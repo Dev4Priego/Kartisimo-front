@@ -80,19 +80,19 @@
           </div>
         </div>
         <div class="col-auto">
-          <button class="btn btn-success shadow-sm">
+          
           <button class="btn btn-success shadow-sm" @click="avanzarEstado"
           :disabled="otEditar.estatus != 1  ">
             Avanzar estado <i class="bi bi-arrow-right-short ms-2"></i>
           </button>
         </div>
         <div class="col-12 d-flex justify-content-end mt-3">
-          <button class="btn btn-danger btn-sm shadow-sm">
+          
           <button class="btn btn-danger btn-sm shadow-sm" @click="cambiarEstatusOT(0)"
           :disabled="otEditar.estatus == 0">
             <i class="bi bi-x-circle-fill me-3"></i>Cancelar OT
           </button>
-          <button class="btn btn-warning btn-sm shadow-sm ms-2">
+          
           <!-- <button class="btn btn-warning btn-sm shadow-sm ms-2" @click="cambiarEstatusOT(2)"
             :disabled="otEditar.estatus == 0">
             <i class="bi bi-stop-circle-fill me-3"></i>Suspender OT 
@@ -207,7 +207,6 @@
             <h4 class="modal-title">
               Agregar incidencia
             </h4>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             Fecha / hora de la incidencia
