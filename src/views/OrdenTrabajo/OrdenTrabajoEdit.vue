@@ -113,7 +113,7 @@
         </div>
       </div>
       <h5>Datos generales</h5>
-      <div class="row my-3">
+      <div class="row my-3 gy-3">
         <div class="col-6 col-lg-3">
           <label class="form-label">Fecha/hora comprometida</label>
           <input type="text" readonly class="form-control-plaintext" :value=formatearFecha(otEditar.fechaEntrega)>
@@ -160,7 +160,23 @@
       </option>
     </select>
       </div>
-
+      <div class="col-6">
+        <label class="form-label">¿Desechar llantas?</label><br/>
+          Si
+          <input
+            v-model="otEditar.desecharLlanta"
+            class="form-check-input btn-outline-dark mx-2"
+            :value="true"
+            type="radio"
+          />
+          No
+          <input
+            v-model="otEditar.desecharLlanta"
+            class="form-check-input mx-2"
+            :value="false"
+            type="radio"
+          />
+      </div>
       
       </div>
       <h5>Tareas</h5>
@@ -176,7 +192,7 @@
         <adicionalesSection
         :adicionales = "otEditar.adicionales" />
       </div>
-      <h5>Otros</h5>
+      <!-- <h5>Otros</h5>
       <div class="my-3 gp-2">
         <button class="btn btn-primary shadow mx-2">
           <i class="bi bi-tools me-3"></i>Recibir refacciones
@@ -184,7 +200,7 @@
         <button class="btn btn-warning shadow mx-2" @click="abrirModalIncidente()">
           <i class="bi bi-exclamation-triangle-fill me-3"></i>Registrar incidente
         </button>
-      </div>
+      </div> -->
     </div>
 
     <div class="border-top py-2 px-3 bg-light text-end">
@@ -484,7 +500,10 @@ const guardarEdicion = async () => {
   const payload = {
     idUsuario: idUsuarioSession,
     idEmpleado: otEditar.value.empleado.idEmpleado,
-    metodoPago: otEditar.value.metodoPago
+    metodoPago: otEditar.value.metodoPago,
+    desecharLlanta: otEditar.value.desecharLlanta,
+    requiereFactura: otEditar.value.requiereFactura,
+    factura: otEditar.value.factura
   };
 
   try {
