@@ -1185,11 +1185,11 @@ const mapearInsumosParaPadre = () => {
         subTotal: d.subtotal,
       })),
 
-      promosDisponibles: p.id,
+      promosDisponibles: p.promosDisponibles,
 
-      nombrePromocion: p.id,
-      valorPromocion: p.id,
-      tipoPromocion: p.id,
+      nombrePromocion: p.nombrePromocion,
+      valorPromocion: p.valorPromocion,
+      tipoPromocion: p.tipoPromocion,
     })),
 
     adicional: adicionales.value.map((a) => ({
@@ -1235,7 +1235,7 @@ onMounted(() => {
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
-
+  console.log(props.insumos)
   // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
 

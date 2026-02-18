@@ -1693,7 +1693,7 @@ const telefonoFormateado = computed({
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
     const base = soloNumeros.slice(0, 10);   // teléfono principal
-    const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
+    //const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
 
     let formateado = "";
 
@@ -1714,7 +1714,8 @@ const telefonoFormateado = computed({
       );
     }
 
-    return ext ? `${formateado} ext ${ext}` : formateado;
+    //return ext ? `${formateado} ext ${ext}` : formateado;
+    return formateado;
   },
 
   set(v) {

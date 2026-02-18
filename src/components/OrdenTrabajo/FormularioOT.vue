@@ -179,6 +179,8 @@
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
+                  @blur="validate('cliente.clienteTelefono')"
+                  :class="{ 'input-error': errores['cliente.clienteTelefono'] }"
                 />
                 <small
                   v-if="errores['cliente.clienteTelefono']"
@@ -832,7 +834,7 @@
               <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
             </button>
           </router-link>
-          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true">
+          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true; console.log(insumosFiltrados);">
             <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
@@ -947,15 +949,33 @@
                     <tr v-for="i in insumosFiltrados.llanta" :key="i.idLlanta">
                       <td>{{ i.descripcion }}</td>
                       <td class="text-center">{{ i.cantidad }}</td>
-                      <td class="text-end">${{ i.precioUnitario.toFixed(2) }}</td>
-                      <td class="text-end">${{ i.subTotal }}</td>
+                      <td class="text-end">{{ Number(i.precioUnitario).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
+                      <td class="text-end"><s v-if="i.idPromocion">{{ Number(i.cantidad * i.precioUnitario).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</s> {{ Number(i.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
                     </tr>
                     <template v-for="p in insumosFiltrados.paquete" :key="p.idPaquete">
                       <tr style="font-weight:bold; background:#fafafa;">
                         <td>{{ p.descripcion }}</td>
                         <td class="text-center">{{ p.cantidad }}</td>
-                        <td class="text-end">${{ p.precioUnitario.toFixed(2) }}</td>
-                        <td class="text-end">${{ p.subTotal }}</td>
+                        <td class="text-end">{{ Number(p.precioUnitario).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
+                        <td class="text-end"><s v-if="p.idPromocion">{{ Number(p.cantidad * p.precioUnitario).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</s> {{ Number(p.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
                       </tr>
                       <tr v-for="d in p.detalle" :key="d.idDetalle" style="color:#555;">
                         <td style="padding-left:20px;">↳ {{ d.descripcion }}</td>
@@ -967,8 +987,21 @@
                     <tr v-for="a in insumosFiltrados.adicional" :key="a.idAdicional">
                       <td>{{ a.descripcion }}</td>
                       <td class="text-center">{{ a.cantidad }}</td>
-                      <td class="text-end">${{ Number(a.precioUnitario).toFixed(2) }}</td>
-                      <td class="text-end">${{ a.subTotal }}</td>
+                      <td class="text-end">${{ Number(a.precioUnitario).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
+                      <td class="text-end">${{ Number(a.subTotal).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
+                    </tr>
+                    <tr style="font-weight: bold; font-size: larger;">
+                      <td colspan="3">Total</td>
+                      <td style="text-align: right;">{{ Number(ordenTrabajoForm.totales.total).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            }) }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1109,12 +1142,26 @@ function validate(path) {
         ? "Debe seleccionar una forma de pago."
         : null,
 
-    "cliente.clienteCorreo": () => {
+    "cliente.clienteTelefono": () => {
+      if(!value) {
+        return "Debe ingresar un teléfono"
+      } else {
+      const soloNumeros = value.replace(/\D/g, "");
+      return (!value || soloNumeros.length < 10)
+        ? "Teléfono no válido."
+        : null;
+      }
+    },
 
+    "cliente.clienteCorreo": () => {
+      if(value.length > 0) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return (value && !emailRegex.test(value))
+      return (!emailRegex.test(value))
         ? "E-mail no válido."
         : null;
+      } else {
+        return null;
+      }
     },
 
     "fechaEntrega": () => {
@@ -1200,7 +1247,7 @@ const formValido = computed(() => {
 
     // CLIENTE
     ordenTrabajoForm.cliente.clienteTelefono,
-    ordenTrabajoForm.cliente.clienteCorreo,
+    //ordenTrabajoForm.cliente.clienteCorreo,
     ordenTrabajoForm.cliente.metodoPago,
 
     // VEHÍCULO
@@ -1561,10 +1608,10 @@ const onClienteSeleccionadoByValue = (valor) => {
     return (
       nombreCompleto.includes(normalizado) ||
       normalizado.includes(nombreCompleto) ||
-      telefono.includes(normalizado) ||
-      normalizado.includes(telefono) ||
-      correo.includes(normalizado) ||
-      normalizado.includes(correo)
+      telefono === normalizado ||
+      //normalizado.includes(telefono) ||
+      correo === normalizado 
+      //||  normalizado.includes(correo)
     );
   });
 
@@ -1964,7 +2011,7 @@ const cargarInfoCotizacion = async () => {
             subTotal: 0,
           })),
 
-          promosDisponibles,
+          promosDisponibles: promosDisponibles || [],
 
           // info histórica (si viene de backend)
           nombrePromocion: paquete.nombrePromocion,
@@ -2001,7 +2048,7 @@ const cargarInfoCotizacion = async () => {
             })
           ).toFixed(2),
 
-          promosDisponibles,
+          promosDisponibles: promosDisponibles || [],
 
           // info histórica
           nombrePromocion: s.nombrePromocion,
