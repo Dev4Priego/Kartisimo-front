@@ -1,7 +1,7 @@
 <template>
-  <div class="card mb-4 shadow-sm rounded-4">
+  <div class="card mb-4 shadow-sm">
     <div class="card-header bg-light">
-      <strong>🛞 Llantas</strong>
+      <i class="bi bi-record-circle-fill me-2"></i>Llantas
     </div>
 
     <div class="card-body">
@@ -13,7 +13,7 @@
         <div
           v-for="(llanta, index) in llantas"
           :key="index"
-          class="col-md-6"
+          class="col-lg-6"
         >
           <LlantaCard
             :llanta="llanta"

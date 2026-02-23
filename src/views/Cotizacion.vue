@@ -669,6 +669,7 @@
                       class="form-control mb-3"
                       type="text"
                       placeholder="Ej. Nombre"
+                      @change="ajustaNombre()"
                     />
                   </div>
                   <div class="col-6 col-lg-3">
@@ -681,6 +682,7 @@
                       class="form-control mb-3"
                       type="text"
                       placeholder="Ej. Apellido"
+                      @change="ajustaNombre()"
                     />
                   </div>
                   <div class="col-6 col-lg-3">
@@ -982,7 +984,7 @@
 
                     <div class="row mb-2 d-flex ">
                       <div class="col-2">
-                        C{{ cotizacionForm.codigo || "N/A" }}
+                        {{ cotizacionForm.codigo ? 'C' + cotizacionForm.codigo : "(Por definir)" }}
                       </div>
                       <div class="col-3">
                         <strong>Fecha de emisión: </strong>
@@ -1678,11 +1680,7 @@ const cotizacionForm = reactive({
   serviciosExtras: [],
   mostrarTotal: false,
   observaciones: "",
-  fechaCreacion: new Date().toLocaleDateString("es-MX", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  }),
+  fechaCreacion: null,
 });
 
 const preciosLlantas = reactive({});
@@ -1695,7 +1693,7 @@ const telefonoFormateado = computed({
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
     const base = soloNumeros.slice(0, 10);   // teléfono principal
-    const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
+    //const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
 
     let formateado = "";
 
@@ -1716,7 +1714,8 @@ const telefonoFormateado = computed({
       );
     }
 
-    return ext ? `${formateado} ext ${ext}` : formateado;
+    //return ext ? `${formateado} ext ${ext}` : formateado;
+    return formateado;
   },
 
   set(v) {
@@ -1811,6 +1810,9 @@ const reactivarCotizacion = (cotizacion) => {
     });
 };
 
+const ajustaNombre = () => {
+  cotizacionForm.clienteNombre = cotizacionForm.nombre + " " + cotizacionForm.apellidos
+} 
 
 const aprobarCotizacion = (cotizacion) => {
   const idCotizacion = cotizacion.idCotizacion;
@@ -2516,12 +2518,9 @@ const cargarFormulario = async (cotizacion = null) => {
       llantas: [],
       serviciosExtras: [],
       mostrarTotal: false,
-      fechaCreacion: new Date().toLocaleDateString("es-MX", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      }),
-      observaciones: observacionesPrevias, // 🔹 Conservamos lo escrito
+      fechaCreacion: new Date(),
+      observaciones: "",
+      // observaciones: observacionesPrevias, // 🔹 Conservamos lo escrito ===== ¿Por qué? Lo quité.
     });
 
     promoGeneral.value = null;

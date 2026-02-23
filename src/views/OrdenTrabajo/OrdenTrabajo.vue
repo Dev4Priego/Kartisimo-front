@@ -112,7 +112,7 @@
 
                  <button
                   class="btn btn-sm btn-outline-warning"
-                  @click="abrirModalEditar(ot.idOrdenTrabajo)"
+                  @click="editarOT(ot.idOrdenTrabajo)"
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>
@@ -128,71 +128,18 @@
       </div>
     </div>
 
-    <!-- MODAL EDITAR -->
-    <div class="modal fade" id="modalEditarOT" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              Editar OT #{{ otEditar.idOrdenTrabajo }}
-            </h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-
-          <div class="modal-body row g-3">
-            <div class="col-md-6">
-              <label class="form-label">Método de pago</label>
-              <select class="form-select" v-model="otEditar.metodoPago">
-                <option>Efectivo</option>
-                <option>Tarjeta</option>
-                <option>Transferencia</option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Estado</label>
-              <select class="form-select" v-model="otEditar.estado">
-                <option>Creado</option>
-                <option>En curso</option>
-                <option>Finalizado</option>
-              </select>
-            </div>
-
-            <div class="col-md-6">
-              <label class="form-label">Factura</label>
-              <select
-                class="form-select"
-                v-model="otEditar.requiereFactura"
-              >
-                <option :value="true">Sí</option>
-                <option :value="false">No</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancelar
-            </button>
-            <button class="btn btn-primary" @click="guardarEdicion">
-              Guardar cambios
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, getCurrentInstance } from "vue";
+import { ref, onMounted, getCurrentInstance, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 
+const itmEmpleados = ref({});
 const loading = ref(true);
 const listaOrdenTrabajo = ref({
   ordenes: [],
@@ -202,9 +149,16 @@ const listaOrdenTrabajo = ref({
 /* ===== MODAL ===== */
 const otEditar = ref({});
 let modalEditar;
+let modalIncidente;
 
-const abrirModalEditar = (ot) => {
-  otEditar.value = { ...ot };
+const abrirModalEditar = async(ot) => {
+  const resp = await fetch(
+		`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${ot}`
+	)
+	const data = await resp.json()
+  otEditar.value = data;
+  console.log(otEditar.value);
+  cargarEmpleados();
   modalEditar = new Modal(document.getElementById("modalEditarOT"));
   modalEditar.show();
 };
@@ -229,6 +183,25 @@ const cargarOrdenTrabajo = async () => {
 
 const verOT = (id) => {
   router.push(`/content/orden-trabajo/${id}`);
+};
+
+const cargarEmpleados = async () => {
+  const userSession = JSON.parse(localStorage.getItem("userSession"));
+  try {
+    const res = await fetch(
+      proxy.$serverIP +
+        "api/Empleado/getEmpleado?idSucursal=" +
+        userSession.usuario.idSucursal
+    );
+    if (!res.ok) throw new Error("Error en la respuesta");
+    const data = await res.json();
+
+    itmEmpleados.value = data;
+    // console.log('Empleados: '+ JSON.stringify(data))
+    // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
+  } catch (error) {
+    console.error("Error al cargar empleado:", error);
+  }
 };
 
 /* ===== HELPERS ===== */
@@ -261,6 +234,44 @@ onMounted(cargarOrdenTrabajo);
 const editarOT = (id) => {
   console.log(' Editar OT:', id)
   router.push(`/content/orden-trabajo/${id}/work`)
+}
+
+const estados = [
+  'Creado',
+  'En curso',
+  'Finalizado',
+  'Entregado'
+]
+
+const indiceActual = computed(() => {
+  return estados.indexOf(otEditar.value.estado)
+})
+
+// ¿ya pasó este estado?
+const esCompletado = (estado) => {
+  return estados.indexOf(estado) < indiceActual.value
+}
+
+// clases del círculo
+const clasePaso = (estado) => {
+  const idx = estados.indexOf(estado)
+
+  if (idx < indiceActual.value) {
+    return 'bg-success text-white'
+  }
+
+  if (idx === indiceActual.value) {
+    return 'bg-primary text-white'
+  }
+
+  return 'bg-light border'
+}
+
+// clases de la línea entre pasos
+const lineaClase = (estado) => {
+  return estados.indexOf(estado) < indiceActual.value
+    ? 'bg-success'
+    : 'bg-secondary'
 }
 
 </script>

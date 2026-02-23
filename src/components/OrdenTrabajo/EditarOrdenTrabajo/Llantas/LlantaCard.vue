@@ -1,7 +1,6 @@
 <template>
   <div class="border rounded-3 p-3 h-100">
-    <h6 class="mb-3">{{ llanta.posicion }}</h6>
-
+    <strong>{{ llanta.detalle }}</strong> Cantidad: {{ llanta.cantidad }}
     <TareaItem
       v-for="tarea in llanta.tareas"
       :key="tarea.id"
