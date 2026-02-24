@@ -1,8 +1,20 @@
 <template>
-  <div class="container p-4 bs-body">
+  <div class="container p-3 bs-body">
     <form>
-      <div class="row my-3">
-        <h2 class="text-start">Nueva Orden de Trabajo</h2>
+      <div class="row my-1">
+        <div class="col">
+          <h2 class="text-start">Nueva Orden de Trabajo</h2>
+        </div>
+        <div class="col">
+          <div class="d-flex justify-content-end">
+              <div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
+                <div class="card-body" style="font-size: 10pt; color: slategray;">
+                  <i class="bi bi-person me-2"></i> <strong>Usuario: </strong>{{ loggeduser.usuario.nombre }}<br />
+                  <i class="bi bi-building-fill me-2"></i> <strong>Sucursal: </strong>{{ sucursales[loggeduser.usuario.idSucursal - 1] }}
+                </div>
+              </div>
+            </div>
+        </div>
         <hr />
       </div>
       <div class="row my-3">
@@ -1047,6 +1059,8 @@ const showModal = ref(false);
 const mostrarVista = ref(false);
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
+const loggeduser = JSON.parse(localStorage.getItem("userSession"));
+const sucursales = [ '(Ninguna)', 'Delta', 'López Mateos', 'Torres Landa', 'Martinica' ];
 
 const props = defineProps({
   idCotizacion: {
