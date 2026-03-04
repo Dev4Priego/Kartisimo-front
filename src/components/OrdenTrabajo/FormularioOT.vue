@@ -539,7 +539,7 @@
         <div class="col-4">
           <h5>Desechar Llantas</h5>
         </div>
-        <div class="col-8">
+        <div v-if="hayLlantas" class="col-8">
           <label class="form-label">¿Se desea desechar llantas antiguas?</label><br/>
           Si
           <input
@@ -555,6 +555,9 @@
             :value="false"
             type="radio"
           />
+        </div>
+        <div v-else class="col-8">
+          No aplica
         </div>
       </div>
       <hr />
@@ -1334,6 +1337,14 @@ const regimenFiscalTexto = computed(() => {
   )
 
   return regimen ? `${regimen.codigo} - ${regimen.descripcion}` : ''
+});
+
+const hayLlantas = computed(() => {
+  var resp = false;
+  ordenTrabajoForm?.insumo?.llanta?.forEach(l => {
+    !l.eliminado ? resp = true: resp = resp;
+  });
+  return resp;
 });
 
 const ordenTrabajoForm = reactive({

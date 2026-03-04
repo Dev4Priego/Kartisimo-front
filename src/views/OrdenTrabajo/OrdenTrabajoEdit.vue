@@ -2,7 +2,7 @@
   <div class="container-fluid h-100 d-flex flex-column m-0">
     <div class="border-bottom py-2 ">
       <h3 class="mb-0">
-        Editar OT # {{ otEditar.idOrdenTrabajo }}
+        Editar OT # O{{ otEditar.prefijoSucursal }}-{{ otEditar.consecutivoSucursal }}
       </h3>
     </div>
 
@@ -11,7 +11,7 @@
         <div class="col-12 mb-3">
           <div class="card shadow-sm p-2">
             <div><span style="font-weight: bold; color: grey;" >Fecha de creación:</span>&nbsp;{{ formatearFecha(otEditar.fechaAlta) }}</div>
-            <div v-if="otEditar.idCotizacion"><span style="font-weight: bold; color: grey;" >Cotización de origen:</span> C{{ otEditar.prefijoSucursal }}-{{ otEditar.consecutivoSucursal }}</div>
+            <div v-if="otEditar.idCotizacion"><span style="font-weight: bold; color: grey;" >Cotización de origen:</span> C{{ otEditar.prefijoCotizacion }}-{{ otEditar.consecutivoCotizacion }}</div>
         </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">

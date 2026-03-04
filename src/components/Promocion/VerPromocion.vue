@@ -1,22 +1,95 @@
 <template>
-	<div class="card shadow-sm p-3">
-		<div class="d-flex justify-content-between align-items-center mb-3">
+	<div class="row m-4">
+		<div class="col-5 d-flex align-items-center">
 			<input
 				v-model="filtro"
 				type="text"
-				class="form-control w-auto"
+				class="form-control"
 				placeholder="Buscar por nombre..."
 			/>
 		</div>
 
+		<div style="visibility: hidden;" class="col-5 d-flex align-items-center">
+			<label for="select" class="form-label m-2">Mostrar: </label>
+			<select v-model="filtroEstatus" class="form-select">
+				<option value="">Todas</option>
+				<option value="Creada">Vigentes</option>
+			</select>
+		</div>
+
+		<div class="col-2 d-flex align-items-right">
+			<button class="btn btn-primary position-relative shadow w-100" @click="abrirModalPromocion()">
+				<i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva promoción
+			</button>
+		</div>
+	</div>
+	<div class="row m-4">
 		<!-- Spinner mientras carga -->
 		<div v-if="loading" class="text-center my-4">
 			<div class="spinner-border text-primary" role="status"></div>
 			<p class="mt-2 text-muted">Cargando promociones...</p>
 		</div>
 
+		<div v-if="modalPromocion" class="card shadow-sm mx-4 mb-3 p-3">
+			<div class="row align-items-end">
+				<div class="col-12 col-lg-6 mb-2">
+					<label for="nombrePromocion" class="form-label">Nombre de la promoción</label>
+					<input
+						id="nombrePromocion"
+						v-model="promocionForm.nombre"
+						type="text"
+						class="form-control"
+						@change = "formValida = 'true';"
+					/>
+				</div>
+				<div class="col-6 col-lg-3 mb-2">
+					<label class="form-label">Tipo</label>
+					<select v-model="promocionForm.tipo" class="form-select">
+						<option :value="false" selected>Monto</option>
+						<option :value="true">Porcentaje</option>
+					</select>
+				</div>
+
+				<div class="col-6 col-lg-3 mb-2">
+					<label class="form-label">Valor</label>
+					<input 
+						v-model.number="promocionForm.valor" 
+						type="number" 
+						step="0.01" 
+						class="form-control" 
+						min="1"
+						max="120"
+						required
+						@change = "formValida = 'true';"
+					/>
+				</div>
+
+				<div class="col-6 col-lg-3 mb-2">
+					<label class="form-label">Fecha Inicio</label>
+					<input v-model="promocionForm.fechaInicio" type="date" class="form-control" @change = "formValida = 'true';" />
+				</div>
+
+				<div class="col-6 col-lg-3 mb-2">
+					<label class="form-label">Fecha Fin</label>
+					<input v-model="promocionForm.fechaFin" type="date" class="form-control" @change = "formValida = 'true';" />
+				</div>
+
+				<div class="col-12 col-lg-6 my-2">
+					<div v-if="!formValida" class="error-msg d-flex justify-content-end mb-2">{{ errorFormulario }}</div>
+					<div class="d-flex justify-content-end align-self-end">
+						<button class="btn btn-secondary shadow-sm me-3" @click="modalPromocion = false">
+							<i class="bi bi-x-circle-fill me-2"></i> Cerrar
+						</button>
+						<button class="btn btn-success shadow-sm" @click="guardarPromocion()">
+							<i class="bi bi-save-fill me-2"></i> Guardar
+						</button>
+					</div>
+				</div>
+			</div>
+			
+		</div>
 		<!-- Tabla -->
-		<div v-else class="table-responsive">
+		<div class="table-responsive">
 			<table class="table align-middle table-hover">
 				<thead class="table-light">
 					<tr>
@@ -24,10 +97,9 @@
 						<th>Nombre</th>
 						<th>Tipo</th>
 						<th>Valor</th>
-						<th>Es General</th>
 						<th>Fecha Inicio</th>
 						<th>Fecha Fin</th>
-						<th>Cant. Artículos</th>
+						<th>¿Vigente?</th>
 						<!-- <th>Estado</th> -->
 						<th>Acciones</th>
 					</tr>
@@ -45,11 +117,10 @@
 							{{ promo.tipo ? "Porcentaje" : "Monto fijo" }}
 						</span>
 						</td>
-						<td>{{ promo.valor }}</td>
-						<td>{{ promo.esGeneral ? "Sí" : "No" }}</td>
+						<td style="text-align: right;">{{ promo.tipo ? promo.valor + "%" : Number(promo.valor).toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}</td>
 						<td>{{ formatearFecha(promo.fechaInicio) }}</td>
 						<td>{{ formatearFecha(promo.fechaFin) }}</td>
-						<td>{{ promo.cantidadArticulos }}</td>
+						<td>{{ esVigente(promo.fechaInicio, promo.fechaFin) ? 'Sí' : 'No' }}</td>
 						<!-- <td>
 							<span
 								class="badge"
@@ -71,9 +142,12 @@
 						>
 							<i class="bi bi-pencil"></i>
 						</button>
-						<!-- <button class="btn btn-sm btn-outline-danger">
+						<button 
+							class="btn btn-sm btn-outline-danger"
+							@click="borrarPromocion(promo)"
+						>
 							<i class="bi bi-trash"></i>
-						</button> -->
+						</button>
 						</td>
 					</tr>
 
@@ -94,13 +168,19 @@ import Swal from "sweetalert2";
 const { proxy } = getCurrentInstance();
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import CrearPromocion from "./CrearPromocion.vue"; 
 
 
 const promociones = ref([]);
 const filtro = ref("");
 const loading = ref(true);
+const errorFormulario = ref('');
+const formValida = ref(true);
 
-
+const data45= JSON.parse(localStorage.getItem('userSession')); // o el nombre de la key que usaste
+const idUsuarioSession = data45?.usuario?.idUsuario;
+const modalPromocion = ref(false);
+const promocionForm = ref([]);
 
 const mostrarToast = (type, message) => {
 	const color = type === "success" 
@@ -163,6 +243,47 @@ const cargarPromociones = async () => {
 		loading.value = false;
 	}
 };
+
+function esVigente(fechaInicio, fechaFin) {
+	const hoy = new Date();
+	hoy.setHours(0,0,0,0);
+	const inicio = new Date(fechaInicio);
+	inicio.setHours(0,0,0,0);
+	const fin = new Date(fechaFin);
+	fin.setHours(23,59,59,999);
+	var resultado = (hoy >= inicio && hoy <= fin);
+	return resultado;
+}
+
+function validarFormulario() {
+	var mensaje = '';
+	var valido = true;
+	console.log(promocionForm.value);
+	if(promocionForm.value.nombre === '') {
+		mensaje = 'Capture un nombre para la promoción.';
+		valido = false;
+	} else {
+		if(promocionForm.value.valor === '' || promocionForm.value.valor <= 0) {
+			mensaje = 'El valor de porcentaje/monto debe ser mayor a cero.';
+			valido = false;
+		} else {
+			if(promocionForm.value.fechaInicio == null || promocionForm.value.fechaFin == null) {
+				mensaje = 'Capture las fechas de vigencia de la promoción.';
+				valido = false;
+			} else {
+				var fechaini = new Date(promocionForm.value.fechaInicio);
+				var fechafin = new Date(promocionForm.value.fechaFin);
+				if(fechafin < fechaini) {
+					mensaje = 'La fecha de fin no puede ser anterior a la fecha de inicio de la promoción.';
+					valido = false;
+				}
+			}
+		}
+	}
+	console.log('Mensaje: ' + mensaje);
+	errorFormulario.value = mensaje;
+	return valido;
+}
 
 // Ver detalles de una promoción
 const verPromocion = async (idPromocion) => {
@@ -253,6 +374,46 @@ const verPromocion = async (idPromocion) => {
 		});
 	}
 };
+
+const abrirModalPromocion = async () => {
+	promocionForm.value = { nombre: '', tipo: true, valor: 0, fechaInicio: null, fechaFin: null, esGeneral: true }
+	formValida.value = true;
+	modalPromocion.value = true;
+}
+
+const guardarPromocion = async () => {
+	formValida.value = validarFormulario();
+	if (formValida.value) {
+		try {
+			const body = {
+				Promocion: {
+					id: null,
+					Nombre: promocionForm.value.nombre,
+					Tipo: promocionForm.value.tipo,
+					Valor: promocionForm.value.valor,
+					EsGeneral: promocionForm.value.esGeneral,
+					FechaInicio: promocionForm.value.fechaInicio,
+					FechaFin: promocionForm.value.fechaFin,
+					Activo: true
+				}
+			}
+			const res = await fetch(`${proxy.$serverIP}api/Promocion/crear?usuario=${idUsuarioSession}`, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(body)
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.mensaje || "Error al crear promoción");
+			mostrarToast("success", "Promoción guardada con éxito.");
+			modalPromocion.value = false;
+			cargarPromociones();
+		}
+		catch (error) {
+			console.log(error);
+			mostrarToast("error", "Ocurrió un error al intentar guardar la promoción: " + error.message);
+		}
+	}
+}
 
 const editarPromocion = async (idPromocion) => {
 	try {
@@ -415,7 +576,37 @@ const editarPromocion = async (idPromocion) => {
 	}
 };
 
+const borrarPromocion = async (promo) => {
+	const result = await Swal.fire({
+		title: 'Eliminar promoción',
+		text: `¿Desea eliminar la promoción seleccionada (${promo.nombre})?`,
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonText: 'Eliminar',
+		cancelButtonText: 'Cancelar'
+	});
+	if (result.isConfirmed) {
+		try {
+			const response = await fetch(`${proxy.$serverIP}api/Promocion/borrar`, {
+				method: "DELETE",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					id: promo.idPromocion,
+					usuario: idUsuarioSession
+				}),
+			});
 
+			if (!response.ok)
+				throw new Error(`Error ${response.status}: ${response.statusText}`);
+			mostrarToast("success", "Promoción borrada correctamente.");
+			cargarPromociones();
+		}
+		catch(err) {
+			console.log(err);
+			mostrarToast("error", "Ocurrió un error al intentar borrar la promoción: " + err.message);
+		}
+	}
+}
 
 const abrirSelectorDeLlantas = async (productos, contenedor) => {
   const buscador = contenedor.querySelector("#buscadorLlantas");
@@ -619,3 +810,10 @@ onMounted(() => {
   cargarPromociones();
 });
 </script>
+
+<style>
+.error-msg {
+  color: red;
+  font-size: 12px;
+}
+</style>
