@@ -2,7 +2,7 @@
   <div class="container-fluid h-100 d-flex flex-column m-0">
     <div class="border-bottom py-2 ">
       <h3 class="mb-0">
-        Editar OT # {{ otEditar.idOrdenTrabajo }}
+        Editar OT # O{{ otEditar.prefijoSucursal }}-{{ otEditar.consecutivoSucursal }}
       </h3>
     </div>
 
@@ -11,7 +11,7 @@
         <div class="col-12 mb-3">
           <div class="card shadow-sm p-2">
             <div><span style="font-weight: bold; color: grey;" >Fecha de creación:</span>&nbsp;{{ formatearFecha(otEditar.fechaAlta) }}</div>
-            <div v-if="otEditar.idCotizacion"><span style="font-weight: bold; color: grey;" >Cotización de origen:</span> C{{ otEditar.prefijoSucursal }}-{{ otEditar.consecutivoSucursal }}</div>
+            <div v-if="otEditar.idCotizacion"><span style="font-weight: bold; color: grey;" >Cotización de origen:</span> C{{ otEditar.prefijoCotizacion }}-{{ otEditar.consecutivoCotizacion }}</div>
         </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">
@@ -161,6 +161,23 @@
     </select>
       </div>
       <div class="col-6">
+        <label class="form-label">¿Requiere factura?</label><br/>
+          Si
+          <input
+            v-model="otEditar.requiereFactura"
+            class="form-check-input btn-outline-dark mx-2"
+            :value="true"
+            type="radio"
+          />
+          No
+          <input
+            v-model="otEditar.requiereFactura"
+            class="form-check-input mx-2"
+            :value="false"
+            type="radio"
+          />
+      </div>
+      <div class="col-6">
         <label class="form-label">¿Desechar llantas?</label><br/>
           Si
           <input
@@ -177,7 +194,137 @@
             type="radio"
           />
       </div>
-      
+      <div v-if="otEditar.requiereFactura" class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header">
+              <i class="bi bi-receipt me-2"></i> Datos fiscales para factura
+            </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-8 col-lg-4 mb-3">
+                <label for="razonsocial" class="form-label">Razón social *</label>
+                <input id="razonsocial"
+                  v-model="otEditar.factura.razonSocial"
+                  class="form-control"
+                  type="text"
+                  placeholder="(Razón Social a facturar)"
+                  @blur="validate('factura.razonSocial')"
+                  :class="{ 'input-error': errores['factura.razonSocial'] }"
+                />
+                <small
+                  v-if="errores['factura.razonSocial']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.razonSocial'] }}
+                </small>
+              </div>
+              <div class="col-4 col-lg-2 mb-3">
+                <label for="rfcfactura" class="form-label">RFC *</label>
+                <input id="rfcfactura"
+                  v-model="otEditar.factura.rfc"
+                  class="form-control"
+                  type="text"
+                  placeholder="(RFC a facturar)"
+                  @blur="validate('factura.rfc')"
+                  :class="{ 'input-error': errores['factura.rfc'] }"
+                />
+                <small
+                  v-if="errores['factura.rfc']"
+                  class="error-msg"
+                >
+                  {{ errores["factura.rfc"] }}
+                </small>
+              </div>
+              <div class="col-6 col-lg-3 mb-3">
+                <label class="form-label">Uso CFDI *</label>
+                <select
+                  v-model="otEditar.factura.usoCFDI"
+                  class="form-select"
+                  
+                  @blur="validate('factura.usoCFDI')"
+                  :class="{ 'input-error': errores['factura.usoCFDI'] }"
+                >
+                  <option disabled value="">-Selecciona-</option>
+                  <option v-for="u in usosCFDI" :key="u.idUsoCFDI" :value="u.idUsoCFDI">
+                    {{ u.codigo + ' - ' + u.descripcion }}
+                  </option>
+                </select>
+                <small
+                  v-if="errores['factura.usoCFDI']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.usoCFDI'] }}
+                </small>
+              </div>
+              <div class="col-6 col-lg-3 mb-3">
+                <label class="form-label">Régimen fiscal *</label>
+                <select
+                  v-model="otEditar.factura.regimenFiscal"
+                  class="form-select"
+                  
+                  @blur="validate('factura.regimenFiscal')"
+                  :class="{ 'input-error': errores['factura.regimenFiscal'] }"
+                >
+                  <option disabled value="">-Selecciona-</option>
+                  <option v-for="r in regimenFiscal" :key="r.idRegimenFiscal" :value="r.idRegimenFiscal">
+                    {{ r.codigo + ' - ' + r.descripcion }}
+                  </option>
+                </select>
+                <small
+                  v-if="errores['factura.regimenFiscal']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.regimenFiscal'] }}
+                </small>
+              </div>
+              <div class="col-8 col-lg-4 mb-3">
+                <label for="direccionfiscal" class="form-label">Dirección</label>
+                <input id="direccionfiscal"
+                  v-model="otEditar.factura.direccion"
+                  class="form-control"
+                  type="text"
+                  placeholder="(Domicilio)"
+                />
+              </div>
+              <div class="col-4 col-lg-2 mb-3">
+                <label for="cpfactura" class="form-label">Código postal *</label>
+                <input id="cpfactura"
+                  v-model="otEditar.factura.cp"
+                  class="form-control"
+                  type="text"
+                  placeholder="(C.P.)"
+                  @blur="validate('factura.cp')"
+                  :class="{ 'input-error': errores['factura.cp'] }"
+                />
+                <small
+                  v-if="errores['factura.cp']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.cp'] }}
+                </small>
+              </div>
+              <div class="col-6 col-lg-3 mb-3">
+                <label for="correofactura" class="form-label">Correo *</label>
+                <input id="correofactura"
+                  v-model="otEditar.factura.eMail"
+                  class="form-control"
+                  type="text"
+                  placeholder="(Use un correo válido)"
+                  @blur="validate('factura.eMail')"
+                  :class="{ 'input-error': errores['factura.eMail'] }"
+                />
+                <small
+                  v-if="errores['factura.eMail']"
+                  class="error-msg"
+                >
+                  {{ errores['factura.eMail'] }}
+                </small>
+              </div>
+            </div>
+          </div>
+            
+        </div>
+      </div>
       </div>
 <h5>Tareas</h5>
 
@@ -237,6 +384,22 @@
           <option value="CUPON">Cupón</option>
         </select>
       </div>
+      <h5>Otros</h5>
+      <div class="my-3 gp-2">
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <Refacciones
+            :otId = "otEditar.idOrdenTrabajo"
+            :usuario = "idUsuarioSession"
+            :key = "otEditar.idOrdenTrabajo" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <Incidentes
+            :otId = "otEditar.idOrdenTrabajo"
+            :usuario = "idUsuarioSession" />
+          </div>
+        </div>
+      </div>
 
       <div class="col-2">
         <button
@@ -247,6 +410,14 @@
         </button>
       </div>
     </div>
+
+    <div class="border-top py-2 px-3 bg-light text-end">
+      <button class="btn btn-secondary mx-3" @click="volver()">
+        <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
+      </button>
+      <button class="btn btn-primary mx-3" :disabled="!formValido" @click="guardarEdicion">
+        Guardar cambios
+      </button>
   </div>
 </div>
 
@@ -372,10 +543,21 @@
 </template>
 
 <script setup>
+import { ref, onMounted, getCurrentInstance, computed, reactive, watch } from 'vue'
 
 
 import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue'
+import LlantasSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue'
+import PaquetesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue'
+import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue'
+import Incidentes from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Incidentes.vue';
+import Refacciones from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Refacciones.vue';
+import { parse } from 'vue/compiler-sfc';
+import axios from 'axios';
+import Toastify from "toastify-js";
+import "toastify-js/src/toastify.css";
 import { Modal } from "bootstrap"
 import axios from 'axios'
 import Toastify from "toastify-js"
@@ -462,6 +644,118 @@ const cargarEmpleados = async () => {
   } catch (error) {
     console.error("Error al cargar empleado:", error)
   }
+};
+
+const cargarUsosCFDI = async () => {
+  try {
+    const res = await fetch(
+      proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI"
+    );
+    if (!res.ok) throw new Error("Error en la respuesta");
+
+    const result = await res.json();
+    usosCFDI.value = result.data;
+  } catch (error) {
+    console.error("Error al cargar usos CFDI:", error);
+  }
+}
+
+const cargarRegimenFiscal = async () => {
+  try {
+    const res = await fetch(
+      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal"
+    );
+    if (!res.ok) throw new Error("Error en la respuesta");
+
+    const result = await res.json();
+    regimenFiscal.value = result.data;
+  } catch (error) {
+    console.error("Error al cargar el régimen fiscal:", error);
+  }
+}
+
+const formatearFecha = (fecha) => {
+    if (!fecha) return "";
+
+    const d = new Date(fecha);
+
+    const fechaFormateada = d.toLocaleDateString("es-MX", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const horaFormateada = d.toLocaleTimeString("es-MX", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return `${fechaFormateada}, ${horaFormateada}`;
+  };
+
+const refrescarOrden = () => {
+  console.log('🔄 Refrescando orden...')
+  cargarOrden()
+}
+
+const volver = () => {
+  router.push('/content/orden-trabajo');
+}
+
+const estados = [
+  'Creado',
+  'En curso',
+  'Finalizado',
+  'Entregado'
+]
+
+const indiceActual = computed(() => {
+  return estados.indexOf(otEditar.value.estado)
+})
+
+// ¿ya pasó este estado?
+const esCompletado = (estado) => {
+  return estados.indexOf(estado) < indiceActual.value
+}
+
+// clases del círculo
+const clasePaso = (estado) => {
+  const idx = estados.indexOf(estado)
+
+  if (idx < indiceActual.value) {
+    return 'bg-success text-white'
+  }
+
+  if (idx === indiceActual.value) {
+    return 'bg-primary text-white'
+  }
+
+  return 'bg-light border'
+}
+
+// clases de la línea entre pasos
+const lineaClase = (estado) => {
+  return estados.indexOf(estado) < indiceActual.value
+    ? 'bg-success'
+    : 'bg-secondary'
+}
+
+const avanzarEstado = async () => {
+
+  const idx = estados.indexOf(otEditar.value.estado)
+
+  // si no existe o ya es el último → no hace nada
+  if (idx === -1 || idx >= estados.length - 1) return
+
+  const nuevoEstado = estados[idx + 1]
+
+  try {
+
+    // actualizar en frontend
+    otEditar.value.estado = nuevoEstado
+
+    // guardar en backend
 }
 
 /* ==============================
@@ -536,6 +830,11 @@ const mostrarToast = (type, message) => {
    INIT
 ============================== */
 onMounted(() => {
+  cargarOrden();
+  cargarEmpleados();
+  cargarUsosCFDI();
+  cargarRegimenFiscal();
+});
   cargarOrden()
   cargarEmpleados()
 })
