@@ -179,132 +179,254 @@
       </div>
       
       </div>
-      <h5>Tareas</h5>
-      <div v-if="otEditar.llantas">
-        <LlantasSection
-        :llantas = "otEditar.llantas" />
+<h5>Tareas</h5>
+
+<!-- ================= LLANTAS ================= -->
+<div v-if="otEditar.llantas?.length">
+  <h6 class="text-muted">Llantas</h6>
+
+  <div
+    v-for="(llanta, i) in otEditar.llantas"
+    :key="'llanta-'+i"
+    class="card shadow-sm p-3 mb-3"
+  >
+    <div class="row">
+      <div class="col-6">
+        <strong>{{ llanta.descripcion }}</strong>
       </div>
-      <div v-if="otEditar.paquetes">
-        <PaquetesSection
-        :paquetes = "otEditar.paquetes" />
+      <div class="col-2">Cant: {{ llanta.cantidad }}</div>
+      <div class="col-2">$ {{ llanta.precio }}</div>
+      <div class="col-2 fw-bold">
+        $ {{ calcularTotalLinea(llanta) }}
       </div>
-      <div v-if="otEditar.adicionales">
-        <adicionalesSection
-        :adicionales = "otEditar.adicionales" />
-      </div>
-      <!-- <h5>Otros</h5>
-      <div class="my-3 gp-2">
-        <button class="btn btn-primary shadow mx-2">
-          <i class="bi bi-tools me-3"></i>Recibir refacciones
-        </button>
-        <button class="btn btn-warning shadow mx-2" @click="abrirModalIncidente()">
-          <i class="bi bi-exclamation-triangle-fill me-3"></i>Registrar incidente
-        </button>
-      </div> -->
     </div>
 
-    <div class="border-top py-2 px-3 bg-light text-end">
-      <button class="btn btn-secondary mx-3" @click="volver()">
-        <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
-      </button>
-      <button class="btn btn-primary mx-3" @click="guardarEdicion">
-        Guardar cambios
-      </button>
-    </div>
+    <!-- DESCUENTO -->
+    <div class="row mt-3 align-items-end">
+      <div class="col-3">
+        <label class="form-label">Tipo</label>
+        <select class="form-select" v-model="llanta.descuento.tipo">
+          <option :value="null">Sin descuento</option>
+          <option value="PORCENTAJE">Procentaje</option>
+          <option value="MONTO">Monto</option>
+        </select>
 
+      </div>
+
+      <div class="col-3">
+        <label class="form-label">Valor</label>
+        <input
+          type="number"
+          min="0"
+          class="form-control"
+          v-model.number="llanta.descuento.valor"
+          :disabled="!llanta.descuento.tipo"
+        />
+      </div>
+
+      <div class="col-4">
+        <label class="form-label">Origen</label>
+        <select
+          class="form-select"
+          v-model="llanta.descuento.origen"
+          :disabled="!llanta.descuento.tipo"
+        >
+          <option :value="null">Seleccionar</option>
+          <option value="TIENDA">Tienda</option>
+          <option value="PROMOCION">Promoción</option>
+          <option value="CUPON">Cupón</option>
+        </select>
+      </div>
+
+      <div class="col-2">
+        <button
+          class="btn btn-outline-danger w-100"
+          @click="resetDescuento(llanta)"
+        >
+          Quitar
+        </button>
+      </div>
+    </div>
   </div>
+</div>
 
-  <!-- MODAL INCIDENTE -->
-  <div class="modal fade" id="modalIncidente" tabindex="-1">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form>
-          <div class="modal-header">
-            <h4 class="modal-title">
-              Agregar incidencia
-            </h4>
-          </div>
-          <div class="modal-body">
-            Fecha / hora de la incidencia
-            <div class="row my-2">
-              <div class="col-12 col-lg-6">
-                <input
-                  v-model="incidenteForm.fecha"
-                  type="date"
-                  class="form-control"
-                />
-              </div>
-              <div class="col-12 col-lg-6">
-                <input
-                  v-model="incidenteForm.hora"
-                  type="time"
-                  class="form-control"
-                />
-              </div>
-            </div>
-            Incidente (detalle)
-            <div class="row my-2">
-              <div class="col-12">
-                <textarea v-model="incidenteForm.incidente" class="form-control" rows="3" maxlength="500"></textarea>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-sm btn-secondary shadow mx-2" type="button" data-bs-dismiss="modal">
-              <i class="bi bi-x-circle-fill me-2"></i>Cancelar
-            </button>
-            <button class="btn btn-sm btn-success mx-2" type="button">
-              Guardar
-            </button>
-          </div>
-        </form>
+<!-- ================= PAQUETES ================= -->
+<div v-if="otEditar.paquetes?.length">
+  <h6 class="text-muted">Paquetes</h6>
+
+  <div
+    v-for="(paq, i) in otEditar.paquetes"
+    :key="'paq-'+i"
+    class="card shadow-sm p-3 mb-3"
+  >
+    <div class="row">
+      <div class="col-8">
+        <strong>{{ paq.descripcion }}</strong>
+      </div>
+      <div class="col-4 fw-bold">
+        $ {{ calcularTotalLinea(paq) }}
       </div>
     </div>
+
+    <div class="row mt-3 align-items-end">
+      <div class="col-3">
+        <select class="form-select" v-model="paq.descuento.tipo">
+          <option :value="null">Sin descuento</option>
+          <option value="PORCENTAJE">porcentaje</option>
+          <option value="MONTO">Monto</option>
+        </select>
+      </div>
+
+      <div class="col-3">
+        <input
+          type="number"
+          class="form-control"
+          v-model.number="paq.descuento.valor"
+          :disabled="!paq.descuento.tipo"
+        />
+      </div>
+
+      <div class="col-4">
+        <select
+          class="form-select"
+          v-model="paq.descuento.origen"
+          :disabled="!paq.descuento.tipo"
+        >
+          <option value="TIENDA">Tienda</option>
+          <option value="PROMOCION">Promoción</option>
+          <option value="CUPON">Cupón</option>
+        </select>
+      </div>
+
+      <div class="col-2">
+        <button class="btn btn-outline-danger w-100" @click="resetDescuento(paq)">
+          Quitar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= ADICIONALES ================= -->
+<div v-if="otEditar.adicionales?.length">
+  <h6 class="text-muted">Adicionales</h6>
+
+  <div
+    v-for="(add, i) in otEditar.adicionales"
+    :key="'add-'+i"
+    class="card shadow-sm p-3 mb-3"
+  >
+    <div class="row">
+      <div class="col-8">{{ add.descripcion }}</div>
+      <div class="col-4 fw-bold">$ {{ calcularTotalLinea(add) }}</div>
+    </div>
+
+    <div class="row mt-3 align-items-end">
+      <div class="col-3">
+
+        <select class="form-select" v-model="add.descuento.tipo">
+          <option :value="null">Sin descuento</option>
+          <option value="PORCENTAJE">porcentaje </option>
+          <option value="MONTO">Monto </option>
+        </select>
+
+        
+      </div>
+
+      <div class="col-3">
+        <input
+          type="number"
+          class="form-control"
+          v-model.number="add.descuento.valor"
+          :disabled="!add.descuento.tipo"
+        />
+      </div>
+
+      <div class="col-4">
+        <select
+          class="form-select"
+          v-model="add.descuento.origen"
+          :disabled="!add.descuento.tipo"
+        >
+          <option value="TIENDA">Tienda</option>
+          <option value="PROMOCION">Promoción</option>
+          <option value="CUPON">Cupón</option>
+        </select>
+      </div>
+
+      <div class="col-2">
+        <button class="btn btn-outline-danger w-100" @click="resetDescuento(add)">
+          Quitar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+
+
+    
   </div>
 
 </template>
+
 <script setup>
+
+
 import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { Modal } from "bootstrap";
-import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue'
-import LlantasSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue'
-import PaquetesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue'
-import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue'
-import { parse } from 'vue/compiler-sfc';
-import axios from 'axios';
-import Toastify from "toastify-js";
-import "toastify-js/src/toastify.css";
+import { Modal } from "bootstrap"
+import axios from 'axios'
+import Toastify from "toastify-js"
+import "toastify-js/src/toastify.css"
 
 const { proxy } = getCurrentInstance()
-const route = useRoute();
-const router = useRouter();
-const otEditar = ref({});
-const itmEmpleados = ref({});
-const incidenteForm = ref({});
-let modalIncidente;
-/**
- * 🔒 No renderizar nada hasta que TODO esté listo
- */ 
+const route = useRoute()
+const router = useRouter()
 
-const data45= JSON.parse(localStorage.getItem('userSession')); // o el nombre de la key que usaste
-const idUsuarioSession = data45?.usuario?.idUsuario;
-
-const orden = ref({
+/* ==============================
+   ESTADO BASE (IMPORTANTE)
+============================== */
+const otEditar = ref({
   llantas: [],
   paquetes: [],
   adicionales: []
 })
 
-const normalizar = (arr) =>
-  Array.isArray(arr)
-    ? arr.filter(i => i && typeof i === 'object')
-    : []
+const itmEmpleados = ref([])
+const incidenteForm = ref({})
+let modalIncidente
 
+/* ==============================
+   USUARIO SESIÓN
+============================== */
+const data45 = JSON.parse(localStorage.getItem('userSession'))
+const idUsuarioSession = data45?.usuario?.idUsuario
+
+/* ==============================
+   NORMALIZADORES
+============================== */
+const normalizar = (arr) =>
+  Array.isArray(arr) ? arr.filter(i => i && typeof i === 'object') : []
+
+const normalizarLinea = (linea) => ({
+  ...linea,
+  cantidad: linea.cantidad ?? 1,
+  precio: linea.precio ?? 0,
+  descuento: linea.descuento ?? {
+    tipo: null,
+    valor: 0,
+    origen: null
+  }
+})
+
+/* ==============================
+   CARGAR ORDEN (AQUÍ VA json)
+============================== */
 const cargarOrden = async () => {
   try {
     const id = route.params.id
-    console.log(' Cargando OT:', id)
 
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
@@ -313,237 +435,131 @@ const cargarOrden = async () => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
     const json = await res.json()
-    console.log(' RESPUESTA BACKEND:', json)
 
-    /**
-     * 🔒 Normalización total
-     */
     otEditar.value = {
       ...json,
-      paquetes: normalizar(json.paquetes),
-      llantas: normalizar(json.llantas),
-      adicionales: normalizar(json.adicionales)
+      llantas: normalizar(json.llantas).map(normalizarLinea),
+      paquetes: normalizar(json.paquetes).map(normalizarLinea),
+      adicionales: normalizar(json.adicionales).map(normalizarLinea)
     }
 
   } catch (err) {
-    console.error(' Error cargando OT:', err)
-    orden.value = null
+    console.error('Error cargando OT:', err)
   }
 }
 
+/* ==============================
+   EMPLEADOS
+============================== */
 const cargarEmpleados = async () => {
-  const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
     const res = await fetch(
-      proxy.$serverIP +
-        "api/Empleado/getEmpleado?idSucursal=" +
-        userSession.usuario.idSucursal
-    );
-    if (!res.ok) throw new Error("Error en la respuesta");
-    const data = await res.json();
-
-    itmEmpleados.value = data;
-    // console.log('Empleados: '+ JSON.stringify(data))
-    // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
-  } catch (error) {
-    console.error("Error al cargar empleado:", error);
-  }
-};
-
-const formatearFecha = (fecha) => {
-    if (!fecha) return "";
-
-    const d = new Date(fecha);
-
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-    const horaFormateada = d.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    return `${fechaFormateada}, ${horaFormateada}`;
-  };
-
-const refrescarOrden = () => {
-  cargarOrden()
-}
-
-const abrirModalIncidente = () => {
-  const ahora = new Date();
-  incidenteForm.value.fecha = ahora.toISOString().slice(0, 10); // YYYY-MM-DD
-  incidenteForm.value.hora = ahora.toTimeString().slice(0, 5);
-  incidenteForm.value.incidente = "";
-  modalIncidente = new Modal(document.getElementById("modalIncidente"));
-  modalIncidente.show();
-}
-
-const volver = () => {
-  router.push('/content/orden-trabajo');
-}
-
-const estados = [
-  'Creado',
-  'En curso',
-  'Finalizado',
-  'Entregado'
-]
-
-const indiceActual = computed(() => {
-  return estados.indexOf(otEditar.value.estado)
-})
-
-// ¿ya pasó este estado?
-const esCompletado = (estado) => {
-  return estados.indexOf(estado) < indiceActual.value
-}
-
-// clases del círculo
-const clasePaso = (estado) => {
-  const idx = estados.indexOf(estado)
-
-  if (idx < indiceActual.value) {
-    return 'bg-success text-white'
-  }
-
-  if (idx === indiceActual.value) {
-    return 'bg-primary text-white'
-  }
-
-  return 'bg-light border'
-}
-
-// clases de la línea entre pasos
-const lineaClase = (estado) => {
-  return estados.indexOf(estado) < indiceActual.value
-    ? 'bg-success'
-    : 'bg-secondary'
-}
-
-const avanzarEstado = async () => {
-
-  const idx = estados.indexOf(otEditar.value.estado)
-
-  // si no existe o ya es el último → no hace nada
-  if (idx === -1 || idx >= estados.length - 1) return
-
-  const nuevoEstado = estados[idx + 1]
-
-  try {
-
-    // actualizar en frontend
-    otEditar.value.estado = nuevoEstado
-
-    // guardar en backend
-    await axios.put(
-      `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
-      {
-        estado: nuevoEstado,
-      }
+      `${proxy.$serverIP}api/Empleado/getEmpleado?idSucursal=${data45.usuario.idSucursal}`
     )
+    if (!res.ok) throw new Error("Error empleados")
 
-    mostrarToast("success", "Orden de trabajo avanzada correctamente")
-
+    itmEmpleados.value = await res.json()
   } catch (error) {
-    console.error("No se pudo actualizar el estado", error)
+    console.error("Error al cargar empleado:", error)
   }
 }
 
-const cambiarEstatusOT = async (estatus) => {
-
-  try {
-
-    // guardar en backend
-    await axios.put(
-      `${proxy.$serverIP}api/OrdenTrabajo/cambiarEstatusOT/${otEditar.value.idOrdenTrabajo}`,
-      {
-        estatus: estatus,
-      }
-    )
-
-    switch (estatus) {
-      case 0:
-        mostrarToast("success", "Orden de trabajo cancelada correctamente")
-        break
-      case 1:
-        mostrarToast("success", "Orden de trabajo retomada correctamente")
-        break
-      case 2:
-        mostrarToast("success", "Orden de trabajo suspendida correctamente")
-        break
-    } 
-
-    cargarOrden()
-
-  } catch (error) {
-    console.error("No se pudo actualizar el estado", error)
-  }
+/* ==============================
+   DESCUENTOS
+============================== */
+const resetDescuento = (linea) => {
+  linea.descuento = { tipo: null, valor: 0, origen: null }
 }
 
-// funcion para guardar los datos editados de la OT
+const calcularTotalLinea = (linea) => {
+  const base = (linea.precio || 0) * (linea.cantidad || 1)
+
+  if (!linea.descuento?.tipo) return base
+
+  if (linea.descuento.tipo === 'PORCENTAJE') {
+    return base - (base * linea.descuento.valor / 100)
+  }
+
+  if (linea.descuento.tipo === 'MONTO') {
+    return Math.max(0, base - linea.descuento.valor)
+  }
+
+  return base
+}
+
+/* ==============================
+   GUARDAR EDICIÓN
+============================== */
+
+
 const guardarEdicion = async () => {
-
-  const idOT = otEditar.value.idOrdenTrabajo;
-
-  console.log('usuario edita' + idUsuarioSession)
-
-  const payload = {
-    idUsuario: idUsuarioSession,
-    idEmpleado: otEditar.value.empleado.idEmpleado,
-    metodoPago: otEditar.value.metodoPago,
-    desecharLlanta: otEditar.value.desecharLlanta,
-    requiereFactura: otEditar.value.requiereFactura,
-    factura: otEditar.value.factura
-  };
-
   try {
-    const response = await axios.put(
-      `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${idOT}`,
-      payload
-    );
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        idUsuario: idUsuarioSession,
+        idEmpleado: otEditar.value.empleado?.idEmpleado,
+        metodoPago: otEditar.value.metodoPago,
+        desecharLlanta: otEditar.value.desecharLlanta,
+        requiereFactura: otEditar.value.requiereFactura,
+        factura: otEditar.value.factura
+      }
+    )
 
-    mostrarToast("success", "Orden de trabajo editada correctamente");
-    console.log("OT actualizada:", response.data);
+    mostrarToast("success", "Orden de trabajo editada correctamente")
     cargarOrden()
-    //volver()
 
   } catch (error) {
-    console.error("Error al editar OT:", error);
+    console.error("Error al editar OT:", error)
   }
-};
+}
 
+/* ==============================
+   TOAST
+============================== */
 const mostrarToast = (type, message) => {
-  const color =
-    type === "success"
-      ? "linear-gradient(to right, #96c93d)"
-      : type === "warning"
-      ? "linear-gradient(to right, #f5af19, #f12711)"
-      : "linear-gradient(to right, #6dd5ed, #2193b0)";
-
   Toastify({
     text: message,
     duration: 3000,
-    close: true,
     gravity: "top",
     position: "right",
-    stopOnFocus: true,
     style: {
-      background: color,
-      borderRadius: "6px",
-      color: "white",
-      fontSize: "14px",
-      boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-    },
-  }).showToast();
-};
+      background:
+        type === "success"
+          ? "linear-gradient(to right, #96c93d)"
+          : "linear-gradient(to right, #f12711)"
+    }
+  }).showToast()
+}
 
+/* ==============================
+   INIT
+============================== */
 onMounted(() => {
-  cargarOrden();
-  cargarEmpleados();
-});
+  cargarOrden()
+  cargarEmpleados()
+})
+
+
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return ''
+
+  const d = new Date(fecha)
+
+  const fechaFormateada = d.toLocaleDateString('es-MX', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  })
+
+  const horaFormateada = d.toLocaleTimeString('es-MX', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  })
+
+  return `${fechaFormateada}, ${horaFormateada}`
+}
+
 </script>

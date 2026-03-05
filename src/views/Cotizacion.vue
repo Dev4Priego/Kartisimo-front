@@ -21,6 +21,7 @@
           <option value="Cancelada">Cancelados</option>
           <option value="Aprobada">Aprobados</option>
           <option value="Realizada">Finalizados</option>
+          
         </select>
       </div>
 
