@@ -12,7 +12,6 @@
                         type="text" 
                         class="form-control"
                         v-model="promocionState.nombre"
-                        pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+"
                         minlength="3"
                         maxlength="50"
                         required
@@ -174,7 +173,7 @@ const { proxy } = getCurrentInstance()
 const llantas = ref([])
 const llantasFiltradas = ref([])
 const busquedaMedida = ref("")
-
+const loggeduser = JSON.parse(localStorage.getItem("userSession"));
 
 const totalRegistros = ref(0)
 const loading = ref(false)
@@ -325,7 +324,7 @@ const guardarPromocion = async () => {
             }))
         }
 
-        const res = await fetch(`${proxy.$serverIP}api/Promocion/crear`, {
+        const res = await fetch(`${proxy.$serverIP}api/Promocion/crear?usuario=${loggeduser.usuario.idUsuario}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body)
