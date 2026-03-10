@@ -708,21 +708,24 @@
                   </div>
                   <div class="col">
                     <div
-  v-for="paquete in paquetesDisponibles"
-  :key="paquete.idPaquete"
-  class="form-check m-4"
->
-  <input
-    class="form-check-input"
-    type="checkbox"
-    :id="'paquete-' + paquete.idPaquete"
-    :value="paquete.idPaquete"
-   v-model="paquetesSeleccionados"
- />
- <label class="form-check-label" :for="'paquete-' + paquete.idPaquete">
-    {{ paquete.nombre }} - ${{ paquete.precioUnitario }}
-  </label>
-</div>
+                      v-for="paquete in paquetesDisponibles"
+                      :key="paquete.idPaquete"
+                      class="form-check m-4"
+                    >
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        :id="'paquete-' + paquete.idPaquete"
+                        :value="paquete.idPaquete"
+                        v-model="paquetesSeleccionados"
+                      />
+                      <label
+                        class="form-check-label"
+                        :for="'paquete-' + paquete.idPaquete"
+                      >
+                        {{ paquete.nombre }} - ${{ paquete.precioUnitario }}
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1166,9 +1169,18 @@
                                       : 'btn-outline-primary'
                                   "
                                   @click="togglePromoAlVuelo(item)"
-                                  :disabled="item.idPromocionSeleccionada > 0 && !buscarPromocionAplicada(item)"
+                                  :disabled="
+                                    item.idPromocionSeleccionada > 0 &&
+                                    !buscarPromocionAplicada(item)
+                                  "
                                 >
-                                   <i :class=" buscarPromocionAplicada(item) ? 'bi bi-x-lg' : 'bi bi-plus-lg'"></i>
+                                  <i
+                                    :class="
+                                      buscarPromocionAplicada(item)
+                                        ? 'bi bi-x-lg'
+                                        : 'bi bi-plus-lg'
+                                    "
+                                  ></i>
                                 </button>
                               </div>
 
@@ -1239,8 +1251,9 @@
                                   />
                                 </div>
                                 <div>
-
-                                  <label class="samll"> Tipo de Promocion </label>
+                                  <label class="samll">
+                                    Tipo de Promocion
+                                  </label>
                                   <div
                                     calss=" d-flex align-items-center justify-content-center "
                                   >
@@ -1258,15 +1271,15 @@
                                         value="0"
                                         v-model="PromocionesVuelo.tipoPromocion"
                                         checked
-                                        />
-                                      </div>
-                                      <div class="form-checK float-start mx-2">
-                                        <label
-                                          class="form-check-label mx-2"
-                                          for="opcPromo"
-                                          >Promocion</label
-                                        >
-                                        <input
+                                      />
+                                    </div>
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcPromo"
+                                        >Promocion</label
+                                      >
+                                      <input
                                         class="form-check-input me-2"
                                         type="radio"
                                         name="opcPromocion"
@@ -1487,14 +1500,23 @@
                                 <button
                                   class="btn btn-sm"
                                   :class="
-                                   buscarPromocionAplicada(p)
+                                    buscarPromocionAplicada(p)
                                       ? 'btn-outline-danger'
                                       : 'btn-outline-primary'
                                   "
                                   @click="togglePromoAlVuelo(p)"
-                                  :disabled="p.idPromocionSeleccionada > 0 && !buscarPromocionAplicada(p)"
+                                  :disabled="
+                                    p.idPromocionSeleccionada > 0 &&
+                                    !buscarPromocionAplicada(p)
+                                  "
                                 >
-                                  <i :class=" buscarPromocionAplicada(p) ? 'bi bi-x-lg' : 'bi bi-plus-lg'"></i>
+                                  <i
+                                    :class="
+                                      buscarPromocionAplicada(p)
+                                        ? 'bi bi-x-lg'
+                                        : 'bi bi-plus-lg'
+                                    "
+                                  ></i>
                                 </button>
                               </div>
 
@@ -1564,62 +1586,61 @@
                                   />
                                 </div>
                                 <!-- Radios -->
-                                 <div>
-
-                                   <label class="samll"
-                                     > Tipo de Promocion </label
-                                   >
-                                   <div
-                                     calss=" d-flex align-items-center justify-content-center "
-                                   >
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcTienda"
-                                         >Tienda</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcTienda"
-                                         value="0"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                         checked
-                                       />
-                                     </div>
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcPromo"
-                                         >Promocion</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcPromo"
-                                         value="1"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                       />
-                                     </div>
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcPromo"
-                                         >Cupón</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcCupon"
-                                         value="2"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                       />
-                                     </div>
-                                   </div>
-                                 </div>
+                                <div>
+                                  <label class="samll">
+                                    Tipo de Promocion
+                                  </label>
+                                  <div
+                                    calss=" d-flex align-items-center justify-content-center "
+                                  >
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcTienda"
+                                        >Tienda</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcTienda"
+                                        value="0"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                        checked
+                                      />
+                                    </div>
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcPromo"
+                                        >Promocion</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcPromo"
+                                        value="1"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                      />
+                                    </div>
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcPromo"
+                                        >Cupón</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcCupon"
+                                        value="2"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
 
                                 <!-- Guardar -->
                                 <button
@@ -1820,14 +1841,23 @@
                                 <button
                                   class="btn btn-sm"
                                   :class="
-                                   buscarPromocionAplicada(extra)
+                                    buscarPromocionAplicada(extra)
                                       ? 'btn-outline-danger'
                                       : 'btn-outline-primary'
                                   "
                                   @click="togglePromoAlVuelo(extra)"
-                                 :disabled="extra.idPromocionSeleccionada > 0 && !buscarPromocionAplicada(extra)"
+                                  :disabled="
+                                    extra.idPromocionSeleccionada > 0 &&
+                                    !buscarPromocionAplicada(extra)
+                                  "
                                 >
-                                   <i :class=" buscarPromocionAplicada(extra) ? 'bi bi-x-lg' : 'bi bi-plus-lg'"></i>
+                                  <i
+                                    :class="
+                                      buscarPromocionAplicada(extra)
+                                        ? 'bi bi-x-lg'
+                                        : 'bi bi-plus-lg'
+                                    "
+                                  ></i>
                                 </button>
                               </div>
 
@@ -1901,62 +1931,61 @@
                                   />
                                 </div>
                                 <!-- Radios -->
-                                 <div>
-
-                                   <label class="samll mx-2"
-                                     > Tipo de Promocion </label
-                                   >
-                                   <div
-                                     calss=" d-flex align-items-center justify-content-center "
-                                   >
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcTienda"
-                                         >Tienda</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcTienda"
-                                         value="0"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                         checked
-                                       />
-                                     </div>
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcPromo"
-                                         >Promocion</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcPromo"
-                                         value="1"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                       />
-                                     </div>
-                                     <div class="form-checK float-start mx-2">
-                                       <label
-                                         class="form-check-label mx-2"
-                                         for="opcPromo"
-                                         >Cupón</label
-                                       >
-                                       <input
-                                         class="form-check-input me-2"
-                                         type="radio"
-                                         name="opcPromocion"
-                                         id="opcCupon"
-                                         value="2"
-                                         v-model="PromocionesVuelo.tipoPromocion"
-                                       />
-                                     </div>
-                                   </div>
-                                 </div>
+                                <div>
+                                  <label class="samll mx-2">
+                                    Tipo de Promocion
+                                  </label>
+                                  <div
+                                    calss=" d-flex align-items-center justify-content-center "
+                                  >
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcTienda"
+                                        >Tienda</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcTienda"
+                                        value="0"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                        checked
+                                      />
+                                    </div>
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcPromo"
+                                        >Promocion</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcPromo"
+                                        value="1"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                      />
+                                    </div>
+                                    <div class="form-checK float-start mx-2">
+                                      <label
+                                        class="form-check-label mx-2"
+                                        for="opcPromo"
+                                        >Cupón</label
+                                      >
+                                      <input
+                                        class="form-check-input me-2"
+                                        type="radio"
+                                        name="opcPromocion"
+                                        id="opcCupon"
+                                        value="2"
+                                        v-model="PromocionesVuelo.tipoPromocion"
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
 
                                 <!-- Guardar -->
                                 <button
@@ -2116,6 +2145,7 @@ const loading = ref(true);
 
 const itemsSelected = ref([]);
 const paquetesSeleccionados = ref([]);
+const esNuevaCotizacion = ref(true); // bandera para edicion o crear (paquetes)
 
 const sortBy = ref(""); // '' = sin columna activa
 const sortType = ref("asc"); // 'asc' | 'desc'
@@ -2407,7 +2437,6 @@ const cargarPaquetes = async () => {
         nombre: p.nombre,
         descripcion: p.descripcion,
         precioUnitario: Math.trunc(parseFloat(p.precioUnitario)) || 0,
-        
       };
 
       paquetesDisponibles.value.push(paquete);
@@ -2641,14 +2670,16 @@ watch(
 watch(
   paquetesDisponibles,
   (nuevoValor) => {
-    // Solo aplica si es una nueva cotización (no edición)
+    // Solo aplica si es una nueva cotización Y no hay paquetes seleccionados
     if (
-        !cotizacionForm.codigo &&
-        nuevoValor.length &&
-        paquetesSeleccionados.value.length === 0
-      ) {
-        paquetesSeleccionados.value = [nuevoValor[0].idPaquete];
-     }
+      esNuevaCotizacion.value &&
+      nuevoValor.length &&
+      paquetesSeleccionados.value.length === 0 &&
+      cotizacionForm.paquetes.length === 0
+    ) {
+      
+      paquetesSeleccionados.value = [nuevoValor[0].idPaquete];
+      }
   },
   { immediate: true },
 );
@@ -3027,15 +3058,20 @@ const cargarFormulario = async (cotizacion = null) => {
     promoGeneral.value = null;
     itemsSelected.value = [];
     paquetesSeleccionados.value = [];
+    esNuevaCotizacion.value = true;
+    // 🔹 Asignar el primer paquete automáticamente para nuevas cotizaciones
+    if (paquetesDisponibles.value.length > 0 && paquetesSeleccionados.value.length === 0) {
+      paquetesSeleccionados.value = [paquetesDisponibles.value[0].idPaquete];
+    }
 
-     // 🔹 log claro
+    // 🔹 log claro
     return;
   }
 
   // Si se carga una cotización existente
   try {
     const codigoStr = String(cotizacion?.idCotizacion ?? "").trim();
-
+    esNuevaCotizacion.value = false;
     const res = await fetch(
       `${proxy.$serverIP}api/Cotizacion/getDetalleCotizacion?id=${codigoStr}`,
     );
@@ -3050,7 +3086,7 @@ const cargarFormulario = async (cotizacion = null) => {
     }
 
     const data = await res.json();
-    
+
     // 🔹 Cargar datos de cliente
     cotizacionForm.codigo = data.prefijo + "-" + data.consecutivoSucursal;
     cotizacionForm.idCotizacion = data.idCotizacion;
@@ -3072,7 +3108,7 @@ const cargarFormulario = async (cotizacion = null) => {
         const base = paquetesDisponibles.value.find(
           (q) => q.idPaquete === p.idPaquete,
         );
-        console.log("base: ",base);
+        //console.log("base: ",base);
         if (!base) return null;
 
         // 🔹 Determinar si tiene promoción individual o al vuelo
@@ -3115,16 +3151,16 @@ const cargarFormulario = async (cotizacion = null) => {
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
-          promoIndividual && !promoIndividual.esAlVuelo
-            ? promoIndividual.idPromocion
-            : null,
-            precioConPromo,
+            promoIndividual && !promoIndividual.esAlVuelo
+              ? promoIndividual.idPromocion
+              : null,
+          precioConPromo,
 
           idPromocionAlVuelo:
             promoIndividual && promoIndividual.esAlVuelo
               ? promoIndividual.idPromocion
               : null,
-              isVuelo: promoIndividual?.esAlVuelo ?? false
+          isVuelo: promoIndividual?.esAlVuelo ?? false,
         };
       }),
     );
@@ -3189,18 +3225,18 @@ const cargarFormulario = async (cotizacion = null) => {
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
-          promoIndividual && !promoIndividual.esAlVuelo
-            ? promoIndividual.idPromocion
-            : null,
+            promoIndividual && !promoIndividual.esAlVuelo
+              ? promoIndividual.idPromocion
+              : null,
 
           idPromocionAlVuelo:
-          promoIndividual && promoIndividual.esAlVuelo
-            ? promoIndividual.idPromocion
-            : null,
+            promoIndividual && promoIndividual.esAlVuelo
+              ? promoIndividual.idPromocion
+              : null,
           precioConPromo,
           excluirPromocionGeneral: ll.excluirPromocionGeneral ?? false,
           comentario: ll.comentario || "",
-          isVuelo: promoIndividual?.esAlVuelo ?? false
+          isVuelo: promoIndividual?.esAlVuelo ?? false,
         };
       }),
     );
@@ -3250,19 +3286,19 @@ const cargarFormulario = async (cotizacion = null) => {
 
           promosAplicables,
           promo: promoIndividual,
-         idPromocionSeleccionada:
-  promoIndividual && !promoIndividual.esAlVuelo
-    ? promoIndividual.idPromocion
-    : null,
+          idPromocionSeleccionada:
+            promoIndividual && !promoIndividual.esAlVuelo
+              ? promoIndividual.idPromocion
+              : null,
 
-idPromocionAlVuelo:
-  promoIndividual && promoIndividual.esAlVuelo
-    ? promoIndividual.idPromocion
-    : null,
+          idPromocionAlVuelo:
+            promoIndividual && promoIndividual.esAlVuelo
+              ? promoIndividual.idPromocion
+              : null,
           precioConPromo,
           excluirPromocionGeneral: s.excluirPromocionGeneral ?? false,
           comentario: s.comentario || "",
-          isVuelo: promoIndividual?.esAlVuelo ?? false
+          isVuelo: promoIndividual?.esAlVuelo ?? false,
         };
       }),
     );
@@ -3518,7 +3554,7 @@ const guardarCotizacion = async () => {
   const nuevaCotizacion = {
     codigo: cotizacionForm.idCotizacion,
     mostrarTotal: cotizacionForm.mostrarTotal,
-    observaciones:"",
+    observaciones: "",
     cliente,
     llantas,
     paquetes,
@@ -3931,42 +3967,42 @@ watch(
   { deep: true },
 );
 watch(
-    paquetesSeleccionados,
-    async (ids) => {
-      const actuales = cotizacionForm.paquetes.map((p) => p.idPaquete);
+  paquetesSeleccionados,
+  async (ids) => {
+    const actuales = cotizacionForm.paquetes.map((p) => p.idPaquete);
 
-      // añadir los que se acaban de marcar
-      for (const id of ids) {
-        if (!actuales.includes(id)) {
-          const base = paquetesDisponibles.value.find((p) => p.idPaquete === id);
-          if (!base) continue;
+    // añadir los que se acaban de marcar
+    for (const id of ids) {
+      if (!actuales.includes(id)) {
+        const base = paquetesDisponibles.value.find((p) => p.idPaquete === id);
+        if (!base) continue;
 
-          const paqueteObj = {
-            idPaquete: base.idPaquete,
-            nombre: base.nombre,
-            descripcion: base.descripcion,
-            precioUnitario: base.precioUnitario,
-            comentario: "",
-            excluirPromocionGeneral: false,
-            promosAplicables: [],
-            promo: null,
-            idPromocionSeleccionada: 0,
-            precioConPromo: base.precioUnitario || 0,
-            idPromocionAlVuelo: 0,
-            isVuelo: false,
-          };
+        const paqueteObj = {
+          idPaquete: base.idPaquete,
+          nombre: base.nombre,
+          descripcion: base.descripcion,
+          precioUnitario: base.precioUnitario,
+          comentario: "",
+          excluirPromocionGeneral: false,
+          promosAplicables: [],
+          promo: null,
+          idPromocionSeleccionada: 0,
+          precioConPromo: base.precioUnitario || 0,
+          idPromocionAlVuelo: 0,
+          isVuelo: false,
+        };
 
-          paqueteObj.promosAplicables = await obtenerPromosPorPaquete(
-            paqueteObj.idPaquete,
-          );
-          cotizacionForm.paquetes.push(paqueteObj);
-        }
+        paqueteObj.promosAplicables = await obtenerPromosPorPaquete(
+          paqueteObj.idPaquete,
+        );
+        cotizacionForm.paquetes.push(paqueteObj);
       }
+    }
 
-      // eliminar los que se desmarcaron
-      cotizacionForm.paquetes = cotizacionForm.paquetes.filter((p) =>
-        ids.includes(p.idPaquete),
-      );
+    // eliminar los que se desmarcaron
+    cotizacionForm.paquetes = cotizacionForm.paquetes.filter((p) =>
+      ids.includes(p.idPaquete),
+    );
   },
   { deep: true, immediate: true },
 );
@@ -4306,17 +4342,12 @@ const togglePromoAlVuelo = (item) => {
   item.mostrarEditorPromo = !item.mostrarEditorPromo;
 };
 const togglePaquete = (paquete) => {
-
   if (cotizacionForm.paquetesDetalles[paquete.idPaquete]) {
     eliminarPaquete(paquete.idPaquete);
     delete cotizacionForm.paquetesDetalles[paquete.idPaquete];
-
   } else {
-
     cotizacionForm.paquetesDetalles[paquete.idPaquete] = 0;
-
   }
-
 };
 
 // Guardar Promociones al vuelo
@@ -4339,7 +4370,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     idPromocion: 0,
     nombre: PromocionesVuelo.nombre,
     tipo: PromocionesVuelo.tipo,
-    valor: PromocionesVuelo.valor  ,
+    valor: PromocionesVuelo.valor,
     tipopromo: PromocionesVuelo?.tipoPromocion || 1,
     esAlVuelo: true,
   };
