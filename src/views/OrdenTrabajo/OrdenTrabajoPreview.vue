@@ -1,3 +1,4 @@
+
 <template>
   
 	<div class="container py-4" id="area-imprimir" style="font-size: larger; max-width: 1000px;">
@@ -45,86 +46,79 @@
 				</span>
 			</div>
 		</div>
+		
+<!-- DATOS VEHICULO + CLIENTE -->
+<div class="card border-1 shadow-sm mb-2 card-datos">
+  <div class="card-body">
 
-		<!-- Vehículo -->
-		<div class="card border-1 shadow-sm mb-2">
-			<div class="card-body">
-				<h5 class="fw-bold mb-3">
-				<i class="bi bi-car-front-fill me-2 text-primary"></i>
-				Vehículo
-				</h5>
+    <div class="row">
 
-				<div class="row">
-					<div class="col-12 col-lg-4">
-						<div class="fw-semibold">
-						{{ orden?.vehiculo?.serie }}
-						</div>
-						<small class="text-muted">Num. Serie</small>
-					</div>
-					<div class="col-12 col-lg-8">
-						<div class="fw-semibold">
-						{{ orden?.vehiculo?.marca }} {{ orden?.vehiculo?.modelo }} {{ orden?.vehiculo?.color }}
-						</div>
-						<small class="text-muted">Marca / Modelo / Color</small>
-					</div>
+      <!-- VEHICULO -->
+      <div class="col-6">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-car-front-fill me-2 text-primary"></i>
+          Vehículo
+        </h5>
 
-					<div class="col-6 col-lg-4">
-						<div class="fw-semibold">
-						{{ orden?.vehiculo?.anio }}
-						</div>
-						<small class="text-muted">Año</small>
-					</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Num. Serie:</span>
+          {{ orden?.vehiculo?.serie }}
+        </div>
 
-					<div class="col-6 col-lg-4">
-						<div class="fw-semibold">
-						{{ orden?.vehiculo?.placas }}
-						</div>
-						<small class="text-muted">Placas</small>
-					</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Marca / Modelo / Color:</span>
+          {{ orden?.vehiculo?.marca }} {{ orden?.vehiculo?.modelo }} {{ orden?.vehiculo?.color }}
+        </div>
 
-					<div class="col-6 col-lg-4">
-						<div class="fw-semibold">
-						{{ orden?.vehiculo?.kilometraje?.toLocaleString() }} km
-						</div>
-						<small class="text-muted">Kilometraje</small>
-					</div>
-				</div>
-			</div>
-		</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Año:</span>
+          {{ orden?.vehiculo?.anio }}
+        </div>
+
+        <div class="mb-1">
+          <span class="fw-semibold">Placas:</span>
+          {{ orden?.vehiculo?.placas }}
+        </div>
+
+        <div class="mb-1">
+          <span class="fw-semibold">Kilometraje:</span>
+          {{ orden?.vehiculo?.kilometraje?.toLocaleString() }} km
+        </div>
+      </div>
 
 
-		<!-- CLIENTE -->
-		<div class="card border-1 shadow-sm mb-2">
-			<div class="card-body">
-				<h5 class="fw-bold mb-3">
-					<i class="bi bi-person-fill me-2 text-primary"></i>
-					Cliente
-				</h5>
+      <!-- CLIENTE -->
+      <div class="col-6">
+        <h5 class="fw-bold mb-3">
+          <i class="bi bi-person-fill me-2 text-primary"></i>
+          Cliente
+        </h5>
 
-				<div class="row">
-					<div class="col-5">
-						<div class="fw-semibold">
-						{{ orden?.cliente?.nombreCompleto }}
-						</div>
-						<small class="text-muted">Nombre</small>
-					</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Nombre:</span>
+          {{ orden?.cliente?.nombreCompleto }}
+        </div>
 
-					<div class="col-3">
-						<div class="fw-semibold">
-						{{ orden?.cliente?.telefono || '—' }}
-						</div>
-						<small class="text-muted">Teléfono</small>
-					</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Teléfono:</span>
+          {{ orden?.cliente?.telefono || '—' }}
+        </div>
 
-					<div class="col-4">
-						<div class="fw-semibold">
-						{{ orden?.cliente?.correo || '—' }}
-						</div>
-						<small class="text-muted">Correo</small>
-					</div>		
-				</div>
-			</div>
-		</div>
+        <div class="mb-1">
+          <span class="fw-semibold">Correo:</span>
+          {{ orden?.cliente?.correo || '—' }}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
 
 		<!-- FACTURA -->
 		<div v-if="orden?.requiereFactura" class="card border-1 shadow-sm mb-2 no-imprimir">
@@ -193,7 +187,7 @@
 					<li
 						v-for="llanta in orden.llantas"
 						:key="llanta.idDetalleOTLlanta"
-						class="list-group-item py-3"
+						class="list-group-item py-3 item-check renglon "
 						>
 						<div class="d-flex justify-content-between align-items-start">
 							<div>
@@ -214,9 +208,7 @@
 				</ul>
 			</div>
 
-			<div class="text-end mb-2 fw-semibold text-primary">
-				Subtotal llantas: ${{ subtotalLlantas.toLocaleString() }}
-			</div>
+			
 		</template>
 
 
@@ -228,10 +220,9 @@
 			<div class="card border-1 shadow-sm mb-2">
 				<ul class="list-group list-group-flush">
 					<li
-						v-for="paquete in orden.paquetes"
-						:key="paquete.idDetalleOTPaquete"
-						class="list-group-item py-3"
-					>
+					v-for="paquete in orden.paquetes"
+					:key="paquete.idDetalleOTPaquete"
+					class="list-group-item py-3 item-check renglon"					>
 						<div class="d-flex justify-content-between">
 							<div>
 								<div class="fw-semibold">
@@ -247,22 +238,24 @@
 							</div>
 						</div>
 
-						<ul class="mt-2 ps-3 small text-muted">
-							<li
-								v-for="d in paquete.desglosePaquetes"
-								:key="d.idDesglosePaquete"
+						<div class="mt-2 small text-muted">
+
+						<div
+							v-for="d in paquete.desglosePaquetes"
+							:key="d.idDesglosePaquete"
+							class="paquete-item item-check"
 							>
-								{{ d.nombre }} (x{{ d.cantidad }})
-							</li>
-						</ul>
+							{{ d.nombre }} (x{{ d.cantidad }})
+							</div>
+						</div>
+
+
 					</li>
 
 				</ul>
 			</div>
 
-			<div class="text-end mb-2 fw-semibold text-primary">
-				Subtotal paquetes: ${{ subtotalPaquetes.toLocaleString() }}
-			</div>
+			
 		</template>
 
 
@@ -273,11 +266,14 @@
 
 			<div class="card border-1 shadow-sm mb-2">
 				<ul class="list-group list-group-flush">
+
 					<li
-						v-for="s in orden.adicionales"
-						:key="s.idDetalleOTServicio"
-						class="list-group-item py-3"
-					>
+					v-for="s in orden.adicionales"
+					:key="s.idDetalleOTServicio"
+					class="list-group-item py-3 item-check renglon"					>
+
+
+
 						<div class="d-flex justify-content-between">
 							<div>
 								<div class="fw-semibold">
@@ -297,9 +293,7 @@
 				</ul>
 			</div>
 
-			<div class="text-end mb-4 fw-semibold text-primary">
-				Subtotal servicios: ${{ subtotalServicios.toLocaleString() }}
-			</div>
+			
 		</template>
 
 		<!-- TOTAL -->
@@ -315,19 +309,6 @@
 			</div>
 		</div>
 
-		<!-- PROGRESO -->
-		<!-- <div class="mb-4">
-			<h6 class="mb-1">Progreso de la orden</h6>
-
-			<div class="progress" style="height: 22px">
-			<div
-				class="progress-bar"
-				:style="{ width: porcentaje + '%' }"
-			>
-				{{ porcentaje }}%
-			</div>
-			</div>
-		</div> -->
 
 		<!-- ACCIONES -->
 		<div class="d-flex justify-content-between mt-4">
@@ -345,13 +326,7 @@
 		</button>
 		
 
-		<!-- <button
-			class="btn btn-danger shadow mx-3 position-relative" style="width: 140px;"
-			:disabled="orden?.estado !== 'Creado'"
-			@click="cancelarOT"
-		><i class="bi bi-x-circle-fill position-absolute start-0 ms-2"></i>
-			Cancelar
-		</button> -->
+		
 
 		<button
 			class="btn btn-success shadow position-relative" style="width: 140px;"
@@ -367,11 +342,10 @@
 		</div>
 
 	</div>
-    <!-- <small class="text-muted">
-      {{ completadas }} / {{ total }} tareas
-    </small> -->
+
 
 </template>
+
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, computed } from 'vue'
@@ -532,102 +506,123 @@ const porcentaje = computed(() => {
   transition: width 0.3s ease;
 }
 
+
+
 @media print {
 
-  .col-lg-1 { flex: 0 0 auto; width: 8.333333%; }
-  .col-lg-2 { flex: 0 0 auto; width: 16.666667%; }
-  .col-lg-3 { flex: 0 0 auto; width: 25%; }
-  .col-lg-4 { flex: 0 0 auto; width: 33.333333%; }
-  .col-lg-5 { flex: 0 0 auto; width: 41.666667%; }
-  .col-lg-6 { flex: 0 0 auto; width: 50%; }
-  .col-lg-7 { flex: 0 0 auto; width: 58.333333%; }
-  .col-lg-8 { flex: 0 0 auto; width: 66.666667%; }
-  .col-lg-9 { flex: 0 0 auto; width: 75%; }
-  .col-lg-10 { flex: 0 0 auto; width: 83.333333%; }
-  .col-lg-11 { flex: 0 0 auto; width: 91.666667%; }
-  .col-lg-12 { flex: 0 0 auto; width: 100%; }
-
-  /* Quitar márgenes gigantes */
-  @page {
-    margin: 8mm;
-  }
-
   body {
-    margin: 0 !important;
-    padding: 0 !important;
-	font-size: 14pt;
+    background: white !important;
   }
 
-  /* Ocultar TODO */
-  body * {
-    visibility: hidden;
-  }
-
-  .container,
-  .row {
-    margin: 0 !important;
+  /* quitar padding bootstrap */
+  .container {
+    max-width: 100% !important;
     padding: 0 !important;
   }
 
-  /* Mostrar solo el área a imprimir */
-  #area-imprimir,
-  #area-imprimir * {
-    font-size: 11pt;
-    line-height: 1.5;
-    visibility: visible;
+  /* ===== QUITAR CARDS VISUALES ===== */
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+    margin-bottom: 6px !important;
   }
 
-  #area-imprimir {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
+  .card-body {
+    padding: 4px 0 !important;
   }
 
-  .modal-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
-  }
-
-  /* 🔥 CLAVE: desactivar table-responsive */
-  .table-responsive {
-    overflow: visible !important;
-  }
-
-  table {
-    page-break-inside: auto;
-  }
-
-  tr {
+  /* ===== CARD SOLO PARA VEHICULO Y CLIENTE ===== */
+  .card-datos {
+    border: 1px solid #ccc !important;
+    padding: 10px !important;
+    border-radius: 6px;
     page-break-inside: avoid;
-    page-break-after: auto;
   }
 
-  thead {
-    display: table-header-group; /* Permite encabezado correcto */
+  /* ocultar iconos */
+  i {
+    display: none !important;
   }
 
-  tfoot {
-    display: table-footer-group;
+  /* ocultar botones */
+  button {
+    display: none !important;
   }
 
-  /* Botones fuera */
-  button,
-  .btn,
+  /* ocultar secciones */
   .no-imprimir {
     display: none !important;
   }
 
-  .modal,
-  .modal-dialog,
-  .modal-content {
-    position: static !important;
-    overflow: visible !important;
+  /* listas simples */
+  .list-group {
+    list-style: none !important;
+    padding-left: 0 !important;
   }
 
-  .page-break {
-    page-break-before: always;
+  .list-group-item {
+    border: none !important;
+    padding: 4px 0 !important;
   }
+
+  /* ===== CHECKBOX DECORATIVO ===== */
+
+  .item-check {
+    position: relative;
+    padding-left: 24px !important;
+  }
+
+  .item-check::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #000;
+    border-radius: 2px;
+  }
+
+  /* ===== RENGLONES PARA LLANTAS / PAQUETES / SERVICIOS ===== */
+
+  .renglon {
+    border-bottom: 1px solid #cfcfcf !important;
+    padding-bottom: 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .renglon:last-child {
+    border-bottom: 1px solid #cfcfcf !important;
+  }
+
+  /* ===== DESGLOSE DE PAQUETES ===== */
+
+  .paquete-item {
+    border-bottom: 1px solid #ddd;
+    padding: 3px 0;
+  }
+
+  .paquete-item:last-child {
+    border-bottom: none;
+  }
+
+  /* compactar títulos */
+  h5 {
+    margin-top: 6px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* total grande */
+  h2 {
+    font-size: 26px !important;
+  }
+
+  /* compactar columnas */
+  .row > div {
+    margin-bottom: 2px !important;
+  }
+
 }
+
+
 </style>

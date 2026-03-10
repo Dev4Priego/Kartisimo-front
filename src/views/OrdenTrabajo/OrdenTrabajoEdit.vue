@@ -348,6 +348,8 @@
       </div>
     </div>
 
+
+    
     <!-- DESCUENTO -->
     <div class="row mt-3 align-items-end">
       <div class="col-3">
@@ -371,35 +373,19 @@
         />
       </div>
 
-      <div class="col-4">
-        <label class="form-label">Origen</label>
-        <select
-          class="form-select"
-          v-model="llanta.descuento.origen"
-          :disabled="!llanta.descuento.tipo"
-        >
-          <option :value="null">Seleccionar</option>
-          <option value="TIENDA">Tienda</option>
-          <option value="PROMOCION">Promoción</option>
-          <option value="CUPON">Cupón</option>
-        </select>
-      </div>
-      <h5>Otros</h5>
-      <div class="my-3 gp-2">
-        <div class="row">
-          <div class="col-12 col-lg-6">
-            <Refacciones
-            :otId = "otEditar.idOrdenTrabajo"
-            :usuario = "idUsuarioSession"
-            :key = "otEditar.idOrdenTrabajo" />
-          </div>
-          <div class="col-12 col-lg-6">
-            <Incidentes
-            :otId = "otEditar.idOrdenTrabajo"
-            :usuario = "idUsuarioSession" />
-          </div>
-        </div>
-      </div>
+   <div class="col-4">
+      <label class="form-label">Origen</label>
+      <select
+        class="form-select"
+        v-model="llanta.descuento.origen"
+        :disabled="!llanta.descuento.tipo"
+      >
+        <option :value="null">Seleccionar</option>
+        <option value="TIENDA">Tienda</option>
+        <option value="PROMOCION">Promoción</option>
+        <option value="CUPON">Cupón</option>
+      </select>
+</div>
 
       <div class="col-2">
         <button
@@ -410,15 +396,33 @@
         </button>
       </div>
     </div>
-
-    <div class="border-top py-2 px-3 bg-light text-end">
-      <button class="btn btn-secondary mx-3" @click="volver()">
-        <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
-      </button>
-      <button class="btn btn-primary mx-3" :disabled="!formValido" @click="guardarEdicion">
-        Guardar cambios
-      </button>
   </div>
+</div>
+
+<h5>Otros</h5>
+<div class="my-3 gp-2">
+  <div class="row">
+    <div class="col-12 col-lg-6">
+      <Refacciones
+      :otId = "otEditar.idOrdenTrabajo"
+      :usuario = "idUsuarioSession"
+      :key = "otEditar.idOrdenTrabajo" />
+    </div>
+    <div class="col-12 col-lg-6">
+      <Incidentes
+      :otId = "otEditar.idOrdenTrabajo"
+      :usuario = "idUsuarioSession" />
+    </div>
+  </div>
+</div>
+
+<div class="border-top py-2 px-3 bg-light text-end">
+  <button class="btn btn-secondary mx-3" @click="volver()">
+    <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
+  </button>
+  <button class="btn btn-primary mx-3" :disabled="!formValido" @click="guardarEdicion">
+    Guardar cambios
+  </button>
 </div>
 
 <!-- ================= PAQUETES ================= -->
@@ -534,19 +538,22 @@
   </div>
 </div>
 
+
+
+
     </div>
 
 
     
   </div>
 
+
+  
+
 </template>
 
 <script setup>
 import { ref, onMounted, getCurrentInstance, computed, reactive, watch } from 'vue'
-
-
-import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue'
 import LlantasSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue'
@@ -559,9 +566,6 @@ import axios from 'axios';
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import { Modal } from "bootstrap"
-import axios from 'axios'
-import Toastify from "toastify-js"
-import "toastify-js/src/toastify.css"
 
 const { proxy } = getCurrentInstance()
 const route = useRoute()
@@ -591,15 +595,23 @@ const idUsuarioSession = data45?.usuario?.idUsuario
 ============================== */
 const normalizar = (arr) =>
   Array.isArray(arr) ? arr.filter(i => i && typeof i === 'object') : []
+  
+  
+  
 
-const normalizarLinea = (linea) => ({
+  const promociones = ref([])
+
+
+  const normalizarLinea = (linea) => ({
   ...linea,
   cantidad: linea.cantidad ?? 1,
   precio: linea.precio ?? 0,
   descuento: linea.descuento ?? {
     tipo: null,
     valor: 0,
-    origen: null
+    origen: null,
+    promocionId: null,
+    codigoCupon: null
   }
 })
 
@@ -756,6 +768,10 @@ const avanzarEstado = async () => {
     otEditar.value.estado = nuevoEstado
 
     // guardar en backend
+
+  } catch (error) {
+    console.error("Error al avanzar estado:", error)
+  }
 }
 
 /* ==============================
@@ -765,17 +781,17 @@ const resetDescuento = (linea) => {
   linea.descuento = { tipo: null, valor: 0, origen: null }
 }
 
-const calcularTotalLinea = (linea) => {
-  const base = (linea.precio || 0) * (linea.cantidad || 1)
+const calcularTotalLinea = (item) => {
+  const base = (item.precio || 0) * (item.cantidad || 1)
 
-  if (!linea.descuento?.tipo) return base
+  if (!item.descuento?.tipo) return base
 
-  if (linea.descuento.tipo === 'PORCENTAJE') {
-    return base - (base * linea.descuento.valor / 100)
+  if (item.descuento.tipo === 'PORCENTAJE') {
+    return base - (base * item.descuento.valor / 100)
   }
 
-  if (linea.descuento.tipo === 'MONTO') {
-    return Math.max(0, base - linea.descuento.valor)
+  if (item.descuento.tipo === 'MONTO') {
+    return Math.max(0, base - item.descuento.valor)
   }
 
   return base
@@ -784,6 +800,37 @@ const calcularTotalLinea = (linea) => {
 /* ==============================
    GUARDAR EDICIÓN
 ============================== */
+
+
+
+
+const cargarPromociones = async () => {
+  try {
+
+    const res = await fetch(
+      proxy.$serverIP + "api/Promocion/getPromociones"
+    )
+
+    if (!res.ok) throw new Error("Error promociones")
+
+    promociones.value = await res.json()
+
+  } catch (error) {
+    console.error("Error cargando promociones:", error)
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 const guardarEdicion = async () => {
@@ -834,31 +881,16 @@ onMounted(() => {
   cargarEmpleados();
   cargarUsosCFDI();
   cargarRegimenFiscal();
+  cargarPromociones();
 });
-  cargarOrden()
-  cargarEmpleados()
-})
 
 
 
-const formatearFecha = (fecha) => {
-  if (!fecha) return ''
 
-  const d = new Date(fecha)
 
-  const fechaFormateada = d.toLocaleDateString('es-MX', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
 
-  const horaFormateada = d.toLocaleTimeString('es-MX', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  })
 
-  return `${fechaFormateada}, ${horaFormateada}`
-}
+
+
 
 </script>
