@@ -346,8 +346,36 @@
       <div class="col-2 fw-bold">
         $ {{ calcularTotalLinea(llanta) }}
       </div>
+      <div v-if="otEditar.adicionales">
+        <adicionalesSection
+        :adicionales = "otEditar.adicionales" />
+      </div>
+      <h5>Otros</h5>
+      <div class="my-3 gp-2">
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <Refacciones
+            :otId = "otEditar.idOrdenTrabajo"
+            :usuario = "idUsuarioSession"
+            :key = "otEditar.idOrdenTrabajo" />
+          </div>
+          <div class="col-12 col-lg-6">
+            <Incidentes
+            :otId = "otEditar.idOrdenTrabajo"
+            :usuario = "idUsuarioSession" />
+          </div>
+        </div>
+      </div>
     </div>
 
+    <div class="border-top py-2 px-3 bg-light text-end">
+      <button class="btn btn-secondary mx-3" @click="volver()">
+        <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
+      </button>
+      <button class="btn btn-primary mx-3" :disabled="!formValido" @click="guardarEdicion">
+        Guardar cambios
+      </button>
+    </div>
 
     
     <!-- DESCUENTO -->
@@ -872,6 +900,99 @@ const mostrarToast = (type, message) => {
     }
   }).showToast()
 }
+
+// Validaciones
+const errores = reactive({});
+
+const getValor = (path) => {
+  return path.split(".").reduce((obj, key) => obj[key], otEditar.value);
+};
+
+function validate(path) {
+  const value = getValor(path);
+
+  // ========================= VALIDACIONES ==============================
+
+  const rules = {
+
+    
+    // -------- FACTURA ----------
+    "factura.razonSocial": () =>
+      !value || !value.trim()
+        ? "Razón social obligatoria."
+        : null,
+
+    "factura.usoCFDI": () =>
+      !value
+        ? "Debe seleccionar un uso CFDI."
+        : null,
+
+    "factura.regimenFiscal": () =>
+      !value
+        ? "Debe seleccionar un régimen fiscal."
+        : null,
+
+    "factura.eMail": () => {
+      if (!value || !value.trim()) return "Correo obligatorio.";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
+        : null;
+    },
+
+    "factura.cp": () => {
+      if (!value || !value.trim()) return "Código postal obligatorio.";
+
+      const cpRegex = /^\d{5}$/;
+      return !cpRegex.test(value)
+        ? "El código postal debe tener 5 dígitos."
+        : null;
+    },
+
+    "factura.rfc": () => {
+      if (!value || !value.trim()) return "RFC obligatorio.";
+
+      const rfcRegex =
+        /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+
+      return !rfcRegex.test(value.toUpperCase())
+        ? "RFC no válido."
+        : null;
+    },
+
+  };
+
+  // Ejecutar regla
+  const error = rules[path] ? rules[path]() : null;
+
+  if (error) errores[path] = error;
+  else delete errores[path];
+}
+
+const formValido = computed(() => {
+  // Si hay errores → inválido
+  if (otEditar.value.requiereFactura) {
+  if (Object.keys(errores).length > 0) return false;
+  // Campos obligatorios SOLO si se desea factura
+  const facturaRequired = otEditar.requiereFactura === true
+    ? [
+        otEditar.factura.razonSocial,
+        otEditar.factura.usoCFDI,
+        otEditar.factura.regimenFiscal,
+        otEditar.factura.eMail,
+        otEditar.factura.cp,
+        otEditar.factura.rfc,
+      ]
+    : [];
+  
+
+  // 4️⃣ Validación final (no vacío / no null)
+  return [...facturaRequired].every(
+    (v) => v !== "" && v !== null && v !== undefined
+  );
+  } else return true;
+});
 
 /* ==============================
    INIT
