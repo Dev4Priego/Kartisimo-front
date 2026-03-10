@@ -716,7 +716,7 @@
                         class="form-check-input"
                         type="checkbox"
                         :id="'paquete-' + i"
-                        :value="paquete"
+                        :value="paquete.idPaquete" 
                         v-model="cotizacionForm.paquetes"
                       />
                       <label class="form-check-label" :for="'paquete-' + i">
@@ -3052,7 +3052,7 @@ const cargarFormulario = async (cotizacion = null) => {
     }
 
     const data = await res.json();
-    //console.log("DATA:", JSON.stringify(data));
+    
     // 🔹 Cargar datos de cliente
     cotizacionForm.codigo = data.prefijo + "-" + data.consecutivoSucursal;
     cotizacionForm.idCotizacion = data.idCotizacion;
@@ -3113,7 +3113,6 @@ const cargarFormulario = async (cotizacion = null) => {
           ...base,
           comentario: p.comentario || "",
           excluirPromocionGeneral: p.excluirPromocionGeneral ?? false,
-
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
@@ -3136,7 +3135,7 @@ const cargarFormulario = async (cotizacion = null) => {
       cotizacionForm.paquetesDetalles[p.idPaquete] =
         p.idDetalleCotizacionPaquete;
     });
-
+    console.log("paquetes:", JSON.stringify(cotizacionForm.paquetesDetalles));
     // ===============================
     // 🔹 LLANTAS
     // ===============================
@@ -4266,6 +4265,19 @@ const togglePromoAlVuelo = (item) => {
 
   // SI NO EXISTE → ABRIR RAMA OCULTA
   item.mostrarEditorPromo = !item.mostrarEditorPromo;
+};
+const togglePaquete = (paquete) => {
+
+  if (cotizacionForm.paquetesDetalles[paquete.idPaquete]) {
+    eliminarPaquete(paquete.idPaquete);
+    delete cotizacionForm.paquetesDetalles[paquete.idPaquete];
+
+  } else {
+
+    cotizacionForm.paquetesDetalles[paquete.idPaquete] = 0;
+
+  }
+
 };
 
 // Guardar Promociones al vuelo
