@@ -708,21 +708,21 @@
                   </div>
                   <div class="col">
                     <div
-                      v-for="(paquete, i) in paquetesDisponibles"
-                      :key="i"
-                      class="form-check m-4"
-                    >
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        :id="'paquete-' + i"
-                        :value="paquete.idPaquete" 
-                        v-model="cotizacionForm.paquetes"
-                      />
-                      <label class="form-check-label" :for="'paquete-' + i">
-                        {{ paquete.nombre }} - ${{ paquete.precioUnitario }}
-                      </label>
-                    </div>
+  v-for="paquete in paquetesDisponibles"
+  :key="paquete.idPaquete"
+  class="form-check m-4"
+>
+  <input
+    class="form-check-input"
+    type="checkbox"
+    :id="'paquete-' + paquete.idPaquete"
+    :value="paquete.idPaquete"
+   v-model="paquetesSeleccionados"
+ />
+ <label class="form-check-label" :for="'paquete-' + paquete.idPaquete">
+    {{ paquete.nombre }} - ${{ paquete.precioUnitario }}
+  </label>
+</div>
                   </div>
                 </div>
               </div>
@@ -2643,12 +2643,12 @@ watch(
   (nuevoValor) => {
     // Solo aplica si es una nueva cotización (no edición)
     if (
-      !cotizacionForm.codigo &&
-      nuevoValor.length &&
-      cotizacionForm.paquetes.length === 0
-    ) {
-      cotizacionForm.paquetes = [nuevoValor[0]];
-    }
+        !cotizacionForm.codigo &&
+        nuevoValor.length &&
+        paquetesSeleccionados.value.length === 0
+      ) {
+        paquetesSeleccionados.value = [nuevoValor[0].idPaquete];
+     }
   },
   { immediate: true },
 );
@@ -3014,9 +3014,7 @@ const cargarFormulario = async (cotizacion = null) => {
       clienteTelefono: "",
       clienteCorreo: "",
       clienteExistente: false,
-      paquetes: paquetesDisponibles.value.length
-        ? [paquetesDisponibles.value[0]]
-        : [],
+      paquetes: [],
       paquetesDetalles: {},
       llantas: [],
       serviciosExtras: [],
@@ -3074,6 +3072,7 @@ const cargarFormulario = async (cotizacion = null) => {
         const base = paquetesDisponibles.value.find(
           (q) => q.idPaquete === p.idPaquete,
         );
+        console.log("base: ",base);
         if (!base) return null;
 
         // 🔹 Determinar si tiene promoción individual o al vuelo
@@ -3131,11 +3130,11 @@ const cargarFormulario = async (cotizacion = null) => {
     );
 
     // Registrar idDetalle para edición
-    data.paquetes.forEach((p) => {
-      cotizacionForm.paquetesDetalles[p.idPaquete] =
-        p.idDetalleCotizacionPaquete;
-    });
-    console.log("paquetes:", JSON.stringify(cotizacionForm.paquetesDetalles));
+    // marcaremos los checkboxes en el modal
+    paquetesSeleccionados.value = cotizacionForm.paquetes
+      .filter((p) => p && p.idPaquete != null)
+      .map((p) => p.idPaquete);
+    //console.log("paquetes Completo:", JSON.stringify(cotizacionForm.paquete));
     // ===============================
     // 🔹 LLANTAS
     // ===============================
@@ -3791,7 +3790,7 @@ const abrirModalCotizacion = (cotizacion = null) => {
   } else {
     tituloModal.value = "Nueva Cotización";
   }
-  console.log("AbirModalCotizacion " + JSON.stringify(cotizacion));
+  //console.log("AbirModalCotizacion " + JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
   openModal();
 
@@ -3931,6 +3930,46 @@ watch(
   },
   { deep: true },
 );
+watch(
+    paquetesSeleccionados,
+    async (ids) => {
+      const actuales = cotizacionForm.paquetes.map((p) => p.idPaquete);
+
+      // añadir los que se acaban de marcar
+      for (const id of ids) {
+        if (!actuales.includes(id)) {
+          const base = paquetesDisponibles.value.find((p) => p.idPaquete === id);
+          if (!base) continue;
+
+          const paqueteObj = {
+            idPaquete: base.idPaquete,
+            nombre: base.nombre,
+            descripcion: base.descripcion,
+            precioUnitario: base.precioUnitario,
+            comentario: "",
+            excluirPromocionGeneral: false,
+            promosAplicables: [],
+            promo: null,
+            idPromocionSeleccionada: 0,
+            precioConPromo: base.precioUnitario || 0,
+            idPromocionAlVuelo: 0,
+            isVuelo: false,
+          };
+
+          paqueteObj.promosAplicables = await obtenerPromosPorPaquete(
+            paqueteObj.idPaquete,
+          );
+          cotizacionForm.paquetes.push(paqueteObj);
+        }
+      }
+
+      // eliminar los que se desmarcaron
+      cotizacionForm.paquetes = cotizacionForm.paquetes.filter((p) =>
+        ids.includes(p.idPaquete),
+      );
+  },
+  { deep: true, immediate: true },
+);
 
 // Servicios
 watch(
@@ -4035,7 +4074,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       // ===============================
       // 🔹 PAQUETES
       // ===============================
-      console.log("PAQUETES API:", data.paquetes);
+      //console.log("PAQUETES API:", data.paquetes);
       const paquetes = data.paquetes.map((p) => {
         const promoIndividual = p.idPromocion
           ? {
