@@ -10,7 +10,7 @@
         @change="$emit('toggle')"
       />
       <span :class="{ 'text-decoration-line-through text-muted': tarea.completada }">
-        {{ tarea.nombre }}
+        {{ tarea.descripcionServicio }}
       </span>
     </div>
   </div>

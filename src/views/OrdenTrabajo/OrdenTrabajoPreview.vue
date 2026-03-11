@@ -114,12 +114,6 @@
 
   </div>
 </div>
-
-
-
-
-
-
 		<!-- FACTURA -->
 		<div v-if="orden?.requiereFactura" class="card border-1 shadow-sm mb-2 no-imprimir">
 			<div class="card-body">
@@ -196,12 +190,14 @@
 								</div>
 								<small class="text-muted">
 									Cantidad: {{ llanta.cantidad }} ·
-									${{ llanta.precioUnitario.toLocaleString() }} c/u
+									${{ formatNumber(llanta.precioUnitario) }} c/u,
+									subtotal: ${{ formatNumber(llanta.cantidad * llanta.precioUnitario) }},
+									promoción: -${{ llanta.total === 0 ? formatNumber(0) : formatNumber((llanta.cantidad * llanta.precioUnitario) - llanta.total) }}
 								</small>
 							</div>
 
 							<div class="fw-bold text-end">
-								${{ (llanta.cantidad * llanta.precioUnitario).toLocaleString() }}
+								${{ llanta.total === 0 ? formatNumber(llanta.cantidad * llanta.precioUnitario) : formatNumber(llanta.total) }}
 							</div>
 						</div>
 					</li>
@@ -229,12 +225,13 @@
 									{{ paquete.nombre }}
 								</div>
 								<small class="text-muted">
-									{{ paquete.descripcion }}
+									{{ paquete.descripcion }}, subtotal: ${{ formatNumber(paquete.precioUnitario) }}, 
+									promoción: -${{ paquete.total === 0 ? formatNumber(0) : formatNumber(paquete.precioUnitario - paquete.total) }}
 								</small>
 							</div>
 
 							<div class="fw-bold">
-								${{ paquete.precioUnitario.toLocaleString() }}
+								${{ paquete.total === 0 ? formatNumber(paquete.precioUnitario) : formatNumber(paquete.total) }}
 							</div>
 						</div>
 
@@ -280,12 +277,13 @@
 									{{ s.descripcionServicio }}
 								</div>
 								<small class="text-muted">
-									Cantidad: {{ s.cantidad }}
+									Cantidad: {{ s.cantidad }} · ${{ formatNumber(s.precioUnitario) }} c/u, subtotal: ${{ formatNumber(s.cantidad * s.precioUnitario) }},
+									promoción: -${{ s.total === 0 ? formatNumber(0) : formatNumber((s.cantidad * s.precioUnitario) - s.total) }}
 								</small>
 							</div>
 
 							<div class="fw-bold">
-								${{ (s.cantidad * s.precioUnitario).toLocaleString() }}
+								${{ s.total === 0 ? formatNumber(s.cantidad * s.precioUnitario) : formatNumber(s.total) }}
 							</div>
 						</div>
 					</li>
@@ -303,9 +301,9 @@
 					<h4 class="mb-0 fw-bold">Total</h4>
 				</div>
 
-				<h2 class="mb-0 text-success fw-bold">
-					${{ totalOrden.toLocaleString() }}
-				</h2>
+				<h4 class="mb-0 text-success fw-bold">
+					${{ formatNumber(totalOrden) }}
+				</h4>
 			</div>
 		</div>
 
@@ -348,6 +346,7 @@
 
 
 <script setup>
+import { format } from 'pdfmake/build/pdfmake';
 import { ref, onMounted, getCurrentInstance, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -357,6 +356,15 @@ const route = useRoute()
 const router = useRouter()
 
 const orden = ref(null)
+
+function formatNumber(value, decimals = 2) {
+  if (value === null || value === undefined) return '';
+
+  return Number(value).toLocaleString('es-MX', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
 
 const formatearFecha = (fecha) => {
     if (!fecha) return "";
@@ -434,7 +442,7 @@ const subtotalLlantas = computed(() => {
 	if (!orden.value?.llantas) return 0;
 
 	return orden.value.llantas.reduce(
-		(total, l) => total + (l.cantidad * l.precioUnitario),
+		(total, l) => l.total === 0 ? total + (l.cantidad * l.precioUnitario) : total + l.total,
 		0
 	);
 });
@@ -443,7 +451,7 @@ const subtotalPaquetes = computed(() => {
 	if (!orden.value?.paquetes) return 0;
 
 	return orden.value.paquetes.reduce(
-		(total, p) => total + p.precioUnitario,
+		(total, p) => p.total === 0 ? total + p.precioUnitario : total + p.total,
 		0
 	);
 });
@@ -452,7 +460,7 @@ const subtotalServicios = computed(() => {
 	if (!orden.value?.adicionales) return 0;
 
 	return orden.value.adicionales.reduce(
-		(total, s) => total + (s.cantidad * s.precioUnitario),
+		(total, s) => s.total === 0 ? total + (s.cantidad * s.precioUnitario) : total + s.total,
 		0
 	);
 });

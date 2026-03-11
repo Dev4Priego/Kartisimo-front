@@ -326,29 +326,21 @@
         </div>
       </div>
       </div>
-<h5>Tareas</h5>
-
-<!-- ================= LLANTAS ================= -->
-<div v-if="otEditar.llantas?.length">
-  <h6 class="text-muted">Llantas</h6>
-
-  <div
-    v-for="(llanta, i) in otEditar.llantas"
-    :key="'llanta-'+i"
-    class="card shadow-sm p-3 mb-3"
-  >
-    <div class="row">
-      <div class="col-6">
-        <strong>{{ llanta.descripcion }}</strong>
+      <h5>Tareas</h5>
+      <div v-if="otEditar.llantas">
+        <LlantasSection
+        :llantas = "otEditar.llantas" />
       </div>
-      <div class="col-2">Cant: {{ llanta.cantidad }}</div>
-      <div class="col-2">$ {{ llanta.precio }}</div>
-      <div class="col-2 fw-bold">
-        $ {{ calcularTotalLinea(llanta) }}
+      <div v-if="otEditar.paquetes">
+        <PaquetesSection
+        :paquetes = "otEditar.paquetes" />
       </div>
       <div v-if="otEditar.adicionales">
-        <adicionalesSection
-        :adicionales = "otEditar.adicionales" />
+        <AdicionalesSection
+        @tarea-actualizada="console.log('evento recibido,')"
+        :otId = "otEditar.idOrdenTrabajo"
+        :usuario = "idUsuarioSession"
+         />
       </div>
       <h5>Otros</h5>
       <div class="my-3 gp-2">
@@ -377,206 +369,7 @@
       </button>
     </div>
 
-    
-    <!-- DESCUENTO -->
-    <div class="row mt-3 align-items-end">
-      <div class="col-3">
-        <label class="form-label">Tipo</label>
-        <select class="form-select" v-model="llanta.descuento.tipo">
-          <option :value="null">Sin descuento</option>
-          <option value="PORCENTAJE">Procentaje</option>
-          <option value="MONTO">Monto</option>
-        </select>
-
-      </div>
-
-      <div class="col-3">
-        <label class="form-label">Valor</label>
-        <input
-          type="number"
-          min="0"
-          class="form-control"
-          v-model.number="llanta.descuento.valor"
-          :disabled="!llanta.descuento.tipo"
-        />
-      </div>
-
-   <div class="col-4">
-      <label class="form-label">Origen</label>
-      <select
-        class="form-select"
-        v-model="llanta.descuento.origen"
-        :disabled="!llanta.descuento.tipo"
-      >
-        <option :value="null">Seleccionar</option>
-        <option value="TIENDA">Tienda</option>
-        <option value="PROMOCION">Promoción</option>
-        <option value="CUPON">Cupón</option>
-      </select>
-</div>
-
-      <div class="col-2">
-        <button
-          class="btn btn-outline-danger w-100"
-          @click="resetDescuento(llanta)"
-        >
-          Quitar
-        </button>
-      </div>
-    </div>
   </div>
-</div>
-
-<h5>Otros</h5>
-<div class="my-3 gp-2">
-  <div class="row">
-    <div class="col-12 col-lg-6">
-      <Refacciones
-      :otId = "otEditar.idOrdenTrabajo"
-      :usuario = "idUsuarioSession"
-      :key = "otEditar.idOrdenTrabajo" />
-    </div>
-    <div class="col-12 col-lg-6">
-      <Incidentes
-      :otId = "otEditar.idOrdenTrabajo"
-      :usuario = "idUsuarioSession" />
-    </div>
-  </div>
-</div>
-
-<div class="border-top py-2 px-3 bg-light text-end">
-  <button class="btn btn-secondary mx-3" @click="volver()">
-    <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
-  </button>
-  <button class="btn btn-primary mx-3" :disabled="!formValido" @click="guardarEdicion">
-    Guardar cambios
-  </button>
-</div>
-
-<!-- ================= PAQUETES ================= -->
-<div v-if="otEditar.paquetes?.length">
-  <h6 class="text-muted">Paquetes</h6>
-
-  <div
-    v-for="(paq, i) in otEditar.paquetes"
-    :key="'paq-'+i"
-    class="card shadow-sm p-3 mb-3"
-  >
-    <div class="row">
-      <div class="col-8">
-        <strong>{{ paq.descripcion }}</strong>
-      </div>
-      <div class="col-4 fw-bold">
-        $ {{ calcularTotalLinea(paq) }}
-      </div>
-    </div>
-
-    <div class="row mt-3 align-items-end">
-      <div class="col-3">
-        <select class="form-select" v-model="paq.descuento.tipo">
-          <option :value="null">Sin descuento</option>
-          <option value="PORCENTAJE">porcentaje</option>
-          <option value="MONTO">Monto</option>
-        </select>
-      </div>
-
-      <div class="col-3">
-        <input
-          type="number"
-          class="form-control"
-          v-model.number="paq.descuento.valor"
-          :disabled="!paq.descuento.tipo"
-        />
-      </div>
-
-      <div class="col-4">
-        <select
-          class="form-select"
-          v-model="paq.descuento.origen"
-          :disabled="!paq.descuento.tipo"
-        >
-          <option value="TIENDA">Tienda</option>
-          <option value="PROMOCION">Promoción</option>
-          <option value="CUPON">Cupón</option>
-        </select>
-      </div>
-
-      <div class="col-2">
-        <button class="btn btn-outline-danger w-100" @click="resetDescuento(paq)">
-          Quitar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ================= ADICIONALES ================= -->
-<div v-if="otEditar.adicionales?.length">
-  <h6 class="text-muted">Adicionales</h6>
-
-  <div
-    v-for="(add, i) in otEditar.adicionales"
-    :key="'add-'+i"
-    class="card shadow-sm p-3 mb-3"
-  >
-    <div class="row">
-      <div class="col-8">{{ add.descripcion }}</div>
-      <div class="col-4 fw-bold">$ {{ calcularTotalLinea(add) }}</div>
-    </div>
-
-    <div class="row mt-3 align-items-end">
-      <div class="col-3">
-
-        <select class="form-select" v-model="add.descuento.tipo">
-          <option :value="null">Sin descuento</option>
-          <option value="PORCENTAJE">porcentaje </option>
-          <option value="MONTO">Monto </option>
-        </select>
-
-        
-      </div>
-
-      <div class="col-3">
-        <input
-          type="number"
-          class="form-control"
-          v-model.number="add.descuento.valor"
-          :disabled="!add.descuento.tipo"
-        />
-      </div>
-
-      <div class="col-4">
-        <select
-          class="form-select"
-          v-model="add.descuento.origen"
-          :disabled="!add.descuento.tipo"
-        >
-          <option value="TIENDA">Tienda</option>
-          <option value="PROMOCION">Promoción</option>
-          <option value="CUPON">Cupón</option>
-        </select>
-      </div>
-
-      <div class="col-2">
-        <button class="btn btn-outline-danger w-100" @click="resetDescuento(add)">
-          Quitar
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
-    </div>
-
-
-    
-  </div>
-
-
-  
 
 </template>
 
@@ -593,62 +386,32 @@ import { parse } from 'vue/compiler-sfc';
 import axios from 'axios';
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
-import { Modal } from "bootstrap"
 
 const { proxy } = getCurrentInstance()
-const route = useRoute()
-const router = useRouter()
+const route = useRoute();
+const router = useRouter();
+const otEditar = ref({});
+const itmEmpleados = ref({});
+const usosCFDI = ref([]);
+const regimenFiscal = ref([]);
 
-/* ==============================
-   ESTADO BASE (IMPORTANTE)
-============================== */
-const otEditar = ref({
+/**
+ * 🔒 Estado inicial seguro
+ */
+
+const data45= JSON.parse(localStorage.getItem('userSession')); // o el nombre de la key que usaste
+const idUsuarioSession = data45?.usuario?.idUsuario;
+
+const orden = ref({
   llantas: [],
   paquetes: [],
   adicionales: []
 })
 
-const itmEmpleados = ref([])
-const incidenteForm = ref({})
-let modalIncidente
-
-/* ==============================
-   USUARIO SESIÓN
-============================== */
-const data45 = JSON.parse(localStorage.getItem('userSession'))
-const idUsuarioSession = data45?.usuario?.idUsuario
-
-/* ==============================
-   NORMALIZADORES
-============================== */
-const normalizar = (arr) =>
-  Array.isArray(arr) ? arr.filter(i => i && typeof i === 'object') : []
-  
-  
-  
-
-  const promociones = ref([])
-
-
-  const normalizarLinea = (linea) => ({
-  ...linea,
-  cantidad: linea.cantidad ?? 1,
-  precio: linea.precio ?? 0,
-  descuento: linea.descuento ?? {
-    tipo: null,
-    valor: 0,
-    origen: null,
-    promocionId: null,
-    codigoCupon: null
-  }
-})
-
-/* ==============================
-   CARGAR ORDEN (AQUÍ VA json)
-============================== */
 const cargarOrden = async () => {
   try {
     const id = route.params.id
+    console.log('📌 Cargando OT:', id)
 
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
@@ -657,32 +420,46 @@ const cargarOrden = async () => {
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
 
     const json = await res.json()
+    console.log(' RESPUESTA BACKEND:', json)
 
+    /**
+     * 🔒 Normalización total
+     */
     otEditar.value = {
       ...json,
-      llantas: normalizar(json.llantas).map(normalizarLinea),
-      paquetes: normalizar(json.paquetes).map(normalizarLinea),
-      adicionales: normalizar(json.adicionales).map(normalizarLinea)
+      llantas: Array.isArray(json.llantas) ? json.llantas : [],
+      paquetes: Array.isArray(json.paquetes) ? json.paquetes : [],
+      adicionales: Array.isArray(json.adicionales) ? json.adicionales : []
     }
 
   } catch (err) {
-    console.error('Error cargando OT:', err)
+    console.error('❌ Error cargando OT:', err)
+
+    // fallback seguro
+    orden.value = {
+      llantas: [],
+      paquetes: [],
+      adicionales: []
+    }
   }
 }
 
-/* ==============================
-   EMPLEADOS
-============================== */
 const cargarEmpleados = async () => {
+  const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
     const res = await fetch(
-      `${proxy.$serverIP}api/Empleado/getEmpleado?idSucursal=${data45.usuario.idSucursal}`
-    )
-    if (!res.ok) throw new Error("Error empleados")
+      proxy.$serverIP +
+        "api/Empleado/getEmpleado?idSucursal=" +
+        userSession.usuario.idSucursal
+    );
+    if (!res.ok) throw new Error("Error en la respuesta");
+    const data = await res.json();
 
-    itmEmpleados.value = await res.json()
+    itmEmpleados.value = data;
+    // console.log('Empleados: '+ JSON.stringify(data))
+    // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
   } catch (error) {
-    console.error("Error al cargar empleado:", error)
+    console.error("Error al cargar empleado:", error);
   }
 };
 
@@ -796,110 +573,107 @@ const avanzarEstado = async () => {
     otEditar.value.estado = nuevoEstado
 
     // guardar en backend
-
-  } catch (error) {
-    console.error("Error al avanzar estado:", error)
-  }
-}
-
-/* ==============================
-   DESCUENTOS
-============================== */
-const resetDescuento = (linea) => {
-  linea.descuento = { tipo: null, valor: 0, origen: null }
-}
-
-const calcularTotalLinea = (item) => {
-  const base = (item.precio || 0) * (item.cantidad || 1)
-
-  if (!item.descuento?.tipo) return base
-
-  if (item.descuento.tipo === 'PORCENTAJE') {
-    return base - (base * item.descuento.valor / 100)
-  }
-
-  if (item.descuento.tipo === 'MONTO') {
-    return Math.max(0, base - item.descuento.valor)
-  }
-
-  return base
-}
-
-/* ==============================
-   GUARDAR EDICIÓN
-============================== */
-
-
-
-
-const cargarPromociones = async () => {
-  try {
-
-    const res = await fetch(
-      proxy.$serverIP + "api/Promocion/getPromociones"
-    )
-
-    if (!res.ok) throw new Error("Error promociones")
-
-    promociones.value = await res.json()
-
-  } catch (error) {
-    console.error("Error cargando promociones:", error)
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const guardarEdicion = async () => {
-  try {
     await axios.put(
-      `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${otEditar.value.idOrdenTrabajo}`,
+      `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
       {
-        idUsuario: idUsuarioSession,
-        idEmpleado: otEditar.value.empleado?.idEmpleado,
-        metodoPago: otEditar.value.metodoPago,
-        desecharLlanta: otEditar.value.desecharLlanta,
-        requiereFactura: otEditar.value.requiereFactura,
-        factura: otEditar.value.factura
+        estado: nuevoEstado,
       }
     )
 
-    mostrarToast("success", "Orden de trabajo editada correctamente")
-    cargarOrden()
+    mostrarToast("success", "Orden de trabajo avanzada correctamente")
 
   } catch (error) {
-    console.error("Error al editar OT:", error)
+    console.error("No se pudo actualizar el estado", error)
   }
 }
 
-/* ==============================
-   TOAST
-============================== */
+const cambiarEstatusOT = async (estatus) => {
+
+  try {
+
+    // guardar en backend
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/cambiarEstatusOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        estatus: estatus,
+      }
+    )
+
+    switch (estatus) {
+      case 0:
+        mostrarToast("success", "Orden de trabajo cancelada correctamente")
+        break
+      case 1:
+        mostrarToast("success", "Orden de trabajo retomada correctamente")
+        break
+      case 2:
+        mostrarToast("success", "Orden de trabajo suspendida correctamente")
+        break
+    } 
+
+    cargarOrden()
+
+  } catch (error) {
+    console.error("No se pudo actualizar el estado", error)
+  }
+}
+
+// funcion para guardar los datos editados de la OT
+const guardarEdicion = async () => {
+
+  const idOT = otEditar.value.idOrdenTrabajo;
+
+  console.log('usuario edita' + idUsuarioSession)
+
+  const payload = {
+    idUsuario: idUsuarioSession,
+    idEmpleado: otEditar.value.empleado.idEmpleado,
+    metodoPago: otEditar.value.metodoPago,
+    desecharLlanta: otEditar.value.desecharLlanta,
+    requiereFactura: otEditar.value.requiereFactura,
+    factura: otEditar.value.factura
+  };
+
+  try {
+    const response = await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${idOT}`,
+      payload
+    );
+
+    mostrarToast("success", "Orden de trabajo editada correctamente");
+    console.log("OT actualizada:", response.data);
+    cargarOrden()
+    //volver()
+
+  } catch (error) {
+    console.error("Error al editar OT:", error);
+  }
+};
+
 const mostrarToast = (type, message) => {
+  const color =
+    type === "success"
+      ? "linear-gradient(to right, #96c93d)"
+      : type === "warning"
+      ? "linear-gradient(to right, #f5af19, #f12711)"
+      : "linear-gradient(to right, #6dd5ed, #2193b0)";
+
   Toastify({
     text: message,
     duration: 3000,
+    close: true,
     gravity: "top",
     position: "right",
+    stopOnFocus: true,
     style: {
-      background:
-        type === "success"
-          ? "linear-gradient(to right, #96c93d)"
-          : "linear-gradient(to right, #f12711)"
-    }
-  }).showToast()
-}
+      background: color,
+      borderRadius: "6px",
+      color: "white",
+      fontSize: "14px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+    },
+  }).showToast();
+};
 
 // Validaciones
 const errores = reactive({});
@@ -994,24 +768,21 @@ const formValido = computed(() => {
   } else return true;
 });
 
-/* ==============================
-   INIT
-============================== */
 onMounted(() => {
   cargarOrden();
   cargarEmpleados();
   cargarUsosCFDI();
   cargarRegimenFiscal();
-  cargarPromociones();
 });
-
-
-
-
-
-
-
-
-
-
 </script>
+
+<style>
+.input-error {
+  border: 1px solid red;
+}
+
+.error-msg {
+  color: red;
+  font-size: 12px;
+}
+</style>
