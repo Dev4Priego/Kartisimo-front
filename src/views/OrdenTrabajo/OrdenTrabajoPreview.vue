@@ -192,12 +192,12 @@
 									Cantidad: {{ llanta.cantidad }} ·
 									${{ formatNumber(llanta.precioUnitario) }} c/u,
 									subtotal: ${{ formatNumber(llanta.cantidad * llanta.precioUnitario) }},
-									promoción: -${{ llanta.total === 0 ? formatNumber(0) : formatNumber((llanta.cantidad * llanta.precioUnitario) - llanta.total) }}
+									promoción: {{llanta?.tipoPromocion || llanta?.tipoVuelo ? `-%` : `-$`  }}{{llanta?.valorPromocion || llanta.valorVuelo}}
 								</small>
 							</div>
 
 							<div class="fw-bold text-end">
-								${{ llanta.total === 0 ? formatNumber(llanta.cantidad * llanta.precioUnitario) : formatNumber(llanta.total) }}
+								${{formatNumber(precioFinalItem(llanta))}}
 							</div>
 						</div>
 					</li>
@@ -226,12 +226,12 @@
 								</div>
 								<small class="text-muted">
 									{{ paquete.descripcion }}, subtotal: ${{ formatNumber(paquete.precioUnitario) }}, 
-									promoción: -${{ paquete.total === 0 ? formatNumber(0) : formatNumber(paquete.precioUnitario - paquete.total) }}
+									promoción: {{paquete?.tipoPromocion || paquete?.tipoVuelo ? `-%` : `-$`  }}{{paquete?.valorPromocion || paquete.valorVuelo}}
 								</small>
 							</div>
 
 							<div class="fw-bold">
-								${{ paquete.total === 0 ? formatNumber(paquete.precioUnitario) : formatNumber(paquete.total) }}
+								${{ formatNumber(precioFinalItem(paquete)) }}
 							</div>
 						</div>
 
@@ -278,12 +278,12 @@
 								</div>
 								<small class="text-muted">
 									Cantidad: {{ s.cantidad }} · ${{ formatNumber(s.precioUnitario) }} c/u, subtotal: ${{ formatNumber(s.cantidad * s.precioUnitario) }},
-									promoción: -${{ s.total === 0 ? formatNumber(0) : formatNumber((s.cantidad * s.precioUnitario) - s.total) }}
+									promoción: {{s?.tipoPromocion || s?.tipoVuelo ? `-%` : `-$`  }}{{s?.valorPromocion || s.valorVuelo}}
 								</small>
 							</div>
 
 							<div class="fw-bold">
-								${{ s.total === 0 ? formatNumber(s.cantidad * s.precioUnitario) : formatNumber(s.total) }}
+								${{ formatNumber(precioFinalItem(s)) }}
 							</div>
 						</div>
 					</li>
@@ -302,7 +302,7 @@
 				</div>
 
 				<h4 class="mb-0 text-success fw-bold">
-					${{ formatNumber(totalOrden) }}
+					${{ totalFinalOrden }}
 				</h4>
 			</div>
 		</div>
@@ -507,6 +507,47 @@ const porcentaje = computed(() => {
   if (total.value === 0) return 0
   return Math.round((completadas.value / total.value) * 100)
 })
+
+const precioFinalItem = (item) => {
+  const base = item.precioUnitario ?? 0;
+  const valor = item?.valorVuelo || item?.valorPromocion || null;
+
+  // si tiene tipo Promo false es Monto, si es true es Porcentual
+  if ((item.idPromocion || item.idPromocionVuelo) && valor != null) {
+	return item?.tipoPromocion || item?.tipoVuelo
+	  ? item?.cantidad ? base * (1 - valor / 100) * item.cantidad :  base * (1 - valor / 100)
+	  : item?.cantidad ? Math.max(0, base - valor) * item?.cantidad : Math.max(0, base - valor);
+  } else {
+	return item.cantidad ? base * item.cantidad : base;
+  }
+}
+
+//Funcion para sumar todo y tener el total final de la orden, considerando promociones y vuelos
+
+const totalFinalOrden = computed(() => {
+	let total = 0;
+	
+	if (orden.value?.llantas) {
+		orden.value.llantas.forEach(item => {
+			total += precioFinalItem(item) || 0;
+		});
+	}
+	
+	if (orden.value?.paquetes) {
+		orden.value.paquetes.forEach(item => {
+			total += precioFinalItem(item) || 0;
+		});
+	}
+	
+	if (orden.value?.adicionales) {
+		orden.value.adicionales.forEach(item => {
+			total += precioFinalItem(item) || 0;
+		});
+	}
+	
+	return formatNumber(total);
+});
+
 </script>
 
 <style scoped>

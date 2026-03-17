@@ -3259,7 +3259,8 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
 
-    console.log("Data: ", JSON.stringify(cotizacionForm.paquetes));
+    
+      console.log("Cotizacion EDIT: ",JSON.stringify(cotizacionForm) ); 
   } catch (e) {
     console.error("Error cargando cotización para edición:", e);
     mostrarToast("warning", "No se pudo cargar la cotización");
@@ -3919,7 +3920,7 @@ watch(
 // Paquetes
 watch(
   () =>
-    console.log("Paquetes (Crear cotizacion): ", JSON.stringify(cotizacionForm.paquetes)),
+
     cotizacionForm.paquetes.map((p) => ({
       id: p.idPaquete,
       precio: p.precioUnitario,
