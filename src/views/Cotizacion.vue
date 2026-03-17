@@ -2173,6 +2173,7 @@ const PromocionesVuelo = reactive({
 /***********************************
  *  FUNCIONES INPUTS
  ***********************************/
+ 
 const telefonoFormateado = computed({
   get() {
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
