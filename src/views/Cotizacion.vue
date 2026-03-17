@@ -733,7 +733,7 @@
                         type="checkbox"
                         :id="'paquete-' + paquete.idPaquete"
                         :value="paquete.idPaquete"
-                        v-model="cotizacionForm.paquetes"
+                        v-model="paquetesSeleccionados"
                       />
                       <label class="form-check-label" :for="'paquete-' + paquete.idPaquete">
                         {{ paquete.nombre }} - $ {{ paquete.precioUnitario }}.00
@@ -2173,6 +2173,7 @@ const PromocionesVuelo = reactive({
 /***********************************
  *  FUNCIONES INPUTS
  ***********************************/
+ 
 const telefonoFormateado = computed({
   get() {
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
@@ -2495,7 +2496,7 @@ const cargarCotizaciones = async () => {
   } catch (error) {
     console.error("Error al cargar cotizaciones:", error);
   }
-}
+};
 
 const registrarCerrarConEsc = (mostrarVista) => {
   //console.log()
@@ -3021,7 +3022,8 @@ const cargarFormulario = async (cotizacion = null) => {
       paquetesSeleccionados.value = [paquetesDisponibles.value[0].idPaquete];
     }
 
-    console.log("🧹 FORM LIMPIO:", JSON.stringify(cotizacionForm)); // 🔹 log claro
+    //console.log("🧹 FORM LIMPIO:", JSON.stringify(cotizacionForm)); // 🔹 log claro
+   
     return;
   }
 
@@ -3258,7 +3260,8 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
 
-    //console.log(data)
+    
+      console.log("Cotizacion EDIT: ",JSON.stringify(cotizacionForm) ); 
   } catch (e) {
     console.error("Error cargando cotización para edición:", e);
     mostrarToast("warning", "No se pudo cargar la cotización");
@@ -3803,7 +3806,6 @@ const abrirModalCotizacion = (cotizacion = null) => {
   mostrarVista.value = false;
 };
 
-
 const tblHeadersModal = [
   { text: "Llanta", value: "llanta", sortable: true },
   { text: "Rango", value: "rango" },
@@ -3919,6 +3921,7 @@ watch(
 // Paquetes
 watch(
   () =>
+
     cotizacionForm.paquetes.map((p) => ({
       id: p.idPaquete,
       precio: p.precioUnitario,
@@ -4847,11 +4850,6 @@ const generarPDF = async () => {
   // usa esta si el problema es download
   pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
 };
-
-
-
-
-
 </script>
 
 <style>
