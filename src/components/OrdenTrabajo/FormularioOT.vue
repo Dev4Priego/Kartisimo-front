@@ -29,6 +29,7 @@
         </div>
       </div>
       <hr />
+      
       <div class="row mb-4 align-items-stretch">
         <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
@@ -39,6 +40,7 @@
               <div class="row">
                 <div class="col-6 mb-3">
                   <label for="sumserie" class="form-label">Núm. Serie *</label>
+
                 <input id="numserie"
                   v-model="ordenTrabajoForm.vehiculo.numSerie"
                   @input="onSerieInput($event.target.value)"
@@ -46,7 +48,6 @@
                   list="vehiculos"
                   placeholder="(17 caracteres)"
                   class="form-control"
-                  @blur="validate('vehiculo.numSerie')"
                   :class="{ 'input-error': errores['vehiculo.numSerie'] }"
                 />
                 <small v-if="errores['vehiculo.numSerie']" class="error-msg">
@@ -65,14 +66,17 @@
               </div>
               <div class="col-6 mb-3">
                 <label for="marca" class="form-label">Marca *</label>
+
                 <input id="marca"
                   v-model="ordenTrabajoForm.vehiculo.marca"
                   class="form-control"
                   type="text"
                   placeholder="Marca"
-                  @blur="validate('vehiculo.marca')"
                   :class="{ 'input-error': errores['vehiculo.marca'] }"
                 />
+
+
+
                 <small v-if="errores['vehiculo.marca']" class="error-msg">
                   {{ errores["vehiculo.marca"] }}
                 </small>
@@ -84,7 +88,6 @@
                   class="form-control"
                   type="text"
                   placeholder="Modelo *"
-                  @blur="validate('vehiculo.modelo')"
                   :class="{ 'input-error': errores['vehiculo.modelo'] }"
                 />
                 <small v-if="errores['vehiculo.modelo']" class="error-msg">
@@ -98,7 +101,6 @@
                   class="form-control"
                   type="text"
                   placeholder="Color *"
-                  @blur="validate('vehiculo.color')"
                   :class="{ 'input-error': errores['vehiculo.color'] }"
                 />
                 <small v-if="errores['vehiculo.color']" class="error-msg">
@@ -112,7 +114,6 @@
                   class="form-control"
                   type="number"
                   placeholder="(Kilometraje actual)"
-                  @blur="validate('vehiculo.kilometraje')"
                   :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
                 />
                 <small v-if="errores['vehiculo.kilometraje']" class="error-msg">
@@ -127,7 +128,6 @@
                   class="form-control"
                   type="number"
                   placeholder="Ej: 2019"
-                  @blur="validate('vehiculo.anio')"
                   :class="{ 'input-error': errores['vehiculo.anio'] }"
                 />
                 <small v-if="errores['vehiculo.anio']" class="error-msg">
@@ -141,7 +141,6 @@
                   class="form-control"
                   type="text"
                   placeholder="Ej: GAB-254-A"
-                  @blur="validate('vehiculo.placas')"
                   :class="{ 'input-error': errores['vehiculo.placas'] }"
                 />
                 <small v-if="errores['vehiculo.placas']" class="error-msg">
@@ -191,7 +190,6 @@
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.clienteTelefono')"
                   :class="{ 'input-error': errores['cliente.clienteTelefono'] }"
                 />
                 <small
@@ -212,7 +210,6 @@
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.clienteCorreo')"
                   :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
                 />
                 <small
@@ -233,7 +230,6 @@
                   list="clientes"
                   @input="onClienteInput($event.target.value)"
                   @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.rfc')"
                   :class="{ 'input-error': errores['cliente.rfc'] }"
                 />
 
@@ -1028,9 +1024,13 @@
               <button type="button" class="btn btn-secondary position-relative shadow mx-3" style="width: 140px;" @click="mostrarVista = false">
                   <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i> Cerrar
                 </button>
-                <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarOT()">
-                  <i class="bi-save-fill position-absolute start-0 ms-2"></i> Guardar OT
-                </button>
+
+               <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarOT()"
+>
+  <i class="bi-save-fill position-absolute start-0 ms-2"></i> 
+  Guardar OT
+</button>
+
             </div>
           </div>
         </div>
@@ -1075,232 +1075,128 @@ const props = defineProps({
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
 
+/* =================== FORMATEO DE FECHAS =================== */
+
 const formatearFecha = (fecha) => {
-    if (!fecha) return "";
+  if (!fecha) return "";
 
-    const d = new Date(fecha);
+  const d = new Date(fecha);
 
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+  const fechaFormateada = d.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
-    const horaFormateada = d.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+  const horaFormateada = d.toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
-    return `${fechaFormateada}, ${horaFormateada}`;
-  };
-
-  const formatearFechaSinHora = (fecha) => {
-    if (!fecha) return "";
-
-    const d = new Date(fecha);
-
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-    return fechaFormateada;
-  };
-
-// Helper para acceder a propiedades anidadas tipo "cliente.telefono"
-const getValor = (path) => {
-  return path.split(".").reduce((obj, key) => obj[key], ordenTrabajoForm);
+  return `${fechaFormateada}, ${horaFormateada}`;
 };
 
-function validate(path) {
-  const value = getValor(path);
+const formatearFechaSinHora = (fecha) => {
+  if (!fecha) return "";
 
-  // ========================= VALIDACIONES ==============================
+  const d = new Date(fecha);
 
-  const rules = {
-    
-    // -------- VEHÍCULO ----------
-    "vehiculo.marca": () => (!value ? "Marca obligatoria." : null),
+  return d.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
-    "vehiculo.modelo": () => (!value ? "Modelo obligatorio." : null),
+/* =================== HELPER PARA CAMPOS ANIDADOS =================== */
 
-    "vehiculo.numSerie": () =>
-      value.length < 17 ? "El número de serie (VIN) debe ser de 17 caracteres." : null,
+const getValor = (path) => {
+  return path.split(".").reduce((obj, key) => obj?.[key], ordenTrabajoForm);
+};
 
-    "vehiculo.kilometraje": () =>
-      value === ""
-        ? "Kilometraje obligatorio."
-        : isNaN(value)
-        ? "Debe ser un número."
-        : value < 0
-        ? "No puede ser negativo."
-        : value < kilometrajeBase.value
-        ? `No puede ser menor a ${kilometrajeBase.value}.`
-        : null,
 
-    "vehiculo.color": () => (!value ? "Color obligatorio." : null),
 
-    "vehiculo.placas": () => (!value ? "Placas obligatorias." : null),
-
-    "vehiculo.anio": () => {
-      const y = parseInt(value);
-      const current = new Date().getFullYear();
-      const nextyear = current + 1;
-      return !y
-        ? "Año obligatorio."
-        : y < 1950 || y > nextyear
-        ? `Año entre 1950 y ${nextyear}.`
-        : null;
-    },
-
-    "cliente.metodoPago": () =>
-      !value
-        ? "Debe seleccionar una forma de pago."
-        : null,
-
-    "cliente.clienteTelefono": () => {
-      if(!value) {
-        return "Debe ingresar un teléfono"
-      } else {
-      const soloNumeros = value.replace(/\D/g, "");
-      return (!value || soloNumeros.length < 10)
-        ? "Teléfono no válido."
-        : null;
-      }
-    },
-
-    "cliente.clienteCorreo": () => {
-      if(value.length > 0) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return (!emailRegex.test(value))
-        ? "E-mail no válido."
-        : null;
-      } else {
-        return null;
-      }
-    },
-
-    "fechaEntrega": () => {
-      if (!ordenTrabajoForm.fechaEntrega)
-        return "La fecha y hora de entrega son obligatorias.";
-
-      const entrega = new Date(ordenTrabajoForm.fechaEntrega);
-      const ahora = new Date();
-
-      if (entrega < ahora)
-        return "La fecha de entrega no puede ser menor a la actual.";
-
-      return null;
-    },
-
-    idEmpleado: () =>
-      !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
-        ? "Debes seleccionar un técnico."
-        : null,
-
-    
-    // -------- FACTURA ----------
-    "factura.razonSocial": () =>
-      !value || !value.trim()
-        ? "Razón social obligatoria."
-        : null,
-
-    "factura.usoCFDI": () =>
-      !value
-        ? "Debe seleccionar un uso CFDI."
-        : null,
-
-    "factura.regimenFiscal": () =>
-      !value
-        ? "Debe seleccionar un régimen fiscal."
-        : null,
-
-    "factura.eMail": () => {
-      if (!value || !value.trim()) return "Correo obligatorio.";
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !emailRegex.test(value)
-        ? "E-mail no válido."
-        : null;
-    },
-
-    "factura.cp": () => {
-      if (!value || !value.trim()) return "Código postal obligatorio.";
-
-      const cpRegex = /^\d{5}$/;
-      return !cpRegex.test(value)
-        ? "El código postal debe tener 5 dígitos."
-        : null;
-    },
-
-    "factura.rfc": () => {
-      if (!value || !value.trim()) return "RFC obligatorio.";
-
-      const rfcRegex =
-        /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
-
-      return !rfcRegex.test(value.toUpperCase())
-        ? "RFC no válido."
-        : null;
-    },
-
-  };
-
-  // Ejecutar regla
-  const error = rules[path] ? rules[path]() : null;
-
-  if (error) errores[path] = error;
-  else delete errores[path];
-}
-
-// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
+/* =================== FORMULARIO VALIDO =================== */
 const formValido = computed(() => {
-  // Si hay errores → inválido
+
   if (Object.keys(errores).length > 0) return false;
-  // Campos obligatorios SIEMPRE
-  const requiredFields = [
-    ordenTrabajoForm.fechaEntrega,
 
-    // CLIENTE
-    ordenTrabajoForm.cliente.clienteTelefono,
-    //ordenTrabajoForm.cliente.clienteCorreo,
-    ordenTrabajoForm.cliente.metodoPago,
+  const validations = [
 
-    // VEHÍCULO
-    ordenTrabajoForm.vehiculo.marca,
-    ordenTrabajoForm.vehiculo.modelo,
-    ordenTrabajoForm.vehiculo.numSerie,
-    ordenTrabajoForm.vehiculo.kilometraje,
-    ordenTrabajoForm.vehiculo.color,
-    ordenTrabajoForm.vehiculo.placas,
-    ordenTrabajoForm.vehiculo.anio,
+    /* FECHA */
+    () => !!ordenTrabajoForm.fechaEntrega,
 
-    // TÉCNICO
-    ordenTrabajoForm.idEmpleado,
+    /* TELEFONO */
+    () => {
+      const nums = ordenTrabajoForm.cliente.clienteTelefono?.replace(/\D/g, "");
+      return nums && nums.length >= 10;
+    },
+
+    /* METODO PAGO */
+    () => !!ordenTrabajoForm.cliente.metodoPago,
+
+    /* VEHICULO */
+    () => !!ordenTrabajoForm.vehiculo.marca,
+    () => !!ordenTrabajoForm.vehiculo.modelo,
+
+    () => {
+      const vin = ordenTrabajoForm.vehiculo.numSerie;
+      return vin && vin.length === 17;
+    },
+
+    () => {
+      const km = Number(ordenTrabajoForm.vehiculo.kilometraje);
+      return !isNaN(km) && km >= kilometrajeBase.value;
+    },
+
+    () => !!ordenTrabajoForm.vehiculo.color,
+    () => !!ordenTrabajoForm.vehiculo.placas,
+
+    () => {
+      const y = parseInt(ordenTrabajoForm.vehiculo.anio);
+      const current = new Date().getFullYear();
+      return y >= 1950 && y <= current + 1;
+    },
+
+    /* TECNICO */
+    () => ordenTrabajoForm.idEmpleado && ordenTrabajoForm.idEmpleado !== 0,
   ];
 
-  // 3️⃣ Campos obligatorios SOLO si se desea factura
-  const facturaRequired = boolFactura.value === true
-    ? [
-        ordenTrabajoForm.factura.razonSocial,
-        ordenTrabajoForm.factura.usoCFDI,
-        ordenTrabajoForm.factura.regimenFiscal,
-        ordenTrabajoForm.factura.eMail,
-        ordenTrabajoForm.factura.cp,
-        ordenTrabajoForm.factura.rfc,
-      ]
-    : [];
-  
+  /* FACTURA SOLO SI ESTA ACTIVA */
+  if (boolFactura.value) {
 
-  // 4️⃣ Validación final (no vacío / no null)
-  return [...requiredFields, ...facturaRequired].every(
-    (v) => v !== "" && v !== null && v !== undefined
-  );
+    validations.push(
+
+      () => !!ordenTrabajoForm.factura.razonSocial,
+
+      () => !!ordenTrabajoForm.factura.usoCFDI,
+
+      () => !!ordenTrabajoForm.factura.regimenFiscal,
+
+      () => {
+        const email = ordenTrabajoForm.factura.eMail;
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return email && regex.test(email);
+      },
+
+      () => {
+        const cp = ordenTrabajoForm.factura.cp;
+        return /^\d{5}$/.test(cp);
+      },
+
+      () => {
+        const rfc = ordenTrabajoForm.factura.rfc?.toUpperCase();
+        const regex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+        return rfc && regex.test(rfc);
+      }
+
+    );
+  }
+
+  return validations.every(v => v());
+
 });
-
-
-
 const getFechaHoraLocal = () => {
   const ahora = new Date();
   const pad = (n) => n.toString().padStart(2, "0");
@@ -1713,12 +1609,9 @@ const validarYMostrarPreview = async () => {
 
   // Factura (si aplica)
   if (boolFactura.value) {
-    // if (!ordenTrabajoForm.factura.razonSocial) errores.push('La razón social es obligatoria.')
-    // if (!ordenTrabajoForm.factura.direccion) errores.push('La dirección es obligatoria.')
-    // if (!ordenTrabajoForm.factura.rfc || !/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/.test(ordenTrabajoForm.factura.rfc)) errores.push('El RFC no tiene un formato válido.')
-    // if (!ordenTrabajoForm.factura.eMail || !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(ordenTrabajoForm.factura.eMail)) errores.push('El correo de la factura no es válido.')
-    // if (!ordenTrabajoForm.factura.cp || !/^\d{5}$/.test(ordenTrabajoForm.factura.cp)) errores.push('El código postal debe tener 5 dígitos.')
-    // if (!ordenTrabajoForm.factura.usoCFDI) errores.push('El uso de CFDI es obligatorio.')
+
+ 
+ 
   }
 
   if (errores.length > 0) {
@@ -1810,6 +1703,16 @@ const guardarOT = async () => {
   console.log('Entró');
 
   let factura = {};
+
+
+  validaciones();
+
+  if (Object.keys(errores).length > 0) {
+    console.log("Formulario inválido");
+    return;
+  }
+
+  console.log("Formulario válido");
 
   let insumosSelec = ({
   ...ordenTrabajoForm.insumo,
@@ -2207,6 +2110,41 @@ const actualizarInsumos = (payload) => {
   ordenTrabajoForm.totales.iva = payload.totales.iva;
   ordenTrabajoForm.totales.total = payload.totales.total;
 };
+
+
+
+
+
+
+function validaciones() {
+
+  const campos = [
+
+    "vehiculo.numSerie",
+    "vehiculo.marca",
+    "vehiculo.modelo",
+    "vehiculo.color",
+    "vehiculo.kilometraje",
+    "vehiculo.anio",
+    "vehiculo.placas",
+
+    "cliente.clienteTelefono",
+    "cliente.clienteCorreo",
+    "cliente.rfc",
+
+  ];
+
+  campos.forEach(campo => validate(campo));
+
+}
+
+
+
+
+
+
+
+
 
 
 </script>
