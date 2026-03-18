@@ -319,6 +319,13 @@
                               )
                             }}
                           </span>
+                          <br>
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ ll.promo.nombre }}
+                            </small>
+                          </span>
+                          <br>
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(ll.subTotal).toLocaleString("es-MX", {
@@ -346,6 +353,10 @@
                             @change="onPromoChange(ll)"
                             :disabled="ll.idPromocionVuelo > 0"
                           >
+                          <option
+                                    v-if="ll.idPromocionVuelo > 0" :value="ll.idPromocionSeleccionada">
+                                    {{ll.promo.nombre }} 
+                                  </option>
                             <!-- Default -->
                             <option :value="0">-- Sin promoción --</option>
 
@@ -552,6 +563,13 @@
                               })
                             }}
                           </span>
+                          <br>
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{paq.promo.nombre }}
+                            </small>
+                          </span>
+                          <br>
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(paq.subTotal).toLocaleString("es-MX", {
@@ -579,6 +597,11 @@
                             @change="onPromoChange(paq)"
                             :disabled="paq.idPromocionVuelo > 0"
                           >
+                          <option
+                            v-if="paq.idPromocionVuelo > 0" 
+                            :value="paq.idPromocionSeleccionada">
+                            {{paq.promo?.nombre || "Promocion Vuelo APlicada"}} 
+                          </option>
                             <option :value="0">-- Sin promoción --</option>
                             <option
                               v-for="promo in paq.promosDisponibles"
@@ -756,6 +779,7 @@
                           class="form-select form-select-sm"
                           v-model="det.idConceptoTrabajo"
                         >
+                        
                           <option :value="0">-- Seleccione concepto --</option>
                           <option
                             v-for="c in conceptoOT"
@@ -795,6 +819,7 @@
                           class="form-select form-select-sm"
                           v-model="ad.idConceptoTrabajo"
                         >
+                        
                           <!-- Default -->
                           <option :value="0">-- Seleccione concepto --</option>
 
@@ -841,6 +866,13 @@
                               )
                             }}
                           </span>
+                          <br>
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ad.promo.nombre  }}
+                            </small>
+                          </span>
+                          <br>
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(ad.subTotal).toLocaleString("es-MX", {
@@ -868,6 +900,10 @@
                             @change="onPromoChange(ad)"
                             :disabled="ad.idPromocionVuelo > 0"
                           >
+                          <option
+                                    v-if="ad.idPromocionVuelo > 0" :value="ad.idPromocionSeleccionada">
+                                    {{ad.promo.nombre }} 
+                                  </option>
                             <!-- Default -->
                             <option :value="0">-- Sin promoción --</option>
 
@@ -915,7 +951,7 @@
                         <button
                           type="button"
                           class="btn btn-danger btn-sm mt-1"
-                          @click="borrarInsumo(ad)"
+                          @click="borrarAdicional(ad)"
                         >
                           <i class="bi bi-trash"></i>
                         </button>
@@ -1143,7 +1179,7 @@ const PromocionesVuelo = reactive({
 const onPromoChange = (item) => {
   // Si el usuario elige una promo "regular", deja limpia la promo al vuelo
   item.idPromocionVuelo = 0;
-  item.isVuelo = false;
+  item.esAlVuelo = false;
 
   // Si el select está apuntando a `idPromocion`, nos aseguramos que también esté en idPromocionSeleccionada
   item.idPromocionSeleccionada = item.idPromocion || 0;
@@ -1173,7 +1209,7 @@ const recalcularSubtotal = (item) => {
   const promo = obtenerPromoSeleccionada(item);
   
   item.promo = promo || null;
-  item.isVuelo = !!item.idPromocionVuelo;
+  item.esAlVuelo = !!item.idPromocionVuelo;
 
   const precioFinal = precioFinalItem(item);
   console.log("Precio Final", precioFinal);
@@ -1627,9 +1663,9 @@ const mapearInsumosParaPadre = () => {
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
       idPromocion: l.esAlVuelo ? null : l.idPromocionSeleccionada,
-      idPromocionSeleccionada: l.idPromocionSeleccionada || 0,
+      idPromocionSeleccionada: l.idPromocionSeleccionada || null,
       idPromocionVuelo: l.idPromocionVuelo || null,
-      isVuelo: !!l.idPromocionVuelo,
+      esAlVuelo: !!l.idPromocionVuelo,
       idConceptoTrabajo: l.idConceptoTrabajo,
       idInventarioInicial: l.idInventarioInicial,
 
@@ -1655,10 +1691,10 @@ const mapearInsumosParaPadre = () => {
 
     paquete: paquetes.value.map((p) => ({
       idPaquete: p.idPaquete,
-      idPromocion: p.idPromocion || p.idPromocionSeleccionada || null,
-      idPromocionSeleccionada: p.idPromocionSeleccionada || 0,
-      idPromocionVuelo: p.idPromocionVuelo || 0,
-      isVuelo: !!p.idPromocionVuelo,
+      idPromocion: p.esAlVuelo ? null : p.idPromocionSeleccionada,
+      idPromocionSeleccionada: p.idPromocionSeleccionada || null,
+      idPromocionVuelo: p.idPromocionVuelo || null,
+      esAlVuelo: !!p.idPromocionVuelo,
       idConceptoOrdenTrabajo: p.idConceptoTrabajo,
 
       descripcion: p.descripcion,
@@ -1687,10 +1723,10 @@ const mapearInsumosParaPadre = () => {
 
     adicional: adicionales.value.map((a) => ({
       idDetalleCotizacionServicio: a.idDetalleCotizacionServicio,
-      idPromocion: a.idPromocion || a.idPromocionSeleccionada || null,
-      idPromocionSeleccionada: a.idPromocionSeleccionada || 0,
-      idPromocionVuelo: a.idPromocionVuelo,
-      isVuelo: !!a.idPromocionVuelo,
+      idPromocion: a.esAlVuelo ? null : a.idPromocionSeleccionada,
+      idPromocionSeleccionada: a.idPromocionSeleccionada || null,
+      idPromocionVuelo: a.idPromocionVuelo || null,
+      esAlVuelo: !!a.idPromocionVuelo,
       idConceptoTrabajo: a.idConceptoTrabajo,
 
       descripcion: a.descripcion,
@@ -1785,7 +1821,7 @@ const togglePromoAlVuelo = (item) => {
     item.idPromocionVuelo = 0;
     item.idPromocionSeleccionada = 0;
     item.promo = null;
-    item.isVuelo = false;
+    item.esAlVuelo = false;
     item.precioConPromo = item.precioUnitario;
     item.subTotal = (item.cantidad || 0) * item.precioUnitario;
     return;
@@ -1833,14 +1869,13 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 
     const data = await res.json();
     nuevaPromo.idPromocion = data.idPromoVuelo;
-
     item.promosAplicables.push(nuevaPromo);
 
     // la promo al vuelo debe reflejarse en estos campos
     item.idPromocionVuelo = nuevaPromo.idPromocion;
     item.idPromocionSeleccionada = 0;
     item.idPromocion = 0;
-    item.isVuelo = true;
+    item.esAlVuelo = true;
 
     recalcularSubtotal(item);
     item.mostrarEditorPromo = false;

@@ -975,13 +975,19 @@
                               currency: "MXN",
                             }) }}</td>
                       <td class="text-end"><div v-if="i.idPromocion || i.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted  me-2">
                           {{
                             (i.cantidad * i.precioUnitario).toLocaleString(
                               "es-MX",
                               { style: "currency", currency: "MXN" }
                             )
                           }}
+                        </span>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ i.promo.nombre }}
+
+                          </small>
                         </span>
                         <span class="text-success fw-bold mx-2">
                           {{
@@ -1010,13 +1016,19 @@
                               currency: "MXN",
                             }) }}</td>
                         <td class="text-end"><div v-if="p.idPromocion || p.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted  me-2">
                           {{
                             (p.cantidad * p.precioUnitario).toLocaleString(
                               "es-MX",
                               { style: "currency", currency: "MXN" }
                             )
                           }}
+                        </span>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ p.promo.nombre }}
+
+                          </small>
                         </span>
                         <span class="text-success fw-bold mx-2">
                           {{
@@ -1051,13 +1063,19 @@
                               currency: "MXN",
                             }) }}</td>
                       <td class="text-end"><div v-if="a.idPromocion || a.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted me-2">
                           {{
                             (a.cantidad * a.precioUnitario).toLocaleString(
                               "es-MX",
                               { style: "currency", currency: "MXN" }
                             )
                           }}
+                        </span>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ a.promo.nombre }}
+
+                          </small>
                         </span>
                         <span class="text-success fw-bold mx-2">
                           {{
