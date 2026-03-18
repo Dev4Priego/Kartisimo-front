@@ -26,5 +26,6 @@ coverage
 *.njsproj
 *.sln
 *.sw?
-
+#main dev
+src/main.js
 *.tsbuildinfo
