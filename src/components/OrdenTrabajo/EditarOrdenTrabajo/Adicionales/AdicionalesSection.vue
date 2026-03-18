@@ -53,7 +53,7 @@
 				</span>
 				<div class="flex-grow-1"></div>
 				
-				<span class="me-3">{{ Number(tarea.subTotal).toLocaleString("es-MX", {style: 'currency', currency: 'MXN'}) }}</span>
+				<span class="me-3">{{ Number(tarea.cantidad * tarea.precioUnitario).toLocaleString("es-MX", {style: 'currency', currency: 'MXN'}) }}</span>
 				<button class="btn btn-sm btn-outline-danger" @click="eliminarTarea(tarea)">
 					<i class="bi bi-trash"></i>
 				</button>
@@ -89,7 +89,9 @@ const agregarTarea = async () => {
 		descripcion: nuevaTarea.value.trim(),
 		cantidad: 1,
 		precioUnitario: precio.value,
-		subTotal: precio.value
+		subTotal: precio.value,
+		idPromocion: null,
+		isVuelo: false
 	};
 	console.log(payload);
 	try {

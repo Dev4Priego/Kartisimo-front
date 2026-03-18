@@ -34,7 +34,7 @@
               <i class="bi bi-building mx-1"></i>
               Proveedor
             </label>
-            <div class="input-group">
+            <!-- <div class="input-group">
               <input
                 type="text"
                 class="form-control"
@@ -49,7 +49,21 @@
               >
                 Buscar
               </button>
-            </div>
+            </div> -->
+            <select
+              v-model="refaccionForm.id_proveedor"
+              class="form-select"
+              placeholder="Selecciona el proveedor"
+             >
+             <option disabled :value="null">-Selecciona-</option>
+             <option
+                v-for="itm in proveedores"
+                :key="itm.id_proveedor"
+                :value="itm.id_proveedor"
+              >
+                {{ itm.nombreproveedor }}
+              </option>
+            </select>
           </div>
         </div>
         <div class="row mb-2">
@@ -105,7 +119,7 @@
                 <button class="btn btn-sm btn-secondary shadow-sm me-3" @click="modalRefacciones = false">
                     <i class="bi bi-x-circle-fill me-2"></i> Cerrar
                 </button>
-                <button class="btn btn-sm btn-primary shadow-sm" @click="guardarRefaccion()">
+                <button class="btn btn-sm btn-primary shadow-sm" @click="guardarRefaccion()" :disabled="refaccionForm.id_proveedor === null">
                     <i class="bi bi-save-fill me-2"></i> Guardar
                 </button>
             </div>
@@ -140,22 +154,20 @@
               <i class="bi bi-building mx-1"></i>
               Proveedor
             </label>
-            <div class="input-group">
-              <input
-                type="text"
-                class="form-control"
-                v-model="editarRefaccionForm.nombreProveedor"
-                readonly
-              />
-              <button
-                class="btn btn-outline-secondary"
-                type="button"
-                data-bs-toggle="modal"
-                data-bs-target="#modalProveedores"
+            
+            <select
+              v-model="editarRefaccionForm.id_proveedor"
+              class="form-select"
+              placeholder="Selecciona el proveedor"
+             >
+             <option
+                v-for="itm in proveedores"
+                :key="itm.id_proveedor"
+                :value="itm.id_proveedor"
               >
-                Buscar
-              </button>
-            </div>
+                {{ itm.nombreproveedor }}
+              </option>
+            </select>
           </div>
         </div>
         <div class="row mb-2">
@@ -339,14 +351,15 @@ import { Modal } from 'bootstrap';
 import axios from 'axios';
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+defineExpose({})
 
 const modalAgregarRefaccion = ref(false);
 const { proxy } = getCurrentInstance();
 const Refacciones = ref([]);
 const modalRefacciones = ref(false);
 const modalEditarRefacciones =ref(false)
-const refaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0, id_proveedor: null, numero_factura: ''});
-const editarRefaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0.0, id_proveedor: null, nota_factura: '', usuario: '', nombreProveedor: '', idRefacciones: null});
+const refaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0, proveedor: null, id_proveedor: null, numero_factura: ''});
+const editarRefaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0.0, proveedor: null, id_proveedor: null, nota_factura: '', usuario: '', nombreProveedor: '', idRefacciones: null});
 const props = defineProps({
   otId: Number,
   usuario: Number
@@ -361,12 +374,12 @@ const proveedorNombre = ref('')
 const modalProveedores = ref(null)
 const totalMonto = ref(0)
 
-const cargarProveedores = async () => {
+const cargarProveedoresPag = async () => {
   proveedores.value = [];
   try {
     const url =
       proxy.$serverIP +
-      "api/Proveedores/proveedores?page=" +
+      "api/Proveedores/proveedorespag?page=" +
       currentPage.value +
       "&search=" +
       encodeURIComponent(busqueda.value);
@@ -388,6 +401,30 @@ const cargarProveedores = async () => {
     console.error("Error al cargar los proveedores:", error);
   }
 };
+
+const cargarProveedores = async () => {
+  proveedores.value = [];
+  try {
+    const url =
+      proxy.$serverIP +
+      "api/Proveedores/proveedores";
+
+    const res = await fetch(url);
+    const text = await res.text();
+    
+    console.log("RESPUESTA RAW:", text);
+
+    if (!res.ok) throw new Error("Error en la respuesta");
+
+    const response = JSON.parse(text);
+    console.log(response);
+    proveedores.value = response ?? [];
+    console.log(proveedores.value);
+
+  } catch (error) {
+    console.error("Error al cargar los proveedores:", error);
+  }
+}
 
 function formatNumber(value, decimals = 2) {
   if (value === null || value === undefined) return '';
@@ -476,6 +513,7 @@ const agregarRefaccion = () => {
   refaccionForm.value.hora = ahora.toTimeString().slice(0, 5);
   refaccionForm.value.refaccion = "";
   refaccionForm.monto = parseFloat(refaccionForm.monto).toFixed(2)
+  modalEditarRefacciones.value = false;
   modalRefacciones.value = !modalRefacciones.value;
 }
 
@@ -519,6 +557,7 @@ const getEditarRefaccionOT = (ot) => {
   editarRefaccionForm.value.refaccion = ot.refaccion;
   editarRefaccionForm.value.monto = ot.monto_refaccion;
   editarRefaccionForm.value.nota_factura = ot.nota_Factura;
+  modalRefacciones.value = false;
   modalEditarRefacciones.value = !modalEditarRefacciones.value
 };
 
