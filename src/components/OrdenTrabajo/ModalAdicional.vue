@@ -1,125 +1,63 @@
-<template>
-	<!-- Backdrop -->
-	<div class="modal-backdrop fade show"></div>
-
-	<!-- Modal -->
-	<div class="modal fade show d-block" tabindex="-1">
-		<div class="modal-dialog modal-lg">
-			<div class="modal-content">
-
-				<div class="modal-header">
-					<h5 class="modal-title">Adicionales</h5>
-					<button type="button" class="btn-close" @click="cerrar"></button>
-				</div>
-
-				<div class="modal-body">
-
-					<table class="table table-sm align-middle">
-						<thead>
-							<tr>
-								<th>Concepto Trabajo</th>
-								<th>Descripción</th>
-								<th style="width:120px">Cantidad</th>
-								<th style="width:140px">Precio</th>
-								<th style="width:140px">Subtotal</th>
-								<th style="width:60px"></th>
-							</tr>
-						</thead>
-
-						<tbody>
-							<tr v-for="(ad, i) in adicionalesLocal" :key="i">
-
-								<!-- CONCEPTO -->
-								<td>
-									<select
-										class="form-select form-select-sm"
-										v-model="ad.idConceptoTrabajo"
-									>
-										<option :value="0">-- Seleccione concepto --</option>
-
-										<option
-											v-for="c in conceptoOT"
-											:key="c.idConceptoOrdenTrabajo"
-											:value="c.idConceptoOrdenTrabajo"
-										>
-											{{ c.nombre }}
-										</option>
-									</select>
-								</td>
-
-								<!-- DESCRIPCIÓN -->
-								<td>
-									<input
-										class="form-control form-control-sm"
-										v-model="ad.descripcion"
-									/>
-								</td>
-
-								<!-- CANTIDAD -->
-								<td>
-									<input
-										type="number"
-										min="1"
-										class="form-control form-control-sm"
-										v-model.number="ad.cantidad"
-										@input="recalcularSubtotal(ad)"
-									/>
-								</td>
-
-								<!-- PRECIO -->
-								<td>
-									<input
-										type="number"
-										min="0"
-										step="0.01"
-										class="form-control form-control-sm"
-										v-model.number="ad.precioUnitario"
-										@input="recalcularSubtotal(ad)"
-									/>
-								</td>
-
-								<!-- SUBTOTAL -->
-								<td class="text-end">
-									{{ Number(ad.subTotal).toLocaleString('es-MX', {
-									style: 'currency',
-									currency: 'MXN'
-									}) }}
-								</td>
-
-								<!-- ELIMINAR -->
-								<td class="text-center">
-									<button
-										class="btn btn-danger btn-sm"
-										@click="eliminarFila(i)"
-									>
-										<i class="bi bi-trash"></i>
-									</button>
-								</td>
-
-							</tr>
-
-						</tbody>
-					</table>
-
-					<button
-						type="button"
-						class="btn btn-outline-primary btn-sm"
-						@click="agregarFila"
-					>
-						<i class="bi bi-plus"></i> Agregar adicional
-					</button>
-
-				</div>
-
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" @click="cerrar">
-						Cerrar
-					</button>
-				</div>
-
-			</div>
+<template  >
+		<div class="row d-flex">
+			<h4>Agregar servicio adicional</h4>
 		</div>
-	</div>
+		<div class="row my-3 mx-3" >
+				 
+				  <div class="d-flex gap-3 my-3">
+					<div class="col">
+						<select
+						v-model="Concepto"
+						class="form-select form-select-sm">
+						<option :value="0">-- Seleccione concepto --</option>
+	
+						<option
+							v-for="c in conceptoOT"
+							:key="c.idConceptoOrdenTrabajo"
+							:value="c.idConceptoOrdenTrabajo"
+						>
+							{{ c.nombre }}
+						</option>
+					</select>
+	
+	
+					</div>
+					<div class="col">
+					  <input
+						class="form-control"
+						placeholder="Nombre del servicio"
+						v-model="Servicio"
+					  />
+					</div>
+					<div class="col-1">
+					  <input
+						class="form-control"
+						type="number"
+						min="1"
+						placeholder="Cantidad"
+						v-model="Cantidad"
+					  />
+					</div>
+	
+					<div class="col">
+					  <input
+						class="form-control"
+						min="0"
+						type="number"
+						placeholder="Precio unitario"
+						v-model="Precio"
+					  />
+					</div>
+					<div class="btn btn-primary position-relative shadow" style="width: 130px;" @click="agregarFila">
+						
+					  <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i> 
+					  &nbsp;Agregar
+					</div>
+				  </div>
+				</div>
+
+
+
 </template>
 
 <script setup>
@@ -127,7 +65,10 @@ import { getCurrentInstance } from 'vue';
 import { computed, ref } from 'vue';
 
 const { proxy } = getCurrentInstance() 
-
+const Concepto = ref(0)
+const Servicio = ref('')
+const Cantidad = ref(1)
+const Precio = ref(0)
 const props = defineProps({
   adicionales: {
     type: Array,
@@ -141,7 +82,7 @@ const props = defineProps({
 
 
 const emit = defineEmits(['update:adicionales', 'cerrar']);
-
+console.log("props",JSON.stringify(props.adicionales));
 /**
  * v-model proxy
  */
@@ -165,25 +106,37 @@ const obtenerPromosCacheadas = async () => {
 	promosGeneralesCache.value = promos;
 	return promos;
 };
+
+const generearTempId =()=>{
+ 	return `${Date.now()} - ${Math.random().toString(36).slice(2)}`
+}
 const agregarFila = async () => {
-	const promosDisponibles = await obtenerPromosCacheadas();
-	console.log(promosDisponibles)
-	adicionalesLocal.value.push({
-		idDetalleCotizacionServicio: null,
-		idConceptoTrabajo: 0,
-		idPromocion: 0,
-		descripcion: '',
-		observacion: '',
-		comentario: '',
-		cantidad: 1,
-		precioUnitario: 0,
-		subTotal: '0.00',
-		promosDisponibles,
-		nombrePromocion: null,
-		valorPromocion: null,
-		tipoPromocion: null
-	});
-};
+  const promosDisponibles = await obtenerPromosCacheadas()
+
+  adicionalesLocal.value.push({
+  	tempId: generearTempId(),
+    idDetalleCotizacionServicio: null,
+    idConceptoTrabajo: Concepto.value,
+    idPromocion: 0,
+    descripcion: Servicio.value,
+    observacion: '',
+    comentario: '',
+    cantidad: Cantidad.value,
+    precioUnitario: Precio.value,
+    subTotal: (Cantidad.value * Precio.value).toFixed(2),
+    promosDisponibles,
+    nombrePromocion: null,
+    valorPromocion: null,
+    tipoPromocion: null
+  })
+
+  // limpiar formulario
+  Concepto.value = 0
+  Servicio.value = ''
+  Cantidad.value = 1
+  Precio.value = 0
+}
+
 
 const obtenerPromosGeneralesParaServicio = async () => {
 	try {
@@ -201,12 +154,6 @@ const obtenerPromosGeneralesParaServicio = async () => {
 };
 
 
-/**
- * Eliminar fila
- */
-const eliminarFila = (index) => {
-	adicionalesLocal.value.splice(index, 1);
-};
 
 /**
  * Recalcular subtotal
@@ -217,10 +164,5 @@ const recalcularSubtotal = (ad) => {
 	ad.subTotal = (cantidad * precio).toFixed(2);
 };
 
-/**
- * Cerrar modal
- */
-const cerrar = () => {
-	emit('cerrar');
-};
+
 </script>
