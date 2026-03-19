@@ -43,11 +43,12 @@
 
                 <input id="numserie"
                   v-model="ordenTrabajoForm.vehiculo.numSerie"
-                  @input="onSerieInput($event.target.value)"
+                  @input="onSerieInput($event.target.value), validate('vehiculo.numSerie')"
                   @change="onSerieSeleccionada"
                   list="vehiculos"
                   placeholder="(17 caracteres)"
                   class="form-control"
+                  
                   @blur="validate('vehiculo.numSerie')"
                   :class="{ 'input-error': errores['vehiculo.numSerie'] }"
                 />
@@ -73,6 +74,8 @@
                   class="form-control"
                   type="text"
                   placeholder="Marca"
+                  @input="validate('vehiculo.marca')"
+
                   @blur="validate('vehiculo.marca')"
                   :class="{ 'input-error': errores['vehiculo.marca'] }"
                 />
@@ -90,6 +93,8 @@
                   class="form-control"
                   type="text"
                   placeholder="Modelo *"
+                  @input="validate('vehiculo.marca')"
+
                   @blur="validate('vehiculo.modelo')"
                   :class="{ 'input-error': errores['vehiculo.modelo'] }"
                 />
@@ -118,6 +123,8 @@
                   class="form-control"
                   type="number"
                   placeholder="(Kilometraje actual)"
+                  @input="validate('vehiculo.marca')"
+
                   @blur="validate('vehiculo.kilometraje')"
                   :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
                 />
@@ -133,6 +140,8 @@
                   class="form-control"
                   type="number"
                   placeholder="Ej: 2019"
+                  @input="validate('vehiculo.marca')"
+
                   @blur="validate('vehiculo.anio')"
                   :class="{ 'input-error': errores['vehiculo.anio'] }"
                 />
@@ -147,6 +156,8 @@
                   class="form-control"
                   type="text"
                   placeholder="Ej: GAB-254-A"
+                  @input="validate('vehiculo.marca')"
+
                   @blur="validate('vehiculo.placas')"
                   :class="{ 'input-error': errores['vehiculo.placas'] }"
                 />
@@ -165,91 +176,95 @@
             </div>
             <div class="card-body">
               <div class="row">
-              <!-- Nombre -->
-              <div class="col-6 mb-3">
-                <label for="nombrecliente" class="form-label">Nombre(s) *</label>
-                <input id="nombrecliente"
-                  v-model="ordenTrabajoForm.cliente.nombres"
-                  class="form-control"
-                  type="text"
-                  placeholder="Nombre del cliente"
-                  list="clientes"
-                />
-              </div>
-              <!-- Apellidos -->
-              <div class="col-6 mb-3">
-                <label for="apellidos" class="form-label">Apellido(s) *</label>
-                <input id="apellidos"
-                  v-model="ordenTrabajoForm.cliente.apellidos"
-                  type="text"
-                  class="form-control"
-                  placeholder="Apellido(s) del cliente"
-                />
-              </div>
-              <!-- Teléfono -->
-              <div class="col-6 mb-3">
-                <label for="telefono" class="form-label">Teléfono(s) *</label>
-                <input id="telefono"
-                  v-model="ordenTrabajoForm.cliente.clienteTelefono"
-                  class="form-control"
-                  type="text"
-                  placeholder="(10 dígitos)"
-                  list="clientes"
-                  @input="onClienteInput($event.target.value)"
-                  @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.clienteTelefono')"
-                  :class="{ 'input-error': errores['cliente.clienteTelefono'] }"
-                />
-                <small
-                  v-if="errores['cliente.clienteTelefono']"
-                  class="error-msg"
-                >
-                  {{ errores["cliente.clienteTelefono"] }}
-                </small>
-              </div>
-              <!-- Correo -->
-              <div class="col-6 mb-3">
-                <label for="email" class="form-label">Correo electrónico</label>
-                <input id="email"
-                  v-model="ordenTrabajoForm.cliente.clienteCorreo"
-                  class="form-control"
-                  type="text"
-                  placeholder="(Use un correo válido)"
-                  list="clientes"
-                  @input="onClienteInput($event.target.value)"
-                  @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.clienteCorreo')"
-                  :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
-                />
-                <small
-                  v-if="errores['cliente.clienteCorreo']"
-                  class="error-msg"
-                >
-                  {{ errores["cliente.clienteCorreo"] }}
-                </small>
-              </div>
-              <!-- RFC -->
-              <div class="col-6 mb-3">
-                <label for="rfc" class="form-label">RFC</label>
-                <input id="rfc"
-                  v-model="ordenTrabajoForm.cliente.rfc"
-                  type="text"
-                  class="form-control"
-                  placeholder="(12 ó 13 caracteres)"
-                  list="clientes"
-                  @input="onClienteInput($event.target.value)"
-                  @change="onClienteSeleccionadoByValue($event.target.value)"
-                  @blur="validate('cliente.rfc')"
-                  :class="{ 'input-error': errores['cliente.rfc'] }"
-                />
 
-                <small
-                  v-if="errores['cliente.rfc']"
-                  class="error-msg"
-                >
-                  {{ errores["cliente.rfc"] }}
-                </small>
-              </div>
+
+              
+
+<!-- Nombre -->
+<div class="col-6 mb-3">
+  <label for="nombrecliente" class="form-label">Nombre(s) *</label>
+  <input id="nombrecliente"
+    v-model="ordenTrabajoForm.cliente.nombres"
+    class="form-control"
+    type="text"
+    placeholder="Nombre del cliente"
+    list="clientes"
+    @input="onClienteInput($event.target.value)"
+  />
+</div>
+
+<!-- Apellidos -->
+<div class="col-6 mb-3">
+  <label for="apellidos" class="form-label">Apellido(s) *</label>
+  <input id="apellidos"
+    v-model="ordenTrabajoForm.cliente.apellidos"
+    type="text"
+    class="form-control"
+    placeholder="Apellido(s) del cliente"
+    @blur="validate('cliente.apellidos')"
+    :class="{ 'input-error': errores['cliente.apellidos'] }"
+  />
+</div>
+
+            <!-- Teléfono -->
+          <div class="col-6 mb-3">
+            <label for="telefono" class="form-label">Teléfono(s) *</label>
+            <input id="telefono"
+              v-model="telefonoFormateado"
+              class="form-control"
+              type="text"
+              placeholder="(10 dígitos)"
+              list="clientes"
+              @change="onClienteSeleccionadoByValue($event.target.value)"
+              @blur="validate('cliente.clienteTelefono')"
+              :class="{ 'input-error': errores['cliente.clienteTelefono'] }"
+            />
+            <small v-if="errores['cliente.clienteTelefono']" class="error-msg">
+              {{ errores["cliente.clienteTelefono"] }}
+            </small>
+          </div>
+
+
+                    <div class="col-6 mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input id="email"
+              v-model="ordenTrabajoForm.cliente.clienteCorreo"
+              class="form-control"
+              type="text"
+              placeholder="(Use un correo válido)"
+              list="clientes"
+              @change="onClienteSeleccionadoByValue($event.target.value)"
+              @blur="validate('cliente.clienteCorreo')"
+              :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
+            />
+            <small v-if="errores['cliente.clienteCorreo']" class="error-msg">
+              {{ errores["cliente.clienteCorreo"] }}
+            </small>
+          </div>
+
+
+
+                
+        <!-- RFC -->
+        <div class="col-6 mb-3">
+          <label for="rfc" class="form-label">RFC</label>
+          <input id="rfc"
+            v-model="ordenTrabajoForm.cliente.rfc"
+            type="text"
+            class="form-control"
+            placeholder="(12 ó 13 caracteres)"
+            list="clientes"
+            @change="onClienteSeleccionadoByValue($event.target.value)"
+            @blur="validate('cliente.rfc')"
+            :class="{ 'input-error': errores['cliente.rfc'] }"
+          />
+          <small v-if="errores['cliente.rfc']" class="error-msg">
+            {{ errores["cliente.rfc"] }}
+          </small>
+        </div>
+
+
+
               </div>
             </div>
           </div>
@@ -274,6 +289,13 @@
           </option>
         </datalist>
       </div>
+
+
+
+
+
+
+
 
       <div class="row">
         <div class="col-3">
@@ -1876,14 +1898,9 @@ const guardarOT = async () => {
   console.log('Entró');
 
   let factura = {};
+const esValido = validaciones();
 
-
-  validaciones();
-
-  if (Object.keys(errores).length > 0) {
-    console.log("Formulario inválido");
-    return;
-  }
+if (!esValido) return;
 
   console.log("Formulario válido");
 
@@ -1972,6 +1989,8 @@ const guardarOT = async () => {
     console.error("Error al guardar OT:", err);
   }
 };
+
+
 
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
   try {
@@ -2293,15 +2312,30 @@ const actualizarInsumos = (payload) => {
   ordenTrabajoForm.totales.total = payload.totales.total;
 };
 
+function validarCampo(campo, valor) {
 
+  const v = (valor ?? "").toString(); // 🔥 ESTA LÍNEA ES LA CLAVE
 
+  switch (campo) {
 
+    case "vehiculo.kilometraje": {
+      const limpio = v.replace(/\D/g, ""); // 🔥 usar v, NO valor
 
+      if (!limpio) {
+        errores[campo] = "Kilometraje requerido";
+      } else {
+        delete errores[campo];
+      }
+
+      ordenTrabajoForm.vehiculo.kilometraje = limpio;
+      break;
+    }
+
+  }}
 
 function validaciones() {
 
   const campos = [
-
     "vehiculo.numSerie",
     "vehiculo.marca",
     "vehiculo.modelo",
@@ -2313,15 +2347,32 @@ function validaciones() {
     "cliente.clienteTelefono",
     "cliente.clienteCorreo",
     "cliente.rfc",
-
   ];
 
-  campos.forEach(campo => validate(campo));
+  // limpiar errores
+  Object.keys(errores).forEach(k => delete errores[k]);
 
+  campos.forEach(campo => {
+    const valor = campo.split(".").reduce((o, k) => o?.[k], ordenTrabajoForm);
+    validarCampo(campo, valor);
+  });
+
+  // SI HAY ERRORES → MOSTRAR ALERTA DETALLADA
+  if (Object.keys(errores).length > 0) {
+
+    let mensaje = "Corrige los siguientes campos:\n\n";
+
+    for (const campo in errores) {
+      mensaje += `• ${campo}: ${errores[campo]}\n`;
+    }
+
+    alert(mensaje);
+
+    return false;
+  }
+
+  return true;
 }
-
-
-
 
 
 
