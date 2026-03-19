@@ -855,7 +855,7 @@
               <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
             </button>
           </router-link>
-          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true; console.log(insumosFiltrados);">
+          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true;">
             <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
@@ -1981,12 +1981,12 @@ const guardarOT = async () => {
     const data = await res.json();
 
     if (data.success) {
-      console.log(data)
+      //console.log(data)
       limpiarOrdenTrabajoForm(); // Limpia formulario
-      console.log(data.codigo);
+      //console.log(data.codigo);
       irAOrdenTrabajo(data.codigo);         // Redirige
     } else {
-      console.log("No guardada", data);
+      //console.log("No guardada", data);
     }
   } catch (err) {
     console.error("Error al guardar OT:", err);
@@ -2200,7 +2200,6 @@ const cargarInfoCotizacion = async () => {
       })
     ),
   };
-  console.log("CARGAR INFO COT:", JSON.stringify(ordenTrabajoForm.insumo))
   calcularTotales();
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };

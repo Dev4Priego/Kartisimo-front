@@ -364,7 +364,7 @@
                               {{ ll.promo?.nombre || "Promocion Aplicada" }}
                             </option>
                             <!-- Default -->
-
+                            <option :value="0">-- Sin promoción --</option>
                             <!-- Promociones disponibles -->
                             <option
                               v-for="promo in ll.promosDisponibles"
@@ -602,8 +602,8 @@
                             :disabled="paq.idPromocionVuelo > 0"
                           >
                             <option
-                              v-if="Number(paq.idPromocionVuelo) > 0"
-                              :value="Number(paq.idPromocionVuelo)"
+                              v-if="paq.idPromocionVuelo > 0"
+                              :value="paq.idPromocionVuelo"
                             >
                               {{
                                 paq.promo?.nombre || "Promocion Vuelo APlicada"
@@ -1144,14 +1144,13 @@ const mostrarModalAdicional = ref(false);
 watch(
   () => props.insumos,
   (nuevo) => {
-    console.log(JSON.stringify(nuevo));
+    //console.log(JSON.stringify(nuevo));
     llantas.value = [...(nuevo.llanta || [])];
     paquetes.value = [...(nuevo.paquete || [])];
     adicionales.value = [...(nuevo.adicional || [])];
   },
   { immediate: true, deep: true },
 );
-console.log("Insumos recibidos en ModalInsumo:", llantas.value);
 const close = () => emit("update:modelValue", false);
 
 // Estados
@@ -1189,6 +1188,7 @@ const onPromoChange = (item) => {
     item.promo = null;
     item.precioConPromo = item.precioUnitario;
     item.isVuelo = null;
+    item.idPromocion = 0; // Reset idPromocion for normal promos
     return;
   }
 
@@ -1199,6 +1199,13 @@ const onPromoChange = (item) => {
 
   item.promo = promo || null;
   item.isVuelo = !!idVuelo;
+
+  // Set idPromocion for normal promos to enable display
+  if (idSel && !idVuelo) {
+    item.idPromocion = idSel;
+  } else if (idVuelo) {
+    item.idPromocion = 0; // For al vuelo, keep as 0
+  }
 
   // Calcular precio con la promo
   recalcularSubtotal(item);
@@ -1232,7 +1239,6 @@ const recalcularSubtotal = (item) => {
   item.esAlVuelo = !!item.idPromocionVuelo;
 
   const precioFinal = precioFinalItem(item);
-  console.log("Precio Final", precioFinal);
   item.precioConPromo = precioFinal;
   item.subTotal = ((item.cantidad || 0) * precioFinal).toFixed(2);
 };
@@ -1499,6 +1505,7 @@ const agregarLlanta = async (itm) => {
     const promos = await obtenerPromosPorInventario(itm.idInventarioInicial);
 
     nuevaLlanta.promosDisponibles = promos || [];
+    
   } catch (error) {
     console.error("Error al cargar promociones", error);
     nuevaLlanta.promosDisponibles = [];
@@ -1756,17 +1763,10 @@ const mapearInsumosParaPadre = () => {
   };
 };
 
-const debugg = () => {
-  console.log("Insumos mapeados para padre:", {
-    llanta: llantas.value,
-    paquete: paquetes.value,
-    adicional: adicionales.value,
-  });
-};
+
 const guardarInsumo = () => {
   const insumosMapeados = mapearInsumosParaPadre();
   const totales = calcularTotalesDesdeInsumos(insumosMapeados);
-  debugg();
   emit("update:insumos", {
     insumo: insumosMapeados,
     totales,
@@ -1782,7 +1782,7 @@ onMounted(() => {
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
-  console.log(props.insumos);
+ 
   // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
 
