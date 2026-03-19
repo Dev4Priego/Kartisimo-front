@@ -2070,12 +2070,19 @@ const cargarInfoCotizacion = async () => {
         const promosDisponibles = await obtenerPromosPorInventario(
           llanta.idInventarioInicial
         );
+        const promocionExistente ={
+          idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
+          valor: llanta?.valorPromocion || llanta?.valorPromocionVuelo || 0,
+          tipo: llanta?.tipoPromocion || llanta?.tipoPromocionVuelo || null,
+          nombre: llanta?.nombrePromocion || llanta?.nombrePromocionVuelo || ""
+        }
 
         return {
           idLlanta: llanta.idLlanta,
           idAlmacen: llanta.idAlmacen,
-          idPromocion: llanta.idPromocion ?? null,
-          idPromocionVuelo : llanta.idPromocionVuelo ?? null,
+          idPromocion: llanta.idPromocion || 0,
+          idPromocionVuelo : llanta.idPromocionVuelo || 0,
+          idPromocionSeleccionada : llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
           idConceptoTrabajo: 1,
           idInventarioInicial: llanta.idInventarioInicial, // para buscar promo
 
@@ -2095,11 +2102,9 @@ const cargarInfoCotizacion = async () => {
             })).toFixed(2), // campo estetico
           
           promosDisponibles: promosDisponibles || [],
-
+            esAlVuelo : llanta.idPromocionVuelo != 0 ? true : false,
           // si ya tiene promo existente rellenar valores
-          nombrePromocion: llanta?.nombrePromocion || llanta.nombrePromocionVuelo,
-          valorPromocion: llanta?.valorPromocion || llanta.valorPromocionVuelo,
-          tipoPromocion: llanta?.tipoPromocion || llanta.tipoPromocionVuelo,
+         promo: promocionExistente
         };
       })
     ),
@@ -2107,12 +2112,18 @@ const cargarInfoCotizacion = async () => {
       data.paquetes.map(async (paquete) => {
         const promosDisponibles =
           (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
-
+        const promocionExistente ={
+          idPromocion: paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
+          valor: paquete?.valorPromocion || paquete?.valorPromocionVuelo || 0,
+          tipo: paquete?.tipoPromocion || paquete?.tipoPromocionVuelo || null,
+          nombre: paquete?.nombrePromocion || paquete?.nombrePromocionVuelo || ""
+        }
         return {
           idPaquete: paquete.idPaquete,
-          idPromocion: paquete.idPromocion ?? null,
+          idPromocion: paquete?.idPromocion || 0,
           idConceptoTrabajo: 0,
-          idPromocionVuelo: paquete.idPromocionVuelo ?? null,
+          idPromocionVuelo: paquete?.idPromocionVuelo || 0,
+          idPromocionSeleccionada :paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
           descripcion: paquete.nombre,
           cantidad: 1,
           precioUnitario: paquete.precioUnitario,
@@ -2137,11 +2148,9 @@ const cargarInfoCotizacion = async () => {
           })),
 
           promosDisponibles: promosDisponibles || [],
-
+          esAlVuelo : paquete.idPromocionVuelo != 0 ? true : false,
           // info histórica (si viene de backend)
-          nombrePromocion: paquete?.nombrePromocion || paquete.nombrePromocionVuelo,
-          valorPromocion: paquete?.valorPromocion || paquete.valorPromocionVuelo,
-          tipoPromocion: paquete?.tipoPromocion || paquete.tipoPromocionVuelo,
+          promo: promocionExistente
         };
       })
     ),
@@ -2150,12 +2159,18 @@ const cargarInfoCotizacion = async () => {
       data.servicios.map(async (s) => {
         const promosDisponibles =
           (await obtenerPromosGeneralesParaServicio()) || [];
-
+        const promocionExistente ={
+          idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
+          valor: s?.valorPromocion || s?.valorPromocionVuelo || 0,
+          tipo: s?.tipoPromocion || s?.tipoPromocionVuelo || null,
+          nombre: s?.nombrePromocion || s?.nombrePromocionVuelo || ""
+        }
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-          idPromocion: s.idPromocion ?? null,
+          idPromocion: s?.idPromocion || 0,
           idConceptoTrabajo: 7,
-          idPromocionVuelo: s.idPromocionVuelo ?? null,
+          idPromocionVuelo: s?.idPromocionVuelo || 0,
+          idPromocionSeleccionada : s?.idPromocion || s?.idPromocionVuelo || 0,
           descripcion: s.descripcion,
           observacion: s.observacion,
           comentario: s.comentario,
@@ -2176,11 +2191,9 @@ const cargarInfoCotizacion = async () => {
           ).toFixed(2),
 
           promosDisponibles: promosDisponibles || [],
-
+          esAlVuelo : s.idPromocionVuelo != 0 ? true : false,
           // info histórica
-          nombrePromocion: s?.nombrePromocion || s.nombrePromocionVuelo,
-          valorPromocion: s?.valorPromocion || s.valorPromocionVuelo,
-          tipoPromocion: s?.tipoPromocion || s.tipoPromocionVuelo,
+           promo: promocionExistente
         };
       })
     ),
