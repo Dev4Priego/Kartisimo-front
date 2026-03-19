@@ -1465,8 +1465,8 @@ const ordenTrabajoForm = reactive({
   },
 });
 
-const irAOrdenTrabajo = () => {
-  router.push({ name: "orden-trabajo-list" });
+const irAOrdenTrabajo = (id) => {
+  router.push({ name: "orden-trabajo-work", params: { id } });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
@@ -1963,8 +1963,10 @@ const guardarOT = async () => {
     const data = await res.json();
 
     if (data.success) {
+      console.log(data)
       limpiarOrdenTrabajoForm(); // Limpia formulario
-      irAOrdenTrabajo();         // Redirige
+      console.log(data.codigo);
+      irAOrdenTrabajo(data.codigo);         // Redirige
     } else {
       console.log("No guardada", data);
     }

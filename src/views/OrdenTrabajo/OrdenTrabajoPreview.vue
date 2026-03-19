@@ -328,10 +328,9 @@
 
 		<button
 			class="btn btn-success shadow position-relative" style="width: 140px;"
-			:disabled="orden?.estado !== 'Creado'"
 			@click="iniciarOT"
 		><i class="bi bi-play-circle-fill position-absolute start-0 ms-2"></i>
-			&nbsp;Iniciar OT
+			&nbsp;Ir a OT
 		</button>
 
 		

@@ -2,7 +2,7 @@
   <div class="card mb-4 shadow-sm">
     <div class="card-header bg-light d-flex justify-content-between align-items-center">
         <div>
-            <i class="bi bi-tools me-2"></i>Refacciones
+            <i class="bi bi-nut-fill me-2"></i>Refacciones
         </div>
         <button class="btn btn-sm btn-outline-primary  shadow-sm" @click="agregarRefaccion()">
           <i class="bi bi-plus me-3"></i>Recibir Refacciones

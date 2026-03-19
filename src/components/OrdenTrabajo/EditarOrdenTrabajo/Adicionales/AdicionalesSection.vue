@@ -2,7 +2,7 @@
 	<div class="card mb-4 shadow-sm">
 		<div class="card-header bg-light d-flex justify-content-between align-items-center">
 			<div>
-				<i class="bi bi-tools me-2"></i>Adicionales
+				<i class="bi bi-wrench me-2"></i>Adicionales
 			</div>
 			<button
 				class="btn btn-sm btn-outline-primary"
@@ -160,7 +160,7 @@ const cargarAdicionales =  async(ot) => {
   try {
     const res = await fetch(
       proxy.$serverIP +
-        "api/OrdenTrabajo/getAdicionalesPorOT?idOT=" + ot
+        "api/OrdenTrabajo/getAdicionalesPorOT?nuevas=1&idOT=" + ot
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const response = await res.json();
