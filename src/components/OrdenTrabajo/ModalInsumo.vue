@@ -799,7 +799,7 @@
                           min="1"
                           class="form-control form-control-sm"
                           v-model.number="det.cantidad"
-                          @input="recalcularSubtotal(ll)"
+                          @input="recalcularSubtotal(det)"
                         />
                       </td>
                       <td></td>
@@ -1079,6 +1079,18 @@
                       </td>
                     </tr>
                   </template>
+                  <!--Total de insumos-->
+                  <tr>
+                    <td colspan="5" class="text-end fs-5 fw-bold">
+                      <h4>Total:</h4>
+                    </td>
+                    <td class="fs-5 fw-bold text-end">
+                      <h4>{{Number(totales.total).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })}}</h4>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1129,6 +1141,7 @@ const { proxy } = getCurrentInstance();
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
+const totales = ref([]);
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1477,6 +1490,8 @@ const agregarLlanta = async (itm) => {
     idLlanta: itm.idLlanta,
     idAlmacen: itm.idAlmacen,
     idPromocion: 0,
+    idPromocionVuelo: 0,
+    idPromocionSeleccionada: 0,
     idConceptoTrabajo: 1,
     idInventarioInicial: itm.idInventarioInicial,
 
@@ -1630,6 +1645,22 @@ watch(
   { immediate: true, deep: true },
 );
 
+//watch para recalcular el total cada vez que cambie el arreglo de paquetes, o las promociones seleccionadas dentro de cada paquete, llanta o adicional
+watch(
+  () => [paquetes.value, llantas.value, adicionales.value],
+  () => {
+   
+    // Aquí podrías recalcular totales o hacer cualquier otra acción necesaria
+    //recalcular para ver en tiempo real el total cada vez que se modifique algo en paquetes, llantas o adicionales
+    const insumosMapeados = mapearInsumosParaPadre();
+    totales.value = calcularTotalesDesdeInsumos(insumosMapeados);
+     console.log("total:" , totales);
+    // Aquí puedes hacer algo con los totales si lo necesitas
+    // Por ejemplo, emitir un evento o actualizar un estado
+    
+  },
+  { deep: true },
+);
 // agregar o quitar a el arreglo paquetes, conforme checbox
 const onTogglePaquete = async (paqueteBase) => {
   const existe = paquetes.value.some(
@@ -1652,7 +1683,8 @@ const onTogglePaquete = async (paqueteBase) => {
     idPaquete: paqueteBase.idPaquete,
     idPromocion: 0,
     idConceptoTrabajo: 0,
-
+    idPromocionVuelo:0,
+    idPromocionSeleccionada:0,
     descripcion: paqueteBase.nombre,
     cantidad: 1,
     precioUnitario: paqueteBase.precioUnitario,

@@ -610,6 +610,13 @@
                             })
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ llanta.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(llanta.subTotal).toLocaleString("es-MX", {
@@ -672,6 +679,13 @@
                             })
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ paquete.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(paquete.subTotal).toLocaleString("es-MX", {
@@ -745,6 +759,13 @@
                             )
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(ad.subTotal).toLocaleString("es-MX", {
@@ -983,12 +1004,14 @@
                             )
                           }}
                         </span>
+                        <br>
                         <span>
                           <small class="badge bg-danger">
                             {{ i.promo.nombre }}
 
                           </small>
                         </span>
+                        <br>
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(i.subTotal).toLocaleString("es-MX", {
@@ -1024,11 +1047,13 @@
                             )
                           }}
                         </span>
+                        <br>
                         <span>
                           <small class="badge bg-danger">
                             {{ p.promo.nombre }}
 
                           </small>
+                          <br>
                         </span>
                         <span class="text-success fw-bold mx-2">
                           {{
@@ -1071,12 +1096,14 @@
                             )
                           }}
                         </span>
+                        <br>
                         <span>
                           <small class="badge bg-danger">
                             {{ a.promo.nombre }}
 
                           </small>
                         </span>
+                        <br>
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(a.subTotal).toLocaleString("es-MX", {
@@ -2082,8 +2109,8 @@ const cargarInfoCotizacion = async () => {
         return {
           idLlanta: llanta.idLlanta,
           idAlmacen: llanta.idAlmacen,
-          idPromocion: llanta.idPromocion || 0,
-          idPromocionVuelo : llanta.idPromocionVuelo || 0,
+          idPromocion: llanta.idPromocion || null,
+          idPromocionVuelo : llanta.idPromocionVuelo || null,
           idPromocionSeleccionada : llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
           idConceptoTrabajo: 1,
           idInventarioInicial: llanta.idInventarioInicial, // para buscar promo
@@ -2122,9 +2149,9 @@ const cargarInfoCotizacion = async () => {
         }
         return {
           idPaquete: paquete.idPaquete,
-          idPromocion: paquete?.idPromocion || 0,
+          idPromocion: paquete?.idPromocion || null,
           idConceptoTrabajo: 0,
-          idPromocionVuelo: paquete?.idPromocionVuelo || 0,
+          idPromocionVuelo: paquete?.idPromocionVuelo || null,
           idPromocionSeleccionada :paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
           descripcion: paquete.nombre,
           cantidad: 1,
@@ -2169,9 +2196,9 @@ const cargarInfoCotizacion = async () => {
         }
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-          idPromocion: s?.idPromocion || 0,
+          idPromocion: s?.idPromocion || null,
           idConceptoTrabajo: 7,
-          idPromocionVuelo: s?.idPromocionVuelo || 0,
+          idPromocionVuelo: s?.idPromocionVuelo || null,
           idPromocionSeleccionada : s?.idPromocion || s?.idPromocionVuelo || 0,
           descripcion: s.descripcion,
           observacion: s.observacion,

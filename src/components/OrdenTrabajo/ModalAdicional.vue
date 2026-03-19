@@ -118,6 +118,8 @@ const agregarFila = async () => {
     idDetalleCotizacionServicio: null,
     idConceptoTrabajo: Concepto.value,
     idPromocion: 0,
+	idPromocionVuelo: 0,
+	idPromocionSeleccionada: 0 ,
     descripcion: Servicio.value,
     observacion: '',
     comentario: '',
