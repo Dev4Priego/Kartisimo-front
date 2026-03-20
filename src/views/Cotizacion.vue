@@ -4801,12 +4801,7 @@ const generarPDF = async () => {
         },
         layout: {
           fillColor: (rowIndex) => (rowIndex === 0 ? "#ededed" : null),
-          // hLineWidth: (i, node) => {
-          //   // Quita todas las líneas horizontales menos la del encabezado y las divisiones
-          //   if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
-          //   // Puedes agregar condiciones aquí para las divisiones
-          //   return 0;
-          // },
+        
           vLineWidth: (i, node) => 0,
         },
         margin: [0, 12, 0, 0],
@@ -4850,6 +4845,8 @@ const generarPDF = async () => {
   // usa esta si el problema es download
   pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
 };
+
+
 </script>
 
 <style>
