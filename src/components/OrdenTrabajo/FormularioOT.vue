@@ -210,7 +210,7 @@
           <div class="col-6 mb-3">
             <label for="telefono" class="form-label">Teléfono(s) *</label>
             <input id="telefono"
-              v-model="telefonoFormateado"
+              v-model="ordenTrabajoForm.cliente.clienteTelefono"
               class="form-control"
               type="text"
               placeholder="(10 dígitos)"
@@ -603,9 +603,9 @@
               <thead>
                 <tr>
                   <th>Descripción</th>
-                  <th>Cantidad</th>
-                  <th>P/U</th>
-                  <th>Subtotal</th>
+                  <th style="text-align: center;">Cantidad</th>
+                  <th style="text-align: right;">Precio Unit.</th>
+                  <th style="text-align: right;">Subtotal</th>
                   <th></th>
                 </tr>
               </thead>
@@ -618,9 +618,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': llanta.eliminado }">
                     <td>{{ llanta.descripcion }}</td>
-                    <td>{{ llanta.cantidad }}</td>
-                    <td>{{ Number(llanta.precioUnitario).toFixed(2) }}</td>
-                    <td>
+                    <td style="text-align: center;">{{ llanta.cantidad }}</td>
+                    <td style="text-align: right;">{{ (llanta.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;">
                       <div v-if="llanta.idPromocion || llanta.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -650,7 +653,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(llanta.subTotal).toLocaleString("es-MX", {
+                          Number(llanta.cantidad * llanta.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -687,9 +690,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': paquete.eliminado }">
                     <td>{{ paquete.descripcion }}</td>
-                    <td>{{ paquete.cantidad }}</td>
-                    <td>{{ Number(paquete.precioUnitario).toFixed(2) }}</td>
-                    <td><!--check-->
+                    <td style="text-align: center;">{{ paquete.cantidad }}</td>
+                    <td style="text-align: right;">{{ (paquete.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;"><!--check-->
                       <div v-if="paquete.idPromocion || paquete.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -719,7 +725,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(paquete.subTotal).toLocaleString("es-MX", {
+                          Number(paquete.cantidad * paquete.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -755,7 +761,7 @@
                     class="table-light"
                   >
                     <td class="ps-4">↳ {{ detalle.descripcion }}</td>
-                    <td>{{ detalle.cantidad }}</td>
+                    <td style="text-align: center;">{{ detalle.cantidad }}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -769,9 +775,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': ad.eliminado }">
                     <td>{{ ad.descripcion }}</td>
-                    <td>{{ ad.cantidad }}</td>
-                    <td>{{ Number(ad.precioUnitario).toFixed(2) }}</td>
-                    <td>
+                    <td style="text-align: center;">{{ ad.cantidad }}</td>
+                    <td style="text-align: right;">{{ (ad.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;">
                       <div v-if="ad.idPromocion || ad.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -799,7 +808,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(ad.subTotal).toLocaleString("es-MX", {
+                          Number(ad.cantidad * ad.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -1294,15 +1303,17 @@ function validate(path) {
     },
 
     "cliente.metodoPago": () =>
-      !value
+      (!value
         ? "Debe seleccionar una forma de pago."
-        : null,
+        : null),
 
     "cliente.clienteTelefono": () => {
-      if(!value) {
-        return "Debe ingresar un teléfono"
+      if(value.length == 0) {
+        console.log(value);
+        return "Debe ingresar un teléfono " + value;
       } else {
       const soloNumeros = value.replace(/\D/g, "");
+      console.log(soloNumeros);
       return (!value || soloNumeros.length < 10)
         ? "Teléfono no válido."
         : null;

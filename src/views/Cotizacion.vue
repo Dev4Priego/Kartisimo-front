@@ -406,7 +406,7 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger">{{
+                          <small class="badge bg-danger mt-1 text-wrap">{{
                             paquete.promoLabel
                           }}</small>
                         </span>
@@ -467,7 +467,7 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger mt-1">{{
+                          <small class="badge bg-danger mt-1 text-wrap">{{
                             servicio.promoLabel
                           }}</small>
                         </span>
@@ -489,10 +489,22 @@
                       </div>
                     </td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
 
-                  <!-- Total -->
-                  <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
-                    <td colspan="3" class="text-center">Total:</td>
+            <div v-if="vistaCotizacion.mostrarTotal" class="table-responsive mt-3 cotizacion-header" >
+              <table
+                class="table table-bordered table-sm align-middle"
+                style="table-layout: fixed"
+              >
+                <colgroup>
+                  <col />
+                  <col style="width: 120px" />
+                </colgroup>
+                <tbody>
+              <tr class="fw-bold">
+                    <td class="text-center">Total:</td>
                     <td class="text-end">
                       <div v-if="vistaCotizacion.tienePromocion">
                         <span class="text-decoration-line-through text-muted">
@@ -3110,7 +3122,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
           precioConPromo,
 
           idPromocionAlVuelo:
@@ -3184,7 +3196,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
 
           idPromocionAlVuelo:
             promoIndividual && promoIndividual.esAlVuelo
@@ -3246,7 +3258,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
 
           idPromocionAlVuelo:
             promoIndividual && promoIndividual.esAlVuelo
@@ -3468,7 +3480,7 @@ const guardarCotizacion = async () => {
         }
       : {
           idCliente: null,
-          nombre: cotizacionForm.nombre || "",
+          nombre: cotizacionForm.clienteNombre || "",
           nombres: cotizacionForm.nombre || "",
           apellidos: cotizacionForm.apellidos || "",
           telefono: cotizacionForm.clienteTelefono || "",
@@ -4215,7 +4227,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         cliente: {
           nombre: data.clienteNombre,
           telefono: data.telefono || "Sin teléfono",
-          correo: data.correo || "Sin correo",
+          correo: data.correo || "",
           fecha: data.fechaCreacion,
           observaciones: data.observaciones || "", // ⚡ AQUI
         },
@@ -4510,7 +4522,7 @@ const generarPDF = async () => {
   const paquetesRows = v.paquetes.map((p) => [
     celdaCentroY("1", "center"),
 
-    celdaCentroY(p.nombre),
+    celdaCentroY(p.nombre + " " + p.descripcion),
 
     celdaCentroY(formatMoney(p.precioUnitario), "right"),
 
