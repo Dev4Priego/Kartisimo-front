@@ -3110,7 +3110,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
           precioConPromo,
 
           idPromocionAlVuelo:
@@ -3184,7 +3184,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
 
           idPromocionAlVuelo:
             promoIndividual && promoIndividual.esAlVuelo
@@ -3246,7 +3246,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idPromocionSeleccionada:
             promoIndividual && !promoIndividual.esAlVuelo
             ? promoIndividual.idPromocion
-              : null,
+              : 0,
 
           idPromocionAlVuelo:
             promoIndividual && promoIndividual.esAlVuelo
