@@ -34,7 +34,7 @@ const abrirModal = async () => {
 	const medida = match ? match[0].toUpperCase() : null || "";
 
 	const correo = props.cotizacion.cliente.correo ;
-	// console.log(correo);
+	console.log(correo);
 
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
@@ -45,7 +45,7 @@ const abrirModal = async () => {
 		title: '<h3>Enviar cotización por correo</h3>',
 		html: `
 			<table style="margin-left: 0px; margin-right: 0px;">
-			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}" style="width: 280px; font-size: 12pt;"></td></tr>
+			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo ? correo : ''}" style="width: 280px; font-size: 12pt;"></td></tr>
 			<tr><td><input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo" style="width: 470px; font-size: 12pt;"></td></tr>
 			<tr><td><textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..." style="width: 470px; font-size: 12pt;"></textarea></td></tr>
 			</table>
@@ -145,7 +145,7 @@ table {
 
 /* 🔹 ANCHOS OPTIMIZADOS */
 th:nth-child(1), td:nth-child(1) { width: 8%; }
-th:nth-child(2), td:nth-child(2) { width: 17%; } /* 🔥 columna larga */
+th:nth-child(2), td:nth-child(2) { width: 57%; } /* 🔥 columna larga */
 th:nth-child(3), td:nth-child(3) { width: 17%; }
 th:nth-child(4), td:nth-child(4) { width: 18%; }
 
@@ -155,7 +155,6 @@ thead th {
   border-top: 2px solid #000;
   border-bottom: 2px solid #000;
   padding: 6px;
-  text-align: center;
 }
 
 /* 🔹 CELDAS */
@@ -272,17 +271,20 @@ tbody tr:last-child td {
 
   <div>
     <strong>No. Cotización:</strong> 
-    ${props.cotizacion?.codigo }
+    C${props.cotizacion?.codigo }
   </div>
 
   <div>
     <strong>Fecha emisión:</strong> 
-    ${formatearFecha(props.cotizacion?.fecha) || 'N/A'}
+    ${formatearFecha(props.cotizacion?.cliente?.fecha) || 'N/A'}
   </div>
 
   <div>
     <strong>Cliente:</strong> 
     ${props.cotizacion?.cliente?.nombre || 'N/A'}
+  </div>
+
+  <div>
   </div>
 
   <div>
@@ -295,7 +297,8 @@ tbody tr:last-child td {
     ${props.cotizacion?.cliente?.correo || 'Sin correo'}
   </div>
 
-  <div>
+</div>
+<div>
     <strong>Observaciones:</strong> 
     ${props.cotizacion?.observaciones || 'N/A'}
   </div>
@@ -310,15 +313,15 @@ tbody tr:last-child td {
 				<tr>
 					<th>CANT</th>
 					<th>MEDIDA-MARCA-MODELO-RANGO</th>
-					<th>PRECIO UNIT.</th>
-					<th>TOTAL</th>
+					<th class="right">PRECIO UNIT.</th>
+					<th class="right">TOTAL</th>
 				</tr>
 			</thead>
 			<tbody>
 
 				${props.cotizacion.llantasSelecionadas.map(l => `
 				<tr>
-				<td class="right">${l.cantidad}</td>
+				<td class="center">${l.cantidad}</td>
 				<td>${l.medidas}</td>
 				<td class="right">
 					$${l.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -344,7 +347,7 @@ tbody tr:last-child td {
 				? `
 					<tr>
 					<td class="separador center">CANT</td>
-					<td colspan="3" class="separador">
+					<td class="separador">
 						SERVICIOS
 					</td>
 					</tr>
@@ -370,7 +373,7 @@ tbody tr:last-child td {
 				${props.cotizacion.paquetes.map(p => `
 				<tr>
 				<td class="center">1</td>
-				<td><em>${p.nombre}</em></td>
+				<td><em>${p.nombre.toUpperCase()} ${p.descripcion.toUpperCase()} </em></td>
 				<td class="right">
 					$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>

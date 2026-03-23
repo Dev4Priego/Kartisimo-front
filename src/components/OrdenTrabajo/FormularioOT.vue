@@ -210,7 +210,7 @@
           <div class="col-6 mb-3">
             <label for="telefono" class="form-label">Teléfono(s) *</label>
             <input id="telefono"
-              v-model="telefonoFormateado"
+              v-model="ordenTrabajoForm.cliente.clienteTelefono"
               class="form-control"
               type="text"
               placeholder="(10 dígitos)"
@@ -603,9 +603,9 @@
               <thead>
                 <tr>
                   <th>Descripción</th>
-                  <th>Cantidad</th>
-                  <th>P/U</th>
-                  <th>Subtotal</th>
+                  <th style="text-align: center;">Cantidad</th>
+                  <th style="text-align: right;">Precio Unit.</th>
+                  <th style="text-align: right;">Subtotal</th>
                   <th></th>
                 </tr>
               </thead>
@@ -618,9 +618,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': llanta.eliminado }">
                     <td>{{ llanta.descripcion }}</td>
-                    <td>{{ llanta.cantidad }}</td>
-                    <td>{{ Number(llanta.precioUnitario).toFixed(2) }}</td>
-                    <td>
+                    <td style="text-align: center;">{{ llanta.cantidad }}</td>
+                    <td style="text-align: right;">{{ (llanta.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;">
                       <div v-if="llanta.idPromocion || llanta.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -632,6 +635,13 @@
                             })
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ llanta.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(llanta.subTotal).toLocaleString("es-MX", {
@@ -643,7 +653,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(llanta.subTotal).toLocaleString("es-MX", {
+                          Number(llanta.cantidad * llanta.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -680,9 +690,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': paquete.eliminado }">
                     <td>{{ paquete.descripcion }}</td>
-                    <td>{{ paquete.cantidad }}</td>
-                    <td>{{ Number(paquete.precioUnitario).toFixed(2) }}</td>
-                    <td><!--check-->
+                    <td style="text-align: center;">{{ paquete.cantidad }}</td>
+                    <td style="text-align: right;">{{ (paquete.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;"><!--check-->
                       <div v-if="paquete.idPromocion || paquete.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -694,6 +707,13 @@
                             })
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ paquete.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(paquete.subTotal).toLocaleString("es-MX", {
@@ -705,7 +725,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(paquete.subTotal).toLocaleString("es-MX", {
+                          Number(paquete.cantidad * paquete.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -741,7 +761,7 @@
                     class="table-light"
                   >
                     <td class="ps-4">↳ {{ detalle.descripcion }}</td>
-                    <td>{{ detalle.cantidad }}</td>
+                    <td style="text-align: center;">{{ detalle.cantidad }}</td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -755,9 +775,12 @@
                 >
                   <tr :class="{ 'fila-eliminada': ad.eliminado }">
                     <td>{{ ad.descripcion }}</td>
-                    <td>{{ ad.cantidad }}</td>
-                    <td>{{ Number(ad.precioUnitario).toFixed(2) }}</td>
-                    <td>
+                    <td style="text-align: center;">{{ ad.cantidad }}</td>
+                    <td style="text-align: right;">{{ (ad.precioUnitario).toLocaleString(
+                              "es-MX",
+                              { style: "currency", currency: "MXN" }
+                            ) }}</td>
+                    <td style="text-align: right;">
                       <div v-if="ad.idPromocion || ad.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
                           {{
@@ -767,6 +790,13 @@
                             )
                           }}
                         </span>
+                         <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(ad.subTotal).toLocaleString("es-MX", {
@@ -778,7 +808,7 @@
                       </div>
                       <div v-else>
                         {{
-                          Number(ad.subTotal).toLocaleString("es-MX", {
+                          Number(ad.cantidad * ad.precioUnitario).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -877,7 +907,7 @@
               <i class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"></i> &nbsp;Volver
             </button>
           </router-link>
-          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true; console.log(insumosFiltrados);">
+          <button type="button" class="btn btn-success position-relative shadow ms-3" style="width: 140px;" :disabled="!formValido" @click="mostrarVista = true;">
             <i class="bi-save-fill position-absolute start-0 ms-2"></i> &nbsp;Guardar
           </button>
         </div>
@@ -997,7 +1027,7 @@
                               currency: "MXN",
                             }) }}</td>
                       <td class="text-end"><div v-if="i.idPromocion || i.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted  me-2">
                           {{
                             (i.cantidad * i.precioUnitario).toLocaleString(
                               "es-MX",
@@ -1005,6 +1035,14 @@
                             )
                           }}
                         </span>
+                        <br>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ i.promo.nombre }}
+
+                          </small>
+                        </span>
+                        <br>
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(i.subTotal).toLocaleString("es-MX", {
@@ -1032,13 +1070,21 @@
                               currency: "MXN",
                             }) }}</td>
                         <td class="text-end"><div v-if="p.idPromocion || p.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted  me-2">
                           {{
                             (p.cantidad * p.precioUnitario).toLocaleString(
                               "es-MX",
                               { style: "currency", currency: "MXN" }
                             )
                           }}
+                        </span>
+                        <br>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ p.promo.nombre }}
+
+                          </small>
+                          <br>
                         </span>
                         <span class="text-success fw-bold mx-2">
                           {{
@@ -1073,7 +1119,7 @@
                               currency: "MXN",
                             }) }}</td>
                       <td class="text-end"><div v-if="a.idPromocion || a.idPromocionVuelo">
-                        <span class="text-decoration-line-through text-muted">
+                        <span class="text-decoration-line-through text-muted me-2">
                           {{
                             (a.cantidad * a.precioUnitario).toLocaleString(
                               "es-MX",
@@ -1081,6 +1127,14 @@
                             )
                           }}
                         </span>
+                        <br>
+                        <span>
+                          <small class="badge bg-danger">
+                            {{ a.promo.nombre }}
+
+                          </small>
+                        </span>
+                        <br>
                         <span class="text-success fw-bold mx-2">
                           {{
                             Number(a.subTotal).toLocaleString("es-MX", {
@@ -1249,15 +1303,17 @@ function validate(path) {
     },
 
     "cliente.metodoPago": () =>
-      !value
+      (!value
         ? "Debe seleccionar una forma de pago."
-        : null,
+        : null),
 
     "cliente.clienteTelefono": () => {
-      if(!value) {
-        return "Debe ingresar un teléfono"
+      if(value.length == 0) {
+        console.log(value);
+        return "Debe ingresar un teléfono " + value;
       } else {
       const soloNumeros = value.replace(/\D/g, "");
+      console.log(soloNumeros);
       return (!value || soloNumeros.length < 10)
         ? "Teléfono no válido."
         : null;
@@ -1487,8 +1543,8 @@ const ordenTrabajoForm = reactive({
   },
 });
 
-const irAOrdenTrabajo = () => {
-  router.push({ name: "orden-trabajo-list" });
+const irAOrdenTrabajo = (id) => {
+  router.push({ name: "orden-trabajo-work", params: { id } });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
@@ -1980,10 +2036,12 @@ if (!esValido) return;
     const data = await res.json();
 
     if (data.success) {
+      //console.log(data)
       limpiarOrdenTrabajoForm(); // Limpia formulario
-      irAOrdenTrabajo();         // Redirige
+      //console.log(data.codigo);
+      irAOrdenTrabajo(data.codigo);         // Redirige
     } else {
-      console.log("No guardada", data);
+      //console.log("No guardada", data);
     }
   } catch (err) {
     console.error("Error al guardar OT:", err);
@@ -2071,12 +2129,19 @@ const cargarInfoCotizacion = async () => {
         const promosDisponibles = await obtenerPromosPorInventario(
           llanta.idInventarioInicial
         );
+        const promocionExistente ={
+          idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
+          valor: llanta?.valorPromocion || llanta?.valorPromocionVuelo || 0,
+          tipo: llanta?.tipoPromocion || llanta?.tipoPromocionVuelo || null,
+          nombre: llanta?.nombrePromocion || llanta?.nombrePromocionVuelo || ""
+        }
 
         return {
           idLlanta: llanta.idLlanta,
           idAlmacen: llanta.idAlmacen,
-          idPromocion: llanta.idPromocion ?? null,
-          idPromocionVuelo : llanta.idPromocionVuelo ?? null,
+          idPromocion: llanta.idPromocion || null,
+          idPromocionVuelo : llanta.idPromocionVuelo || null,
+          idPromocionSeleccionada : llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
           idConceptoTrabajo: 1,
           idInventarioInicial: llanta.idInventarioInicial, // para buscar promo
 
@@ -2096,11 +2161,9 @@ const cargarInfoCotizacion = async () => {
             })).toFixed(2), // campo estetico
           
           promosDisponibles: promosDisponibles || [],
-
+            esAlVuelo : llanta.idPromocionVuelo != 0 ? true : false,
           // si ya tiene promo existente rellenar valores
-          nombrePromocion: llanta?.nombrePromocion || llanta.nombrePromocionVuelo,
-          valorPromocion: llanta?.valorPromocion || llanta.valorPromocionVuelo,
-          tipoPromocion: llanta?.tipoPromocion || llanta.tipoPromocionVuelo,
+         promo: promocionExistente
         };
       })
     ),
@@ -2108,12 +2171,18 @@ const cargarInfoCotizacion = async () => {
       data.paquetes.map(async (paquete) => {
         const promosDisponibles =
           (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
-
+        const promocionExistente ={
+          idPromocion: paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
+          valor: paquete?.valorPromocion || paquete?.valorPromocionVuelo || 0,
+          tipo: paquete?.tipoPromocion || paquete?.tipoPromocionVuelo || null,
+          nombre: paquete?.nombrePromocion || paquete?.nombrePromocionVuelo || ""
+        }
         return {
           idPaquete: paquete.idPaquete,
-          idPromocion: paquete.idPromocion ?? null,
+          idPromocion: paquete?.idPromocion || null,
           idConceptoTrabajo: 0,
-          idPromocionVuelo: paquete.idPromocionVuelo ?? null,
+          idPromocionVuelo: paquete?.idPromocionVuelo || null,
+          idPromocionSeleccionada :paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
           descripcion: paquete.nombre,
           cantidad: 1,
           precioUnitario: paquete.precioUnitario,
@@ -2138,11 +2207,9 @@ const cargarInfoCotizacion = async () => {
           })),
 
           promosDisponibles: promosDisponibles || [],
-
+          esAlVuelo : paquete.idPromocionVuelo != 0 ? true : false,
           // info histórica (si viene de backend)
-          nombrePromocion: paquete?.nombrePromocion || paquete.nombrePromocionVuelo,
-          valorPromocion: paquete?.valorPromocion || paquete.valorPromocionVuelo,
-          tipoPromocion: paquete?.tipoPromocion || paquete.tipoPromocionVuelo,
+          promo: promocionExistente
         };
       })
     ),
@@ -2151,12 +2218,18 @@ const cargarInfoCotizacion = async () => {
       data.servicios.map(async (s) => {
         const promosDisponibles =
           (await obtenerPromosGeneralesParaServicio()) || [];
-
+        const promocionExistente ={
+          idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
+          valor: s?.valorPromocion || s?.valorPromocionVuelo || 0,
+          tipo: s?.tipoPromocion || s?.tipoPromocionVuelo || null,
+          nombre: s?.nombrePromocion || s?.nombrePromocionVuelo || ""
+        }
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-          idPromocion: s.idPromocion ?? null,
+          idPromocion: s?.idPromocion || null,
           idConceptoTrabajo: 7,
-          idPromocionVuelo: s.idPromocionVuelo ?? null,
+          idPromocionVuelo: s?.idPromocionVuelo || null,
+          idPromocionSeleccionada : s?.idPromocion || s?.idPromocionVuelo || 0,
           descripcion: s.descripcion,
           observacion: s.observacion,
           comentario: s.comentario,
@@ -2177,16 +2250,13 @@ const cargarInfoCotizacion = async () => {
           ).toFixed(2),
 
           promosDisponibles: promosDisponibles || [],
-
+          esAlVuelo : s.idPromocionVuelo != 0 ? true : false,
           // info histórica
-          nombrePromocion: s?.nombrePromocion || s.nombrePromocionVuelo,
-          valorPromocion: s?.valorPromocion || s.valorPromocionVuelo,
-          tipoPromocion: s?.tipoPromocion || s.tipoPromocionVuelo,
+           promo: promocionExistente
         };
       })
     ),
   };
-  console.log("CARGAR INFO COT:", JSON.stringify(ordenTrabajoForm.insumo))
   calcularTotales();
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };

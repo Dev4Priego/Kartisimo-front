@@ -10,7 +10,7 @@
 			</div>
 
 			<div v-for="paquete in paquetes" :key="paquete.idPaquete" class="mb-4">
-				<h6 class="mb-2">{{ paquete.nombre }}</h6>
+				<h6 class="mb-2">{{ paquete.nombre }} - {{ Number(paquete.precioUnitario - paquete.valorPromocion).toLocaleString("es-MX", {style: 'currency', currency: 'MXN'}) }}</h6>
 
 				<div class="ps-3">
 					<TareaItem

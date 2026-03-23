@@ -336,6 +336,11 @@
         :paquetes = "otEditar.paquetes" />
       </div>
       <div v-if="otEditar.adicionales">
+        <OtrosSection
+        :otId = "otEditar.idOrdenTrabajo"
+         />
+      </div>
+      <div v-if="otEditar.adicionales">
         <AdicionalesSection
         @tarea-actualizada="console.log('evento recibido,')"
         :otId = "otEditar.idOrdenTrabajo"
@@ -380,6 +385,7 @@ import OrdenTrabajoProgress from '@/components/OrdenTrabajo/EditarOrdenTrabajo/O
 import LlantasSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue'
 import PaquetesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue'
 import AdicionalesSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue'
+import OtrosSection from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/OtrosSection.vue'
 import Incidentes from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Incidentes.vue';
 import Refacciones from '@/components/OrdenTrabajo/EditarOrdenTrabajo/Refacciones.vue';
 import { parse } from 'vue/compiler-sfc';

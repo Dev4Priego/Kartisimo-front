@@ -6,9 +6,10 @@
 				 
 				  <div class="d-flex gap-3 my-3">
 					<div class="col">
-						<select
+						<label for="conceptos" class="form-label">Concepto</label>
+						<select id="conceptos"
 						v-model="Concepto"
-						class="form-select form-select-sm">
+						class="form-select">
 						<option :value="0">-- Seleccione concepto --</option>
 	
 						<option
@@ -23,14 +24,16 @@
 	
 					</div>
 					<div class="col">
-					  <input
+						<label for="nombreservicio" class="form-label">Nombre</label>
+					  <input id="nombreservicio"
 						class="form-control"
 						placeholder="Nombre del servicio"
 						v-model="Servicio"
 					  />
 					</div>
 					<div class="col-1">
-					  <input
+						<label for="cantidad" class="form-label">Cantidad</label>
+					  <input id="cantidad"
 						class="form-control"
 						type="number"
 						min="1"
@@ -40,7 +43,8 @@
 					</div>
 	
 					<div class="col">
-					  <input
+						<label for="precio" class="form-label">Precio Unit.</label>
+					  <input id="precio"
 						class="form-control"
 						min="0"
 						type="number"
@@ -48,7 +52,7 @@
 						v-model="Precio"
 					  />
 					</div>
-					<div class="btn btn-primary position-relative shadow" style="width: 130px;" @click="agregarFila">
+					<div class="btn btn-primary position-relative align-self-end shadow" style="width: 130px;" @click="agregarFila">
 						
 					  <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i> 
 					  &nbsp;Agregar
@@ -118,6 +122,8 @@ const agregarFila = async () => {
     idDetalleCotizacionServicio: null,
     idConceptoTrabajo: Concepto.value,
     idPromocion: 0,
+	idPromocionVuelo: 0,
+	idPromocionSeleccionada: 0 ,
     descripcion: Servicio.value,
     observacion: '',
     comentario: '',

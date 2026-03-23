@@ -196,8 +196,45 @@
 								</small>
 							</div>
 
-							<div class="fw-bold text-end">
-								${{formatNumber(precioFinalItem(llanta))}}
+							<div
+  v-if="(llanta.idPromocion != null && llanta.idPromocion !== 0) 
+     || (llanta.idPromocionVuelo != null && llanta.idPromocionVuelo !== 0)"
+  class="d-flex flex-column align-items-end"
+>
+  <!-- Precio anterior -->
+  <span class="text-decoration-line-through text-muted small">
+    {{
+      (llanta.cantidad * llanta.precioUnitario).toLocaleString("es-MX", {
+        style: "currency",
+        currency: "MXN",
+      })
+    }}
+  </span>
+
+  <!-- Promo + precio final -->
+  <div class="d-flex align-items-center gap-2">
+    <small class="badge bg-danger">
+      {{ llanta?.nombreVuelo || llanta?.nombrePromocion }}
+    </small>
+
+    <span class="text-success fw-bold">
+      {{
+        Number(precioFinalItem(llanta)).toLocaleString("es-MX", {
+          style: "currency",
+          currency: "MXN",
+        })
+      }}
+    </span>
+  </div>
+							</div>
+
+							<div v-else class="text-end">
+							{{
+								Number(precioFinalItem(llanta)).toLocaleString("es-MX", {
+								style: "currency",
+								currency: "MXN",
+								})
+							}}
 							</div>
 						</div>
 					</li>
@@ -230,9 +267,46 @@
 								</small>
 							</div>
 
-							<div class="fw-bold">
-								${{ formatNumber(precioFinalItem(paquete)) }}
-							</div>
+							<div
+						v-if="(paquete.idPromocion != null && paquete.idPromocion !== 0) 
+							|| (paquete.idPromocionVuelo != null && paquete.idPromocionVuelo !== 0)"
+						class="d-flex flex-column align-items-end"
+						>
+						<!-- Precio anterior -->
+						<span class="text-decoration-line-through text-muted small">
+							{{
+							( paquete.precioUnitario).toLocaleString("es-MX", {
+								style: "currency",
+								currency: "MXN",
+							})
+							}}
+						</span>
+
+						<!-- Promo + precio final -->
+						<div class="d-flex align-items-center gap-2">
+							<small class="badge bg-danger">
+							{{ paquete?.nombreVuelo || paquete?.nombrePromocion }}
+							</small>
+
+							<span class="text-success fw-bold">
+							{{
+								Number(precioFinalItem(paquete)).toLocaleString("es-MX", {
+								style: "currency",
+								currency: "MXN",
+								})
+							}}
+							</span>
+						</div>
+						</div>
+
+						<div v-else class="text-end">
+						{{
+							Number(precioFinalItem(paquete)).toLocaleString("es-MX", {
+							style: "currency",
+							currency: "MXN",
+							})
+						}}
+						</div>
 						</div>
 
 						<div class="mt-2 small text-muted">
@@ -282,9 +356,46 @@
 								</small>
 							</div>
 
-							<div class="fw-bold">
-								${{ formatNumber(precioFinalItem(s)) }}
-							</div>
+							<div
+						v-if="(s.idPromocion != null && s.idPromocion !== 0) 
+							|| (s.idPromocionVuelo != null && s.idPromocionVuelo !== 0)"
+						class="d-flex flex-column align-items-end"
+						>
+						<!-- Precio anterior -->
+						<span class="text-decoration-line-through text-muted small">
+							{{
+							(s.cantidad * s.precioUnitario).toLocaleString("es-MX", {
+								style: "currency",
+								currency: "MXN",
+							})
+							}}
+						</span>
+
+						<!-- Promo + precio final -->
+						<div class="d-flex align-items-center gap-2">
+							<small class="badge bg-danger">
+							{{ s?.nombreVuelo || s?.nombrePromocion }}
+							</small>
+
+							<span class="text-success fw-bold">
+							{{
+								Number(precioFinalItem(s)).toLocaleString("es-MX", {
+								style: "currency",
+								currency: "MXN",
+								})
+							}}
+							</span>
+						</div>
+						</div>
+
+						<div v-else class="text-end">
+						{{
+							Number(precioFinalItem(s)).toLocaleString("es-MX", {
+							style: "currency",
+							currency: "MXN",
+							})
+						}}
+						</div>
 						</div>
 					</li>
 
@@ -328,10 +439,9 @@
 
 		<button
 			class="btn btn-success shadow position-relative" style="width: 140px;"
-			:disabled="orden?.estado !== 'Creado'"
 			@click="iniciarOT"
 		><i class="bi bi-play-circle-fill position-absolute start-0 ms-2"></i>
-			&nbsp;Iniciar OT
+			&nbsp;Ir a OT
 		</button>
 
 		

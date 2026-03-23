@@ -309,7 +309,11 @@
 
                       <td>
                         <div
-                          v-if="ll.idPromocion != null && ll.idPromocion !== 0 || ll.idPromocionVuelo != null && ll.idPromocionVuelo !== 0"
+                          v-if="
+                            (ll.idPromocion != null && ll.idPromocion !== 0) ||
+                            (ll.idPromocionVuelo != null &&
+                              ll.idPromocionVuelo !== 0)
+                          "
                         >
                           <span class="text-decoration-line-through text-muted">
                             {{
@@ -319,6 +323,13 @@
                               )
                             }}
                           </span>
+                          <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ ll.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(ll.subTotal).toLocaleString("es-MX", {
@@ -330,7 +341,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(ll.subTotal).toLocaleString("es-MX", {
+                            Number(ll.cantidad * ll.precioUnitario).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -342,33 +353,31 @@
                         <div class="mb-2 d-flex align-items-center gap-2">
                           <select
                             class="form-select form-select-sm"
-                            v-model="ll.idPromocion"
+                            v-model="ll.idPromocionSeleccionada"
                             @change="onPromoChange(ll)"
                             :disabled="ll.idPromocionVuelo > 0"
                           >
+                            <option
+                              v-if="ll.idPromocionVuelo > 0"
+                              :value="ll.idPromocionVuelo"
+                            >
+                              {{ ll.promo?.nombre || "Promocion Aplicada" }}
+                            </option>
                             <!-- Default -->
                             <option :value="0">-- Sin promoción --</option>
-
                             <!-- Promociones disponibles -->
                             <option
                               v-for="promo in ll.promosDisponibles"
                               :key="promo.idPromocion"
                               :value="promo.idPromocion"
                             >
-                              {{ promo.nombre }} (
-                              {{
-                                promo.tipo
-                                  ? promo.valor + "%"
-                                  : "$" + promo.valor
-                              }}
-                              )
+                              {{ promo.nombre }}
                             </option>
                           </select>
 
                           <button
                             type="button"
                             class="btn btn-sm"
-                            
                             :class="
                               buscarPromocionAplicada(ll)
                                 ? 'btn-outline-danger'
@@ -508,7 +517,7 @@
 
                           <!-- Cancelar -->
                           <button
-                          type="button"
+                            type="button"
                             class="btn btn-secondary btn-sm"
                             @click="ll.mostrarEditorPromo = false"
                           >
@@ -541,7 +550,13 @@
                       </td>
 
                       <td>
-                        <div v-if="paq.idPromocion && paq.idPromocion !== 0 || paq.idPromocionVuelo != null && paq.idPromocionVuelo !== 0">
+                        <div
+                          v-if="
+                            (paq.idPromocion && paq.idPromocion !== 0) ||
+                            (paq.idPromocionVuelo != null &&
+                              paq.idPromocionVuelo !== 0)
+                          "
+                        >
                           <span class="text-decoration-line-through text-muted">
                             {{
                               (
@@ -552,6 +567,13 @@
                               })
                             }}
                           </span>
+                          <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ paq.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(paq.subTotal).toLocaleString("es-MX", {
@@ -563,7 +585,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(paq.subTotal).toLocaleString("es-MX", {
+                            Number(paq.cantidad * paq.precioUnitario).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -575,21 +597,25 @@
                         <div class="mb-2 d-flex align-items-center gap-2">
                           <select
                             class="form-select form-select-sm"
-                            v-model="paq.idPromocion"
+                            v-model="paq.idPromocionSeleccionada"
                             @change="onPromoChange(paq)"
                             :disabled="paq.idPromocionVuelo > 0"
                           >
+                            <option
+                              v-if="paq.idPromocionVuelo > 0"
+                              :value="paq.idPromocionVuelo"
+                            >
+                              {{
+                                paq.promo?.nombre || "Promocion Vuelo APlicada"
+                              }}
+                            </option>
                             <option :value="0">-- Sin promoción --</option>
                             <option
                               v-for="promo in paq.promosDisponibles"
                               :key="promo.idPromocion"
                               :value="promo.idPromocion"
                             >
-                              {{ promo.nombre }} ({{
-                                promo.tipo
-                                  ? promo.valor + "%"
-                                  : "$" + promo.valor
-                              }})
+                              {{ promo?.nombre || "Promocion Aplicada" }}
                             </option>
                           </select>
 
@@ -727,7 +753,7 @@
 
                           <!-- Guardar -->
                           <button
-                          type="button"
+                            type="button"
                             class="btn btn-success btn-sm"
                             @click="guardarPromoAlVuelo(paq)"
                           >
@@ -773,7 +799,7 @@
                           min="1"
                           class="form-control form-control-sm"
                           v-model.number="det.cantidad"
-                          @input="recalcularSubtotal(ll)"
+                          @input="recalcularSubtotal(det)"
                         />
                       </td>
                       <td></td>
@@ -788,7 +814,10 @@
                     </td>
                   </tr>
                   <!--SERVICIOS ADICIONALES-->
-                  <template v-for="(ad, i) in adicionales || []" :key="'ad-' + i">
+                  <template
+                    v-for="(ad, i) in adicionales || []"
+                    :key="'ad-' + i"
+                  >
                     <tr>
                       <td>
                         <select
@@ -831,7 +860,11 @@
 
                       <td>
                         <div
-                          v-if="ad.idPromocion != null && ad.idPromocion !== 0 || ad.idPromocionVuelo != null && ad.idPromocionVuelo !== 0"
+                          v-if="
+                            (ad.idPromocion != null && ad.idPromocion !== 0) ||
+                            (ad.idPromocionVuelo != null &&
+                              ad.idPromocionVuelo !== 0)
+                          "
                         >
                           <span class="text-decoration-line-through text-muted">
                             {{
@@ -841,6 +874,13 @@
                               )
                             }}
                           </span>
+                          <br />
+                          <span>
+                            <small class="badge bg-danger mt-1">
+                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
+                            </small>
+                          </span>
+                          <br />
                           <span class="text-success fw-bold mx-2">
                             {{
                               Number(ad.subTotal).toLocaleString("es-MX", {
@@ -852,7 +892,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(ad.subTotal).toLocaleString("es-MX", {
+                            Number(ad.cantidad * ad.precioUnitario).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -864,10 +904,16 @@
                         <div class="mb-2 d-flex align-items-center gap-2">
                           <select
                             class="form-select form-select-sm"
-                            v-model="ad.idPromocion"
+                            v-model="ad.idPromocionSeleccionada"
                             @change="onPromoChange(ad)"
                             :disabled="ad.idPromocionVuelo > 0"
                           >
+                            <option
+                              v-if="ad.idPromocionVuelo > 0"
+                              :value="ad.idPromocionVuelo"
+                            >
+                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
+                            </option>
                             <!-- Default -->
                             <option :value="0">-- Sin promoción --</option>
 
@@ -877,20 +923,13 @@
                               :key="promo.idPromocion"
                               :value="promo.idPromocion"
                             >
-                              {{ promo.nombre }} (
-                              {{
-                                promo.tipo
-                                  ? promo.valor + "%"
-                                  : "$" + promo.valor
-                              }}
-                              )
+                              {{ promo?.nombre || "Promocion Aplicada" }}
                             </option>
                           </select>
 
                           <button
                             type="button"
                             class="btn btn-sm"
-                            
                             :class="
                               buscarPromocionAplicada(ad)
                                 ? 'btn-outline-danger'
@@ -915,7 +954,7 @@
                         <button
                           type="button"
                           class="btn btn-danger btn-sm mt-1"
-                          @click="borrarInsumo(ad)"
+                          @click="borrarAdicional(ad)"
                         >
                           <i class="bi bi-trash"></i>
                         </button>
@@ -1030,7 +1069,7 @@
 
                           <!-- Cancelar -->
                           <button
-                          type="button"
+                            type="button"
                             class="btn btn-secondary btn-sm"
                             @click="ad.mostrarEditorPromo = false"
                           >
@@ -1040,6 +1079,18 @@
                       </td>
                     </tr>
                   </template>
+                  <!--Total de insumos-->
+                  <tr>
+                    <td colspan="5" class="text-end fs-5 fw-bold">
+                      <h4>Total:</h4>
+                    </td>
+                    <td class="fs-5 fw-bold text-end">
+                      <h4>{{Number(totales.total).toLocaleString("es-MX", {
+                              style: "currency",
+                              currency: "MXN",
+                            })}}</h4>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1090,6 +1141,7 @@ const { proxy } = getCurrentInstance();
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
+const totales = ref([]);
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1105,13 +1157,13 @@ const mostrarModalAdicional = ref(false);
 watch(
   () => props.insumos,
   (nuevo) => {
+    //console.log(JSON.stringify(nuevo));
     llantas.value = [...(nuevo.llanta || [])];
     paquetes.value = [...(nuevo.paquete || [])];
     adicionales.value = [...(nuevo.adicional || [])];
   },
-  { immediate: true }, // carga inicial
+  { immediate: true, deep: true },
 );
-
 const close = () => emit("update:modelValue", false);
 
 // Estados
@@ -1141,21 +1193,45 @@ const PromocionesVuelo = reactive({
 
 // Si existe idPromocion, Busca la promo en ll.promosDisponibles, Copia los datos importantes al item, recalcula Subtotal
 const onPromoChange = (item) => {
-  // Si el usuario elige una promo "regular", deja limpia la promo al vuelo
-  item.idPromocionVuelo = 0;
-  item.isVuelo = false;
+  const idSel = item.idPromocionSeleccionada; // normal
+  const idVuelo = item.idPromocionAlVuelo; // vuelo
 
-  // Si el select está apuntando a `idPromocion`, nos aseguramos que también esté en idPromocionSeleccionada
-  item.idPromocionSeleccionada = item.idPromocion || 0;
+  // Si no hay ninguna promoción
+  if (!idSel && !idVuelo) {
+    item.promo = null;
+    item.precioConPromo = item.precioUnitario;
+    item.isVuelo = null;
+    item.idPromocion = 0; // Reset idPromocion for normal promos
+    return;
+  }
 
+  // Buscamos la promoción correspondiente
+  const promo = (item.promosAplicables || []).find(
+    (p) => p.idPromocion === idSel || p.idPromocion === idVuelo,
+  );
+
+  item.promo = promo || null;
+  item.isVuelo = !!idVuelo;
+
+  // Set idPromocion for normal promos to enable display
+  if (idSel && !idVuelo) {
+    item.idPromocion = idSel;
+  } else if (idVuelo) {
+    item.idPromocion = 0; // For al vuelo, keep as 0
+  }
+
+  // Calcular precio con la promo
   recalcularSubtotal(item);
 };
 const obtenerPromoSeleccionada = (item) => {
-  const allPromos = [...(item.promosDisponibles || []), ...(item.promosAplicables || [])];
+  const allPromos = [
+    ...(item.promosDisponibles || []),
+    ...(item.promosAplicables || []),
+  ];
   return allPromos.find(
     (p) =>
       p.idPromocion === item.idPromocionVuelo ||
-      p.idPromocion === item.idPromocion
+      p.idPromocion === item.idPromocion,
   );
 };
 const precioFinalItem = (item) => {
@@ -1171,12 +1247,11 @@ const precioFinalItem = (item) => {
 
 const recalcularSubtotal = (item) => {
   const promo = obtenerPromoSeleccionada(item);
-  
+
   item.promo = promo || null;
-  item.isVuelo = !!item.idPromocionVuelo;
+  item.esAlVuelo = !!item.idPromocionVuelo;
 
   const precioFinal = precioFinalItem(item);
-  console.log("Precio Final", precioFinal);
   item.precioConPromo = precioFinal;
   item.subTotal = ((item.cantidad || 0) * precioFinal).toFixed(2);
 };
@@ -1415,6 +1490,8 @@ const agregarLlanta = async (itm) => {
     idLlanta: itm.idLlanta,
     idAlmacen: itm.idAlmacen,
     idPromocion: 0,
+    idPromocionVuelo: 0,
+    idPromocionSeleccionada: 0,
     idConceptoTrabajo: 1,
     idInventarioInicial: itm.idInventarioInicial,
 
@@ -1443,6 +1520,7 @@ const agregarLlanta = async (itm) => {
     const promos = await obtenerPromosPorInventario(itm.idInventarioInicial);
 
     nuevaLlanta.promosDisponibles = promos || [];
+    
   } catch (error) {
     console.error("Error al cargar promociones", error);
     nuevaLlanta.promosDisponibles = [];
@@ -1567,6 +1645,22 @@ watch(
   { immediate: true, deep: true },
 );
 
+//watch para recalcular el total cada vez que cambie el arreglo de paquetes, o las promociones seleccionadas dentro de cada paquete, llanta o adicional
+watch(
+  () => [paquetes.value, llantas.value, adicionales.value],
+  () => {
+   
+    // Aquí podrías recalcular totales o hacer cualquier otra acción necesaria
+    //recalcular para ver en tiempo real el total cada vez que se modifique algo en paquetes, llantas o adicionales
+    const insumosMapeados = mapearInsumosParaPadre();
+    totales.value = calcularTotalesDesdeInsumos(insumosMapeados);
+     console.log("total:" , totales);
+    // Aquí puedes hacer algo con los totales si lo necesitas
+    // Por ejemplo, emitir un evento o actualizar un estado
+    
+  },
+  { deep: true },
+);
 // agregar o quitar a el arreglo paquetes, conforme checbox
 const onTogglePaquete = async (paqueteBase) => {
   const existe = paquetes.value.some(
@@ -1589,7 +1683,8 @@ const onTogglePaquete = async (paqueteBase) => {
     idPaquete: paqueteBase.idPaquete,
     idPromocion: 0,
     idConceptoTrabajo: 0,
-
+    idPromocionVuelo:0,
+    idPromocionSeleccionada:0,
     descripcion: paqueteBase.nombre,
     cantidad: 1,
     precioUnitario: paqueteBase.precioUnitario,
@@ -1614,7 +1709,7 @@ const onTogglePaquete = async (paqueteBase) => {
     })),
 
     promosDisponibles,
-    promosAplicables: [], 
+    promosAplicables: [],
     nombrePromocion: null,
     valorPromocion: null,
     tipoPromocion: null,
@@ -1626,10 +1721,10 @@ const mapearInsumosParaPadre = () => {
     llanta: llantas.value.map((l) => ({
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
-      idPromocion: l.esAlVuelo ? null : l.idPromocionSeleccionada,
+      idPromocion: l.esAlVuelo ? 0 : l.idPromocionSeleccionada,
+      idPromocionVuelo: l.idPromocionVuelo || 0,
       idPromocionSeleccionada: l.idPromocionSeleccionada || 0,
-      idPromocionVuelo: l.idPromocionVuelo || null,
-      isVuelo: !!l.idPromocionVuelo,
+      esAlVuelo: !!l.idPromocionVuelo,
       idConceptoTrabajo: l.idConceptoTrabajo,
       idInventarioInicial: l.idInventarioInicial,
 
@@ -1645,20 +1740,15 @@ const mapearInsumosParaPadre = () => {
       subTotal: l.subTotal,
 
       promosDisponibles: l.promosDisponibles,
-
-      nombrePromocion: l.nombrePromocion,
-      valorPromocion: l.valorPromocion,
-      tipoPromocion: l.tipoPromocion,
-
-      promo: l.promo || null,
+      promo: l.promo || [],
     })),
 
     paquete: paquetes.value.map((p) => ({
       idPaquete: p.idPaquete,
-      idPromocion: p.idPromocion || p.idPromocionSeleccionada || null,
+      idPromocion: p.esAlVuelo ? 0 : p.idPromocionSeleccionada,
       idPromocionSeleccionada: p.idPromocionSeleccionada || 0,
       idPromocionVuelo: p.idPromocionVuelo || 0,
-      isVuelo: !!p.idPromocionVuelo,
+      esAlVuelo: !!p.idPromocionVuelo,
       idConceptoOrdenTrabajo: p.idConceptoTrabajo,
 
       descripcion: p.descripcion,
@@ -1678,19 +1768,15 @@ const mapearInsumosParaPadre = () => {
 
       promosDisponibles: p.promosDisponibles,
 
-      nombrePromocion: p.nombrePromocion,
-      valorPromocion: p.valorPromocion,
-      tipoPromocion: p.tipoPromocion,
-
-      promo: p.promo || null,
+      promo: p.promo || [],
     })),
 
     adicional: adicionales.value.map((a) => ({
       idDetalleCotizacionServicio: a.idDetalleCotizacionServicio,
-      idPromocion: a.idPromocion || a.idPromocionSeleccionada || null,
+      idPromocion: a.esAlVuelo ? 0 : a.idPromocionSeleccionada,
       idPromocionSeleccionada: a.idPromocionSeleccionada || 0,
-      idPromocionVuelo: a.idPromocionVuelo,
-      isVuelo: !!a.idPromocionVuelo,
+      idPromocionVuelo: a.idPromocionVuelo || 0,
+      esAlVuelo: !!a.idPromocionVuelo,
       idConceptoTrabajo: a.idConceptoTrabajo,
 
       descripcion: a.descripcion,
@@ -1704,29 +1790,15 @@ const mapearInsumosParaPadre = () => {
 
       promosDisponibles: a.promosDisponibles,
 
-      nombrePromocion: a.nombrePromocion,
-      valorPromocion: a.valorPromocion,
-      tipoPromocion: a.tipoPromocion,
-
       promo: a.promo || null,
-  })),
-    
-    
+    })),
   };
-  
 };
 
-const debugg = ()=>{
-  console.log("Insumos mapeados para padre:", {
-      llanta: llantas.value,
-      paquete: paquetes.value,
-      adicional: adicionales.value,
-    });
-}
+
 const guardarInsumo = () => {
   const insumosMapeados = mapearInsumosParaPadre();
   const totales = calcularTotalesDesdeInsumos(insumosMapeados);
-  debugg()
   emit("update:insumos", {
     insumo: insumosMapeados,
     totales,
@@ -1742,7 +1814,7 @@ onMounted(() => {
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
-  console.log(props.insumos);
+ 
   // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
 
@@ -1785,7 +1857,7 @@ const togglePromoAlVuelo = (item) => {
     item.idPromocionVuelo = 0;
     item.idPromocionSeleccionada = 0;
     item.promo = null;
-    item.isVuelo = false;
+    item.esAlVuelo = false;
     item.precioConPromo = item.precioUnitario;
     item.subTotal = (item.cantidad || 0) * item.precioUnitario;
     return;
@@ -1833,14 +1905,13 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 
     const data = await res.json();
     nuevaPromo.idPromocion = data.idPromoVuelo;
-
     item.promosAplicables.push(nuevaPromo);
 
     // la promo al vuelo debe reflejarse en estos campos
     item.idPromocionVuelo = nuevaPromo.idPromocion;
-    item.idPromocionSeleccionada = 0;
-    item.idPromocion = 0;
-    item.isVuelo = true;
+    item.idPromocionSeleccionada = nuevaPromo.idPromocion;
+    item.idPromocion = 0;// promocion normal = 0
+    item.esAlVuelo = true;
 
     recalcularSubtotal(item);
     item.mostrarEditorPromo = false;
