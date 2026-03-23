@@ -4420,7 +4420,7 @@ const generarPDF = async () => {
     promoLabel,
   }) => {
     const tienePromo =
-      promoLabel && total < precioUnitario * cantidad;
+  promoLabel && promoLabel !== "(Excluido de promoción)";
 
     return {
       stack: tienePromo
@@ -4840,11 +4840,12 @@ const generarPDF = async () => {
         border: [true, true, true, true],
         alignment: "center",
       },
-      promoLabel: {
-        italics: true,
-        fontSize: 9,
-        color: "#D92300",
-      },
+     promoLabel: {
+       fontSize: 8,
+           color: "white",
+  background: "#dc3545", // rojo bootstrap
+  margin: [0, 2, 0, 2],
+},
       notaIVA: {
         italics: true,
         fontSize: 9,
@@ -4862,6 +4863,7 @@ const generarPDF = async () => {
 </script>
 
 <style>
+
 .cotizacion-table {
   max-width: min(1100px, 95vw);
 }
@@ -4878,8 +4880,9 @@ const generarPDF = async () => {
 }
 
 @media print {
-  /* Quitar márgenes gigantes */
+
   @page {
+    size: letter;
     margin: 8mm;
   }
 
@@ -4888,22 +4891,14 @@ const generarPDF = async () => {
     padding: 0 !important;
   }
 
-  /* Ocultar TODO */
+  /* 🔴 Ocultar todo */
   body * {
     visibility: hidden;
   }
 
-  .container,
-  .row {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Mostrar solo el área a imprimir */
+  /* 🟢 Mostrar solo cotización */
   #area-imprimir,
   #area-imprimir * {
-    font-size: 8pt;
-    line-height: 1.5;
     visibility: visible;
   }
 
@@ -4912,41 +4907,112 @@ const generarPDF = async () => {
     left: 0;
     top: 0;
     width: 100%;
+
+    font-family: Arial, sans-serif;
+    font-size: 9pt;
+    line-height: 1.3;
+    color: #000;
   }
 
-  .modal-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
+  /* ========================= */
+  /* 🔥 TABLA ESTILO PDF REAL */
+  /* ========================= */
+
+  #area-imprimir table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 10px;
   }
 
-  /* 🔥 CLAVE: desactivar table-responsive */
+  /* HEADER */
+  #area-imprimir thead th {
+  background: #000000;  font-weight: bold;
+  font-size: 10pt;
+  padding: 6px 4px;
+
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+  /* FILAS */
+  #area-imprimir tbody td {
+    padding: 6px 4px;
+    font-size: 9pt;
+
+    border: none;
+    border-bottom: 1px solid #000;
+  }
+
+  /* ❌ quitar líneas verticales */
+  #area-imprimir th,
+  #area-imprimir td {
+    border-left: none !important;
+    border-right: none !important;
+  }
+
+  /* 🔥 separador tipo SERVICIOS */
+  #area-imprimir .fila-separador td {
+    background: #ededed;
+    font-weight: bold;
+
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+  }
+
+  /* 📐 alineaciones */
+  #area-imprimir td:nth-child(1),
+  #area-imprimir th:nth-child(1) {
+    width: 40px;
+    text-align: center;
+  }
+
+  #area-imprimir td:nth-child(2),
+  #area-imprimir th:nth-child(2) {
+    text-align: left;
+  }
+
+  #area-imprimir td:nth-child(3),
+  #area-imprimir th:nth-child(3),
+  #area-imprimir td:nth-child(4),
+  #area-imprimir th:nth-child(4) {
+    width: 90px;
+    text-align: right;
+  }
+
+  /* 💰 total */
+  #area-imprimir .total-verde {
+    color: #008000;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+
+  /* 🎟️ promo */
+  #area-imprimir .promo-label {
+    color: #d92300;
+    font-style: italic;
+    font-size: 8pt;
+  }
+
+  /* 📄 total general */
+  #area-imprimir .total-general {
+    font-weight: bold;
+    font-size: 12pt;
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  /* 📄 nota IVA */
+  #area-imprimir .nota-iva {
+    font-style: italic;
+    font-size: 9pt;
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  /* 🔧 arreglos Bootstrap */
   .table-responsive {
     overflow: visible !important;
-  }
-
-  table {
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  thead {
-    display: table-header-group; /* Permite encabezado correcto */
-  }
-
-  tfoot {
-    display: table-footer-group;
-  }
-
-  /* Botones fuera */
-  button,
-  .btn,
-  .no-imprimir {
-    display: none !important;
   }
 
   .modal,
@@ -4956,8 +5022,31 @@ const generarPDF = async () => {
     overflow: visible !important;
   }
 
-  .page-break {
-    page-break-before: always;
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* 📄 saltos de página */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* ❌ ocultar botones */
+  button,
+  .btn,
+  .no-imprimir {
+    display: none !important;
   }
 }
+
 </style>
