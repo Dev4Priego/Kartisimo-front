@@ -4412,52 +4412,50 @@ const generarPDF = async () => {
 
   const formatMoney = (v) =>
   `$${(v ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+const celdaTotalConPromo = ({
+  precioUnitario,
+  cantidad = 1,
+  total,
+  promoLabel,
+}) => {
 
-  const celdaTotalConPromo = ({
-    precioUnitario,
-    cantidad = 1,
-    total,
-    promoLabel,
-  }) => {
-    const tienePromo =
-  promoLabel && promoLabel !== "(Excluido de promoción)";
+  const totalSinPromo = precioUnitario * cantidad;
 
-    return {
-      stack: tienePromo
-        ? [
-            {
-              text: formatMoney(precioUnitario * cantidad),
-              decoration: "lineThrough",
-              color: "#888",
-              fontSize: 9,
-              alignment: "right",
-            },
-            {
-              text: promoLabel,
-              fontSize: 9,
-              style: "promoLabel",
-              alignment: "right",
-              margin: [0, 2, 0, 2],
-            },
-            {
-              text: formatMoney(total),
-              color: "green",
-              bold: true,
-              fontSize: 9,
-              alignment: "right",
-            },
-          ]
-        : [
-            {
-              text: formatMoney(total),
-              alignment: "right",
-              fontSize: 10,
-            },
-          ],
-      margin: [0, 10, 0, 10],
-    };
+  const tienePromo =
+    total < totalSinPromo &&
+    promoLabel &&
+    promoLabel !== "" &&
+    promoLabel !== ""; // 🔥 filtro clave
+
+  return {
+    stack: tienePromo
+      ? [
+          // ❌ ya no quieres tachado → lo quitamos
+          {
+            text: promoLabel,
+            fontSize: 9,
+            style: "promoLabel",
+            alignment: "right",
+            margin: [0, 2, 0, 2],
+          },
+          {
+            text: formatMoney(total),
+            color: "green",
+            bold: true,
+            fontSize: 10,
+            alignment: "right",
+          },
+        ]
+      : [
+          {
+            text: formatMoney(total),
+            alignment: "right",
+            fontSize: 10,
+          },
+        ],
+    margin: [0, 10, 0, 10],
   };
-
+};
 
   // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
   const llantasRows = v.llantasSelecionadas.map((ll) => {
@@ -4922,7 +4920,7 @@ const generarPDF = async () => {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    margin-top: 10px;
+    margin-top: 20px;
   }
 
   /* HEADER */
