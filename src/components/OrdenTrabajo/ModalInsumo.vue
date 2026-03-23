@@ -585,7 +585,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(paq.subTotal).toLocaleString("es-MX", {
+                            Number(paq.cantidad * paq.precioUnitario).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -892,7 +892,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(ad.subTotal).toLocaleString("es-MX", {
+                            Number(ad.cantidad * ad.precioUnitario).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })

@@ -406,7 +406,7 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger">{{
+                          <small class="badge bg-danger mt-1 text-wrap">{{
                             paquete.promoLabel
                           }}</small>
                         </span>
@@ -467,7 +467,7 @@
                               currency: "MXN",
                             })
                           }}
-                          <small class="badge bg-danger mt-1">{{
+                          <small class="badge bg-danger mt-1 text-wrap">{{
                             servicio.promoLabel
                           }}</small>
                         </span>
@@ -489,10 +489,22 @@
                       </div>
                     </td>
                   </tr>
+                </tbody>
+              </table>
+            </div>
 
-                  <!-- Total -->
-                  <tr v-if="vistaCotizacion.mostrarTotal" class="fw-bold">
-                    <td colspan="3" class="text-center">Total:</td>
+            <div v-if="vistaCotizacion.mostrarTotal" class="table-responsive mt-3 cotizacion-header" >
+              <table
+                class="table table-bordered table-sm align-middle"
+                style="table-layout: fixed"
+              >
+                <colgroup>
+                  <col />
+                  <col style="width: 120px" />
+                </colgroup>
+                <tbody>
+              <tr class="fw-bold">
+                    <td class="text-center">Total:</td>
                     <td class="text-end">
                       <div v-if="vistaCotizacion.tienePromocion">
                         <span class="text-decoration-line-through text-muted">
@@ -3468,7 +3480,7 @@ const guardarCotizacion = async () => {
         }
       : {
           idCliente: null,
-          nombre: cotizacionForm.nombre || "",
+          nombre: cotizacionForm.clienteNombre || "",
           nombres: cotizacionForm.nombre || "",
           apellidos: cotizacionForm.apellidos || "",
           telefono: cotizacionForm.clienteTelefono || "",
@@ -4215,7 +4227,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         cliente: {
           nombre: data.clienteNombre,
           telefono: data.telefono || "Sin teléfono",
-          correo: data.correo || "Sin correo",
+          correo: data.correo || "",
           fecha: data.fechaCreacion,
           observaciones: data.observaciones || "", // ⚡ AQUI
         },
@@ -4510,7 +4522,7 @@ const generarPDF = async () => {
   const paquetesRows = v.paquetes.map((p) => [
     celdaCentroY("1", "center"),
 
-    celdaCentroY(p.nombre),
+    celdaCentroY(p.nombre + " " + p.descripcion),
 
     celdaCentroY(formatMoney(p.precioUnitario), "right"),
 
@@ -4801,12 +4813,7 @@ const generarPDF = async () => {
         },
         layout: {
           fillColor: (rowIndex) => (rowIndex === 0 ? "#ededed" : null),
-          // hLineWidth: (i, node) => {
-          //   // Quita todas las líneas horizontales menos la del encabezado y las divisiones
-          //   if (i === 0 || i == 1 || i === node.table.body.length) return 1; // Header y bottom
-          //   // Puedes agregar condiciones aquí para las divisiones
-          //   return 0;
-          // },
+        
           vLineWidth: (i, node) => 0,
         },
         margin: [0, 12, 0, 0],
@@ -4850,6 +4857,8 @@ const generarPDF = async () => {
   // usa esta si el problema es download
   pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
 };
+
+
 </script>
 
 <style>

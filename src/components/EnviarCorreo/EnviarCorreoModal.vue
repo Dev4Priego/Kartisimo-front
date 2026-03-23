@@ -34,7 +34,7 @@ const abrirModal = async () => {
 	const medida = match ? match[0].toUpperCase() : null || "";
 
 	const correo = props.cotizacion.cliente.correo ;
-	// console.log(correo);
+	console.log(correo);
 
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
@@ -45,7 +45,7 @@ const abrirModal = async () => {
 		title: '<h3>Enviar cotización por correo</h3>',
 		html: `
 			<table style="margin-left: 0px; margin-right: 0px;">
-			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo}" style="width: 280px; font-size: 12pt;"></td></tr>
+			<tr><td style="text-align: left;"><input id="correo" class="swal2-input" placeholder="Correo destinatario" type="email" value="${correo ? correo : ''}" style="width: 280px; font-size: 12pt;"></td></tr>
 			<tr><td><input id="asunto" class="swal2-input" placeholder="Asunto" value="Cotización ${medida} Kartisimo" style="width: 470px; font-size: 12pt;"></td></tr>
 			<tr><td><textarea id="mensaje" class="swal2-textarea" placeholder="Mensaje..." style="width: 470px; font-size: 12pt;"></textarea></td></tr>
 			</table>
@@ -78,135 +78,162 @@ const abrirModal = async () => {
 const generarPDFyEnviar = async ({ email, subj, msg }) => {
 	try {
 
-		Swal.fire({ title: 'Generando PDF...', didOpen: () => Swal.showLoading(), allowOutsideClick: false })
+		Swal.fire({ title: 'PDF Generado y enviado '})
 
 		// Crear un contenedor temporal para el PDF
 		const pdfContent = document.createElement('div')
 		pdfContent.innerHTML = `
-		<style>
-			body {
-				font-family: Arial, Helvetica, sans-serif;
-				font-size: 12px;
-				color: #000;
-			}
+	<style>
+/* 🔹 BASE */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #000;
+}
 
-			.header {
-				display: flex;
-				justify-content: space-between;
-				margin-bottom: 20px;
-			}
+/* 🔹 HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
 
-			.branch {
-				width: 32%;
-				font-size: 11px;
-				line-height: 1.4;
-			}
+.logo {
+  width: 180px;
+}
 
-			hr {
-				border: none;
-				border-top: 1px solid #000;
-				margin: 15px 0;
-			}
+/* 🔹 SUCURSALES */
+.branches {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 11px;
+}
 
-			.info {
-				display: flex;
-				justify-content: space-between;
-				margin-bottom: 10px;
-				font-size: 12px;
-			}
+.branch {
+  width: 32%;
+  line-height: 1.4;
+}
 
-			table {
-				width: 100%;
-				border-collapse: collapse;
-				margin-top: 10px;
-				font-size: 12px;
-			}
+/* 🔹 DIVISOR */
+hr {
+  border: none;
+  border-top: 1px solid #000;
+  margin: 15px 0;
+}
 
-			thead th {
-				border-top: 2px solid #000;
-				border-bottom: 2px solid #000;
-				padding: 6px;
-				text-align: center;
-			}
+/* 🔹 INFO CLIENTE */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 20px;
+  font-size: 12px;
+  margin-bottom: 10px;
+  border-top: 1px solid #000;
+  padding-top: 8px;
+}
 
-			tbody td {
-				padding: 6px;
-				border-bottom: 1px solid #000;
-			}
+/* 🔹 TABLA */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 12px;
+  table-layout: fixed; /* 🔥 clave */
+}
 
-			.center { text-align: center; }
-			.right { text-align: right; }
+/* 🔹 ANCHOS OPTIMIZADOS */
+th:nth-child(1), td:nth-child(1) { width: 8%; }
+th:nth-child(2), td:nth-child(2) { width: 57%; } /* 🔥 columna larga */
+th:nth-child(3), td:nth-child(3) { width: 17%; }
+th:nth-child(4), td:nth-child(4) { width: 18%; }
 
-			.footer {
-				margin-top: 15px;
-				text-align: right;
-				font-style: italic;
-				font-size: 11px;
-			}
+/* 🔹 HEADER TABLA */
+thead th {
+  background-color: #e0e0e0; /* 🔥 sombreado visible */
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  padding: 6px;
+}
 
-			.header {
-				display: flex;
-				justify-content: space-between;
-				align-items: flex-start;
-				margin-bottom: 20px;
-			}
+/* 🔹 CELDAS */
+td {
+  padding: 6px;
+  border-bottom: 1px solid #000;
+  vertical-align: middle;
+}
 
-			.logo {
-				width: 180px;
-			}
+/* 🔹 FIX COLUMNA LARGA (MEDIDAS) */
+td:nth-child(2), th:nth-child(2) {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  line-height: 1.2;
+  font-size: 11px;
+}
 
-			.company {
-				font-size: 14px;
-				font-weight: bold;
-				text-align: right;
-			}
+/* 🔹 ALINEACIONES */
+.center { text-align: center; }
+.right { text-align: right; }
 
-			.branches {
-				display: flex;
-				justify-content: space-between;
-				margin-top: 10px;
-				font-size: 11px;
-			}
+/* 🔹 SEPARADOR SERVICIOS */
+.separador {
+  background-color: #f0f0f0;
+  font-weight: bold;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
 
-			.branch {
-				width: 32%;
-				line-height: 1.4;
-			}
+/* 🔹 PROMOS */
+.total-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 
-			 /* --- PROMOS --- */
-			.precio-original {
-				text-decoration: line-through;
-				color: #888;
-				font-size: 11px;
-				display: block;
-			}
+.precio-original {
+  text-decoration: line-through;
+  color: #888;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
 
-			.precio-final {
-				color: #2e7d32;
-				font-weight: bold;
-				font-size: 12px;
-				display: block;
-			}
+.promo-label {
+  display: inline-block;
+  background: #e53935;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin: 2px 0;
+}
 
-			.promo-label {
-				display: inline-block;
-				background: #e53935;
-				color: #fff;
-				font-size: 10px;
-				font-weight: bold;
-				padding: 2px 6px;
-				border-radius: 4px;
-				margin: 2px 0;
-			}
-		</style>
+.precio-final {
+  color: #2e7d32;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* 🔹 FOOTER */
+.footer {
+  margin-top: 15px;
+  text-align: right;
+  font-style: italic;
+  font-size: 11px;
+}
+
+/* 🔹 BORDE FINAL */
+tbody tr:last-child td {
+  border-bottom: 2px solid #000;
+}
+</style>
 
 		<!-- ENCABEZADO -->
 		<div class="header">
 			<img src="/images/Logo-Kartisimo.png" class="logo" />
 
-			<div class="company">
-				Kartisimo Bajio S.A. de C.V.
-			</div>
 		</div>
 
 		<div class="branches">
@@ -240,152 +267,154 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		<hr>
 
 		<!-- DATOS CLIENTE -->
-		<div class="info">
-			<div><strong>No. Cotización:</strong> ${props.cotizacion.codigo}</div>
-			<div><strong>Cliente:</strong> ${props.cotizacion.cliente.nombre}</div>
-			<div><strong>Teléfono:</strong> ${props.cotizacion.cliente.telefono}</div>
-		</div>
+		<div class="info-grid">
+
+  <div>
+    <strong>No. Cotización:</strong> 
+    C${props.cotizacion?.codigo }
+  </div>
+
+  <div>
+    <strong>Fecha emisión:</strong> 
+    ${formatearFecha(props.cotizacion?.cliente?.fecha) || 'N/A'}
+  </div>
+
+  <div>
+    <strong>Cliente:</strong> 
+    ${props.cotizacion?.cliente?.nombre || 'N/A'}
+  </div>
+
+  <div>
+  </div>
+
+  <div>
+    <strong>Teléfono(s):</strong> 
+    ${props.cotizacion?.cliente?.telefono || 'N/A'}
+  </div>
+
+  <div>
+    <strong>Correo:</strong> 
+    ${props.cotizacion?.cliente?.correo || 'Sin correo'}
+  </div>
+
+</div>
+<div>
+    <strong>Observaciones:</strong> 
+    ${props.cotizacion?.observaciones || 'N/A'}
+  </div>
 
 		<!-- TABLA -->
 		<table>
 			<thead>
 				<tr>
 					<th>CANT</th>
-					<th>MARCA - MODELO - MEDIDA</th>
-					<th>PRECIO UNITARIO</th>
-					<th>TOTAL</th>
+					<th>MEDIDA-MARCA-MODELO-RANGO</th>
+					<th class="right">PRECIO UNIT.</th>
+					<th class="right">TOTAL</th>
 				</tr>
 			</thead>
 			<tbody>
-				${props.cotizacion.llantasSelecionadas.map(l => {
-					const tienePromo =
-						l.promoLabel && l.precioConPromo < l.precioUnitario
 
-					const totalOriginal = l.precioUnitario * l.cantidad
+				${props.cotizacion.llantasSelecionadas.map(l => `
+				<tr>
+				<td class="center">${l.cantidad}</td>
+				<td>${l.medidas}</td>
+				<td class="right">
+					$${l.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+				</td>
+				<td class="right">
+                   
+					${renderTotalConPromo({
+					precioUnitario: l.precioUnitario,
+						cantidad: l.cantidad,
+					total: l.total,
+					promoLabel: l.promoLabel,
+					})}
 
-					return `
+
+
+				</td>
+				</tr>
+				`).join('')}
+
+				<!-- 🔹 SEPARADOR -->
+				${
+				(props.cotizacion.paquetes.length || props.cotizacion.serviciosAdicionales.length)
+				? `
 					<tr>
-						<td class="center">${l.cantidad}</td>
-						<td>${l.medidas}</td>
-
-						<!-- PRECIO UNITARIO -->
-						<td class="right">
-						$${l.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-						</td>
-
-						<!-- TOTAL -->
-						<td class="right">
-						${
-							tienePromo
-							? `
-								<span class="precio-original">
-								$${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-								<span class="promo-label">${l.promoLabel}</span>
-								<span class="precio-final">
-								$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
-							: `
-								<span>
-								$${l.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
-						}
-						</td>
+					<td class="separador center">CANT</td>
+					<td class="separador">
+						SERVICIOS
+					</td>
+					<td class="separador right">
+						PRECIO UNIT.
+					</td>
+					<td class="separador right">
+						TOTAL
+					</td>
 					</tr>
-					`
-				}).join('')}
+									`
+				: ''
+				}
 
+				${props.cotizacion.paquetes.map(p => `
+				<tr>
+				<td class="center">1</td>
+				<td><em>${p.nombre.toUpperCase()} ${p.descripcion.toUpperCase()} </em></td>
+				<td class="right">
+					$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+				</td>
+				<td class="right">
+					${renderTotalConPromo({
+					precioUnitario: p.precioUnitario,
+					cantidad: 1,
+					total: p.total,
+					promoLabel: p.promoLabel,
+					})}
+				</td>
+				</tr>
+				`).join('')}
 
-				${props.cotizacion.paquetes.map(p => {
-					const tienePromo = p.promoLabel && p.precio < p.precioUnitario
+				${props.cotizacion.serviciosAdicionales.map(s => `
+				<tr>
+				<td class="center">${s.cantidad}</td>
+				<td><em>${s.nombreServicio}</em></td>
+				<td class="right">
+					$${s.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+				</td>
+				<td class="right">
+					${renderTotalConPromo({
+					precioUnitario: s.precioUnitario,
+					cantidad: s.cantidad,
+					total: s.total,
+					promoLabel: s.promoLabel,
+					})}
+				</td>
+				</tr>
+				`).join('')}
 
-					return `
-					<tr>
-						<td class="center">1</td>
-						<td><em>${p.nombre}</em></td>
+				</tbody>
+										</table>
+									${
+				(props.cotizacion.mostrarTotal)
+				? `
+					<div style='text-align: right; font-size: 12pt; margin-top: 20px;'>
+						Total: $${ props.cotizacion.total.toLocaleString("en-US", { minimumFractionDigits: 2 }) }
+					</div>
+									`
+				: ''
+				}	
+						<div class="footer">
+							Los precios incluyen IVA
+						</div>
+						`;		// Generar el PDF en base64
 
-						<td class="right">
-						$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-						</td>
-
-						<td class="right">
-						${
-							tienePromo
-							? `
-								<span class="precio-original">
-								$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-								<span class="promo-label">${p.promoLabel}</span>
-								<span class="precio-final">
-								$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
-							: `
-								<span>
-								$${p.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
+						const opt = {
+							margin: 10,
+							filename: `${props.cotizacion.codigo}.pdf`,
+							html2canvas: { scale: 2 },
+							jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
 						}
-						</td>
-					</tr>
-					`
-				}).join('')}
-
-
-				${props.cotizacion.serviciosAdicionales.map(s => {
-					const tienePromo =
-						s.promoLabel && s.precioConPromo < s.precioUnitario
-
-					const totalOriginal = s.precioUnitario * s.cantidad
-
-					return `
-					<tr>
-						<td class="center">${s.cantidad}</td>
-						<td><em>${s.nombreServicio}</em></td>
-
-						<td class="right">
-						$${s.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-						</td>
-
-						<td class="right">
-						${
-							tienePromo
-							? `
-								<span class="precio-original">
-								$${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-								<span class="promo-label">${s.promoLabel}</span>
-								<span class="precio-final">
-								$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
-							: `
-								<span>
-								$${s.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-								</span>
-							`
-						}
-						</td>
-					</tr>
-					`
-				}).join('')}
-
-			</tbody>
-		</table>
-
-		<div class="footer">
-			Los precios incluyen IVA
-		</div>
-		`;		// Generar el PDF en base64
-
-		const opt = {
-			margin: 10,
-			filename: `${props.cotizacion.codigo}.pdf`,
-			html2canvas: { scale: 2 },
-			jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-		}
 
 		const pdfBlob = await html2pdf().set(opt).from(pdfContent).outputPdf('blob')
 		const pdfBase64 = await blobToBase64(pdfBlob)
@@ -408,7 +437,8 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		Swal.close()
 		
 		if (response.ok) {
-			Swal.fire(' Enviado', 'El correo con el PDF se envió correctamente.', 'success')
+          console.log('Correo enviado exitosamente');
+
 		} else {
 			Swal.fire(' Error', 'No se pudo enviar el correo.', 'error')
 			let data = await response.json()
@@ -419,6 +449,49 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 	}
 }
 
+const renderTotalConPromo = ({
+  precioUnitario,
+  cantidad = 1,
+  total,
+  promoLabel,
+}) => {
+  const totalOriginal = precioUnitario * cantidad
+  const tienePromo = promoLabel && total < totalOriginal
+
+  return `
+    <div style="text-align:right; line-height:1.2;">
+      
+      ${
+        tienePromo
+          ? `
+        <div style="text-decoration: line-through; color:#888; font-size:12px;">
+          $${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+        </div>
+
+        <div style="color:#888; font-size:13px; font-weight:600;">
+          ${promoLabel}
+        </div>
+      `
+          : ""
+      }
+
+      <div style="color:#2e7d32; font-weight:bold; font-size:16px;">
+        $${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+      </div>
+
+    </div>
+  `
+}
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return ''
+
+  const f = new Date(fecha)
+
+  if (isNaN(f)) return fecha // por si viene mal formateada
+
+  return f.toLocaleDateString('es-MX')
+}
 // Helper para convertir Blob → Base64
 const blobToBase64 = (blob) => new Promise((resolve, reject) => {
 	const reader = new FileReader()
