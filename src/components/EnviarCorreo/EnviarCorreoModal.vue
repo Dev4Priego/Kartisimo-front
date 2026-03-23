@@ -300,6 +300,8 @@ tbody tr:last-child td {
     ${props.cotizacion?.observaciones || 'N/A'}
   </div>
 
+
+
 </div>
 
 		<!-- TABLA -->
@@ -350,6 +352,21 @@ tbody tr:last-child td {
 				: ''
 				}
 
+				${
+				(props.cotizacion.totalOriginal || 0) > (props.cotizacion.total || 0)
+				? `
+					<tr>
+					<td class="separador center">CANT</td>
+					<td colspan="3" class="separador">
+						Total
+					</td>
+					</tr>
+									`
+				: ''
+				}
+
+				
+
 				${props.cotizacion.paquetes.map(p => `
 				<tr>
 				<td class="center">1</td>
@@ -385,9 +402,21 @@ tbody tr:last-child td {
 				</td>
 				</tr>
 				`).join('')}
+				<tr>
+				<td colspan="4" style="border-top: 2px solid #000;"></td>
+				</tr>
+
+				<tr>
+				<td colspan="3" class="right" style="font-weight:bold; font-size:16px;">
+					Total:
+				</td>
+				<td class="right" style="font-weight:bold; font-size:16px;">
+					$${(props.cotizacion.total ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+				</td>
+				</tr>
 
 				</tbody>
-										</table>
+		</table>
 
 						<div class="footer">
 							Los precios incluyen IVA
@@ -441,7 +470,25 @@ const renderTotalConPromo = ({
   promoLabel,
 }) => {
   const totalOriginal = precioUnitario * cantidad
-  const tienePromo = promoLabel && total < totalOriginal
+
+  // 🔍 DEBUG
+  console.log('--- renderTotalConPromo ---')
+  console.log('precioUnitario:', precioUnitario)
+  console.log('cantidad:', cantidad)
+  console.log('total recibido:', total)
+  console.log('promoLabel:', promoLabel)
+
+  const totalFinal = (typeof total === 'number' && !isNaN(total))
+    ? total
+    : totalOriginal
+
+  console.log('totalOriginal:', totalOriginal)
+  console.log('totalFinal:', totalFinal)
+
+  const tienePromo = promoLabel && totalFinal < totalOriginal
+
+  console.log('tienePromo:', tienePromo)
+  console.log('--------------------------')
 
   return `
     <div style="text-align:right; line-height:1.2;">
@@ -461,13 +508,12 @@ const renderTotalConPromo = ({
       }
 
       <div style="color:#2e7d32; font-weight:bold; font-size:16px;">
-        $${total.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+        $${totalFinal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
       </div>
 
     </div>
   `
 }
-
 const formatearFecha = (fecha) => {
   if (!fecha) return ''
 
@@ -484,4 +530,6 @@ const blobToBase64 = (blob) => new Promise((resolve, reject) => {
 	reader.onerror = reject
 	reader.readAsDataURL(blob)
 })
+
+
 </script>
