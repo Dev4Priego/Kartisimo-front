@@ -55,6 +55,7 @@ const abrirModal = async () => {
 		showCancelButton: true,
 		cancelButtonText: 'Cancelar',
 		focusConfirm: false,
+		showLoaderOnConfirm: true,
 		preConfirm: () => {
 			const email = document.getElementById('correo').value
 			const subj = document.getElementById('asunto').value
@@ -350,6 +351,12 @@ tbody tr:last-child td {
 					<td class="separador">
 						SERVICIOS
 					</td>
+					<td class="separador right">
+						PRECIO UNIT.
+					</td>
+					<td class="separador right">
+						TOTAL
+					</td>
 					</tr>
 									`
 				: ''
@@ -405,7 +412,9 @@ tbody tr:last-child td {
 				</td>
 				</tr>
 				`).join('')}
-				<tr>
+
+				${props.cotizacion.mostrarTotal ?  
+				`<tr>
 				<td colspan="4" style="border-top: 2px solid #000;"></td>
 				</tr>
 
@@ -416,7 +425,7 @@ tbody tr:last-child td {
 				<td class="right" style="font-weight:bold; font-size:16px;">
 					$${(props.cotizacion.total ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
-				</tr>
+				</tr>` : ``}
 
 				</tbody>
 		</table>
@@ -503,7 +512,7 @@ const renderTotalConPromo = ({
           $${totalOriginal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
         </div>
 
-        <div style="color:#888; font-size:13px; font-weight:600;">
+        <div style="color: red; font-size:13px; font-weight:600;">
           ${promoLabel}
         </div>
       `

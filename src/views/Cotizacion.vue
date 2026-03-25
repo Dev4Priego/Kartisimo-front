@@ -184,7 +184,7 @@
                 />
               </div>
             </div>
-            <div class="row border-bottom pb-3 mb-4">
+            <div class="row border-bottom pb-3 mb-4 direcciones">
               <div class="col-3">
                 <small>
                   <strong>Blvd. Delta 2002 <br />esq. Rio Mayo</strong><br />
@@ -221,7 +221,7 @@
             </div>
 
             <!-- Información del cliente -->
-            <div class="mb-4 cotizacion-header">
+            <div class="mb-4 cotizacion-header-cliente">
               <div class="row">
                 <div class="col-2">
                   <span class="me-2">
@@ -368,6 +368,14 @@
                   <col style="width: 120px" />
                   <col style="width: 120px" />
                 </colgroup>
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center">CANT</th>
+                    <th>SERVICIO</th>
+                    <th class="text-end">PRECIO UNIT.</th>
+                    <th class="text-end">TOTAL</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <!-- Paquetes -->
                   <tr
@@ -535,6 +543,10 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div class="d-flex w-100 mt-3 justify-content-end">
+              <span class="nota-iva">Todos los precios incluyen IVA.</span>
             </div>
 
             <div class="row no-imprimir">
@@ -4872,6 +4884,14 @@ const celdaTotalConPromo = ({
   border-radius: 0.375rem;
   border: 1px solid #dee2e6;
 }
+
+.cotizacion-header-cliente {
+  background-color: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+}
+
 .modal-1000 {
   max-width: 1000px;
   width: 100%;
@@ -4907,7 +4927,7 @@ const celdaTotalConPromo = ({
     width: 100%;
 
     font-family: Arial, sans-serif;
-    font-size: 9pt;
+    font-size: 8pt;
     line-height: 1.3;
     color: #000;
   }
@@ -4933,6 +4953,20 @@ const celdaTotalConPromo = ({
   border-bottom: 2px solid #000;
 }
 
+  #area-imprimir .cotizacion-header-cliente {
+    font-size: 10pt;
+  }
+
+  #area-imprimir .cotizacion-header {
+    border: 0px;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  #area-imprimir .direcciones {
+    font-size: 10pt;
+  }
+
   /* FILAS */
   #area-imprimir tbody td {
     padding: 6px 4px;
@@ -4947,6 +4981,7 @@ const celdaTotalConPromo = ({
   #area-imprimir td {
     border-left: none !important;
     border-right: none !important;
+    background-color: grey !important;
   }
 
   /* 🔥 separador tipo SERVICIOS */
