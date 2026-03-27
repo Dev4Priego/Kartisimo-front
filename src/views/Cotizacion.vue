@@ -184,7 +184,7 @@
                 />
               </div>
             </div>
-            <div class="row border-bottom pb-3 mb-4">
+            <div class="row border-bottom pb-3 mb-4 direcciones">
               <div class="col-3">
                 <small>
                   <strong>Blvd. Delta 2002 <br />esq. Rio Mayo</strong><br />
@@ -221,7 +221,7 @@
             </div>
 
             <!-- Información del cliente -->
-            <div class="mb-4 cotizacion-header">
+            <div class="mb-4 cotizacion-header-cliente">
               <div class="row">
                 <div class="col-2">
                   <span class="me-2">
@@ -368,6 +368,14 @@
                   <col style="width: 120px" />
                   <col style="width: 120px" />
                 </colgroup>
+                <thead class="table-light">
+                  <tr>
+                    <th class="text-center">CANT</th>
+                    <th>SERVICIO</th>
+                    <th class="text-end">PRECIO UNIT.</th>
+                    <th class="text-end">TOTAL</th>
+                  </tr>
+                </thead>
                 <tbody>
                   <!-- Paquetes -->
                   <tr
@@ -535,6 +543,10 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            <div class="d-flex w-100 mt-3 justify-content-end">
+              <span class="nota-iva">Todos los precios incluyen IVA.</span>
             </div>
 
             <div class="row no-imprimir">
@@ -4412,52 +4424,50 @@ const generarPDF = async () => {
 
   const formatMoney = (v) =>
   `$${(v ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
+const celdaTotalConPromo = ({
+  precioUnitario,
+  cantidad = 1,
+  total,
+  promoLabel,
+}) => {
 
-  const celdaTotalConPromo = ({
-    precioUnitario,
-    cantidad = 1,
-    total,
-    promoLabel,
-  }) => {
-    const tienePromo =
-      promoLabel && total < precioUnitario * cantidad;
+  const totalSinPromo = precioUnitario * cantidad;
 
-    return {
-      stack: tienePromo
-        ? [
-            {
-              text: formatMoney(precioUnitario * cantidad),
-              decoration: "lineThrough",
-              color: "#888",
-              fontSize: 9,
-              alignment: "right",
-            },
-            {
-              text: promoLabel,
-              fontSize: 9,
-              style: "promoLabel",
-              alignment: "right",
-              margin: [0, 2, 0, 2],
-            },
-            {
-              text: formatMoney(total),
-              color: "green",
-              bold: true,
-              fontSize: 9,
-              alignment: "right",
-            },
-          ]
-        : [
-            {
-              text: formatMoney(total),
-              alignment: "right",
-              fontSize: 10,
-            },
-          ],
-      margin: [0, 10, 0, 10],
-    };
+  const tienePromo =
+    total < totalSinPromo &&
+    promoLabel &&
+    promoLabel !== "" &&
+    promoLabel !== ""; // 🔥 filtro clave
+
+  return {
+    stack: tienePromo
+      ? [
+          // ❌ ya no quieres tachado → lo quitamos
+          {
+            text: promoLabel,
+            fontSize: 9,
+            style: "promoLabel",
+            alignment: "right",
+            margin: [0, 2, 0, 2],
+          },
+          {
+            text: formatMoney(total),
+            color: "green",
+            bold: true,
+            fontSize: 10,
+            alignment: "right",
+          },
+        ]
+      : [
+          {
+            text: formatMoney(total),
+            alignment: "right",
+            fontSize: 10,
+          },
+        ],
+    margin: [0, 10, 0, 10],
   };
-
+};
 
   // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
   const llantasRows = v.llantasSelecionadas.map((ll) => {
@@ -4840,11 +4850,12 @@ const generarPDF = async () => {
         border: [true, true, true, true],
         alignment: "center",
       },
-      promoLabel: {
-        italics: true,
-        fontSize: 9,
-        color: "#D92300",
-      },
+     promoLabel: {
+       fontSize: 8,
+           color: "white",
+  background: "#dc3545", // rojo bootstrap
+  margin: [0, 2, 0, 2],
+},
       notaIVA: {
         italics: true,
         fontSize: 9,
@@ -4862,6 +4873,7 @@ const generarPDF = async () => {
 </script>
 
 <style>
+
 .cotizacion-table {
   max-width: min(1100px, 95vw);
 }
@@ -4872,14 +4884,23 @@ const generarPDF = async () => {
   border-radius: 0.375rem;
   border: 1px solid #dee2e6;
 }
+
+.cotizacion-header-cliente {
+  background-color: #f8f9fa;
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+}
+
 .modal-1000 {
   max-width: 1000px;
   width: 100%;
 }
 
 @media print {
-  /* Quitar márgenes gigantes */
+
   @page {
+    size: letter;
     margin: 8mm;
   }
 
@@ -4888,22 +4909,14 @@ const generarPDF = async () => {
     padding: 0 !important;
   }
 
-  /* Ocultar TODO */
+  /* 🔴 Ocultar todo */
   body * {
     visibility: hidden;
   }
 
-  .container,
-  .row {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Mostrar solo el área a imprimir */
+  /* 🟢 Mostrar solo cotización */
   #area-imprimir,
   #area-imprimir * {
-    font-size: 8pt;
-    line-height: 1.5;
     visibility: visible;
   }
 
@@ -4912,41 +4925,127 @@ const generarPDF = async () => {
     left: 0;
     top: 0;
     width: 100%;
+
+    font-family: Arial, sans-serif;
+    font-size: 8pt;
+    line-height: 1.3;
+    color: #000;
   }
 
-  .modal-body {
-    overflow: visible !important;
-    max-height: none !important;
-    height: auto !important;
+  /* ========================= */
+  /* 🔥 TABLA ESTILO PDF REAL */
+  /* ========================= */
+
+  #area-imprimir table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 20px;
   }
 
-  /* 🔥 CLAVE: desactivar table-responsive */
+  /* HEADER */
+  #area-imprimir thead th {
+  background: #000000;  font-weight: bold;
+  font-size: 10pt;
+  padding: 6px 4px;
+
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+}
+
+  #area-imprimir .cotizacion-header-cliente {
+    font-size: 10pt;
+  }
+
+  #area-imprimir .cotizacion-header {
+    border: 0px;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  #area-imprimir .direcciones {
+    font-size: 10pt;
+  }
+
+  /* FILAS */
+  #area-imprimir tbody td {
+    padding: 6px 4px;
+    font-size: 9pt;
+
+    border: none;
+    border-bottom: 1px solid #000;
+  }
+
+  /* ❌ quitar líneas verticales */
+  #area-imprimir th,
+  #area-imprimir td {
+    border-left: none !important;
+    border-right: none !important;
+    background-color: grey !important;
+  }
+
+  /* 🔥 separador tipo SERVICIOS */
+  #area-imprimir .fila-separador td {
+    background: #ededed;
+    font-weight: bold;
+
+    border-top: 2px solid #000;
+    border-bottom: 2px solid #000;
+  }
+
+  /* 📐 alineaciones */
+  #area-imprimir td:nth-child(1),
+  #area-imprimir th:nth-child(1) {
+    width: 40px;
+    text-align: center;
+  }
+
+  #area-imprimir td:nth-child(2),
+  #area-imprimir th:nth-child(2) {
+    text-align: left;
+  }
+
+  #area-imprimir td:nth-child(3),
+  #area-imprimir th:nth-child(3),
+  #area-imprimir td:nth-child(4),
+  #area-imprimir th:nth-child(4) {
+    width: 90px;
+    text-align: right;
+  }
+
+  /* 💰 total */
+  #area-imprimir .total-verde {
+    color: #008000;
+    font-weight: bold;
+    font-size: 10pt;
+  }
+
+  /* 🎟️ promo */
+  #area-imprimir .promo-label {
+    color: #d92300;
+    font-style: italic;
+    font-size: 8pt;
+  }
+
+  /* 📄 total general */
+  #area-imprimir .total-general {
+    font-weight: bold;
+    font-size: 12pt;
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  /* 📄 nota IVA */
+  #area-imprimir .nota-iva {
+    font-style: italic;
+    font-size: 9pt;
+    text-align: right;
+    margin-top: 10px;
+  }
+
+  /* 🔧 arreglos Bootstrap */
   .table-responsive {
     overflow: visible !important;
-  }
-
-  table {
-    page-break-inside: auto;
-  }
-
-  tr {
-    page-break-inside: avoid;
-    page-break-after: auto;
-  }
-
-  thead {
-    display: table-header-group; /* Permite encabezado correcto */
-  }
-
-  tfoot {
-    display: table-footer-group;
-  }
-
-  /* Botones fuera */
-  button,
-  .btn,
-  .no-imprimir {
-    display: none !important;
   }
 
   .modal,
@@ -4956,8 +5055,31 @@ const generarPDF = async () => {
     overflow: visible !important;
   }
 
-  .page-break {
-    page-break-before: always;
+  .modal-body {
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  /* 📄 saltos de página */
+  table {
+    page-break-inside: auto;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  /* ❌ ocultar botones */
+  button,
+  .btn,
+  .no-imprimir {
+    display: none !important;
   }
 }
+
 </style>
