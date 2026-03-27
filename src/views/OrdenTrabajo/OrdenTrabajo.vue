@@ -62,7 +62,11 @@
               v-for="ot in listaOrdenTrabajo.ordenes"
               :key="ot.idOrdenTrabajo"
             >
-              <td style="white-space: nowrap;">O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }}</td>
+              <td style="white-space: nowrap;">O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }} 
+                <div v-if="ot.isHija" class="float-sm-end" >
+                  <i class="bi bi-node-plus-fill"></i>
+                </div>
+              </td>
               <td>{{ ot.clienteNombre }}</td>
               <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
               <td>{{ formatearFecha(ot.fechaAlta) }}</td>

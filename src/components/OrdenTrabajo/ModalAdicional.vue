@@ -119,6 +119,7 @@ const agregarFila = async () => {
 
   adicionalesLocal.value.push({
   	tempId: generearTempId(),
+	idDetalleOTServicio: 0,
     idDetalleCotizacionServicio: null,
     idConceptoTrabajo: Concepto.value,
     idPromocion: 0,

@@ -14,84 +14,83 @@ import OrdenTrabajoEdit from '@/views/OrdenTrabajo/OrdenTrabajoEdit.vue'
 import OrdenTrabajoLayout from '@/views/OrdenTrabajo/OrdenTrabajoLayout.vue'
 
 const routes = [
-    { 
-        path: '/', 
-        component: Login 
-    },
-    {
-        path: '/content',
-        component: MainLayout,
-        meta: { requiereAuth: true },
+  {
+    path: "/",
+    component: Login,
+  },
+  {
+    path: "/content",
+    component: MainLayout,
+    meta: { requiereAuth: true },
+    children: [
+      {
+        path: "inventario",
+        name: "Inventario",
+        component: Inventario,
+      },
+      {
+        path: "inicio",
+        name: "Inicio",
+        component: Inicio,
+      },
+      {
+        path: "cotizacion",
+        name: "cotizacion",
+        component: Cotizacion,
+      },
+
+      {
+        path: "orden-trabajo",
+        component: OrdenTrabajoLayout,
         children: [
-            {
-                path: 'inventario',
-                name: 'Inventario',
-                component: Inventario
-            },
-            {
-                path: 'inicio',
-                name: 'Inicio',
-                component: Inicio 
-            },
-            {
-                path: 'cotizacion',
-                name:'cotizacion',
-                component: Cotizacion
-            },
+          {
+            path: "",
+            name: "orden-trabajo-list",
+            component: OrdenTrabajo,
+          },
+          {
+            path: "nueva/:idCotizacion?/:idOrdenTrabajo?",
+            name: "orden-trabajo-form",
+            component: FormularioOT,
+            props: true,
+          },
+          {
+            path: ":id",
+            name: "orden-trabajo-preview",
+            component: OrdenTrabajoPreview,
+          },
+          {
+            path: ":id/work",
+            name: "orden-trabajo-work",
+            component: OrdenTrabajoEdit,
+          },
+        ],
+      },
 
-
-            {
-                path: 'orden-trabajo',
-                component: OrdenTrabajoLayout, 
-                children: [
-                    {
-                        path: '',
-                        name: 'orden-trabajo-list',
-                        component: OrdenTrabajo
-                    },
-                    {
-                        path: 'nueva/:idCotizacion?',
-                        name: 'orden-trabajo-form',
-                        component: FormularioOT,
-                        props: true
-                    },
-                    {
-                        path: ':id',
-                        name: 'orden-trabajo-preview',
-                        component: OrdenTrabajoPreview
-                    },
-                    {
-                        path: ':id/work',
-                        name: 'orden-trabajo-work',
-                        component: OrdenTrabajoEdit
-                    }
-                ]
-            },
-
-            // {
-            //     path: 'orden-trabajo', //path: 'OrdenTrabajo',
-            //     name:'OrdenTrabajo',
-            //     component: OrdenTrabajo
-            // },
-            // {                
-            //     path:'FormularioOT/:idCotizacion?',
-            //     name:'formOT',
-            //     component: FormularioOT,
-            //     props: true                      
-            // },
-            {
-                path: 'Promocion',
-                name:'Promocion',
-                component: Promocion
-            },
-            {
-                path:'Almacen',
-                name:'almacen',
-                component: TablaCargarLlantas
-            }
-        ]
-    }
-]
+      // {
+      //     path: 'orden-trabajo', //path: 'OrdenTrabajo',
+      //     name:'OrdenTrabajo',
+      //     component: OrdenTrabajo
+      // },
+      // {
+      //     path:'FormularioOT/:idCotizacion?',
+      //     name:'formOT',
+      //     component: FormularioOT,
+      //     props: true
+      // },
+      {
+        path: "Promocion",
+        name: "Promocion",
+        component: Promocion,
+      },
+      {
+        path: "Almacen",
+        name: "almacen",
+        component: TablaCargarLlantas,
+      },
+    ],
+  },
+];
 
 const router = createRouter({
     history: createWebHistory(),
