@@ -225,7 +225,7 @@
           </div>
 
 
-                    <div class="col-6 mb-3">
+           <div class="col-6 mb-3">
             <label for="email" class="form-label">Correo electrónico</label>
             <input id="email"
               v-model="ordenTrabajoForm.cliente.clienteCorreo"
