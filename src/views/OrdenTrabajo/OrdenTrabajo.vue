@@ -64,7 +64,7 @@
             >
               <td style="white-space: nowrap;">O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }} 
                 <div v-if="ot.isHija" class="float-sm-end" >
-                  <i class="bi bi-node-plus-fill"></i>
+                  <i class="bi bi-node-plus-fill ms-1" title="OT Derivada"></i>
                 </div>
               </td>
               <td>{{ ot.clienteNombre }}</td>

@@ -17,7 +17,7 @@
                 >Fecha de creación:</span
               >&nbsp;{{ formatearFecha(otEditar.fechaAlta) }}
             </div>
-            <div v-if="otEditar.idCotizacion">
+            <div v-if="otEditar.idCotizacion && otEditar.idCotizacion != 0">
               <span style="font-weight: bold; color: grey"
                 >Cotización de origen:</span
               >
@@ -169,7 +169,7 @@
           </button>
 
           <button
-            class="btn btn-sm shadow ms-2 btn-info"
+            class="btn btn-sm shadow-sm ms-2 btn-info"
             @click="derivarOtPadre()"
           >
             <i class="bi bi-node-plus-fill me-3"></i>
@@ -286,6 +286,7 @@
                     class="form-control"
                     type="text"
                     placeholder="(Razón Social a facturar)"
+                    @input = "validate('factura.razonSocial')"
                     @blur="validate('factura.razonSocial')"
                     :class="{ 'input-error': errores['factura.razonSocial'] }"
                   />
@@ -304,6 +305,7 @@
                     class="form-control"
                     type="text"
                     placeholder="(RFC a facturar)"
+                    @input="validate('factura.rfc')"
                     @blur="validate('factura.rfc')"
                     :class="{ 'input-error': errores['factura.rfc'] }"
                   />
@@ -316,6 +318,7 @@
                   <select
                     v-model="otEditar.factura.usoCFDI"
                     class="form-select"
+                    @input="validate('factura.usoCFDI')"
                     @blur="validate('factura.usoCFDI')"
                     :class="{ 'input-error': errores['factura.usoCFDI'] }"
                   >
@@ -337,6 +340,7 @@
                   <select
                     v-model="otEditar.factura.regimenFiscal"
                     class="form-select"
+                    @input="validate('factura.regimenFiscal')"
                     @blur="validate('factura.regimenFiscal')"
                     :class="{ 'input-error': errores['factura.regimenFiscal'] }"
                   >
@@ -378,6 +382,7 @@
                     class="form-control"
                     type="text"
                     placeholder="(C.P.)"
+                    @input="validate('factura.cp')"
                     @blur="validate('factura.cp')"
                     :class="{ 'input-error': errores['factura.cp'] }"
                   />
@@ -389,15 +394,16 @@
                   <label for="correofactura" class="form-label">Correo *</label>
                   <input
                     id="correofactura"
-                    v-model="otEditar.factura.eMail"
+                    v-model="otEditar.factura.email"
                     class="form-control"
                     type="text"
                     placeholder="(Use un correo válido)"
-                    @blur="validate('factura.eMail')"
-                    :class="{ 'input-error': errores['factura.eMail'] }"
+                    @input="validate('factura.email')"
+                    @blur="validate('factura.email')"
+                    :class="{ 'input-error': errores['factura.email'] }"
                   />
-                  <small v-if="errores['factura.eMail']" class="error-msg">
-                    {{ errores["factura.eMail"] }}
+                  <small v-if="errores['factura.email']" class="error-msg">
+                    {{ errores["factura.email"] }}
                   </small>
                 </div>
               </div>
@@ -626,6 +632,8 @@ const cargarOrden = async () => {
       idOrdenTrabajo: json?.idOrdenTrabajo || 0,
       prefijoSucursal: json.prefijoSucursal,
       consecutivoSucursal: json.consecutivoSucursal,
+      consecutivoCotizacion: json.consecutivoCotizacion,
+      prefijoCotizacion: json.prefijoCotizacion,
 
       cliente: json.cliente || {},
       empleado: json.empleado || {},
@@ -726,7 +734,8 @@ const cargarOrden = async () => {
             idPromocionVuelo: paquete?.idPromocionVuelo || null,
             idPromocionSeleccionada:
               paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
-            descripcion: paquete.nombre,
+            nombre: paquete.nombre,
+            descripcion: paquete.descripcion,
             cantidad: 1,
             precioUnitario: paquete.precioUnitario,
 
@@ -1163,7 +1172,7 @@ function validate(path) {
     "factura.regimenFiscal": () =>
       !value ? "Debe seleccionar un régimen fiscal." : null,
 
-    "factura.eMail": () => {
+    "factura.email": () => {
       if (!value || !value.trim()) return "Correo obligatorio.";
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -94,6 +94,15 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory(),
+    scrollBehavior(to, from, savedPosition) {
+    // Si vienes de atrás/adelante del navegador
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    // Siempre ir al top al cambiar de ruta
+    return { top: 0 }
+  },
     routes
 })
 
