@@ -25,7 +25,7 @@
               v-for="(paquete, index) in paquetes"
               :key="paquete.idPaquete || index"
             >
-              <td>{{ paquete.descripcion }}</td>
+              <td>{{ paquete.nombre.toUpperCase() }}, {{ paquete.descripcion.toUpperCase() }}</td>
               <td class="text-center">{{ paquete.cantidad }}</td>
               <td class="text-end">
                 {{
