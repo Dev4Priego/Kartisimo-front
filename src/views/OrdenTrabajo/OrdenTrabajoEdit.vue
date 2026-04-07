@@ -175,6 +175,14 @@
             <i class="bi bi-node-plus-fill me-3"></i>
             Derivar OT
           </button>
+          <button
+            class="btn btn-sm shadow-sm ms-2 btn-primary"
+          
+            @click="modelValue = true"
+          >
+          <i class="bi bi-printer-fill me-3"></i>
+            Imprimir
+          </button>
         </div>
       </div>
       <h5>Datos generales</h5>
@@ -484,6 +492,7 @@
     <button class="btn btn-secondary mx-2" @click="volver()">
       <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
     </button>
+    
     <button
       class="btn btn-primary mx-2"
       :disabled="!formValido"
@@ -491,10 +500,18 @@
     >
       Guardar cambios
     </button>
+    
   </div>
 </div>
 
   </div>
+ 
+    <ImprimirOT
+    v-model="modelValue"
+    :OT="prepararDatosImpresion()"
+  />
+ 
+  
 </template>
 
 <script setup>
@@ -513,6 +530,7 @@ import PaquetesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquet
 import AdicionalesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue";
 import OtrosSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/OtrosSection.vue";
 import Incidentes from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Incidentes.vue";
+import ImprimirOT from "@/components/OrdenTrabajo/ImprimirOT.vue";
 import Refacciones from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Refacciones.vue";
 import { parse } from "vue/compiler-sfc";
 import axios from "axios";
@@ -527,6 +545,7 @@ const router = useRouter();
 const itmEmpleados = ref({});
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
+const modelValue =ref(false);
 const showModal = ref(false);
 /**
  * 🔒 Estado inicial seguro
@@ -1279,7 +1298,20 @@ const guardarLLantasOT = async () => {
     //console.log("RESPUESTA BACKEND:", data);
     
 };
+const prepararDatosImpresion = () => {
+  const insumo = otEditar.value.insumo || {};
 
+  return {
+    ...otEditar.value,
+
+    insumo: {
+      llantas: (insumo.llantas || []).filter((l) => !l.eliminado),
+      paquetes: (insumo.paquetes || []).filter((p) => !p.eliminado),
+      adicionales: (insumo.adicionales || []).filter((a) => !a.eliminado),
+    },
+  };
+};
+console.log("PROPIEDADES PARA IMPRIMIR:" , prepararDatosImpresion())
 
 </script>
 

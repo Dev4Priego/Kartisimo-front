@@ -8,7 +8,7 @@
       <div v-if="adicionales.length === 0" class="text-muted">
         No hay Adicionales asignadas
       </div>
-      <div class="row g-3">
+      <div class="row g-3" v-if="adicionales.length !== 0">
         <table class="table table-hover table-sm">
           <thead>
             <tr>
