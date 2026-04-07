@@ -808,7 +808,7 @@
                     </tr>
                   </template>
                   <!--Separar los paquetes con los servicios adicionales  para una mejor vista-->
-                  <tr v-if="paquetes.length > 0 && adicionales.length > 0">
+                  <tr v-if=" adicionales.length > 0">
                     <td colspan="6">
                       <h4>Servicios Adicionales</h4>
                     </td>
@@ -836,7 +836,9 @@
                           </option>
                         </select>
                       </td>
-                      <td>{{ ad.medida }} {{ ad.marca }} {{ ad.modelo }}</td>
+                      <td><strong>
+                        {{ ad.descripcion }}
+                      </strong></td>
                       <td>
                         <input
                           type="number"
@@ -1141,7 +1143,7 @@ const { proxy } = getCurrentInstance();
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
-const totales = ref([]);
+
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1154,16 +1156,19 @@ const emit = defineEmits(["update:modelValue", "update:insumos"]);
 const mostrarModalAdicional = ref(false);
 
 // observar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
+const inicializado = ref(false);
+
 watch(
   () => props.insumos,
   (nuevo) => {
-    //console.log(JSON.stringify(nuevo));
-    llantas.value = [...(nuevo.llanta || [])];
-    paquetes.value = [...(nuevo.paquete || [])];
-    adicionales.value = [...(nuevo.adicional || [])];
+    llantas.value = [...(nuevo.llantas || [])];
+    paquetes.value = [...(nuevo.paquetes || [])];
+    adicionales.value = [...(nuevo.adicionales || [])];
+    console.log("INSUMOS MODAL:", nuevo);
   },
-  { immediate: true, deep: true },
+  { immediate: true }
 );
+
 const close = () => emit("update:modelValue", false);
 
 // Estados
@@ -1194,14 +1199,21 @@ const PromocionesVuelo = reactive({
 // Si existe idPromocion, Busca la promo en ll.promosDisponibles, Copia los datos importantes al item, recalcula Subtotal
 const onPromoChange = (item) => {
   const idSel = item.idPromocionSeleccionada; // normal
-  const idVuelo = item.idPromocionAlVuelo; // vuelo
+  const idVuelo = item.idPromocionVuelo; // vuelo
 
   // Si no hay ninguna promoción
   if (!idSel && !idVuelo) {
-    item.promo = null;
+      item.promo = {
+      idPromocion: 0,
+      valor: 0,
+      tipo: false,
+      nombre: ""
+    };
+    
     item.precioConPromo = item.precioUnitario;
     item.isVuelo = null;
     item.idPromocion = 0; // Reset idPromocion for normal promos
+    recalcularSubtotal(item);
     return;
   }
 
@@ -1246,9 +1258,15 @@ const precioFinalItem = (item) => {
 };
 
 const recalcularSubtotal = (item) => {
+  
   const promo = obtenerPromoSeleccionada(item);
 
-  item.promo = promo || null;
+  item.promo = promo || {
+  idPromocion: 0,
+  valor: 0,
+  tipo: false,
+  nombre: ""
+};;
   item.esAlVuelo = !!item.idPromocionVuelo;
 
   const precioFinal = precioFinalItem(item);
@@ -1487,6 +1505,7 @@ const agregarLlanta = async (itm) => {
   }
 
   const nuevaLlanta = {
+    idDetalleOTLlanta: 0,
     idLlanta: itm.idLlanta,
     idAlmacen: itm.idAlmacen,
     idPromocion: 0,
@@ -1508,10 +1527,13 @@ const agregarLlanta = async (itm) => {
     promosDisponibles: [],
     promosAplicables: [],
     // valores históricos
-    nombrePromocion: null,
-    valorPromocion: null,
-    tipoPromocion: null,
-
+   
+    promo:{
+      idPromocion:0,
+      valor:0,
+      tipo:false,
+      nombre:""
+    },
     //  activo por defecto → botón rojo
     activo: true,
   };
@@ -1646,21 +1668,13 @@ watch(
 );
 
 //watch para recalcular el total cada vez que cambie el arreglo de paquetes, o las promociones seleccionadas dentro de cada paquete, llanta o adicional
-watch(
-  () => [paquetes.value, llantas.value, adicionales.value],
-  () => {
-   
-    // Aquí podrías recalcular totales o hacer cualquier otra acción necesaria
-    //recalcular para ver en tiempo real el total cada vez que se modifique algo en paquetes, llantas o adicionales
-    const insumosMapeados = mapearInsumosParaPadre();
-    totales.value = calcularTotalesDesdeInsumos(insumosMapeados);
-     console.log("total:" , totales);
-    // Aquí puedes hacer algo con los totales si lo necesitas
-    // Por ejemplo, emitir un evento o actualizar un estado
-    
-  },
-  { deep: true },
-);
+const totales = computed(() => {
+  
+
+  const insumosMapeados = mapearInsumosParaPadre()
+  console.log("INSUMOS:", insumosMapeados)
+  return calcularTotalesDesdeInsumos(insumosMapeados)
+})
 // agregar o quitar a el arreglo paquetes, conforme checbox
 const onTogglePaquete = async (paqueteBase) => {
   const existe = paquetes.value.some(
@@ -1680,6 +1694,7 @@ const onTogglePaquete = async (paqueteBase) => {
     (await obtenerPromosPorPaquete(paqueteBase.idPaquete)) || [];
 
   paquetes.value.push({
+    idDetalleOTPaquete:0,
     idPaquete: paqueteBase.idPaquete,
     idPromocion: 0,
     idConceptoTrabajo: 0,
@@ -1719,6 +1734,7 @@ const onTogglePaquete = async (paqueteBase) => {
 const mapearInsumosParaPadre = () => {
   return {
     llanta: llantas.value.map((l) => ({
+      idDetalleOTLlanta: l.idDetalleOTLlanta,
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
       idPromocion: l.esAlVuelo ? 0 : l.idPromocionSeleccionada,
@@ -1744,6 +1760,7 @@ const mapearInsumosParaPadre = () => {
     })),
 
     paquete: paquetes.value.map((p) => ({
+      idDetalleOTPaquete: p.idDetalleOTPaquete,
       idPaquete: p.idPaquete,
       idPromocion: p.esAlVuelo ? 0 : p.idPromocionSeleccionada,
       idPromocionSeleccionada: p.idPromocionSeleccionada || 0,
@@ -1772,6 +1789,7 @@ const mapearInsumosParaPadre = () => {
     })),
 
     adicional: adicionales.value.map((a) => ({
+      idDetalleOTServicio: a.idDetalleOTServicio,
       idDetalleCotizacionServicio: a.idDetalleCotizacionServicio,
       idPromocion: a.esAlVuelo ? 0 : a.idPromocionSeleccionada,
       idPromocionSeleccionada: a.idPromocionSeleccionada || 0,
@@ -1854,6 +1872,7 @@ const togglePromoAlVuelo = (item) => {
 
   if (aplicado) {
     // Quitar promo al vuelo
+    recalcularSubtotal(item);
     item.idPromocionVuelo = 0;
     item.idPromocionSeleccionada = 0;
     item.promo = null;

@@ -384,13 +384,12 @@
                   >
                     <td class="text-center">1</td>
                     <td>
-                      {{ paquete.nombre.toUpperCase() }}
+                      {{ paquete.nombre.toUpperCase() }},
                       {{ paquete.descripcion.toUpperCase() }}
-                      <p>
+                      <br />
                         <small class="badge bg-secondary mt-1">{{
                           paquete.comentario 
                         }}</small>
-                      </p>
                     </td>
                     <td class="text-end">
                       {{
@@ -447,11 +446,10 @@
                     <td class="text-center">{{ servicio.cantidad }}</td>
                     <td>
                       {{ servicio.nombreServicio }} {{ servicio.observacion }}
-                      <p>
+                      <br />
                         <small class="badge bg-secondary mt-1">{{
                           servicio.comentario
                         }}</small>
-                      </p>
                     </td>
                     <td class="text-end">
                       {{
@@ -1386,7 +1384,7 @@
                         >
                           <tr>
                           <td>
-                            {{ p.nombre.toUpperCase() }}
+                            {{ p.nombre.toUpperCase() }}, {{ p.descripcion.toUpperCase() }}
                             <div class="mt-1">
                               <input
                                 type="text"
@@ -4532,7 +4530,7 @@ const celdaTotalConPromo = ({
   const paquetesRows = v.paquetes.map((p) => [
     celdaCentroY("1", "center"),
 
-    celdaCentroY(p.nombre + " " + p.descripcion),
+    celdaCentroY(p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase()),
 
     celdaCentroY(formatMoney(p.precioUnitario), "right"),
 
@@ -4550,13 +4548,13 @@ const celdaTotalConPromo = ({
     {
       text: String(s.cantidad),
       alignment: "center",
-      fontSize: 9,
+      fontSize: 10,
       margin: [0, 10, 0, 10],
     },
     {
       text: s.nombreServicio,
-      italics: true,
-      fontSize: 9,
+      italics: false,
+      fontSize: 10,
       margin: [0, 10, 0, 10],
     },
     {
@@ -4660,40 +4658,40 @@ const celdaTotalConPromo = ({
             {
               text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
-              fontSize: 10,
+              fontSize: 9,
             },
             { text: "Col. Valle de Jerez C.P 37538", fontSize: 8 },
-            { text: "Tels. 477 330 6060\ny 477 390 5090", fontSize: 8 },
+            { text: "Tels. 477 330 6060 y\n477 390 5090", fontSize: 8 },
             { text: "delta@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
               text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
-              fontSize: 10,
+              fontSize: 9,
             },
             { text: "Col. Obrera C.P. 37340", fontSize: 8 },
-            { text: "Tels. 477 717 7440\ny 477 470 9419", fontSize: 8 },
+            { text: "Tels. 477 717 7440 y\n477 470 9419", fontSize: 8 },
             { text: "apolo@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
               text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
-              fontSize: 10,
+              fontSize: 9,
             },
             { text: "Col. La Piscina C.P. 37440", fontSize: 8 },
-            { text: "Tels. 477 390 0290\ny 477 461 0028", fontSize: 8 },
+            { text: "Tels. 477 390 0290 y\n477 461 0028", fontSize: 8 },
             { text: "torreslanda@kartisimo.mx", fontSize: 8 },
           ],
           [
             {
-              text: "Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián",
+              text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián",
               bold: true,
-              fontSize: 10,
+              fontSize: 9,
             },
             { text: "Col. La Martinica, C.P. 37500", fontSize: 8 },
-            { text: "Tels. 477 763 3285\ny 477 763 3284", fontSize: 8 },
+            { text: "Tels. 477 763 3285 y\n477 763 3284", fontSize: 8 },
           ],
         ],
         columnGap: 15,

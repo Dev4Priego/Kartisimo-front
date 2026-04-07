@@ -115,7 +115,7 @@
   </div>
 </div>
 		<!-- FACTURA -->
-		<div v-if="orden?.requiereFactura" class="card border-1 shadow-sm mb-2 no-imprimir">
+		<div v-if="orden?.requiereFactura" class="card border-1 shadow-sm mb-2">
 			<div class="card-body">
 				<h5 class="fw-bold mb-3">
 					<i class="bi bi-receipt me-2 text-primary"></i>
@@ -123,50 +123,46 @@
 				</h5>
 
 				<div class="row">
-					<div class="col-4">
-						<div class="fw-semibold text-uppercase">
+					<div class="col-4 mb-1">
+						<span class="fw-semibold">RFC: </span>
+						<span class="text-uppercase">
 						{{ orden?.factura?.rfc }}
-						</div>
-						<small class="text-muted">RFC</small>
+						</span>
 					</div>
 
-					<div class="col-8">
-						<div class="fw-semibold">
+					<div class="col-8 mb-1">
+						<span class="fw-semibold">Razón social: </span>
 						{{ orden?.factura?.razonSocial || '—' }}
-						</div>
-						<small class="text-muted">Razón social</small>
+						
 					</div>
-
-					<div class="col-12 col-lg-6">
-						<div class="fw-semibold">
+					
+					<div class="col-12 col-lg-6 mb-1">
+						<span class="fw-semibold">Régimen fiscal: </span>
 						{{ orden?.regimenFiscal || '—' }}
-						</div>
-						<small class="text-muted">Régimen fiscal</small>
+						
 					</div>	
-					<div class="col-12 col-lg-6">
-						<div class="fw-semibold">
+					
+					<div class="col-12 col-lg-6 mb-1">
+						<span class="fw-semibold">Uso CFDI: </span>
 						{{ orden?.usoCFDI || '—' }}
-						</div>
-						<small class="text-muted">Uso CFDI</small>
+						
 					</div>
 
-					<div class="col-12 col-lg-6">
-						<div class="fw-semibold">
+					<div class="col-12 col-lg-6 mb-1">
+						<span class="fw-semibold">Domicilio: </span>
 						{{ orden?.factura.direccion || '—' }}
-						</div>
-						<small class="text-muted">Domicilio</small>
+						
 					</div>	
-					<div class="col-6 col-lg-3">
-						<div class="fw-semibold">
+					<div class="col-6 col-lg-2 mb-1">
+						<span class="fw-semibold">C.P. </span>
 						{{ orden?.factura.cp || '—' }}
-						</div>
-						<small class="text-muted">C.P.</small>
+			
 					</div>
-					<div class="col-6 col-lg-3">
-						<div class="fw-semibold">
+
+					<div class="col-6 col-lg-4 mb-1">
+						<span class="fw-semibold">Correo: </span>
 						{{ orden?.factura.email || '—' }}
-						</div>
-						<small class="text-muted">Correo</small>
+						
 					</div>
 				</div>
 			</div>
@@ -190,9 +186,7 @@
 								</div>
 								<small class="text-muted">
 									Cantidad: {{ llanta.cantidad }} ·
-									${{ formatNumber(llanta.precioUnitario) }} c/u,
-									subtotal: ${{ formatNumber(llanta.cantidad * llanta.precioUnitario) }},
-									promoción: {{llanta?.tipoPromocion || llanta?.tipoVuelo ? `-%` : `-$`  }}{{llanta?.valorPromocion || llanta.valorVuelo}}
+									${{ formatNumber(llanta.precioUnitario) }} c/u
 								</small>
 							</div>
 
@@ -212,7 +206,7 @@
   </span>
 
   <!-- Promo + precio final -->
-  <div class="d-flex align-items-center gap-2">
+  
     <small class="badge bg-danger">
       {{ llanta?.nombreVuelo || llanta?.nombrePromocion }}
     </small>
@@ -225,8 +219,7 @@
         })
       }}
     </span>
-  </div>
-							</div>
+	</div>
 
 							<div v-else class="text-end">
 							{{
@@ -259,11 +252,10 @@
 						<div class="d-flex justify-content-between">
 							<div>
 								<div class="fw-semibold">
-									{{ paquete.nombre }}
+									{{ paquete.nombre.toUpperCase() }}, {{ paquete.descripcion.toUpperCase() }}
 								</div>
 								<small class="text-muted">
-									{{ paquete.descripcion }}, subtotal: ${{ formatNumber(paquete.precioUnitario) }}, 
-									promoción: {{paquete?.tipoPromocion || paquete?.tipoVuelo ? `-%` : `-$`  }}{{paquete?.valorPromocion || paquete.valorVuelo}}
+									Subtotal: ${{ formatNumber(paquete.precioUnitario) }}
 								</small>
 							</div>
 
@@ -283,11 +275,10 @@
 						</span>
 
 						<!-- Promo + precio final -->
-						<div class="d-flex align-items-center gap-2">
+						<!--<div class="d-flex align-items-center gap-2"> -->
 							<small class="badge bg-danger">
 							{{ paquete?.nombreVuelo || paquete?.nombrePromocion }}
 							</small>
-
 							<span class="text-success fw-bold">
 							{{
 								Number(precioFinalItem(paquete)).toLocaleString("es-MX", {
@@ -296,7 +287,7 @@
 								})
 							}}
 							</span>
-						</div>
+						<!-- </div> -->
 						</div>
 
 						<div v-else class="text-end">
@@ -351,8 +342,7 @@
 									{{ s.descripcionServicio }}
 								</div>
 								<small class="text-muted">
-									Cantidad: {{ s.cantidad }} · ${{ formatNumber(s.precioUnitario) }} c/u, subtotal: ${{ formatNumber(s.cantidad * s.precioUnitario) }},
-									promoción: {{s?.tipoPromocion || s?.tipoVuelo ? `-%` : `-$`  }}{{s?.valorPromocion || s.valorVuelo}}
+									Cantidad: {{ s.cantidad }} · ${{ formatNumber(s.precioUnitario) }} c/u
 								</small>
 							</div>
 
@@ -671,6 +661,7 @@ const totalFinalOrden = computed(() => {
 
   body {
     background: white !important;
+	font-size: 6pt;
   }
 
   /* quitar padding bootstrap */
@@ -684,6 +675,7 @@ const totalFinalOrden = computed(() => {
     border: none !important;
     box-shadow: none !important;
     margin-bottom: 6px !important;
+	font-size: 11pt;
   }
 
   .card-body {

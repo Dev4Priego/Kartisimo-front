@@ -239,29 +239,29 @@ tbody tr:last-child td {
 
 		<div class="branches">
 			<div class="branch">
-				<strong>Blvd. Delta 2002 esq. Rio Mayo</strong><br>
+				<strong>Blvd. Delta 2002<br>esq. Rio Mayo</strong><br>
 				Col. Valle de Jerez C.P. 37538<br>
-				Tel. 477 330 6060 y 477 390 5090<br>
+				Tel. 477 330 6060 y<br>477 390 5090<br>
 				delta@kartisimo.mx
 			</div>
 
 			<div class="branch">
-				<strong>Blvd. Lopez Mateos 827 esq. Apolo</strong><br>
+				<strong>Blvd. Lopez Mateos 827<br>esq. Apolo</strong><br>
 				Col. Obrera C.P. 37340<br>
-				Tel. 477 717 7440 y 477 470 9419<br>
+				Tel. 477 717 7440 y<br>477 470 9419<br>
 				apolo@kartisimo.mx
 			</div>
 
 			<div class="branch">
-				<strong>Blvd. Torres Landa 1901 esq San Jacobo</strong><br>
+				<strong>Blvd. Torres Landa 1901<br>esq San Jacobo</strong><br>
 				Col. La Pisina C.P. 37440<br>
-				Tel. 477 390 0290 y 477 461 0028<br>
+				Tel. 477 390 0290 y<br>477 461 0028<br>
 				torreslanda@kartisimo.mx
 			</div>
 			<div class="branch">
-				<strong>Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong><br>
+				<strong>Blvd. Mariano Escobedo Pte.<br>2715 esq. San Sebastián</strong><br>
 				Col. La Martinica, C.P. 37500<br>
-				Tel. 477 763 3285 y 477 763 3284
+				Tel. 477 763 3285 y<br>477 763 3284
 			</div>
 		</div>
 
@@ -380,7 +380,7 @@ tbody tr:last-child td {
 				${props.cotizacion.paquetes.map(p => `
 				<tr>
 				<td class="center">1</td>
-				<td><em>${p.nombre.toUpperCase()} ${p.descripcion.toUpperCase()} </em></td>
+				<td>${p.nombre.toUpperCase()}, ${p.descripcion.toUpperCase()}</td>
 				<td class="right">
 					$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
@@ -398,7 +398,7 @@ tbody tr:last-child td {
 				${props.cotizacion.serviciosAdicionales.map(s => `
 				<tr>
 				<td class="center">${s.cantidad}</td>
-				<td><em>${s.nombreServicio}</em></td>
+				<td>${s.nombreServicio.toUpperCase()}</td>
 				<td class="right">
 					$${s.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
