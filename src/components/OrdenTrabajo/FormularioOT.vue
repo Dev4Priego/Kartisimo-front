@@ -840,31 +840,7 @@
               </transition-group>
               
               <tfoot class="table-light">
-                <!-- <tr>
-                  <th colspan="3" class="text-end">Subtotal</th>
-                  <th class="text-end">
-                    {{
-                      ordenTrabajoForm.totales.subtotal.toLocaleString("es-MX", {
-                        style: "currency",
-                        currency: "MXN",
-                      })
-                    }}
-                  </th>
-                  <th></th>
-                </tr>
-
-                <tr>
-                  <th colspan="3" class="text-end">IVA (16%)</th>
-                  <th class="text-end">
-                    {{
-                      ordenTrabajoForm.totales.iva.toLocaleString("es-MX", {
-                        style: "currency",
-                        currency: "MXN",
-                      })
-                    }}
-                  </th>
-                  <th></th>
-                </tr> -->
+               
 
                 <tr class="table-secondary fw-bold">
                   <th colspan="3" class="text-end fs-6">TOTAL</th>
@@ -1182,7 +1158,13 @@
         </div>
       </div>
     </div>
+
+
 </template>
+
+
+
+
 
 <script setup>
 import {
@@ -1217,6 +1199,7 @@ const props = defineProps({
     required: true,
   },
 });
+
 
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
@@ -1323,7 +1306,6 @@ function validate(path) {
       if (!value.trim())
         return "Debe ingresar un teléfono.";
 
-      // 🔥 LIMPIEZA (igual que tu computed)
       let soloNumeros = value.replace(/\D/g, "");
 
       // Limitar a 10 dígitos
@@ -1765,9 +1747,6 @@ const onClienteSeleccionadoByValue = (valor) => {
     );
   });
 
-  // console.log("Normalizado:", normalizado);
-  // console.log("Valor:", valor);
-  // console.log("Cliente encontrado:", cliente);
 
   if (cliente) {
     // console.log('clienteSeleccionado');
@@ -1923,40 +1902,49 @@ const validarYMostrarPreview = async () => {
   
  };
 
-
 const guardarOT = async () => {
+  console.log("===== INICIO guardarOT =====");
+
+  try {
+    //  USER SESSION
+    const userStorage = localStorage.getItem("userSession");
+
+    if (!userStorage) {
+      console.error(" No hay sesión en localStorage");
+      alert("Sesión expirada. Vuelve a iniciar sesión.");
+      return;
+    }
+
+    const dataUser = JSON.parse(userStorage);
+
+    if (!dataUser?.usuario?.idUsuario || !dataUser?.usuario?.idSucursal) {
+      console.error(" userSession inválido:", dataUser);
+      alert("Error con la sesión del usuario");
+      return;
+    }
+
+    console.log(" Usuario:", dataUser.usuario);
+
+    //  VALIDACIONES
+    const esValido = validaciones();
+    console.log("Validaciones:", esValido);
+
   
-  const userStorage = localStorage.getItem("userSession");
+    console.log(" Formulario válido");
 
-  const dataUser = JSON.parse(userStorage)
-  console.log('Entró');
+    const insumo = ordenTrabajoForm.insumo || {};
 
-  let factura = {};
-const esValido = validaciones();
-
-if (!esValido) return;
-
-  console.log("Formulario válido");
-
-  let insumosSelec = ({
-  ...ordenTrabajoForm.insumo,
-  llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
-  paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
-  adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
-})
-
-  if (boolFactura.value) {
-    factura = {
-      razonSocial: ordenTrabajoForm.factura.razonSocial,
-      direccion: ordenTrabajoForm.factura.direccion,
-      rfc: ordenTrabajoForm.factura.rfc,
-      eMail: ordenTrabajoForm.factura.eMail,
-      cp: ordenTrabajoForm.factura.cp,
-      usoCFDI: ordenTrabajoForm.factura.usoCFDI,
-      regimenFiscal: ordenTrabajoForm.factura.regimenFiscal,
+    const insumosSelec = {
+      ...insumo,
+      llanta: (insumo.llanta || []).filter(l => !l.eliminado),
+      paquete: (insumo.paquete || []).filter(p => !p.eliminado),
+      adicional: (insumo.adicional || []).filter(a => !a.eliminado),
     };
-  } else {
-    factura = {
+
+    console.log(" Insumos:", insumosSelec);
+
+    // fACTURA segura
+    let factura = {
       razonSocial: '',
       direccion: '',
       rfc: '',
@@ -1965,65 +1953,101 @@ if (!esValido) return;
       usoCFDI: null,
       regimenFiscal: null,
     };
-  }
 
-  const objSeend = {
-    idUsuario: dataUser.usuario.idUsuario,
-    idSucursal: dataUser.usuario.idSucursal,
-    idCotizacion: ordenTrabajoForm.cotSeleccionada,
-    idEmpleado: ordenTrabajoForm.idEmpleado,
-    idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
-    metodoPago: ordenTrabajoForm.cliente.metodoPago,
-    fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
-    fechaEntrega: ordenTrabajoForm.fechaEntrega,
-    requiereFactura: boolFactura.value,
-    desecharLlanta: boolDesecharLlanta.value,
-    descripcion: "",
-    estado: "Creado",
-    cliente: {
-      idCliente: ordenTrabajoForm.cliente.id_cliente,
-      nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
-      apellidos: ordenTrabajoForm.cliente.apellidos,
-      rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
-      telefono: ordenTrabajoForm.cliente.clienteTelefono,
-      correo: ordenTrabajoForm.cliente.clienteCorreo,
-    },
-    vehiculo: {
-      idVehiculo: ordenTrabajoForm.vehiculo.id_vehiculo
-        ? ordenTrabajoForm.vehiculo.id_vehiculo
-        : 0,
-      modelo: ordenTrabajoForm.vehiculo.modelo,
-      marca: ordenTrabajoForm.vehiculo.marca,
-      serie: ordenTrabajoForm.vehiculo.numSerie,
-      kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
-      color: ordenTrabajoForm.vehiculo.color,
-      placas: ordenTrabajoForm.vehiculo.placas,
-      anio: ordenTrabajoForm.vehiculo.anio,
-    },
-    factura: factura,
-    insumos: insumosSelec
-  };
+    if (boolFactura?.value) {
+      const f = ordenTrabajoForm.factura || {};
 
-  try {
+      factura = {
+        razonSocial: f.razonSocial || '',
+        direccion: f.direccion || '',
+        rfc: f.rfc || '',
+        eMail: f.eMail || '',
+        cp: f.cp || '',
+        usoCFDI: f.usoCFDI || null,
+        regimenFiscal: f.regimenFiscal || null,
+      };
+    }
+
+    console.log(" Factura:", factura);
+
+    // 🔹 OBJETO FINAL SEGURO
+    const objSeend = {
+      idUsuario: dataUser.usuario.idUsuario,
+      idSucursal: dataUser.usuario.idSucursal,
+      idCotizacion: ordenTrabajoForm.cotSeleccionada || null,
+      idEmpleado: ordenTrabajoForm.idEmpleado || null,
+      idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo || null,
+      metodoPago: ordenTrabajoForm?.cliente?.metodoPago || null,
+      fechaAlta: ordenTrabajoForm?.cliente?.fechaAlta || null,
+      fechaEntrega: ordenTrabajoForm.fechaEntrega || null,
+      requiereFactura: !!boolFactura?.value,
+      desecharLlanta: !!boolDesecharLlanta?.value,
+      descripcion: "",
+      estado: "Creado",
+
+      cliente: {
+        idCliente: ordenTrabajoForm?.cliente?.id_cliente || 0,
+        nombres: ordenTrabajoForm?.cliente?.nombres || "",
+        apellidos: ordenTrabajoForm?.cliente?.apellidos || "",
+        rfc: ordenTrabajoForm?.cliente?.rfc || "",
+        telefono: ordenTrabajoForm?.cliente?.clienteTelefono || "",
+        correo: ordenTrabajoForm?.cliente?.clienteCorreo || "",
+      },
+
+      vehiculo: {
+        idVehiculo: ordenTrabajoForm?.vehiculo?.id_vehiculo || 0,
+        modelo: ordenTrabajoForm?.vehiculo?.modelo || "",
+        marca: ordenTrabajoForm?.vehiculo?.marca || "",
+        serie: ordenTrabajoForm?.vehiculo?.numSerie || "",
+        kilometraje: ordenTrabajoForm?.vehiculo?.kilometraje || 0,
+        color: ordenTrabajoForm?.vehiculo?.color || "",
+        placas: ordenTrabajoForm?.vehiculo?.placas || "",
+        anio: ordenTrabajoForm?.vehiculo?.anio || "",
+      },
+
+      factura,
+      insumos: insumosSelec,
+    };
+
+    console.log(" OBJETO FINAL:", objSeend);
+
+    // 🔹 FETCH
+    console.log(" Enviando request...");
+
     const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(objSeend),
     });
 
+    console.log(" Status:", res.status);
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(" Error HTTP:", text);
+      alert("Error en el servidor");
+      return;
+    }
+
     const data = await res.json();
+    console.log(" Respuesta:", data);
 
     if (data.success) {
-      //console.log(data)
-      limpiarOrdenTrabajoForm(); // Limpia formulario
-      //console.log(data.codigo);
-      irAOrdenTrabajo(data.codigo);         // Redirige
+      console.log(" OT guardada");
+
+      limpiarOrdenTrabajoForm();
+      irAOrdenTrabajo(data.codigo);
     } else {
-      //console.log("No guardada", data);
+      console.warn(" Backend respondió error:", data);
+      alert(data.message || "No se pudo guardar la orden");
     }
+
   } catch (err) {
-    console.error("Error al guardar OT:", err);
+    console.error(" Error general:", err);
+    alert("Error inesperado al guardar");
   }
+
+  console.log(" ===== FIN guardarOT =====");
 };
 
 
@@ -2362,12 +2386,12 @@ const actualizarInsumos = (payload) => {
 
 function validarCampo(campo, valor) {
 
-  const v = (valor ?? "").toString(); // 🔥 ESTA LÍNEA ES LA CLAVE
+  const v = (valor ?? "").toString(); //  ESTA LÍNEA ES LA CLAVE
 
   switch (campo) {
 
     case "vehiculo.kilometraje": {
-      const limpio = v.replace(/\D/g, ""); // 🔥 usar v, NO valor
+      const limpio = v.replace(/\D/g, ""); //  usar v, NO valor
 
       if (!limpio) {
         errores[campo] = "Kilometraje requerido";
@@ -2381,8 +2405,9 @@ function validarCampo(campo, valor) {
 
   }}
 
-
 function validaciones() {
+
+  console.log(" ===== INICIO VALIDACIONES =====");
 
   const campos = [
     "vehiculo.numSerie",
@@ -2392,38 +2417,94 @@ function validaciones() {
     "vehiculo.kilometraje",
     "vehiculo.anio",
     "vehiculo.placas",
-
     "cliente.clienteTelefono",
     "cliente.clienteCorreo",
-    "cliente.rfc",
   ];
 
+  const nombresBonitos = {
+    "vehiculo.numSerie": "Número de serie",
+    "vehiculo.marca": "Marca",
+    "vehiculo.modelo": "Modelo",
+    "vehiculo.color": "Color",
+    "vehiculo.kilometraje": "Kilometraje",
+    "vehiculo.anio": "Año",
+    "vehiculo.placas": "Placas",
+    "cliente.clienteTelefono": "Teléfono",
+    "cliente.clienteCorreo": "Correo",
+    "cliente.rfc": "RFC",
+  };
+
+  // 🔹 Ver estado completo del form
+  console.log(" ordenTrabajoForm:", JSON.parse(JSON.stringify(ordenTrabajoForm)));
+
   // limpiar errores
+  console.log(" Errores antes de limpiar:", errores);
   Object.keys(errores).forEach(k => delete errores[k]);
 
+  // 🔹 Validar campos base
   campos.forEach(campo => {
     const valor = campo.split(".").reduce((o, k) => o?.[k], ordenTrabajoForm);
+
+    console.log(` Campo: ${campo} →`, valor);
+
     validarCampo(campo, valor);
   });
 
-  // SI HAY ERRORES → MOSTRAR ALERTA DETALLADA
+  // 🔹 Teléfono
+  const telefonoRaw = ordenTrabajoForm.cliente.clienteTelefono;
+  const telefono = telefonoRaw?.replace(/\D/g, "");
+
+  console.log(" Teléfono raw:", telefonoRaw);
+  console.log("Teléfono limpio:", telefono);
+
+  if (!telefono || telefono.length !== 10) {
+    console.warn(" Teléfono inválido");
+    errores["cliente.clienteTelefono"] = "Debe tener 10 dígitos";
+  }
+
+  // 🔹 Correo
+  const correo = ordenTrabajoForm.cliente.clienteCorreo;
+  const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  console.log(" Correo:", correo);
+  console.log("¿Correo válido?:", regexCorreo.test(correo));
+
+  if (!correo || !regexCorreo.test(correo)) {
+    console.warn(" Correo inválido");
+    errores["cliente.clienteCorreo"] = "Correo inválido";
+  }
+
+  // 🔹 RFC
+  const rfc = ordenTrabajoForm.cliente.rfc;
+  console.log("RFC:", rfc);
+
+  if (rfc && rfc.length < 12) {
+    console.warn(" RFC inválido");
+    errores["cliente.rfc"] = "RFC inválido";
+  }
+
+  //  Resultado final
+  console.log("ERRORES FINALES:", errores);
+
   if (Object.keys(errores).length > 0) {
 
     let mensaje = "Corrige los siguientes campos:\n\n";
 
     for (const campo in errores) {
-      mensaje += `• ${campo}: ${errores[campo]}\n`;
+      console.log(` ${campo}:`, errores[campo]);
+      mensaje += `• ${nombresBonitos[campo] || campo}: ${errores[campo]}\n`;
     }
 
+    console.log(" VALIDACIONES FALLARON");
     alert(mensaje);
-
     return false;
   }
 
+  console.log(" VALIDACIONES OK");
+  console.log(" ===== FIN VALIDACIONES =====");
+
   return true;
 }
-
-
 
 </script>
 
