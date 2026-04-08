@@ -1,5 +1,5 @@
 <template>
-  <div v-if="modelValue" class="print-container">
+  <div v-if="modelValue" >
   <div id="area-print">
     <div class="container py-4" id="area-imprimir" style="font-size: larger; max-width: 1000px;">
 		
@@ -530,20 +530,24 @@ const totalFinalOrden = computed(() => {
 	return formatNumber(total);
 });
 </script>
-<style scoped>
+<style >
+@page {
+
+  margin: 5mm;
+}
 @media print {
 	html, body {
-  margin: 0;
-  padding: 0;
-  background: white !important;
-}
+		margin: 0;
+		padding: 0;
+
+	}
 
   #area-print {
     position: static;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+	
+   
   }
+  
   /* quitar padding bootstrap */
   .container {
     max-width: 100% !important;

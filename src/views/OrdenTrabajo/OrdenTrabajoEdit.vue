@@ -547,6 +547,7 @@ const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const modelValue =ref(false);
 const showModal = ref(false);
+
 /**
  * 🔒 Estado inicial seguro
  */
@@ -638,7 +639,8 @@ const obtenerPromosGeneralesParaServicio = async () => {
 const cargarOrden = async () => {
   try {
     const id = route.params.id;
-
+    const otCreada = history.state?.otCreada ?? false;
+    console.log("isCreated?: " ,otCreada)
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
     );
@@ -849,7 +851,10 @@ const cargarOrden = async () => {
 
       }
     };
-    //console.log("OTEDITAR DATA:",otEditar.value);
+    // invocar el evento imprimir 
+    
+    if (otCreada === true) modelValue.value = true;
+
   } catch (err) {
     console.error("❌ Error cargando OT:", err);
 

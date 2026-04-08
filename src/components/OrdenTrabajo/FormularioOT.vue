@@ -958,12 +958,14 @@
               ></i>
               &nbsp;Volver
             </button>
+            <!-- Modal vista previa OT :disabled="!formValido" -->
           </router-link>
           <button
             type="button"
             class="btn btn-success position-relative shadow ms-3"
             style="width: 140px"
-            :disabled="!formValido"
+            
+            
             @click="mostrarVista = true"
           >
             <i class="bi-save-fill position-absolute start-0 ms-2"></i>
@@ -1705,7 +1707,13 @@ const ordenTrabajoForm = reactive({
 });
 
 const irAOrdenTrabajo = (id) => {
-  router.push({ name: "orden-trabajo-work", params: { id } });
+  const otCreada = !!id;
+
+  router.push({ 
+    name: "orden-trabajo-work", 
+    params: { id },
+    state: { otCreada: otCreada }
+  });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
