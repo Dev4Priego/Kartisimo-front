@@ -416,7 +416,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch , onMounted , onBeforeMount} from 'vue';
 
 
 const props = defineProps({
@@ -436,10 +436,17 @@ watch(
     }
   }
 );
-window.onafterprint = () => {
-  emit("update:modelValue", false);
+
+const handleAfterPrint = () =>{
+	emit("update:modelValue" , false)
 };
 
+onMounted (() =>{ 
+	window.addEventListener("afterprint" , handleAfterPrint )
+});
+onBeforeMount (() =>{ 
+	window.removeEventListener("afterprint" , handleAfterPrint )
+});
 function formatNumber(value, decimals = 2) {
   if (value === null || value === undefined) return '';
 

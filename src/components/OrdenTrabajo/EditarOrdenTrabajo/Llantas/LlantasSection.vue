@@ -8,7 +8,7 @@
       <div v-if="llantas.length === 0" class="text-muted">
         No hay llantas asignadas
       </div>
-      <div class="row g-3">
+      <div class="row g-3" v-if="llantas.length !== 0">
         <table class="table table-hover table-sm">
           <thead>
             <tr>

@@ -177,8 +177,8 @@
           </button>
           <button
             class="btn btn-sm shadow-sm ms-2 btn-primary"
-          
-            @click="modelValue = true"
+            :disabled="insumosCambios"
+            @click="PrintOtFunction()"
           >
           <i class="bi bi-printer-fill me-3"></i>
             Imprimir
@@ -547,7 +547,8 @@ const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const modelValue =ref(false);
 const showModal = ref(false);
-
+const insumosCambios = ref(false);
+const insumoOriginal = ref([]);
 /**
  * 🔒 Estado inicial seguro
  */
@@ -853,8 +854,14 @@ const cargarOrden = async () => {
     };
     // invocar el evento imprimir 
     
-    if (otCreada === true) modelValue.value = true;
-
+    if (otCreada === true) {
+      modelValue.value = true;
+      history.replaceState({}, document.title);
+    }
+    // GUARDAR UNA COPIA DEL LOS INSUMOS ORIGINALES
+    insumoOriginal.value = JSON.parse(
+      JSON.stringify(otEditar.value.insumo)
+    );
   } catch (err) {
     console.error("❌ Error cargando OT:", err);
 
@@ -874,6 +881,7 @@ const cargarOrden = async () => {
   }
   calcularTotales();
 };
+
 const precioFinalItem = (item, promoGlobal) => {
   const base = item.precioUnitario ?? 0;
 
@@ -910,6 +918,25 @@ const actualizarInsumos = (payload) => {
   otEditar.value.totales.iva = payload.totales.iva;
   otEditar.value.totales.total = payload.totales.total;
 };
+// provicional, lo ideal es usar computed
+const PrintOtFunction = ()=>{
+  if (insumosCambios.value == true ){
+    console.log("DEBES GUARDAR LOS CAMBIOS");
+    insumosCambios.value= true; // Solo cambia a false al guardar
+  }else{
+    modelValue.value = true; // imprimir
+  }
+}
+watch(
+  () => otEditar.value.insumo,
+  (newInsumo) => {
+    insumosCambios.value =
+      JSON.stringify(newInsumo) !== JSON.stringify(insumoOriginal.value);
+
+    console.log("cambios en insumos", insumosCambios.value);
+  },
+  { deep: true }
+);
 
 const calcularTotales = () => {
   const totalLlantas = (otEditar.value.insumo.llantas || []).reduce(
@@ -1134,6 +1161,8 @@ const guardarEdicion = async () => {
     mostrarToast("success", "Orden de trabajo editada correctamente");
     console.log("OT actualizada:", response.data);
     cargarOrden();
+    //Habilitar boton imprimir
+    insumosCambios.value= false;
     //volver()
   } catch (error) {
     console.error("Error al editar OT:", error);
