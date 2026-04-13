@@ -680,7 +680,7 @@ const cargarOrden = async () => {
       idCotizacion: json.idCotizacion || 0,
 
       requiereFactura: json.requiereFactura || false,
-      descharllanta: json.descharllanta || false,
+      desecharLlanta: json.desecharLlanta || false,
 
      
       insumo: {

@@ -290,7 +290,7 @@
                     class="form-control"
                     placeholder="(12 ó 13 caracteres)"
                     list="clientes"
-                    @input="validate('cliente.rfc')"
+                    @input="ordenTrabajoForm.cliente.rfc = ordenTrabajoForm.cliente.rfc?.toUpperCase(), validate('cliente.rfc')"
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.rfc')"
                     :class="{ 'input-error': errores['cliente.rfc'] }"
@@ -498,6 +498,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(RFC a facturar)"
+                @input="ordenTrabajoForm.factura.rfc = ordenTrabajoForm.factura.rfc?.toUpperCase(), validate('factura.rfc')"
                 @blur="validate('factura.rfc')"
                 :class="{ 'input-error': errores['factura.rfc'] }"
               />
@@ -565,6 +566,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(C.P.)"
+                @input="validate('factura.cp')"
                 @blur="validate('factura.cp')"
                 :class="{ 'input-error': errores['factura.cp'] }"
               />
@@ -580,6 +582,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(Use un correo válido)"
+                @input="validate('factura.eMail')"
                 @blur="validate('factura.eMail')"
                 :class="{ 'input-error': errores['factura.eMail'] }"
               />
@@ -964,7 +967,7 @@
             type="button"
             class="btn btn-success position-relative shadow ms-3"
             style="width: 140px"
-            
+            :disabled="!formValido"
             
             @click="mostrarVista = true"
           >
@@ -1457,7 +1460,7 @@ function validate(path) {
     "vehiculo.modelo": () =>
       !value.trim() ? "Modelo obligatorio." : null,
 
-    "vehiculo.numSerie": () =>
+    "vehiculo.serie": () =>
       value.trim().length !== 17
         ? "El número de serie (VIN) debe tener 17 caracteres."
         : null,
@@ -1519,9 +1522,6 @@ function validate(path) {
       if (soloNumeros.length !== 10)
         return "El teléfono debe tener exactamente 10 dígitos.";
 
-      if (!/^(55|56|33|81|44|477)/.test(soloNumeros))
-        return "El teléfono no tiene un prefijo válido.";
-
       return null;
     },
 
@@ -1536,8 +1536,13 @@ function validate(path) {
 
     "cliente.rfc": () => {
       if (!value.trim()) return null;
+      const limpio = value.toUpperCase().trim();
 
-      
+      const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+
+      return !rfcRegex.test(limpio)
+        ? "RFC no válido."
+        : null;
     },
 
     // -------- FECHA ----------
@@ -2668,6 +2673,48 @@ function validarCampo(campo, valor) {
     }
   }
 }
+
+// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
+const formValido = computed(() => {
+  // Si hay errores → inválido
+  if (Object.keys(errores).length > 0) return false;
+  // Campos obligatorios SIEMPRE
+  const requiredFields = [
+    ordenTrabajoForm.fechaEntrega,
+
+    // CLIENTE
+    ordenTrabajoForm.cliente.clienteTelefono,
+    ordenTrabajoForm.cliente.metodoPago,
+
+    // VEHÍCULO
+    ordenTrabajoForm.vehiculo.marca,
+    ordenTrabajoForm.vehiculo.modelo,
+    ordenTrabajoForm.vehiculo.serie,
+    ordenTrabajoForm.vehiculo.kilometraje,
+    ordenTrabajoForm.vehiculo.color,
+    ordenTrabajoForm.vehiculo.placas,
+    ordenTrabajoForm.vehiculo.anio,
+
+    // TÉCNICO
+    ordenTrabajoForm.idEmpleado,
+  ];
+
+  // 3️⃣ Campos obligatorios SOLO si se desea factura
+  if (boolFactura.value === true) {
+    requiredFields.push(
+      ordenTrabajoForm.factura.razonSocial,
+      ordenTrabajoForm.factura.usoCFDI,
+      ordenTrabajoForm.factura.eMail,
+      ordenTrabajoForm.factura.cp,
+      ordenTrabajoForm.factura.rfc
+    );
+  }
+
+  // 4️⃣ Validación final (no vacío / no null)
+  return requiredFields.every(
+    (v) => v !== "" && v !== null && v !== undefined
+  );
+});
 
 
 function validaciones() {
