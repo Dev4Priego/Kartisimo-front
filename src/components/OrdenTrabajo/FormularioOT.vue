@@ -2161,119 +2161,118 @@ const validarYMostrarPreview = async () => {
 };
 
 const guardarOT = async () => {
-  
-  const userStorage = localStorage.getItem("userSession");
+  try {
+    const userStorage = localStorage.getItem("userSession");
 
-  const dataUser = JSON.parse(userStorage)
-  console.log('Entró');
+    const dataUser = JSON.parse(userStorage)
+    console.log('Entró');
 
-  let factura = {};
-const esValido = validaciones();
+    let factura = {};
+    const esValido = validaciones();
 
-if (!esValido) return;
+    if (!esValido) return;
 
-  
-    console.log(" Formulario válido");
+    
+      console.log(" Formulario válido");
 
-  let insumosSelec = ({
-  ...ordenTrabajoForm.insumo,
-  llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
-  paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
-  adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
-})
+    let insumosSelec = ({
+    ...ordenTrabajoForm.insumo,
+    llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
+    paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
+    adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
+  })
 
-  if (boolFactura.value) {
-    factura = {
-      razonSocial: ordenTrabajoForm.factura.razonSocial,
-      direccion: ordenTrabajoForm.factura.direccion,
-      rfc: ordenTrabajoForm.factura.rfc,
-      eMail: ordenTrabajoForm.factura.eMail,
-      cp: ordenTrabajoForm.factura.cp,
-      usoCFDI: ordenTrabajoForm.factura.usoCFDI,
-      regimenFiscal: ordenTrabajoForm.factura.regimenFiscal,
-    };
-  } else {
-    factura = {
-      razonSocial: '',
-      direccion: '',
-      rfc: '',
-      eMail: '',
-      cp: '',
-      usoCFDI: null,
-      regimenFiscal: null,
-    };
-  }
-
-  const objSeend = {
-    idUsuario: dataUser.usuario.idUsuario,
-    idSucursal: dataUser.usuario.idSucursal,
-    idCotizacion: ordenTrabajoForm.cotSeleccionada,
-    idEmpleado: ordenTrabajoForm.idEmpleado,
-    idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
-    metodoPago: ordenTrabajoForm.cliente.metodoPago,
-    fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
-    fechaEntrega: ordenTrabajoForm.fechaEntrega,
-    requiereFactura: boolFactura.value,
-    desecharLlanta: boolDesecharLlanta.value,
-    descripcion: "",
-    estado: "Creado",
-    cliente: {
-      idCliente: ordenTrabajoForm.cliente.id_cliente,
-      nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
-      apellidos: ordenTrabajoForm.cliente.apellidos,
-      rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
-      telefono: ordenTrabajoForm.cliente.clienteTelefono,
-      correo: ordenTrabajoForm.cliente.clienteCorreo,
-    },
-    vehiculo: {
-      idVehiculo: ordenTrabajoForm.vehiculo.id_vehiculo
-        ? ordenTrabajoForm.vehiculo.id_vehiculo
-        : 0,
-      modelo: ordenTrabajoForm.vehiculo.modelo,
-      marca: ordenTrabajoForm.vehiculo.marca,
-      serie: ordenTrabajoForm.vehiculo.numSerie,
-      kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
-      color: ordenTrabajoForm.vehiculo.color,
-      placas: ordenTrabajoForm.vehiculo.placas,
-      anio: ordenTrabajoForm.vehiculo.anio,
-    },
-    factura: factura,
-    insumos: insumosSelec
-  };
-
-    console.log(" OBJETO FINAL:", objSeend);
-
-    // 🔹 FETCH
-    console.log(" Enviando request...");
-
-    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(objSeend),
-    });
-
-    console.log(" Status:", res.status);
-
-    if (!res.ok) {
-      const text = await res.text();
-      console.error(" Error HTTP:", text);
-      alert("Error en el servidor");
-      return;
-    }
-
-    const data = await res.json();
-    console.log(" Respuesta:", data);
-
-    if (data.success) {
-      //console.log(data)
-      limpiarOrdenTrabajoForm(); // Limpia formulario
-      //console.log(data.codigo);
-      irAOrdenTrabajo(data.codigo);         // Redirige
+    if (boolFactura.value) {
+      factura = {
+        razonSocial: ordenTrabajoForm.factura.razonSocial,
+        direccion: ordenTrabajoForm.factura.direccion,
+        rfc: ordenTrabajoForm.factura.rfc,
+        eMail: ordenTrabajoForm.factura.eMail,
+        cp: ordenTrabajoForm.factura.cp,
+        usoCFDI: ordenTrabajoForm.factura.usoCFDI,
+        regimenFiscal: ordenTrabajoForm.factura.regimenFiscal,
+      };
     } else {
-      console.warn(" Backend respondió error:", data);
-      alert(data.message || "No se pudo guardar la orden");
+      factura = {
+        razonSocial: '',
+        direccion: '',
+        rfc: '',
+        eMail: '',
+        cp: '',
+        usoCFDI: null,
+        regimenFiscal: null,
+      };
     }
 
+    const objSeend = {
+      idUsuario: dataUser.usuario.idUsuario,
+      idSucursal: dataUser.usuario.idSucursal,
+      idCotizacion: ordenTrabajoForm.cotSeleccionada,
+      idEmpleado: ordenTrabajoForm.idEmpleado,
+      idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
+      metodoPago: ordenTrabajoForm.cliente.metodoPago,
+      fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
+      fechaEntrega: ordenTrabajoForm.fechaEntrega,
+      requiereFactura: boolFactura.value,
+      desecharLlanta: boolDesecharLlanta.value,
+      descripcion: "",
+      estado: "Creado",
+      cliente: {
+        idCliente: ordenTrabajoForm.cliente.id_cliente,
+        nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
+        apellidos: ordenTrabajoForm.cliente.apellidos,
+        rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
+        telefono: ordenTrabajoForm.cliente.clienteTelefono,
+        correo: ordenTrabajoForm.cliente.clienteCorreo,
+      },
+      vehiculo: {
+        idVehiculo: ordenTrabajoForm.vehiculo.id_vehiculo
+          ? ordenTrabajoForm.vehiculo.id_vehiculo
+          : 0,
+        modelo: ordenTrabajoForm.vehiculo.modelo,
+        marca: ordenTrabajoForm.vehiculo.marca,
+        serie: ordenTrabajoForm.vehiculo.numSerie,
+        kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
+        color: ordenTrabajoForm.vehiculo.color,
+        placas: ordenTrabajoForm.vehiculo.placas,
+        anio: ordenTrabajoForm.vehiculo.anio,
+      },
+      factura: factura,
+      insumos: insumosSelec
+    };
+
+      console.log(" OBJETO FINAL:", objSeend);
+
+      // 🔹 FETCH
+      console.log(" Enviando request...");
+
+      const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(objSeend),
+      });
+
+      console.log(" Status:", res.status);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(" Error HTTP:", text);
+        alert("Error en el servidor");
+        return;
+      }
+
+      const data = await res.json();
+      console.log(" Respuesta:", data);
+
+      if (data.success) {
+        //console.log(data)
+        limpiarOrdenTrabajoForm(); // Limpia formulario
+        //console.log(data.codigo);
+        irAOrdenTrabajo(data.codigo);         // Redirige
+      } else {
+        console.warn(" Backend respondió error:", data);
+        alert(data.message || "No se pudo guardar la orden");
+      }
   } catch (err) {
     console.error(" Error general:", err);
     alert("Error inesperado al guardar");
