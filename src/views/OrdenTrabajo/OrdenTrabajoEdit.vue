@@ -175,6 +175,14 @@
             <i class="bi bi-node-plus-fill me-3"></i>
             Derivar OT
           </button>
+          <button
+            class="btn btn-sm shadow-sm ms-2 btn-primary"
+            :disabled="insumosCambios"
+            @click="PrintOtFunction()"
+          >
+          <i class="bi bi-printer-fill me-3"></i>
+            Imprimir
+          </button>
         </div>
       </div>
       <h5>Datos generales</h5>
@@ -484,6 +492,7 @@
     <button class="btn btn-secondary mx-2" @click="volver()">
       <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
     </button>
+    
     <button
       class="btn btn-primary mx-2"
       :disabled="!formValido"
@@ -491,10 +500,18 @@
     >
       Guardar cambios
     </button>
+    
   </div>
 </div>
 
   </div>
+ 
+    <ImprimirOT
+    v-model="modelValue"
+    :OT="prepararDatosImpresion()"
+  />
+ 
+  
 </template>
 
 <script setup>
@@ -513,6 +530,7 @@ import PaquetesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquet
 import AdicionalesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/AdicionalesSection.vue";
 import OtrosSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicionales/OtrosSection.vue";
 import Incidentes from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Incidentes.vue";
+import ImprimirOT from "@/components/OrdenTrabajo/ImprimirOT.vue";
 import Refacciones from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Refacciones.vue";
 import { parse } from "vue/compiler-sfc";
 import axios from "axios";
@@ -527,7 +545,10 @@ const router = useRouter();
 const itmEmpleados = ref({});
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
+const modelValue =ref(false);
 const showModal = ref(false);
+const insumosCambios = ref(false);
+const insumoOriginal = ref([]);
 /**
  * 🔒 Estado inicial seguro
  */
@@ -619,7 +640,8 @@ const obtenerPromosGeneralesParaServicio = async () => {
 const cargarOrden = async () => {
   try {
     const id = route.params.id;
-
+    const otCreada = history.state?.otCreada ?? false;
+    console.log("isCreated?: " ,otCreada)
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
     );
@@ -658,7 +680,7 @@ const cargarOrden = async () => {
       idCotizacion: json.idCotizacion || 0,
 
       requiereFactura: json.requiereFactura || false,
-      descharllanta: json.descharllanta || false,
+      desecharLlanta: json.desecharLlanta || false,
 
      
       insumo: {
@@ -830,7 +852,16 @@ const cargarOrden = async () => {
 
       }
     };
-    //console.log("OTEDITAR DATA:",otEditar.value);
+    // invocar el evento imprimir 
+    
+    if (otCreada === true) {
+      modelValue.value = true;
+      history.replaceState({}, document.title);
+    }
+    // GUARDAR UNA COPIA DEL LOS INSUMOS ORIGINALES
+    insumoOriginal.value = JSON.parse(
+      JSON.stringify(otEditar.value.insumo)
+    );
   } catch (err) {
     console.error("❌ Error cargando OT:", err);
 
@@ -850,6 +881,7 @@ const cargarOrden = async () => {
   }
   calcularTotales();
 };
+
 const precioFinalItem = (item, promoGlobal) => {
   const base = item.precioUnitario ?? 0;
 
@@ -886,6 +918,25 @@ const actualizarInsumos = (payload) => {
   otEditar.value.totales.iva = payload.totales.iva;
   otEditar.value.totales.total = payload.totales.total;
 };
+// provicional, lo ideal es usar computed
+const PrintOtFunction = ()=>{
+  if (insumosCambios.value == true ){
+    console.log("DEBES GUARDAR LOS CAMBIOS");
+    insumosCambios.value= true; // Solo cambia a false al guardar
+  }else{
+    modelValue.value = true; // imprimir
+  }
+}
+watch(
+  () => otEditar.value.insumo,
+  (newInsumo) => {
+    insumosCambios.value =
+      JSON.stringify(newInsumo) !== JSON.stringify(insumoOriginal.value);
+
+    console.log("cambios en insumos", insumosCambios.value);
+  },
+  { deep: true }
+);
 
 const calcularTotales = () => {
   const totalLlantas = (otEditar.value.insumo.llantas || []).reduce(
@@ -1110,6 +1161,8 @@ const guardarEdicion = async () => {
     mostrarToast("success", "Orden de trabajo editada correctamente");
     console.log("OT actualizada:", response.data);
     cargarOrden();
+    //Habilitar boton imprimir
+    insumosCambios.value= false;
     //volver()
   } catch (error) {
     console.error("Error al editar OT:", error);
@@ -1279,7 +1332,20 @@ const guardarLLantasOT = async () => {
     //console.log("RESPUESTA BACKEND:", data);
     
 };
+const prepararDatosImpresion = () => {
+  const insumo = otEditar.value.insumo || {};
 
+  return {
+    ...otEditar.value,
+
+    insumo: {
+      llantas: (insumo.llantas || []).filter((l) => !l.eliminado),
+      paquetes: (insumo.paquetes || []).filter((p) => !p.eliminado),
+      adicionales: (insumo.adicionales || []).filter((a) => !a.eliminado),
+    },
+  };
+};
+console.log("PROPIEDADES PARA IMPRIMIR:" , prepararDatosImpresion())
 
 </script>
 

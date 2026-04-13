@@ -184,7 +184,7 @@
                   </small>
                 </div>
               </div>
-            </div>
+            </div> 
           </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">
@@ -290,7 +290,7 @@
                     class="form-control"
                     placeholder="(12 ó 13 caracteres)"
                     list="clientes"
-                    @input="validate('cliente.rfc')"
+                    @input="ordenTrabajoForm.cliente.rfc = ordenTrabajoForm.cliente.rfc?.toUpperCase(), validate('cliente.rfc')"
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.rfc')"
                     :class="{ 'input-error': errores['cliente.rfc'] }"
@@ -538,6 +538,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(RFC a facturar)"
+                @input="ordenTrabajoForm.factura.rfc = ordenTrabajoForm.factura.rfc?.toUpperCase(), validate('factura.rfc')"
                 @blur="validate('factura.rfc')"
                 :class="{ 'input-error': errores['factura.rfc'] }"
               />
@@ -605,6 +606,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(C.P.)"
+                @input="validate('factura.cp')"
                 @blur="validate('factura.cp')"
                 :class="{ 'input-error': errores['factura.cp'] }"
               />
@@ -620,6 +622,7 @@
                 class="form-control"
                 type="text"
                 placeholder="(Use un correo válido)"
+                @input="validate('factura.eMail')"
                 @blur="validate('factura.eMail')"
                 :class="{ 'input-error': errores['factura.eMail'] }"
               />
@@ -974,12 +977,14 @@
               ></i>
               &nbsp;Volver
             </button>
+            <!-- Modal vista previa OT :disabled="!formValido" -->
           </router-link>
           <button
             type="button"
             class="btn btn-success position-relative shadow ms-3"
             style="width: 140px"
             :disabled="!formValido"
+            
             @click="mostrarVista = true"
           >
             <i class="bi-save-fill position-absolute start-0 ms-2"></i>
@@ -1457,6 +1462,7 @@ function validate(path) {
   const value = (getValor(path) ?? "").toString();
 
   const rules = {
+
     
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () =>
@@ -1465,6 +1471,9 @@ function validate(path) {
     "vehiculo.modelo": () =>
       !value.trim() ? "Modelo obligatorio." : null,
 
+    "vehiculo.serie": () =>
+      value.trim().length !== 17
+        ? "El número de serie (VIN) debe tener 17 caracteres."
     "vehiculo.numSerie": () =>
       value.length < 17 ? "El número de serie (VIN) debe ser de 17 caracteres." : null,
 
@@ -1520,6 +1529,47 @@ function validate(path) {
       !value ? "Debe seleccionar una forma de pago." : null,
 
     "cliente.clienteTelefono": () => {
+      if (!value.trim())
+        return "Debe ingresar un teléfono.";
+
+      // 🔥 LIMPIEZA (igual que tu computed)
+      let soloNumeros = value.replace(/\D/g, "");
+
+      // Limitar a 10 dígitos
+      soloNumeros = soloNumeros.slice(0, 10);
+
+      // Guardar limpio en el modelo
+      ordenTrabajoForm.cliente.clienteTelefono = soloNumeros;
+
+      // Validaciones
+      if (soloNumeros.length !== 10)
+        return "El teléfono debe tener exactamente 10 dígitos.";
+
+      return null;
+    },
+
+    "cliente.clienteCorreo": () => {
+      if (!value.trim()) return null;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
+        : null;
+    },
+
+    "cliente.rfc": () => {
+      if (!value.trim()) return null;
+      const limpio = value.toUpperCase().trim();
+
+      const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+
+      return !rfcRegex.test(limpio)
+        ? "RFC no válido."
+        : null;
+    },
+
+    // -------- FECHA ----------
+    "fechaEntrega": () => {
       if(value.length == 0) {
         console.log(value);
         return "Debe ingresar un teléfono " + value;
@@ -1564,11 +1614,13 @@ function validate(path) {
 
     // -------- FACTURA ----------
     "factura.razonSocial": () =>
+      !value.trim() ? "Razón social obligatoria." : null,
       !value || !value.trim()
         ? "Razón social obligatoria."
         : null,
 
     "factura.usoCFDI": () =>
+      !value ? "Debe seleccionar un uso CFDI." : null,
       !value
         ? "Debe seleccionar un uso CFDI."
         : null,
@@ -1583,6 +1635,7 @@ function validate(path) {
       return !emailRegex.test(value)
         ? "E-mail no válido."
         : null;
+    },
       },
 
     "factura.cp": () => {
@@ -1597,6 +1650,7 @@ function validate(path) {
     "factura.rfc": () => {
       if (!value.trim()) return "RFC obligatorio.";
 
+      const limpio = value.toUpperCase().trim();
       const rfcRegex =
         /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
 
@@ -1755,7 +1809,13 @@ const ordenTrabajoForm = reactive({
 });
 
 const irAOrdenTrabajo = (id) => {
-  router.push({ name: "orden-trabajo-work", params: { id } });
+  const otCreada = !!id;
+
+  router.push({ 
+    name: "orden-trabajo-work", 
+    params: { id },
+    state: { otCreada: otCreada }
+  });
 };
 
 // eliminar si es no es necesaria, se tenia por que se solicito tener fecha y hora en inputs diferentes, fechaAlta
@@ -2717,6 +2777,49 @@ function validarCampo(campo, valor) {
     }
   }
 }
+
+// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
+const formValido = computed(() => {
+  // Si hay errores → inválido
+  if (Object.keys(errores).length > 0) return false;
+  // Campos obligatorios SIEMPRE
+  const requiredFields = [
+    ordenTrabajoForm.fechaEntrega,
+
+    // CLIENTE
+    ordenTrabajoForm.cliente.clienteTelefono,
+    ordenTrabajoForm.cliente.metodoPago,
+
+    // VEHÍCULO
+    ordenTrabajoForm.vehiculo.marca,
+    ordenTrabajoForm.vehiculo.modelo,
+    ordenTrabajoForm.vehiculo.serie,
+    ordenTrabajoForm.vehiculo.kilometraje,
+    ordenTrabajoForm.vehiculo.color,
+    ordenTrabajoForm.vehiculo.placas,
+    ordenTrabajoForm.vehiculo.anio,
+
+    // TÉCNICO
+    ordenTrabajoForm.idEmpleado,
+  ];
+
+  // 3️⃣ Campos obligatorios SOLO si se desea factura
+  if (boolFactura.value === true) {
+    requiredFields.push(
+      ordenTrabajoForm.factura.razonSocial,
+      ordenTrabajoForm.factura.usoCFDI,
+      ordenTrabajoForm.factura.eMail,
+      ordenTrabajoForm.factura.cp,
+      ordenTrabajoForm.factura.rfc
+    );
+  }
+
+  // 4️⃣ Validación final (no vacío / no null)
+  return requiredFields.every(
+    (v) => v !== "" && v !== null && v !== undefined
+  );
+});
+
 
 function validaciones() {
 

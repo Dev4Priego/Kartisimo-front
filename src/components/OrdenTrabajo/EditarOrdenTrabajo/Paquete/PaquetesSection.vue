@@ -9,7 +9,7 @@
         No hay paquetes asignados
       </div>
 
-      <div class="row g-3">
+      <div class="row g-3" v-if="paquetes.length !== 0">
         <table class="table table-hover table-sm">
           <thead>
             <tr>
