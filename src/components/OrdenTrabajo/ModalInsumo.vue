@@ -125,6 +125,7 @@
                       <tr>
                         <th class="text-start">Llanta</th>
                         <th>Rango</th>
+                        <th>Runflat</th>
                         <th>Código</th>
                         <th>Medidas</th>
                         <th class="text-center">Cantidad</th>
@@ -140,8 +141,9 @@
                           {{ item.marca }} {{ item.modelo }}
                         </td>
                         <td>{{ item.rango }}</td>
-                        <td>{{ item.codigo }}</td>
-                        <td>{{ item.medida }}</td>
+                        <td class="text-center"><i v-if="item.runflat == 1" class="bi bi-check-circle-fill text-success"></i></td>
+                        <td class="text-start">{{ item.codigo }}</td>
+                        <td class="text-start">{{ item.medida }} {{ item.runflat == 1 ? 'RF' : '' }}</td>
                         <td class="text-center">
                           {{ item.cantidad }}
                         </td>
@@ -1399,6 +1401,7 @@ const cargarLlantas = async () => {
         modelo: l.modelo,
         marca: l.nombreMarca,
         medida: l.medidas,
+        runflat: l.runflat,
         rango: l.rango,
         precio: Number(l.precio),
         ubicacion: l.nombreAlmacen,
