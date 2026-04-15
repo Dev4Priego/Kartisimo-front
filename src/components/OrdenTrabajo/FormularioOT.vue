@@ -1462,8 +1462,6 @@ function validate(path) {
   const value = (getValor(path) ?? "").toString();
 
   const rules = {
-
-    
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () =>
       !value.trim() ? "Marca obligatoria." : null,
@@ -1474,18 +1472,6 @@ function validate(path) {
     "vehiculo.serie": () =>
       value.trim().length !== 17
         ? "El número de serie (VIN) debe tener 17 caracteres."
-    "vehiculo.numSerie": () =>
-      value.length < 17 ? "El número de serie (VIN) debe ser de 17 caracteres." : null,
-
-    "vehiculo.kilometraje": () =>
-      value === ""
-        ? "Kilometraje obligatorio."
-        : isNaN(value)
-        ? "Debe ser un número."
-        : value < 0
-        ? "No puede ser negativo."
-        : value < kilometrajeBase.value
-        ? `No puede ser menor a ${kilometrajeBase.value}.`
         : null,
 
     "vehiculo.kilometraje": () => {
@@ -1532,16 +1518,10 @@ function validate(path) {
       if (!value.trim())
         return "Debe ingresar un teléfono.";
 
-      // 🔥 LIMPIEZA (igual que tu computed)
       let soloNumeros = value.replace(/\D/g, "");
-
-      // Limitar a 10 dígitos
       soloNumeros = soloNumeros.slice(0, 10);
-
-      // Guardar limpio en el modelo
       ordenTrabajoForm.cliente.clienteTelefono = soloNumeros;
 
-      // Validaciones
       if (soloNumeros.length !== 10)
         return "El teléfono debe tener exactamente 10 dígitos.";
 
@@ -1570,30 +1550,6 @@ function validate(path) {
 
     // -------- FECHA ----------
     "fechaEntrega": () => {
-      if(value.length == 0) {
-        console.log(value);
-        return "Debe ingresar un teléfono " + value;
-      } else {
-      const soloNumeros = value.replace(/\D/g, "");
-      console.log(soloNumeros);
-      return (!value || soloNumeros.length < 10)
-        ? "Teléfono no válido."
-        : null;
-      }
-    },
-
-    "cliente.clienteCorreo": () => {
-      if(value.length > 0) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return (!emailRegex.test(value))
-        ? "E-mail no válido."
-        : null;
-      } else {
-        return null;
-      }
-    },
-
-    "fechaEntrega": () => {
       if (!ordenTrabajoForm.fechaEntrega)
         return "La fecha y hora de entrega son obligatorias.";
 
@@ -1615,28 +1571,6 @@ function validate(path) {
     // -------- FACTURA ----------
     "factura.razonSocial": () =>
       !value.trim() ? "Razón social obligatoria." : null,
-      !value || !value.trim()
-        ? "Razón social obligatoria."
-        : null,
-
-    "factura.usoCFDI": () =>
-      !value ? "Debe seleccionar un uso CFDI." : null,
-      !value
-        ? "Debe seleccionar un uso CFDI."
-        : null,
-
-    "factura.regimenFiscal": () =>
-      !value ? "Debe seleccionar un régimen fiscal." : null,
-
-    "factura.eMail": () => {
-      if (!value.trim()) return "Correo obligatorio.";
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !emailRegex.test(value)
-        ? "E-mail no válido."
-        : null;
-    },
-      },
 
     "factura.cp": () => {
       if (!value.trim()) return "Código postal obligatorio.";
@@ -1651,11 +1585,19 @@ function validate(path) {
       if (!value.trim()) return "RFC obligatorio.";
 
       const limpio = value.toUpperCase().trim();
-      const rfcRegex =
-        /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
+      const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
 
-      return !rfcRegex.test(value.toUpperCase())
+      return !rfcRegex.test(limpio)
         ? "RFC no válido."
+        : null;
+    },
+
+    "factura.eMail": () => {
+      if (!value.trim()) return "Correo obligatorio.";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
         : null;
     },
   };
@@ -1666,50 +1608,6 @@ function validate(path) {
   else delete errores[path];
 }
 
-// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
-const formValido = computed(() => {
-  // Si hay errores → inválido
-  if (Object.keys(errores).length > 0) return false;
-  // Campos obligatorios SIEMPRE
-  const requiredFields = [
-    ordenTrabajoForm.fechaEntrega,
-
-    // CLIENTE
-    ordenTrabajoForm.cliente.clienteTelefono,
-    //ordenTrabajoForm.cliente.clienteCorreo,
-    ordenTrabajoForm.cliente.metodoPago,
-
-    // VEHÍCULO
-    ordenTrabajoForm.vehiculo.marca,
-    ordenTrabajoForm.vehiculo.modelo,
-    ordenTrabajoForm.vehiculo.numSerie,
-    ordenTrabajoForm.vehiculo.kilometraje,
-    ordenTrabajoForm.vehiculo.color,
-    ordenTrabajoForm.vehiculo.placas,
-    ordenTrabajoForm.vehiculo.anio,
-
-    // TÉCNICO
-    ordenTrabajoForm.idEmpleado,
-  ];
-
-  // 3️⃣ Campos obligatorios SOLO si se desea factura
-  const facturaRequired = boolFactura.value === true
-    ? [
-        ordenTrabajoForm.factura.razonSocial,
-        ordenTrabajoForm.factura.usoCFDI,
-        ordenTrabajoForm.factura.regimenFiscal,
-        ordenTrabajoForm.factura.eMail,
-        ordenTrabajoForm.factura.cp,
-        ordenTrabajoForm.factura.rfc,
-      ]
-    : [];
-  
-
-  // 4️⃣ Validación final (no vacío / no null)
-  return [...requiredFields, ...facturaRequired].every(
-    (v) => v !== "" && v !== null && v !== undefined
-  );
-});
 const getFechaHoraLocal = () => {
   const ahora = new Date();
   const pad = (n) => n.toString().padStart(2, "0");
@@ -2778,47 +2676,6 @@ function validarCampo(campo, valor) {
   }
 }
 
-// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
-const formValido = computed(() => {
-  // Si hay errores → inválido
-  if (Object.keys(errores).length > 0) return false;
-  // Campos obligatorios SIEMPRE
-  const requiredFields = [
-    ordenTrabajoForm.fechaEntrega,
-
-    // CLIENTE
-    ordenTrabajoForm.cliente.clienteTelefono,
-    ordenTrabajoForm.cliente.metodoPago,
-
-    // VEHÍCULO
-    ordenTrabajoForm.vehiculo.marca,
-    ordenTrabajoForm.vehiculo.modelo,
-    ordenTrabajoForm.vehiculo.serie,
-    ordenTrabajoForm.vehiculo.kilometraje,
-    ordenTrabajoForm.vehiculo.color,
-    ordenTrabajoForm.vehiculo.placas,
-    ordenTrabajoForm.vehiculo.anio,
-
-    // TÉCNICO
-    ordenTrabajoForm.idEmpleado,
-  ];
-
-  // 3️⃣ Campos obligatorios SOLO si se desea factura
-  if (boolFactura.value === true) {
-    requiredFields.push(
-      ordenTrabajoForm.factura.razonSocial,
-      ordenTrabajoForm.factura.usoCFDI,
-      ordenTrabajoForm.factura.eMail,
-      ordenTrabajoForm.factura.cp,
-      ordenTrabajoForm.factura.rfc
-    );
-  }
-
-  // 4️⃣ Validación final (no vacío / no null)
-  return requiredFields.every(
-    (v) => v !== "" && v !== null && v !== undefined
-  );
-});
 
 
 function validaciones() {
