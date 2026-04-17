@@ -184,7 +184,7 @@
                   </small>
                 </div>
               </div>
-            </div>
+            </div> 
           </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">
@@ -300,6 +300,46 @@
                     {{ errores["cliente.rfc"] }}
                   </small>
                 </div>
+           <div class="col-6 mb-3">
+            <label for="email" class="form-label">Correo electrónico</label>
+            <input id="email"
+              v-model="ordenTrabajoForm.cliente.clienteCorreo"
+              class="form-control"
+              type="text"
+              placeholder="(Use un correo válido)"
+              list="clientes"
+              @change="onClienteSeleccionadoByValue($event.target.value)"
+              @blur="validate('cliente.clienteCorreo')"
+              :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
+            />
+            <small v-if="errores['cliente.clienteCorreo']" class="error-msg">
+              {{ errores["cliente.clienteCorreo"] }}
+            </small>
+          </div>
+
+
+
+                
+        <!-- RFC -->
+        <div class="col-6 mb-3">
+          <label for="rfc" class="form-label">RFC</label>
+          <input id="rfc"
+            v-model="ordenTrabajoForm.cliente.rfc"
+            type="text"
+            class="form-control"
+            placeholder="(12 ó 13 caracteres)"
+            list="clientes"
+            @change="onClienteSeleccionadoByValue($event.target.value)"
+            @blur="validate('cliente.rfc')"
+            :class="{ 'input-error': errores['cliente.rfc'] }"
+          />
+          <small v-if="errores['cliente.rfc']" class="error-msg">
+            {{ errores["cliente.rfc"] }}
+          </small>
+        </div>
+
+
+
               </div>
             </div>
           </div>
@@ -888,31 +928,7 @@
               </transition-group>
 
               <tfoot class="table-light">
-                <!-- <tr>
-                  <th colspan="3" class="text-end">Subtotal</th>
-                  <th class="text-end">
-                    {{
-                      ordenTrabajoForm.totales.subtotal.toLocaleString("es-MX", {
-                        style: "currency",
-                        currency: "MXN",
-                      })
-                    }}
-                  </th>
-                  <th></th>
-                </tr>
-
-                <tr>
-                  <th colspan="3" class="text-end">IVA (16%)</th>
-                  <th class="text-end">
-                    {{
-                      ordenTrabajoForm.totales.iva.toLocaleString("es-MX", {
-                        style: "currency",
-                        currency: "MXN",
-                      })
-                    }}
-                  </th>
-                  <th></th>
-                </tr> -->
+               
 
                 <tr class="table-secondary fw-bold">
                   <th colspan="3" class="text-end fs-6">TOTAL</th>
@@ -1340,21 +1356,22 @@
               Cerrar
             </button>
 
-            <button
-              type="button"
-              class="btn btn-success position-relative shadow mx-3"
-              style="width: 140px"
-              @click="guardarOT()"
-            >
-              <i class="bi-save-fill position-absolute start-0 ms-2"></i>
-              Guardar OT
-            </button>
+               <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarOT()"
+>
+  <i class="bi-save-fill position-absolute start-0 ms-2"></i> 
+  Guardar OT
+</button>
+
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
+
+
+
+
 
 <script setup>
 import {
@@ -1395,15 +1412,8 @@ const props = defineProps({
    
     
   },
-  idOrdenTrabajo: {
-    // para la ot hija
-    type: [String, Number],
-   
-    
-  },
 });
-const isReadOnly = computed(() => !!props.idOrdenTrabajo);
-console.log("props: ", props);
+
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
 
@@ -1452,7 +1462,6 @@ function validate(path) {
   const value = (getValor(path) ?? "").toString();
 
   const rules = {
-
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () =>
       !value.trim() ? "Marca obligatoria." : null,
@@ -1509,16 +1518,10 @@ function validate(path) {
       if (!value.trim())
         return "Debe ingresar un teléfono.";
 
-      // 🔥 LIMPIEZA (igual que tu computed)
       let soloNumeros = value.replace(/\D/g, "");
-
-      // Limitar a 10 dígitos
       soloNumeros = soloNumeros.slice(0, 10);
-
-      // Guardar limpio en el modelo
       ordenTrabajoForm.cliente.clienteTelefono = soloNumeros;
 
-      // Validaciones
       if (soloNumeros.length !== 10)
         return "El teléfono debe tener exactamente 10 dígitos.";
 
@@ -1569,21 +1572,6 @@ function validate(path) {
     "factura.razonSocial": () =>
       !value.trim() ? "Razón social obligatoria." : null,
 
-    "factura.usoCFDI": () =>
-      !value ? "Debe seleccionar un uso CFDI." : null,
-
-    "factura.regimenFiscal": () =>
-      !value ? "Debe seleccionar un régimen fiscal." : null,
-
-    "factura.eMail": () => {
-      if (!value.trim()) return "Correo obligatorio.";
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !emailRegex.test(value)
-        ? "E-mail no válido."
-        : null;
-    },
-
     "factura.cp": () => {
       if (!value.trim()) return "Código postal obligatorio.";
 
@@ -1597,11 +1585,19 @@ function validate(path) {
       if (!value.trim()) return "RFC obligatorio.";
 
       const limpio = value.toUpperCase().trim();
-
       const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
 
       return !rfcRegex.test(limpio)
         ? "RFC no válido."
+        : null;
+    },
+
+    "factura.eMail": () => {
+      if (!value.trim()) return "Correo obligatorio.";
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return !emailRegex.test(value)
+        ? "E-mail no válido."
         : null;
     },
   };
@@ -1611,7 +1607,6 @@ function validate(path) {
   if (error) errores[path] = error;
   else delete errores[path];
 }
-
 
 const getFechaHoraLocal = () => {
   const ahora = new Date();
@@ -1964,9 +1959,6 @@ const onClienteSeleccionadoByValue = (valor) => {
     );
   });
 
-  // console.log("Normalizado:", normalizado);
-  // console.log("Valor:", valor);
-  // console.log("Cliente encontrado:", cliente);
 
   if (cliente) {
     // console.log('clienteSeleccionado');
@@ -2127,113 +2119,122 @@ const validarYMostrarPreview = async () => {
 };
 
 const guardarOT = async () => {
-  const userStorage = localStorage.getItem("userSession");
-
-  const dataUser = JSON.parse(userStorage);
-  console.log("Entró");
-
-  let factura = {};
-  const esValido = validaciones();
-
-  if (!esValido) return;
-
-  console.log("Formulario válido");
-
-  let insumosSelec = {
-    ...ordenTrabajoForm.insumo,
-    llanta: (ordenTrabajoForm.insumo.llanta || []).filter((l) => !l.eliminado),
-    paquete: (ordenTrabajoForm.insumo.paquete || []).filter(
-      (p) => !p.eliminado,
-    ),
-    adicional: (ordenTrabajoForm.insumo.adicional || []).filter(
-      (a) => !a.eliminado,
-    ),
-  };
-
-  if (boolFactura.value) {
-    factura = {
-      razonSocial: ordenTrabajoForm.factura.razonSocial,
-      direccion: ordenTrabajoForm.factura.direccion,
-      rfc: ordenTrabajoForm.factura.rfc,
-      eMail: ordenTrabajoForm.factura.eMail,
-      cp: ordenTrabajoForm.factura.cp,
-      usoCFDI: ordenTrabajoForm.factura.usoCFDI,
-      regimenFiscal: ordenTrabajoForm.factura.regimenFiscal,
-    };
-  } else {
-    factura = {
-      razonSocial: "",
-      direccion: "",
-      rfc: "",
-      eMail: "",
-      cp: "",
-      usoCFDI: null,
-      regimenFiscal: null,
-    };
-  }
-
-  const objSeend = {
-    idUsuario: dataUser.usuario.idUsuario,
-    idSucursal: dataUser.usuario.idSucursal,
-    idCotizacion: ordenTrabajoForm.cotSeleccionada,
-    idOtPadre: parseInt( ordenTrabajoForm.idOtPAdre),
-    isHija:ordenTrabajoForm.esHija,
-    idEmpleado: ordenTrabajoForm.idEmpleado,
-    idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
-    metodoPago: ordenTrabajoForm.cliente.metodoPago,
-    fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
-    fechaEntrega: ordenTrabajoForm.fechaEntrega,
-    requiereFactura: boolFactura.value,
-    desecharLlanta: boolDesecharLlanta.value,
-    descripcion: "",
-    estado: "Creado",
-    cliente: {
-      idCliente: ordenTrabajoForm.cliente.id_cliente,
-      nombres: ordenTrabajoForm.cliente.nombres
-        ? ordenTrabajoForm.cliente.nombres
-        : "",
-      apellidos: ordenTrabajoForm.cliente.apellidos,
-      rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
-      telefono: ordenTrabajoForm.cliente.clienteTelefono,
-      correo: ordenTrabajoForm.cliente.clienteCorreo,
-    },
-    vehiculo: {
-      idVehiculo: ordenTrabajoForm.vehiculo.idVehiculo
-        ? ordenTrabajoForm.vehiculo.idVehiculo
-        : 0,
-      modelo: ordenTrabajoForm.vehiculo.modelo,
-      marca: ordenTrabajoForm.vehiculo.marca,
-      serie: ordenTrabajoForm.vehiculo.serie,
-      kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
-      color: ordenTrabajoForm.vehiculo.color,
-      placas: ordenTrabajoForm.vehiculo.placas,
-      anio: ordenTrabajoForm.vehiculo.anio,
-    },
-    factura: factura,
-    insumos: insumosSelec,
-  };
-
   try {
-    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(objSeend),
-    });
+    const userStorage = localStorage.getItem("userSession");
 
-    const data = await res.json();
+    const dataUser = JSON.parse(userStorage)
+    console.log('Entró');
 
-    if (data.success) {
-      //console.log(data)
-      limpiarOrdenTrabajoForm(); // Limpia formulario
-      //console.log(data.codigo);
-      irAOrdenTrabajo(data.codigo); // Redirige
+    let factura = {};
+    const esValido = validaciones();
+
+    if (!esValido) return;
+
+    
+      console.log(" Formulario válido");
+
+    let insumosSelec = ({
+    ...ordenTrabajoForm.insumo,
+    llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
+    paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
+    adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
+  })
+
+    if (boolFactura.value) {
+      factura = {
+        razonSocial: ordenTrabajoForm.factura.razonSocial,
+        direccion: ordenTrabajoForm.factura.direccion,
+        rfc: ordenTrabajoForm.factura.rfc,
+        eMail: ordenTrabajoForm.factura.eMail,
+        cp: ordenTrabajoForm.factura.cp,
+        usoCFDI: ordenTrabajoForm.factura.usoCFDI,
+        regimenFiscal: ordenTrabajoForm.factura.regimenFiscal,
+      };
     } else {
-      //console.log("No guardada", data);
+      factura = {
+        razonSocial: '',
+        direccion: '',
+        rfc: '',
+        eMail: '',
+        cp: '',
+        usoCFDI: null,
+        regimenFiscal: null,
+      };
     }
+
+    const objSeend = {
+      idUsuario: dataUser.usuario.idUsuario,
+      idSucursal: dataUser.usuario.idSucursal,
+      idCotizacion: ordenTrabajoForm.cotSeleccionada,
+      idEmpleado: ordenTrabajoForm.idEmpleado,
+      idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
+      metodoPago: ordenTrabajoForm.cliente.metodoPago,
+      fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
+      fechaEntrega: ordenTrabajoForm.fechaEntrega,
+      requiereFactura: boolFactura.value,
+      desecharLlanta: boolDesecharLlanta.value,
+      descripcion: "",
+      estado: "Creado",
+      cliente: {
+        idCliente: ordenTrabajoForm.cliente.id_cliente,
+        nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
+        apellidos: ordenTrabajoForm.cliente.apellidos,
+        rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
+        telefono: ordenTrabajoForm.cliente.clienteTelefono,
+        correo: ordenTrabajoForm.cliente.clienteCorreo,
+      },
+      vehiculo: {
+        idVehiculo: ordenTrabajoForm.vehiculo.id_vehiculo
+          ? ordenTrabajoForm.vehiculo.id_vehiculo
+          : 0,
+        modelo: ordenTrabajoForm.vehiculo.modelo,
+        marca: ordenTrabajoForm.vehiculo.marca,
+        serie: ordenTrabajoForm.vehiculo.numSerie,
+        kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
+        color: ordenTrabajoForm.vehiculo.color,
+        placas: ordenTrabajoForm.vehiculo.placas,
+        anio: ordenTrabajoForm.vehiculo.anio,
+      },
+      factura: factura,
+      insumos: insumosSelec
+    };
+
+      console.log(" OBJETO FINAL:", objSeend);
+
+      // 🔹 FETCH
+      console.log(" Enviando request...");
+
+      const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(objSeend),
+      });
+
+      console.log(" Status:", res.status);
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error(" Error HTTP:", text);
+        alert("Error en el servidor");
+        return;
+      }
+
+      const data = await res.json();
+      console.log(" Respuesta:", data);
+
+      if (data.success) {
+        //console.log(data)
+        limpiarOrdenTrabajoForm(); // Limpia formulario
+        //console.log(data.codigo);
+        irAOrdenTrabajo(data.codigo);         // Redirige
+      } else {
+        console.warn(" Backend respondió error:", data);
+        alert(data.message || "No se pudo guardar la orden");
+      }
   } catch (err) {
-    console.error("Error al guardar OT:", err);
+    console.error(" Error general:", err);
+    alert("Error inesperado al guardar");
   }
- console.log("PAYLOAD:" , JSON.stringify(objSeend));
 };
 
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
@@ -2656,11 +2657,12 @@ console.log("INUMOS:",payload);
 };
 
 function validarCampo(campo, valor) {
+
   const v = (valor ?? "").toString(); // 🔥 ESTA LÍNEA ES LA CLAVE
 
   switch (campo) {
     case "vehiculo.kilometraje": {
-      const limpio = v.replace(/\D/g, ""); // 🔥 usar v, NO valor
+      const limpio = v.replace(/\D/g, ""); //  usar v, NO valor
 
       if (!limpio) {
         errores[campo] = "Kilometraje requerido";
@@ -2674,50 +2676,10 @@ function validarCampo(campo, valor) {
   }
 }
 
-// Mantiene el botón de guardar deshabilitado hasta que no exista ningún error de validación
-const formValido = computed(() => {
-  // Si hay errores → inválido
-  if (Object.keys(errores).length > 0) return false;
-  // Campos obligatorios SIEMPRE
-  const requiredFields = [
-    ordenTrabajoForm.fechaEntrega,
-
-    // CLIENTE
-    ordenTrabajoForm.cliente.clienteTelefono,
-    ordenTrabajoForm.cliente.metodoPago,
-
-    // VEHÍCULO
-    ordenTrabajoForm.vehiculo.marca,
-    ordenTrabajoForm.vehiculo.modelo,
-    ordenTrabajoForm.vehiculo.serie,
-    ordenTrabajoForm.vehiculo.kilometraje,
-    ordenTrabajoForm.vehiculo.color,
-    ordenTrabajoForm.vehiculo.placas,
-    ordenTrabajoForm.vehiculo.anio,
-
-    // TÉCNICO
-    ordenTrabajoForm.idEmpleado,
-  ];
-
-  // 3️⃣ Campos obligatorios SOLO si se desea factura
-  if (boolFactura.value === true) {
-    requiredFields.push(
-      ordenTrabajoForm.factura.razonSocial,
-      ordenTrabajoForm.factura.usoCFDI,
-      ordenTrabajoForm.factura.eMail,
-      ordenTrabajoForm.factura.cp,
-      ordenTrabajoForm.factura.rfc
-    );
-  }
-
-  // 4️⃣ Validación final (no vacío / no null)
-  return requiredFields.every(
-    (v) => v !== "" && v !== null && v !== undefined
-  );
-});
 
 
 function validaciones() {
+
   const campos = [
     "vehiculo.serie",
     "vehiculo.marca",
@@ -2726,35 +2688,94 @@ function validaciones() {
     "vehiculo.kilometraje",
     "vehiculo.anio",
     "vehiculo.placas",
-
     "cliente.clienteTelefono",
     "cliente.clienteCorreo",
-    "cliente.rfc",
   ];
 
-  // limpiar errores
-  Object.keys(errores).forEach((k) => delete errores[k]);
+  const nombresBonitos = {
+    "vehiculo.numSerie": "Número de serie",
+    "vehiculo.marca": "Marca",
+    "vehiculo.modelo": "Modelo",
+    "vehiculo.color": "Color",
+    "vehiculo.kilometraje": "Kilometraje",
+    "vehiculo.anio": "Año",
+    "vehiculo.placas": "Placas",
+    "cliente.clienteTelefono": "Teléfono",
+    "cliente.clienteCorreo": "Correo",
+    "cliente.rfc": "RFC",
+  };
 
-  campos.forEach((campo) => {
+  // 🔹 Ver estado completo del form
+  console.log(" ordenTrabajoForm:", JSON.parse(JSON.stringify(ordenTrabajoForm)));
+
+  // limpiar errores
+  Object.keys(errores).forEach(k => delete errores[k]);
+
+  campos.forEach(campo => {
     const valor = campo.split(".").reduce((o, k) => o?.[k], ordenTrabajoForm);
+
+    console.log(` Campo: ${campo} →`, valor);
+
     validarCampo(campo, valor);
   });
 
-  // SI HAY ERRORES → MOSTRAR ALERTA DETALLADA
+  // 🔹 Teléfono
+  const telefonoRaw = ordenTrabajoForm.cliente.clienteTelefono;
+  const telefono = telefonoRaw?.replace(/\D/g, "");
+
+  console.log(" Teléfono raw:", telefonoRaw);
+  console.log("Teléfono limpio:", telefono);
+
+  if (!telefono || telefono.length !== 10) {
+    console.warn(" Teléfono inválido");
+    errores["cliente.clienteTelefono"] = "Debe tener 10 dígitos";
+  }
+
+  // 🔹 Correo
+  const correo = ordenTrabajoForm.cliente.clienteCorreo;
+  const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  console.log(" Correo:", correo);
+  console.log("¿Correo válido?:", regexCorreo.test(correo));
+
+  if (!correo || !regexCorreo.test(correo)) {
+    console.warn(" Correo inválido");
+    errores["cliente.clienteCorreo"] = "Correo inválido";
+  }
+
+  // 🔹 RFC
+  const rfc = ordenTrabajoForm.cliente.rfc;
+  console.log("RFC:", rfc);
+
+  if (rfc && rfc.length < 12) {
+    console.warn(" RFC inválido");
+    errores["cliente.rfc"] = "RFC inválido";
+  }
+
+  //  Resultado final
+  console.log("ERRORES FINALES:", errores);
+
   if (Object.keys(errores).length > 0) {
     let mensaje = "Corrige los siguientes campos:\n\n";
 
     for (const campo in errores) {
-      mensaje += `• ${campo}: ${errores[campo]}\n`;
+      console.log(` ${campo}:`, errores[campo]);
+      mensaje += `• ${nombresBonitos[campo] || campo}: ${errores[campo]}\n`;
     }
 
+    console.log(" VALIDACIONES FALLARON");
     alert(mensaje);
-
     return false;
   }
 
+  console.log(" VALIDACIONES OK");
+  console.log(" ===== FIN VALIDACIONES =====");
+
   return true;
 }
+
+
+
 </script>
 
 <style scoped>
