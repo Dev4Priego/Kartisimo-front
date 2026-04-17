@@ -55,6 +55,11 @@
                         </button>
                     </div>
                 </template> -->
+                <template #item-runflat="runFlat">
+                    <div class="text-center">
+                        <i v-if="runFlat.runflat === '1'" class="bi bi-check-circle-fill text-success"></i>
+                    </div>
+                </template>
             </EasyDataTable>
 
             <!-- Modal -->
@@ -156,6 +161,7 @@ const headers = [
     { text: "Código", value: "codigo" },
     { text: "Descripción", value: "descripcion", sortable:true },
     { text: "Medidas", value: "medidas", sortable:true },
+    { text: "Runflat", value: "runflat" },
     { text: "Existencia", value: "cantidad", sortable:true },
     { text: "Precio", value: "precio", sortable:true },
     { text: "Nombre Almacen", value: "nombreAlmacen", sortable:true },
@@ -170,6 +176,7 @@ const cargarExistenciasInventario = async () => {
             const anchura = llanta.anchura && llanta.anchura !== 0 ? llanta.anchura : '';
             const perfil = llanta.perfil && llanta.perfil !== 0 ? llanta.perfil : '';
             const rin = llanta.rin && llanta.rin !== 0 ? llanta.rin : '';
+            const runflat = llanta.runflat && llanta.runflat !== '' ? llanta.runflat : '';
             const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
             const velocidad = llanta.velocidad && llanta.velocidad !== 0 ? llanta.velocidad : '';
 
@@ -177,6 +184,7 @@ const cargarExistenciasInventario = async () => {
             if (anchura) medida += anchura;
             if (perfil) medida += `/${perfil}`;
             if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
+            if (runflat) medida+= (runflat === '1' ? ' RF' : '');
             if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
             medida = medida.trim();
 

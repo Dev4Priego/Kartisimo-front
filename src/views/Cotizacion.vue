@@ -890,8 +890,14 @@
                     @update:sort-type="onUpdateSortType"
                   >
                     <!-- TEMPLATE PARA ADAPTAR LA INFORMACION A LA ORGANIZACION medida - marca - modelo - rango -->
+                    <template #item-runflat="runFlat">
+                      <div class="text-center">
+                        <i v-if="runFlat.runflat === '1'" class="bi bi-check-circle-fill text-success"></i>
+                      </div>
+                    </template>
+
                     <template #item-medida="slotProps">
-                      {{ slotProps.medida }} {{ slotProps.rango }}
+                      {{ slotProps.medida }} {{ slotProps.rango }} {{ slotProps.runflat === '1' ? 'RF' : '' }}
                     </template>
 
                     <template #item-acciones="slotProps">
@@ -2485,7 +2491,9 @@ const cargarLlantas = async () => {
         idInventarioInicial: llanta.idInventarioInicial,
         codigo: llanta.codigo,
         llanta: nombreCompleto,
+        // nomenclatura: llanta.nomenclatura,
         medida: llanta.medidas,
+        runflat: llanta.runflat,
         rango: llanta.rango, // campo para colocar en cotizacionForm como el cliente la solicita medida - marca - modelo - rango
         cantidad: llanta.cantidad,
         ubicacion: llanta.nombreAlmacen,
@@ -3860,6 +3868,7 @@ const abrirModalCotizacion = (cotizacion = null) => {
 const tblHeadersModal = [
   { text: "Llanta", value: "llanta", sortable: true },
   { text: "Rango", value: "rango" },
+  { text: "Runflat", value: "runflat" },
   { text: "Codigo", value: "codigo" },
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
