@@ -15,7 +15,7 @@ import html2pdf from 'html2pdf.js';
 
 
 const { proxy } = getCurrentInstance()
-
+const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
 const props = defineProps({
 	cotizacion: Object
@@ -446,12 +446,15 @@ tbody tr:last-child td {
 		const pdfBase64 = await blobToBase64(pdfBlob)
 
 		// Enviar correo
+		const datoscorreo = await fetch(`${proxy.$serverIP}api/Usuario/${raw.usuario.idUsuario}`);
+		let datos = await datoscorreo.json();
+		//console.log(JSON.stringify(datos));
 		const response = await fetch(`${proxy.$serverIP}api/Email/enviar`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-				CorreoOrigen: '',
-				Contrasenia: '',
+				CorreoOrigen: raw.usuario.correo,
+				Contrasenia: datos.usuario.password_correo,
 				Para: email,
 				Asunto: subj,
 				Cuerpo: msg,

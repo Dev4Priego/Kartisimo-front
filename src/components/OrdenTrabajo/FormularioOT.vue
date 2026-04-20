@@ -9,7 +9,7 @@
           <div class="d-flex justify-content-end">
             <div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
               <div class="card-body" style="font-size: 10pt; color: slategray">
-                <i class="bi bi-person me-2"></i> <strong>Usuario: </strong
+                <i class="bi bi-person me-2"></i><strong>Usuario: </strong
                 >{{ loggeduser.usuario.nombre }}<br />
                 <i class="bi bi-building-fill me-2"></i>
                 <strong>Sucursal: </strong
