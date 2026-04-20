@@ -639,14 +639,25 @@
 
           <div class="modal-body" :style="{ overflowY: 'auto' }">
 
-            <div class="d-flex justify-content-end">
-              <div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
-                <div class="card-body" style="font-size: 10pt; color: slategray;">
-                  <i class="bi bi-person me-2"></i> <strong>Usuario: </strong>{{ loggeduser.usuario.nombre }}<br />
-                  <i class="bi bi-building-fill me-2"></i> <strong>Sucursal: </strong>{{ sucursales[loggeduser.usuario.idSucursal - 1] }}
-                </div>
-              </div>
-            </div>
+      <div class="d-flex justify-content-end">
+<div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
+  <div class="card-body" style="font-size: 10pt; color: slategray;">
+
+    <i class="bi bi-person me-2"></i>
+    <strong>Usuario: </strong>{{ loggeduser.nombre }}<br />
+
+    <i class="bi bi-envelope me-2"></i>
+    <strong>Correo: </strong>{{ loggeduser.correo || 'Sin correo' }}<br />
+
+    <i class="bi bi-building-fill me-2"></i>
+   <strong>Sucursal: </strong>
+{{ sucursales?.[loggeduser.id_sucursal] || 'N/A' }}
+  </div>
+</div>
+
+
+
+</div>
 
             <!-- Seccion informacion cliente -->
 
@@ -2106,8 +2117,26 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
-const loggeduser = JSON.parse(localStorage.getItem("userSession"));
+
+
+const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
+
+const loggeduser = {
+  id: raw.usuario?.idUsuario ?? null,
+  nombre: raw.usuario?.nombre ?? '',
+  login: raw.usuario?.login ?? '',
+  correo: raw.usuario?.correo ?? raw.usuario?.login ?? '', 
+  id_sucursal: raw.usuario?.idSucursal ?? null
+};
+
+console.log("LOGGED USER:", loggeduser);
+console.log("CORREO:", loggeduser.correo);
+
 const sucursales = [ '(Ninguna)', 'Delta', 'López Mateos', 'Torres Landa', 'Martinica' ];
+
+
+
+
 
 const vistaCotizacion = ref({});
 
