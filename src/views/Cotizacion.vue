@@ -2586,11 +2586,20 @@ const registrarCerrarConEsc = (mostrarVista) => {
 /*************************************/
 /*      AL MONTAR COMPONENTE
     /*************************************/
-onMounted(() => {
-  const el = modalRef.value;
-  el?.addEventListener("hidden.bs.modal", resetTabla);
-});
 
+    onMounted(() => {
+  const el = modalRef.value;
+
+  el?.addEventListener("hidden.bs.modal", () => {
+    resetTabla();
+    cargarPromosRapidas();
+  });
+
+  // opcional: cuando se abre
+  el?.addEventListener("shown.bs.modal", () => {
+    cargarPromosRapidas();
+  });
+});
 let cleanupEscListener = null; // <-- DECLARADO ANTES DE onMounted
 
 onMounted(async () => {
@@ -2853,6 +2862,7 @@ const agregarLlanta = async (item) => {
 
   //console.log('agregarLlanta2: '+ JSON.stringify(cotizacionForm.llantas))
 };
+
 
 // Obtener promociones aplicables a una llanta (por inventario)
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
