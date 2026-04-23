@@ -674,6 +674,15 @@
                     <label for="clienteExistente" class="mb-1 form-label"
                       ><i class="bi bi-search"></i> Buscar cliente existente</label
                     >
+                    
+                    <ClientesFilterOption
+                      v-model="mostrarTabla"
+                      @seleccionar-cliente="manejarCliente"
+                    />
+
+                   
+
+                    <!--
                     <select
                       id="clienteExistente"
                       class="form-select mb-3"
@@ -689,6 +698,10 @@
                         {{ cliente.nombres }} {{ cliente.apPaterno ? cliente.apPaterno : '' }} {{ cliente.apMaterno ? cliente.apMaterno : '' }}
                       </option>
                     </select>
+                    -->
+                    
+
+
                   </div>
                 </div>
                 <div class="row">
@@ -2101,6 +2114,7 @@ import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { useRouter } from "vue-router";
 import { fontStringify } from "pdfmake/src/helpers";
+import ClientesFilterOption from "@/components/Cotizacion/ClientesFilterOption.vue";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -2117,7 +2131,8 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
-
+//Tabla componente 
+const mostrarTabla = ref(false);
 
 const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
@@ -2154,6 +2169,8 @@ const esNuevaCotizacion = ref(true); // bandera para edicion o crear (paquetes)
 const sortBy = ref(""); // '' = sin columna activa
 const sortType = ref("asc"); // 'asc' | 'desc'
 const tableKey = ref(0); // para forzar re-montaje cuando quieras
+const idCliente = ref(null); 
+
 
 const onUpdateSortBy = (v) => {
   sortBy.value = v ?? "";
@@ -2202,12 +2219,13 @@ const resetTabla = () => {
 
 const cotizacionForm = reactive({
   codigo: "", // ← Para saber si es edición
+  idCliente: null,
   clienteNombre: "",
   nombre: "",
   apellidos: "",
   clienteTelefono: "",
   clienteCorreo: "",
-  clienteExistente: false,
+  clienteExistente: null,
   paquetes: [],
   paquetesDetalles: {},
   llantas: [],
@@ -3071,7 +3089,7 @@ const cargarFormulario = async (cotizacion = null) => {
       apellidos: "",
       clienteTelefono: "",
       clienteCorreo: "",
-      clienteExistente: false,
+      clienteExistente: null,
       paquetes: [],
       paquetesDetalles: {},
       llantas: [],
@@ -3121,7 +3139,7 @@ const cargarFormulario = async (cotizacion = null) => {
     cotizacionForm.apellidos = data.apPaterno + " " + data.apMaterno;
     cotizacionForm.clienteTelefono = data.telefono;
     cotizacionForm.clienteCorreo = data.correo;
-    cotizacionForm.clienteExistente = false;
+    cotizacionForm.clienteExistente = null;
     cotizacionForm.mostrarTotal = data.mostrarTotal;
     cotizacionForm.observaciones = data.observaciones;
 
@@ -3536,7 +3554,7 @@ const guardarCotizacion = async () => {
           observaciones: cotizacionForm.observaciones || "",
         }
       : {
-          idCliente: null,
+          idCliente: cotizacionForm?.idCliente || null,
           nombre: cotizacionForm.clienteNombre || "",
           nombres: cotizacionForm.nombre || "",
           apellidos: cotizacionForm.apellidos || "",
@@ -3592,12 +3610,12 @@ const guardarCotizacion = async () => {
     const nuevaCotizacion = {
       codigo: rawId,
       mostrarTotal: cotizacionForm.mostrarTotal,
-      idSucursal: loggeduser.usuario.idSucursal,
+      idSucursal: loggeduser.id_sucursal,
       cliente,
       llantas,
       paquetes,
       serviciosAdicionales,
-      creadoPor: loggeduser.usuario.idUsuario,
+      creadoPor: loggeduser.idUsuario,
       observaciones: cotizacionForm.observaciones,
       idPromocionGeneral: promoGeneral.value?.idPromocion ?? null,
     };
@@ -4357,6 +4375,20 @@ const loadLogoBase64 = async () => {
 };
 
 pdfMake.vfs = pdfFonts.vfs;
+
+const manejarCliente = (cliente) => {
+  if (cliente) {
+    cotizacionForm.idCliente = cliente.idCliente;
+    cotizacionForm.nombre = cliente.nombres ?? '';
+    cotizacionForm.apellidos = `${cliente.apPaterno ?? ''} ${cliente.apMaterno ?? ''}`.trim();
+    cotizacionForm.clienteTelefono = cliente?.telefono ?? '';
+    cotizacionForm.clienteCorreo = cliente?.correo ?? '';
+    cotizacionForm.observaciones = cliente?.observaciones ?? '';
+    mostrarTabla.value = false;
+
+    //cotizacionForm.clienteExistente = cliente;
+  }
+};
 
 //=================================
 //Funciones promocines
