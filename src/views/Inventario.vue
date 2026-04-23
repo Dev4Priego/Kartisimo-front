@@ -29,11 +29,65 @@
                 </div>
                 <div class="col-auto">
                     <button class="btn btn-primary" @click="openModal">
-                        Cargar CSV por marca
+                        Cargar CSV por marca 
                     </button>
                 </div>
             </div>
+            <transition name="slide-down" class="mb-3">
+            <div v-if="showUploader" class="tab-container bg-light border rounded p-3 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Carga de listas <strong>(Beta)</strong></h5>
+                <button type="button" class="btn-close" @click="showUploader=false" aria-label="Close"></button>
+                </div>
 
+                <div class="alert alert-info mb-3">
+                Solo se admite un archivo <strong>.xlsx</strong> (tipo <code>Excel.xlsx</code>), Asegúrate que el nombre del archivo sea igual al de los proveedores admitidos, como: Avante, Bridgestone, Kartisimo, Martinica y Llantas Directas
+
+                <br>
+                
+                <br><strong class="text-warning">AVISO: </strong><strong>Asegurate que la lista cuente con una columna llamada "precio". </strong>
+                </div>
+
+                <!-- Único input file -->
+                <div class="mb-3">
+                <label class="form-label">Seleccionar archivo .xlsx</label>
+                <input type="file"
+                        class="form-control"
+                        accept=".xlsx"
+                        id="file-input"
+                        @change="onFileChange($event)" />
+                </div>
+                <!--  div para mostrar el archivo -->
+                    <div v-if="file!= null" class="alert alert-secondary d-flex justify-content-between align-items-center">
+                    <div class="me-2 text-truncate" style="max-width: 70%;">
+                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>{{ file.name }}
+                        <small class="text-muted">({{ prettySize(file.size) }})</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-danger" @click="clearFile">
+                        Quitar
+                    </button>
+                    </div>
+
+                
+                <!-- Footer con transición -->
+                <div class="mt-3 d-flex justify-content-end align-items-center gap-2">
+                <span class="me-auto text-muted" v-if="file">Archivo seleccionado: {{ file.name }}</span>
+                
+                <transition name="fade">
+                    <button v-if="!isLoading" class="btn btn-success btn-procesar" 
+                            :disabled="!file" @click="submit">
+                    Procesar Lista
+                    </button>
+                </transition>
+
+                <transition name="fade">
+                    <div v-if="isLoading" class="bg-success rounded d-flex justify-content-center align-items-center" style="width: 100px; height: 40px;">
+                    <img src="../../public/images/loading.gif" style="max-width: 100%; max-height: 100%;" alt="loading">
+                    </div>
+                </transition>
+                </div>
+            </div>
+            </transition>
             <EasyDataTable
                 :headers="headers"
                 :items="llantasFiltradas"
@@ -62,86 +116,17 @@
                 </template>
             </EasyDataTable>
 
-            <!-- Modal -->
-            <div class="modal fade" tabindex="-1" ref="modalEl" aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Carga de archivos CSV por marca</h5>
-                            <button type="button" class="btn-close" @click="closeModal" aria-label="Close"></button>
-                        </div>
+            
 
-                        <div class="modal-body">
-                            <div class="alert alert-info mb-3">
-                                Solo se admiten archivos <strong>.csv</strong> (tipo <code>text/csv</code>).
-                            </div>
-
-                            <div class="accordion" id="csvAccordion">
-                                <div class="accordion-item" v-for="(brand, idx) in brands" :key="brand">
-                                    <h2 class="accordion-header" :id="`heading-${idx}`">
-                                        <button class="accordion-button" :class="{'collapsed': idx!==0}" type="button"
-                                                data-bs-toggle="collapse"
-                                                :data-bs-target="`#collapse-${idx}`"
-                                                :aria-expanded="idx===0 ? 'true' : 'false'"
-                                                :aria-controls="`collapse-${idx}`">
-                                            {{ brand }}
-                                            <span class="badge bg-secondary ms-2">{{ filesByBrand[brand].length }}</span>
-                                        </button>
-                                    </h2>
-                                    <div :id="`collapse-${idx}`"
-                                        class="accordion-collapse collapse"
-                                        :class="{'show': idx===0}"
-                                        :aria-labelledby="`heading-${idx}`"
-                                        data-bs-parent="#csvAccordion">
-                                        <div class="accordion-body">
-                                            <div class="mb-3">
-                                                <label class="form-label">Seleccionar archivos CSV (puedes elegir varios)</label>
-                                                <input type="file"
-                                                        class="form-control"
-                                                        accept=".csv,text/csv"
-                                                        multiple
-                                                        :id="`file-${brand}`"
-                                                        @change="onFileChange($event, brand)" />
-                                            </div>
-
-                                            <!-- Lista de archivos seleccionados -->
-                                            <ul class="list-group mb-3" v-if="filesByBrand[brand].length">
-                                                <li class="list-group-item d-flex justify-content-between align-items-center"
-                                                    v-for="(f, i) in filesByBrand[brand]" :key="f._id">
-                                                    <div class="me-2 text-truncate" style="max-width: 70%;">
-                                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i>{{ f.name }}
-                                                        <small class="text-muted">({{ prettySize(f.size) }})</small>
-                                                    </div>
-                                                    <button class="btn btn-sm btn-outline-danger" @click="removeFile(brand, i)">
-                                                        Quitar
-                                                    </button>
-                                                </li>
-                                            </ul>
-
-                                            <div class="d-flex gap-2">
-                                                <button class="btn btn-outline-secondary btn-sm"
-                                                        :disabled="!filesByBrand[brand].length"
-                                                        @click="clearBrand(brand)">
-                                                    Limpiar {{ brand }}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div> <!-- /accordion-item -->
-                            </div> <!-- /accordion -->
-                        </div>
-
-                        <div class="modal-footer">
-                            <span class="me-auto text-muted" v-if="totalFiles">Total archivos: {{ totalFiles }}</span>
-                            <button class="btn btn-outline-secondary" @click="closeModal">Cancelar</button>
-                            <button class="btn btn-success" :disabled="!totalFiles" @click="submit">
-                            Subir seleccionados
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div> <!-- /modal -->
         </div>
+       
+        <ListaLlantas
+        :showModal="mostrarModal"
+        :llantas="ListaLLantas"
+        @close="handleClose"
+        />
+     
+        
     </div>
 </template>
 
@@ -149,14 +134,21 @@
 import { ref, onMounted, computed, getCurrentInstance, reactive } from 'vue';
 import EasyDataTable from "vue3-easy-data-table";
 import "bootstrap/dist/js/bootstrap.bundle"; // muy importante para que offcanvas funcione
+import { log } from 'pdfmake/build/pdfmake';
+import ListaLlantas from '@/components/Inventario/ListaLlantas.vue';
+import Swal from 'sweetalert2';
 
 const { proxy } = getCurrentInstance()
 const llantas = ref([]);
-const almacen = ref([])
+const almacen = ref([]);
+const ListaLLantas = ref([]);
+const mostrarModal=ref(false);
 const busquedaMedida = ref('')
 const almacenSeleccionado = ref('');
 const busquedaCodigoDesc = ref('')
-
+const isLoading = ref(false);
+const showUploader = ref(false);
+const file = ref(null);
 const headers = [
     { text: "Código", value: "codigo" },
     { text: "Descripción", value: "descripcion", sortable:true },
@@ -235,7 +227,7 @@ const llantasFiltradas = computed(() => {
     const palabrasClave = queryDesc
         .split(/[\s\/\-]+/)
         .filter(p => p.length > 0);
-
+   
     const queryUnido = queryDesc.replace(/[^a-z0-9]/gi, '');
 
     return llantas.value.filter(llanta => {
@@ -253,15 +245,18 @@ const llantasFiltradas = computed(() => {
 
         const textoUnido = textoItem.replace(/[^a-z0-9]/gi, '');
 
-        const coincidePorPalabras = palabrasClave.every(p =>
-        textoItem.includes(p)
-        );
-
+       
+        const coincideMedida = palabrasClave.length === 2 &&
+            llanta.anchura.toString() === palabrasClave[0] &&
+            llanta.perfil.toString() === palabrasClave[1];
+        
         const coincideTodoJunto = textoUnido.includes(queryUnido);
 
         const coincideAlmacen = !almacen || llanta.nombreAlmacen.toLowerCase() === almacen;
 
-        return (coincidePorPalabras || coincideTodoJunto) && coincideAlmacen;
+        return (
+            
+        coincideMedida  || coincideTodoJunto) && coincideAlmacen;
     });
 });
 
@@ -304,36 +299,44 @@ const prettySize = (bytes) => {
 }
 
 // Validar CSV por extensión y MIME
-function isCsv(file) {
-  const nameOk = file.name?.toLowerCase().endsWith('.csv')
-  const typeOk = (file.type === 'text/csv') || file.type === '' // algunos navegadores dejan vacío
-  return nameOk || typeOk
+function isXlsx(file) {
+  const nameOk = file.name?.toLowerCase().endsWith('.xlsx')
+
+  const validMimeTypes = [
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  ]
+
+  const typeOk = validMimeTypes.includes(file.type) || file.type === ''
+
+  return nameOk && typeOk
 }
 
-function onFileChange(e, brand) {
+
+
+function onFileChange(e) {
   const input = e.target
-  const selected = Array.from(input.files || [])
-  const accepted = []
-  const rejected = []
+  const selected = input.files[0] // solo el primer archivo
+  if (!selected) return
 
-  selected.forEach(f => {
-    if (isCsv(f)) {
-      // agrega un id interno para v-for
-      f._id = `${Date.now()}_${fileAutoId++}`
-      accepted.push(f)
-    } else {
-      rejected.push(f.name)
-    }
-  })
-
-  if (rejected.length) {
-    alert(`Se ignoraron archivos no CSV:\n• ${rejected.join('\n• ')}`)
+  if (isXlsx(selected)) {
+    // agrega un id interno si lo necesitas
+    //selected._id = `${Date.now()}_${fileAutoId++}`
+    file.value = selected
+  } else {
+    alert(`Se ignoró archivo no válido: ${selected.name}`)
+    file.value = null
   }
-
-  filesByBrand[brand].push(...accepted)
-  // Limpia el input para permitir re-selección del mismo archivo si hace falta
+  console.log("Archivo:",file)
+  // Limpia el input para permitir re-selección del mismo archivo
   input.value = ''
 }
+
+function clearFile() {
+  file.value = null
+}
+
+
+
 
 function removeFile(brand, index) {
   filesByBrand[brand].splice(index, 1)
@@ -351,52 +354,62 @@ const totalFiles = computed(() =>
 const modalEl = ref(null)
 let bsModal = null
 
-onMounted(() => {
-  // Asegúrate de tener Bootstrap JS cargado (window.bootstrap)
-  if (window.bootstrap?.Modal) {
-    bsModal = new window.bootstrap.Modal(modalEl.value, { backdrop: 'static' })
-  } else {
-    console.warn('Bootstrap JS no encontrado. Incluye bootstrap.bundle.min.js')
-  }
-})
+
 
 function openModal() {
-  bsModal?.show()
+  showUploader.value=true;
+  console.log("Abriendo");
 }
 
 function closeModal() {
-  bsModal?.hide()
+  showUploader.value = false;
 }
 
 // Envío de archivos (ejemplo con FormData)
 async function submit() {
-  const fd = new FormData()
-  for (const brand of brands) {
-    filesByBrand[brand].forEach((file, idx) => {
-      // Clave por marca en arreglo, p.ej. Avante[], Bridgestone[]
-      fd.append(`${brand}[]`, file, file.name)
-    })
-  }
-
-  // 👉 Aquí haces tu request real
-  // Ejemplo con fetch:
+    // Remplazar boton por un gift de carga
+    isLoading.value = true;
+    const userSession = JSON.parse(localStorage.getItem("userSession"))
+    const fd = new FormData()
+    fd.append(`Archivo`, file.value, file.value.name);
+    fd.append("Lista" ,file.value.name.replace(".xlsx" ,"")); // Mando solo el nombre
+ 
+  
+  //fd.append('IdUsuario', userSession.usuario.idUsuario)
   try {
-    // Reemplaza '/api/upload-csv' por tu endpoint real
-    // const resp = await fetch('/api/upload-csv', {
-    //   method: 'POST',
-    //   body: fd
-    // })
-    // if (!resp.ok) throw new Error(`Error ${resp.status}`)
+    const resp = await fetch(proxy.$serverIP + 'api/Listas/ProcesarLista', {
+      method: 'POST',
+      body: fd
+      
+    })
 
-    // // Si todo bien:
-    // alert('Archivos cargados correctamente.')
-    // Limpia todo
-    for (const b of brands) filesByBrand[b] = []
-    closeModal()
+    if (!resp.ok) throw new Error(`Error ${resp.status}`)
+    const data = await resp.json();
+    closeModal();
+    ListaLLantas.value = data.llantas; // pasamos el resultado 
+   if(ListaLLantas.value.length != 0){// llantas nuevas
+    mostrarModal.value = true;
+    isLoading.value = false;
+
+   }else{
+    Swal.fire({
+       icon: "success",
+       title: "Inventario Actualizado",
+       text: `Inventario actualizado, no se encontraron llantas nuevas`,
+     });
+     isLoading.value = false;
+   }
+   
   } catch (err) {
     console.error(err)
+    isLoading.value = false;
     alert('Ocurrió un error al subir los archivos. Revisa la consola.')
   }
+  
+}
+const handleClose = () => {
+  mostrarModal.value = false
+  ListaLLantas.value = [] // 
 }
 </script>
 
@@ -408,4 +421,15 @@ async function submit() {
 }
 /* Evita que los nombres largos rompan el layout */
 .list-group-item { overflow: hidden; }
+.slide-down-enter-active, .slide-down-leave-active {
+  transition: all 0.4s ease;
+}
+.slide-down-enter {
+  transform: translateY(-20px);
+  opacity: 0;
+}
+.slide-down-leave-to {
+  transform: translateY(-20px);
+  opacity: 0;
+}
 </style>
