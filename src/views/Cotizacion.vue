@@ -1071,6 +1071,7 @@
                     <table class="table align-middle">
                       <thead>
                         <tr>
+                          <th>Concepto de trabajo</th>
                           <th>MEDIDA - MARCA - MODELO - RANGO</th>
                           <th>Cantidad</th>
                           <th>Precio Unitario</th>
@@ -2131,6 +2132,7 @@ const nuevaObservacion = ref("");
 const busquedaLlantas = ref("");
 const busquedaCotizaciones = ref("");
 const cotizacionesRealizadas = ref([]);
+const conceptoOT = ref([]);
 //Tabla componente 
 const mostrarTabla = ref(false);
 
@@ -3077,6 +3079,28 @@ watch(
   { deep: true },
 );
 
+
+const cargarConcpetoTrabajo = async () => {
+  try {
+    const response = await fetch(`${proxy.$serverIP}api/ConceptoTrabajo/get`);
+
+    if (!response.ok) {
+      throw new Error(`Error HTTP: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    conceptoOT.value = data.map((a) => ({
+      idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
+      nombre: a.nombre,
+    }));
+
+    // console.log('Datos recibidos:', conceptoOT.value)
+  } catch (error) {
+    console.error("Error cargando ConceptoTrabajo:", error);
+  }
+};
+
 const cargarFormulario = async (cotizacion = null) => {
   // 🔹 Guardamos lo que el usuario haya escrito
   const observacionesPrevias = cotizacionForm.observaciones || "";
@@ -3716,6 +3740,19 @@ function parsePrecio(v) {
   return Number.isFinite(n) ? n : Number.POSITIVE_INFINITY;
 }
 
+function parseMedida(text) {
+  const clean = text.replace(/\s+/g, "");
+  const match = clean.match(/(\d{3})\/(\d{2})R?(\d{2})?/i);
+
+  if (!match) return {};
+
+  return {
+    ancho: match[1],
+    perfil: match[2],
+    rin: match[3] || null,
+  };
+}
+
 /* ====== 2) Prepara ítems una sola vez ====== */
 const preparedItems = computed(() =>
   (items.value || []).map((it) => {
@@ -3724,7 +3761,7 @@ const preparedItems = computed(() =>
     const medida = (it.medida ?? "").toString();
     const rango = (it.rango ?? "").toString();
     const ubic = (it.ubicacion ?? "").toString();
-
+    const dims = parseMedida(llanta + " " + medida);
     const text = (
       llanta +
       " " +
@@ -3735,7 +3772,7 @@ const preparedItems = computed(() =>
       ubic
     ).toLowerCase();
     const unido = text.replace(reNonAN, "");
-
+    const medidaNorm = medida.replace(/\s+/g, "").toLowerCase();
     const marca = extractMarcaFromLlanta(llanta);
     const brandRank = brandPriority[marca.toLowerCase()] ?? 3;
     const idInventarioInicial = (it.idInventarioInicial ?? "").toString();
@@ -3744,6 +3781,8 @@ const preparedItems = computed(() =>
       ...it,
       _text: text,
       _unido: unido,
+      _medidaNorm: medidaNorm,
+      _dims: dims,
       _marca: marca,
       _brandRank: brandRank,
       _priceNum: parsePrecio(it.precio),
@@ -3785,25 +3824,46 @@ watch(q, (val) => {
 const itemsFiltrados = computed(() => {
   const term = qDebounced.value;
   let base = baseSorted.value;
-
-  // Filtro por búsqueda de texto
+  const medidaMatch = term.match(/(\d{3})\/(\d{2})/);
   if (term) {
     const palabras = term.split(reSplit).filter(Boolean);
-    base = base.filter((it) => {
-      const t = it._text,
-        u = it._unido;
-      for (let i = 0; i < palabras.length; i++) {
-        const p = palabras[i];
-        const pn = p.replace(reNonAN, "");
-        if (!(t.includes(p) || u.includes(pn))) return false;
+   base = base.filter((it) => {
+      const t = it._text;
+      const u = it._unido;
+
+      // 🔥 1. Filtro fuerte por medida (si existe)
+      if (medidaMatch) {
+        const [, ancho, perfil] = medidaMatch;
+
+        if (
+          it._dims.ancho !== ancho ||
+          it._dims.perfil !== perfil
+        ) {
+          return false;
+        }
       }
+
+      // 🔥 2. Filtro por palabras
+      for (let i = 0; i < palabras.length; i++) {
+        const p = palabras[i].toLowerCase();
+        const pn = p.replace(reNonAN, "");
+
+        // Ignorar medida aquí (ya se procesó arriba)
+        if (/^\d{3}\/\d{2}/.test(p)) continue;
+
+        if (!(t.includes(p) || u.includes(pn))) {
+          return false;
+        }
+      }
+
       return true;
     });
   }
 
-  // Filtro por almacenes seleccionados
   if (selectedAlmacenes.value.length > 0) {
-    base = base.filter((it) => selectedAlmacenes.value.includes(it.ubicacion));
+    base = base.filter((it) =>
+      selectedAlmacenes.value.includes(it.ubicacion)
+    );
   }
 
   return base;

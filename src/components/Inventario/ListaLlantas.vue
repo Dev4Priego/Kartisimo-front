@@ -81,16 +81,17 @@
 							
 							<th class="text-center">Codigo</th>
 							<th class="text-center">Descripcion</th>
-							<th class="text-center" style="width: 10%;" >Marca</th>
-							<th class="text-center" style="width: 15%;" >Modelo</th>
-							<th class="text-center">Carga</th>
-							<th class="text-center">Velocidad</th>
-							<th class="text-center">Anchura</th>
-							<th class="text-center">Perfil</th>
-							<th class="text-center">Rin</th>
+							<th class="text-center" style="width: 10%;" >Marca*</th>
+							<th class="text-center" style="width: 15%;" >Modelo*</th>
+							<th class="text-center">Carga*</th>
+							<th class="text-center">Carga Dual</th>
+							<th class="text-center">Velocidad*</th>
+							<th class="text-center">Anchura*</th>
+							<th class="text-center">Perfil*</th>
+							<th class="text-center">Rin*</th>
 							<th class="text-center" style="width: 4%;">RunFlat</th>
-							<th class="text-center">Cantidad</th>
-							<th class="text-center">Precio</th>
+							<th class="text-center">Cantidad*</th>
+							<th class="text-center">Precio*</th>
 							<th class="text-center">nom</th>
 
 						</tr>
@@ -117,6 +118,10 @@
 							<!--Carga-->
 							<td>
 								<input type="number" class="form-control" v-model="llanta.carga">
+							</td>
+							<!--subCarga (Dual)-->
+							<td>
+								<input type="number" class="form-control" v-model="llanta.subCarga">
 							</td>
 							<!--Vel-->
 							<td>
@@ -150,7 +155,7 @@
 								<input type="number" class="form-control" v-model="llanta.precio" step="any" >
 							</td>
 							<td>
-								<input type="number" class="form-control" v-model="llanta.nomenclatura" readonly >
+								<input type="number" class="form-control" v-model="llanta.nomenclatura"  >
 							</td>
 						</tr>
 					</tbody>
@@ -293,19 +298,22 @@ onMounted(async () => {
 // validar que la lista no tenga llantas con campos nulos
 const llantasAceptadas = ref([])
 
+const nomenclatura = (item)=>{
+	if (llanta.nomenclatura == 1){
+		return item / 100;
+	}
+	return item;	
+	
+}
+
 const ValidateList = () => {
   const aceptadas = []
   const rechazadas = []
 
   props.llantas.forEach(llanta => {
-    const esValida =
-      llanta.marca &&
-      llanta.modelo &&
-      llanta.carga != null &&
-      llanta.velocidad &&
-      llanta.perfil != null &&
-      llanta.anchura != null
-
+    const esValida = llanta.marca && llanta.modelo && llanta.carga != null && llanta.velocidad  && llanta.anchura != null; //Agregar el campo de redial
+	llanta.medida = `${llanta.anchura}${llanta.perfil != 0 ? `/${llanta.perfil}R${llanta.rin}` : `R${llanta.rin}`}`
+	llanta.rango=`${llanta.carga}${llanta.subCarga != 0 ? `/${llanta.subCarga}${llanta.velocidad}` : llanta.velocidad }`
     if (esValida) {
       aceptadas.push(llanta)
     } else {
@@ -339,6 +347,7 @@ const  GuardarLlantas = async ()=>{
 			llantas: llantasAceptadas.value,
 			almacen : almacen.value
 		}
+		console.log("PAYLOAD [DEBUG]:", PAYLOAD);
 		try{
 			const res = await fetch(`${proxy.$serverIP}api/Listas/GuardarNuevas`,{
 				method: "POST",
