@@ -206,9 +206,17 @@
                     type="text"
                     placeholder="Nombre del cliente"
                     list="clientes"
-                    @input="onClienteInput($event.target.value)"
+                    @input="onClienteInput($event.target.value), validate('cliente.nombres')"
+                    @blur="validate('cliente.nombres')"
+                    :class="{ 'input-error': errores['cliente.nombres'] }"
                     :readonly="isReadOnly"
                   />
+                  <small
+                    v-if="errores['cliente.nombres']"
+                    class="error-msg"
+                  >
+                    {{ errores["cliente.nombres"] }}
+                  </small>
                 </div>
 
                 <!-- Apellidos -->
@@ -227,6 +235,12 @@
                     :class="{ 'input-error': errores['cliente.apellidos'] }"
                     :readonly="isReadOnly"
                   />
+                  <small
+                    v-if="errores['cliente.apellidos']"
+                    class="error-msg"
+                  >
+                    {{ errores["cliente.apellidos"] }}
+                  </small>
                 </div>
 
                 <!-- Teléfono -->
@@ -300,46 +314,6 @@
                     {{ errores["cliente.rfc"] }}
                   </small>
                 </div>
-           <div class="col-6 mb-3">
-            <label for="email" class="form-label">Correo electrónico</label>
-            <input id="email"
-              v-model="ordenTrabajoForm.cliente.clienteCorreo"
-              class="form-control"
-              type="text"
-              placeholder="(Use un correo válido)"
-              list="clientes"
-              @change="onClienteSeleccionadoByValue($event.target.value)"
-              @blur="validate('cliente.clienteCorreo')"
-              :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
-            />
-            <small v-if="errores['cliente.clienteCorreo']" class="error-msg">
-              {{ errores["cliente.clienteCorreo"] }}
-            </small>
-          </div>
-
-
-
-                
-        <!-- RFC -->
-        <div class="col-6 mb-3">
-          <label for="rfc" class="form-label">RFC</label>
-          <input id="rfc"
-            v-model="ordenTrabajoForm.cliente.rfc"
-            type="text"
-            class="form-control"
-            placeholder="(12 ó 13 caracteres)"
-            list="clientes"
-            @change="onClienteSeleccionadoByValue($event.target.value)"
-            @blur="validate('cliente.rfc')"
-            :class="{ 'input-error': errores['cliente.rfc'] }"
-          />
-          <small v-if="errores['cliente.rfc']" class="error-msg">
-            {{ errores["cliente.rfc"] }}
-          </small>
-        </div>
-
-
-
               </div>
             </div>
           </div>
@@ -963,6 +937,19 @@
           </div>
         </div>
       </div>
+      <div v-if="formValida" class="row my-3">
+        <div class="col text-end">
+          <div class="error-msg d-flex justify-content-end mb-2">
+            <table>
+              <tbody>
+                <tr v-for="valor in listaErrores" :key="valor">
+                  <td>{{ valor }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
 
       <div class="row my-3">
         <div class="col text-end">
@@ -977,15 +964,13 @@
               ></i>
               &nbsp;Volver
             </button>
-            <!-- Modal vista previa OT :disabled="!formValido" -->
           </router-link>
           <button
             type="button"
             class="btn btn-success position-relative shadow ms-3"
             style="width: 140px"
-            :disabled="!formValido"
             
-            @click="mostrarVista = true"
+            @click="validar_formulario();" 
           >
             <i class="bi-save-fill position-absolute start-0 ms-2"></i>
             &nbsp;Guardar
@@ -1395,6 +1380,7 @@ const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
 const showModal = ref(false);
 const mostrarVista = ref(false);
+const formValida = ref(false);
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
@@ -1451,6 +1437,8 @@ const formatearFechaSinHora = (fecha) => {
   });
 };
 
+const listaErrores = computed(() => Object.values(errores));
+
 /* =================== HELPER PARA CAMPOS ANIDADOS =================== */
 
 const getValor = (path) => {
@@ -1459,15 +1447,16 @@ const getValor = (path) => {
 
 
 function validate(path) {
+  formValida.value = false;
   const value = (getValor(path) ?? "").toString();
 
   const rules = {
     // -------- VEHÍCULO ----------
     "vehiculo.marca": () =>
-      !value.trim() ? "Marca obligatoria." : null,
+      !value.trim() ? "Marca de vehículo obligatoria." : null,
 
     "vehiculo.modelo": () =>
-      !value.trim() ? "Modelo obligatorio." : null,
+      !value.trim() ? "Modelo de vehículo obligatorio." : null,
 
     "vehiculo.serie": () =>
       value.trim().length !== 17
@@ -1475,48 +1464,52 @@ function validate(path) {
         : null,
 
     "vehiculo.kilometraje": () => {
-      if (value === "") return "Kilometraje obligatorio.";
+      if (value === "") return "Kilometraje del vehículo obligatorio.";
 
       const num = Number(value);
 
-      if (isNaN(num)) return "Debe ser un número.";
-      if (num < 0) return "No puede ser negativo.";
+      if (isNaN(num)) return "El kilometraje debe ser un número.";
+      if (num < 0) return "El kilometraje no puede ser negativo.";
       if (num < kilometrajeBase.value)
-        return `No puede ser menor a ${kilometrajeBase.value}.`;
+        return `El kilometraje no puede ser menor a ${kilometrajeBase.value}.`;
 
       return null;
     },
 
     "vehiculo.color": () =>
-      !value.trim() ? "Color obligatorio." : null,
+      !value.trim() ? "Color del vehículo obligatorio." : null,
 
     "vehiculo.placas": () =>
       !value.trim() ? "Placas obligatorias." : null,
 
     "vehiculo.anio": () => {
-      if (!value) return "Año obligatorio.";
+      if (!value) return "Año modelo del vehículo obligatorio.";
 
       const y = parseInt(value);
       const current = new Date().getFullYear();
       const nextyear = current + 1;
 
-      if (isNaN(y)) return "Año no válido.";
+      if (isNaN(y)) return "Año modelo no válido.";
       if (y < 1950 || y > nextyear)
-        return `Año entre 1950 y ${nextyear}.`;
+        return `Año modelo debe ser entre 1950 y ${nextyear}.`;
 
       return null;
     },
 
     // -------- CLIENTE ----------
+
+    "cliente.nombres": () =>
+      !value.trim() ? "Nombre del cliente obligatorio." : null,
+
     "cliente.apellidos": () =>
-      !value.trim() ? "Apellidos obligatorios." : null,
+      !value.trim() ? "Apellidos del cliente obligatorios." : null,
 
     "cliente.metodoPago": () =>
       !value ? "Debe seleccionar una forma de pago." : null,
 
     "cliente.clienteTelefono": () => {
       if (!value.trim())
-        return "Debe ingresar un teléfono.";
+        return "Debe ingresar un teléfono del cliente.";
 
       let soloNumeros = value.replace(/\D/g, "");
       soloNumeros = soloNumeros.slice(0, 10);
@@ -1565,7 +1558,7 @@ function validate(path) {
     // -------- EMPLEADO ----------
     "idEmpleado": () =>
       !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
-        ? "Debes seleccionar un técnico."
+        ? "Debe seleccionar un técnico."
         : null,
 
     // -------- FACTURA ----------
@@ -1592,14 +1585,23 @@ function validate(path) {
         : null;
     },
 
+    "factura.usoCFDI": () =>
+      !value ? "Debe seleccionar un uso de CFDI." : null,
+
+    "factura.regimenFiscal": () =>
+      !value ? "Debe seleccionar un régimen fiscal." : null,
+
     "factura.eMail": () => {
-      if (!value.trim()) return "Correo obligatorio.";
+      if (!value.trim()) return "Correo para facturación obligatorio.";
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return !emailRegex.test(value)
-        ? "E-mail no válido."
+        ? "Correo de facturación no válido."
         : null;
     },
+
+    "insumos": () => 
+      ordenTrabajoForm.insumo.adicional.length == 0 && ordenTrabajoForm.insumo.llanta.length == 0 && ordenTrabajoForm.insumo.paquete.length == 0 ? "Debe incluir por lo menos un insumo." : null,
   };
 
   const error = rules[path] ? rules[path]() : null;
@@ -2189,7 +2191,7 @@ const guardarOT = async () => {
           : 0,
         modelo: ordenTrabajoForm.vehiculo.modelo,
         marca: ordenTrabajoForm.vehiculo.marca,
-        serie: ordenTrabajoForm.vehiculo.numSerie,
+        serie: ordenTrabajoForm.vehiculo.serie,
         kilometraje: ordenTrabajoForm.vehiculo.kilometraje,
         color: ordenTrabajoForm.vehiculo.color,
         placas: ordenTrabajoForm.vehiculo.placas,
@@ -2656,26 +2658,17 @@ console.log("INUMOS:",payload);
   ordenTrabajoForm.totales.total = payload.totales.total;
 };
 
-function validarCampo(campo, valor) {
-
-  const v = (valor ?? "").toString(); // 🔥 ESTA LÍNEA ES LA CLAVE
-
-  switch (campo) {
-    case "vehiculo.kilometraje": {
-      const limpio = v.replace(/\D/g, ""); //  usar v, NO valor
-
-      if (!limpio) {
-        errores[campo] = "Kilometraje requerido";
-      } else {
-        delete errores[campo];
-      }
-
-      ordenTrabajoForm.vehiculo.kilometraje = limpio;
-      break;
-    }
+function validar_formulario() {
+  validaciones();
+  console.log(errores);
+  formValida.value = (Object.keys(errores).length > 0);
+  console.log(Object.keys(errores).length);
+  console.log(formValida.value);
+  if(!formValida.value) {
+    console.log("Guardar: ");
+    guardarOT();
   }
 }
-
 
 
 function validaciones() {
@@ -2688,22 +2681,16 @@ function validaciones() {
     "vehiculo.kilometraje",
     "vehiculo.anio",
     "vehiculo.placas",
+    "cliente.nombres",
+    "cliente.apellidos",
     "cliente.clienteTelefono",
     "cliente.clienteCorreo",
+    "cliente.rfc",
+    "cliente.metodoPago",
+    "fechaEntrega",
+    "idEmpleado",
+    "insumos"
   ];
-
-  const nombresBonitos = {
-    "vehiculo.numSerie": "Número de serie",
-    "vehiculo.marca": "Marca",
-    "vehiculo.modelo": "Modelo",
-    "vehiculo.color": "Color",
-    "vehiculo.kilometraje": "Kilometraje",
-    "vehiculo.anio": "Año",
-    "vehiculo.placas": "Placas",
-    "cliente.clienteTelefono": "Teléfono",
-    "cliente.clienteCorreo": "Correo",
-    "cliente.rfc": "RFC",
-  };
 
   // 🔹 Ver estado completo del form
   console.log(" ordenTrabajoForm:", JSON.parse(JSON.stringify(ordenTrabajoForm)));
@@ -2711,65 +2698,72 @@ function validaciones() {
   // limpiar errores
   Object.keys(errores).forEach(k => delete errores[k]);
 
+  if (boolFactura.value) {
+    campos.push("factura.razonSocial",
+      "factura.usoCFDI",
+      "factura.regimenFiscal",
+      "factura.eMail",
+      "factura.cp",
+      "factura.rfc")
+  }
+
   campos.forEach(campo => {
     const valor = campo.split(".").reduce((o, k) => o?.[k], ordenTrabajoForm);
-
     console.log(` Campo: ${campo} →`, valor);
-
-    validarCampo(campo, valor);
+    validate(campo);
   });
 
   // 🔹 Teléfono
-  const telefonoRaw = ordenTrabajoForm.cliente.clienteTelefono;
-  const telefono = telefonoRaw?.replace(/\D/g, "");
+  // const telefonoRaw = ordenTrabajoForm.cliente.clienteTelefono;
+  // const telefono = telefonoRaw?.replace(/\D/g, "");
 
-  console.log(" Teléfono raw:", telefonoRaw);
-  console.log("Teléfono limpio:", telefono);
+  // console.log(" Teléfono raw:", telefonoRaw);
+  // console.log("Teléfono limpio:", telefono);
 
-  if (!telefono || telefono.length !== 10) {
-    console.warn(" Teléfono inválido");
-    errores["cliente.clienteTelefono"] = "Debe tener 10 dígitos";
-  }
+  // if (!telefono || telefono.length !== 10) {
+  //   console.warn(" Teléfono inválido");
+  //   errores["cliente.clienteTelefono"] = "Debe tener 10 dígitos";
+  // }
 
   // 🔹 Correo
-  const correo = ordenTrabajoForm.cliente.clienteCorreo;
-  const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // const correo = ordenTrabajoForm.cliente.clienteCorreo;
+  // const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  console.log(" Correo:", correo);
-  console.log("¿Correo válido?:", regexCorreo.test(correo));
+  // console.log(" Correo:", correo);
+  // console.log("¿Correo válido?:", regexCorreo.test(correo));
 
-  if (!correo || !regexCorreo.test(correo)) {
-    console.warn(" Correo inválido");
-    errores["cliente.clienteCorreo"] = "Correo inválido";
-  }
+  // if (!correo || !regexCorreo.test(correo)) {
+  //   console.warn(" Correo inválido");
+  //   errores["cliente.clienteCorreo"] = "Correo inválido";
+  // }
 
   // 🔹 RFC
-  const rfc = ordenTrabajoForm.cliente.rfc;
-  console.log("RFC:", rfc);
+  // const rfc = ordenTrabajoForm.cliente.rfc;
+  // console.log("RFC:", rfc);
 
-  if (rfc && rfc.length < 12) {
-    console.warn(" RFC inválido");
-    errores["cliente.rfc"] = "RFC inválido";
-  }
+  // if (rfc && rfc.length < 12) {
+  //   console.warn(" RFC inválido");
+  //   errores["cliente.rfc"] = "RFC inválido";
+  // }
 
   //  Resultado final
-  console.log("ERRORES FINALES:", errores);
+  // console.log("ERRORES FINALES:", errores);
 
-  if (Object.keys(errores).length > 0) {
-    let mensaje = "Corrige los siguientes campos:\n\n";
+  // if (Object.keys(errores).length > 0) {
+  //   let mensaje = "Corrige los siguientes campos:\n\n";
 
-    for (const campo in errores) {
-      console.log(` ${campo}:`, errores[campo]);
-      mensaje += `• ${nombresBonitos[campo] || campo}: ${errores[campo]}\n`;
-    }
+  //   for (const campo in errores) {
+  //     console.log(` ${campo}:`, errores[campo]);
+  //     mensaje += `• ${nombresBonitos[campo] || campo}: ${errores[campo]}\n`;
+  //   }
 
-    console.log(" VALIDACIONES FALLARON");
-    alert(mensaje);
-    return false;
-  }
+  //   console.log(" VALIDACIONES FALLARON");
+  //   alert(mensaje);
+  //   return false;
+  // }
 
-  console.log(" VALIDACIONES OK");
-  console.log(" ===== FIN VALIDACIONES =====");
+  // console.log(" VALIDACIONES OK");
+  // console.log(" ===== FIN VALIDACIONES =====");
 
   return true;
 }
