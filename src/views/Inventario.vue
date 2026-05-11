@@ -170,7 +170,7 @@ const cargarExistenciasInventario = async () => {
             const rin = llanta.rin && llanta.rin !== 0 ? llanta.rin : '';
             const runflat = llanta.runflat && llanta.runflat !== '' ? llanta.runflat : '';
             const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
-            const velocidad = llanta.velocidad && llanta.velocidad !== 0 ? llanta.velocidad : '';
+            const velocidad = llanta.velocidad && llanta.velocidad !== 'N/A' ? llanta.velocidad : '';
 
             let medida = '';
             if (anchura) medida += anchura;

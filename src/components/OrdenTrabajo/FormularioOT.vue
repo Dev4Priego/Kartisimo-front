@@ -3,7 +3,13 @@
     <form>
       <div class="row my-1">
         <div class="col">
-          <h2 class="text-start">{{props.idOrdenTrabajo ? "Orden de Trabajo Derivada" : "Nueva Orden de Trabajo"}}</h2>
+          <h2 class="text-start">
+            {{
+              props.idOrdenTrabajo
+                ? "Orden de Trabajo Derivada"
+                : "Nueva Orden de Trabajo"
+            }}
+          </h2>
         </div>
         <div class="col">
           <div class="d-flex justify-content-end">
@@ -41,16 +47,14 @@
             </div>
             <div class="card-body">
               <div class="row">
-                <div class="col-6 mb-3">
+                <div class="col-7 mb-3">
                   <label for="sumserie" class="form-label">Núm. Serie *</label>
 
                   <input
                     id="numserie"
+                    autocomplete="off"
                     v-model="ordenTrabajoForm.vehiculo.serie"
-                    @input="
-                      onSerieInput($event.target.value),
-                        validate('vehiculo.serie')
-                    "
+                    @input="suggestions(), validate('vehiculo.serie')"
                     @change="onSerieSeleccionada"
                     list="vehiculos"
                     placeholder="(17 caracteres)"
@@ -59,6 +63,7 @@
                     :class="{ 'input-error': errores['vehiculo.serie'] }"
                     :readonly="isReadOnly"
                   />
+                  <div id="Suggestion" class="suggestions-list"></div>
                   <small v-if="errores['vehiculo.serie']" class="error-msg">
                     {{ errores["vehiculo.serie"] }}
                   </small>
@@ -73,7 +78,7 @@
                     </option>
                   </datalist>
                 </div>
-                <div class="col-6 mb-3">
+                <div class="col-5 mb-3">
                   <label for="marca" class="form-label">Marca *</label>
 
                   <input
@@ -139,7 +144,7 @@
                     @input="validate('vehiculo.kilometraje')"
                     @blur="validate('vehiculo.kilometraje')"
                     :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
-                    :readonly="isReadOnly"
+                    
                   />
                   <small
                     v-if="errores['vehiculo.kilometraje']"
@@ -177,14 +182,14 @@
                     @input="validate('vehiculo.placas')"
                     @blur="validate('vehiculo.placas')"
                     :class="{ 'input-error': errores['vehiculo.placas'] }"
-                    :readonly="isReadOnly"
+                    
                   />
                   <small v-if="errores['vehiculo.placas']" class="error-msg">
                     {{ errores["vehiculo.placas"] }}
                   </small>
                 </div>
               </div>
-            </div> 
+            </div>
           </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">
@@ -290,7 +295,11 @@
                     class="form-control"
                     placeholder="(12 ó 13 caracteres)"
                     list="clientes"
-                    @input="ordenTrabajoForm.cliente.rfc = ordenTrabajoForm.cliente.rfc?.toUpperCase(), validate('cliente.rfc')"
+                    @input="
+                      (ordenTrabajoForm.cliente.rfc =
+                        ordenTrabajoForm.cliente.rfc?.toUpperCase()),
+                        validate('cliente.rfc')
+                    "
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.rfc')"
                     :class="{ 'input-error': errores['cliente.rfc'] }"
@@ -300,46 +309,47 @@
                     {{ errores["cliente.rfc"] }}
                   </small>
                 </div>
-           <div class="col-6 mb-3">
-            <label for="email" class="form-label">Correo electrónico</label>
-            <input id="email"
-              v-model="ordenTrabajoForm.cliente.clienteCorreo"
-              class="form-control"
-              type="text"
-              placeholder="(Use un correo válido)"
-              list="clientes"
-              @change="onClienteSeleccionadoByValue($event.target.value)"
-              @blur="validate('cliente.clienteCorreo')"
-              :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
-            />
-            <small v-if="errores['cliente.clienteCorreo']" class="error-msg">
-              {{ errores["cliente.clienteCorreo"] }}
-            </small>
-          </div>
+                <div class="col-6 mb-3">
+                  <label for="email" class="form-label"
+                    >Correo electrónico</label
+                  >
+                  <input
+                    id="email"
+                    v-model="ordenTrabajoForm.cliente.clienteCorreo"
+                    class="form-control"
+                    type="text"
+                    placeholder="(Use un correo válido)"
+                    list="clientes"
+                    @change="onClienteSeleccionadoByValue($event.target.value)"
+                    @blur="validate('cliente.clienteCorreo')"
+                    :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
+                  />
+                  <small
+                    v-if="errores['cliente.clienteCorreo']"
+                    class="error-msg"
+                  >
+                    {{ errores["cliente.clienteCorreo"] }}
+                  </small>
+                </div>
 
-
-
-                
-        <!-- RFC -->
-        <div class="col-6 mb-3">
-          <label for="rfc" class="form-label">RFC</label>
-          <input id="rfc"
-            v-model="ordenTrabajoForm.cliente.rfc"
-            type="text"
-            class="form-control"
-            placeholder="(12 ó 13 caracteres)"
-            list="clientes"
-            @change="onClienteSeleccionadoByValue($event.target.value)"
-            @blur="validate('cliente.rfc')"
-            :class="{ 'input-error': errores['cliente.rfc'] }"
-          />
-          <small v-if="errores['cliente.rfc']" class="error-msg">
-            {{ errores["cliente.rfc"] }}
-          </small>
-        </div>
-
-
-
+                <!-- RFC -->
+                <div class="col-6 mb-3">
+                  <label for="rfc" class="form-label">RFC</label>
+                  <input
+                    id="rfc"
+                    v-model="ordenTrabajoForm.cliente.rfc"
+                    type="text"
+                    class="form-control"
+                    placeholder="(12 ó 13 caracteres)"
+                    list="clientes"
+                    @change="onClienteSeleccionadoByValue($event.target.value)"
+                    @blur="validate('cliente.rfc')"
+                    :class="{ 'input-error': errores['cliente.rfc'] }"
+                  />
+                  <small v-if="errores['cliente.rfc']" class="error-msg">
+                    {{ errores["cliente.rfc"] }}
+                  </small>
+                </div>
               </div>
             </div>
           </div>
@@ -538,7 +548,11 @@
                 class="form-control"
                 type="text"
                 placeholder="(RFC a facturar)"
-                @input="ordenTrabajoForm.factura.rfc = ordenTrabajoForm.factura.rfc?.toUpperCase(), validate('factura.rfc')"
+                @input="
+                  (ordenTrabajoForm.factura.rfc =
+                    ordenTrabajoForm.factura.rfc?.toUpperCase()),
+                    validate('factura.rfc')
+                "
                 @blur="validate('factura.rfc')"
                 :class="{ 'input-error': errores['factura.rfc'] }"
               />
@@ -928,8 +942,6 @@
               </transition-group>
 
               <tfoot class="table-light">
-               
-
                 <tr class="table-secondary fw-bold">
                   <th colspan="3" class="text-end fs-6">TOTAL</th>
                   <th class="text-end fs-6">
@@ -984,7 +996,6 @@
             class="btn btn-success position-relative shadow ms-3"
             style="width: 140px"
             :disabled="!formValido"
-            
             @click="mostrarVista = true"
           >
             <i class="bi-save-fill position-absolute start-0 ms-2"></i>
@@ -1356,22 +1367,21 @@
               Cerrar
             </button>
 
-               <button type="button" class="btn btn-success position-relative shadow mx-3" style="width: 140px;" @click="guardarOT()"
->
-  <i class="bi-save-fill position-absolute start-0 ms-2"></i> 
-  Guardar OT
-</button>
-
-            </div>
+            <button
+              type="button"
+              class="btn btn-success position-relative shadow mx-3"
+              style="width: 140px"
+              @click="guardarOT()"
+            >
+              <i class="bi-save-fill position-absolute start-0 ms-2"></i>
+              Guardar OT
+            </button>
           </div>
         </div>
       </div>
     </div>
+  </div>
 </template>
-
-
-
-
 
 <script setup>
 import {
@@ -1387,7 +1397,7 @@ import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import ModalInsumo from "./ModalInsumo.vue";
 import ModalBuscarCotizacion from "./ModalBuscarCotizacion.vue";
-
+const isReadOnly = ref(false);
 const router = useRouter();
 
 const { proxy } = getCurrentInstance();
@@ -1397,6 +1407,7 @@ const showModal = ref(false);
 const mostrarVista = ref(false);
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
+const vehiculos = ref([]);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
 const sucursales = [
   "(Ninguna)",
@@ -1409,8 +1420,6 @@ const sucursales = [
 const props = defineProps({
   idCotizacion: {
     type: [String, Number],
-   
-    
   },
 });
 
@@ -1457,17 +1466,67 @@ const getValor = (path) => {
   return path.split(".").reduce((obj, key) => obj?.[key], ordenTrabajoForm);
 };
 
+const suggestions = () => {
+  const serie = ordenTrabajoForm.vehiculo.serie.toLowerCase();
+  const suggestiondiv = document.getElementById("Suggestion");
+
+  suggestiondiv.innerHTML = "";
+
+  if (!serie) return;
+
+  const filtro = vehiculos.value.filter((vehiculo) =>
+    vehiculo.serie.toLowerCase().startsWith(serie),
+  );
+
+  filtro.forEach((resultado) => {
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+  <div 
+    style="
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      max-height:50px;
+      width:100%;
+    "
+  >
+    <strong>${resultado.serie}</strong>
+
+    <span style="color:gray;">
+      ${resultado.marca} - ${resultado.modelo}
+    </span>
+  </div>
+  <hr>
+`;
+
+    div.addEventListener("click", function () {
+      ordenTrabajoForm.vehiculo.id_vehiculo = resultado.idVehiculo;
+      ordenTrabajoForm.vehiculo.serie = resultado.serie;
+      ordenTrabajoForm.vehiculo.marca = resultado.marca;
+      ordenTrabajoForm.vehiculo.modelo = resultado.modelo;
+      ordenTrabajoForm.vehiculo.color = resultado.color;
+      ordenTrabajoForm.vehiculo.kilometraje = resultado.kilometraje;
+      ordenTrabajoForm.vehiculo.anio = resultado.anio;
+      ordenTrabajoForm.vehiculo.placas = resultado.placas;
+      suggestiondiv.innerHTML = "";
+      isReadOnly.value = true;
+    });
+
+    suggestiondiv.appendChild(div);
+    isReadOnly.value = false;
+    
+  });
+};
 
 function validate(path) {
   const value = (getValor(path) ?? "").toString();
 
   const rules = {
     // -------- VEHÍCULO ----------
-    "vehiculo.marca": () =>
-      !value.trim() ? "Marca obligatoria." : null,
+    "vehiculo.marca": () => (!value.trim() ? "Marca obligatoria." : null),
 
-    "vehiculo.modelo": () =>
-      !value.trim() ? "Modelo obligatorio." : null,
+    "vehiculo.modelo": () => (!value.trim() ? "Modelo obligatorio." : null),
 
     "vehiculo.serie": () =>
       value.trim().length !== 17
@@ -1487,11 +1546,9 @@ function validate(path) {
       return null;
     },
 
-    "vehiculo.color": () =>
-      !value.trim() ? "Color obligatorio." : null,
+    "vehiculo.color": () => (!value.trim() ? "Color obligatorio." : null),
 
-    "vehiculo.placas": () =>
-      !value.trim() ? "Placas obligatorias." : null,
+    "vehiculo.placas": () => (!value.trim() ? "Placas obligatorias." : null),
 
     "vehiculo.anio": () => {
       if (!value) return "Año obligatorio.";
@@ -1501,8 +1558,7 @@ function validate(path) {
       const nextyear = current + 1;
 
       if (isNaN(y)) return "Año no válido.";
-      if (y < 1950 || y > nextyear)
-        return `Año entre 1950 y ${nextyear}.`;
+      if (y < 1950 || y > nextyear) return `Año entre 1950 y ${nextyear}.`;
 
       return null;
     },
@@ -1515,8 +1571,7 @@ function validate(path) {
       !value ? "Debe seleccionar una forma de pago." : null,
 
     "cliente.clienteTelefono": () => {
-      if (!value.trim())
-        return "Debe ingresar un teléfono.";
+      if (!value.trim()) return "Debe ingresar un teléfono.";
 
       let soloNumeros = value.replace(/\D/g, "");
       soloNumeros = soloNumeros.slice(0, 10);
@@ -1532,9 +1587,7 @@ function validate(path) {
       if (!value.trim()) return null;
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !emailRegex.test(value)
-        ? "E-mail no válido."
-        : null;
+      return !emailRegex.test(value) ? "E-mail no válido." : null;
     },
 
     "cliente.rfc": () => {
@@ -1543,13 +1596,11 @@ function validate(path) {
 
       const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
 
-      return !rfcRegex.test(limpio)
-        ? "RFC no válido."
-        : null;
+      return !rfcRegex.test(limpio) ? "RFC no válido." : null;
     },
 
     // -------- FECHA ----------
-    "fechaEntrega": () => {
+    fechaEntrega: () => {
       if (!ordenTrabajoForm.fechaEntrega)
         return "La fecha y hora de entrega son obligatorias.";
 
@@ -1563,7 +1614,7 @@ function validate(path) {
     },
 
     // -------- EMPLEADO ----------
-    "idEmpleado": () =>
+    idEmpleado: () =>
       !ordenTrabajoForm.idEmpleado || ordenTrabajoForm.idEmpleado === 0
         ? "Debes seleccionar un técnico."
         : null,
@@ -1587,18 +1638,14 @@ function validate(path) {
       const limpio = value.toUpperCase().trim();
       const rfcRegex = /^([A-ZÑ&]{3,4})\d{6}([A-Z\d]{3})$/;
 
-      return !rfcRegex.test(limpio)
-        ? "RFC no válido."
-        : null;
+      return !rfcRegex.test(limpio) ? "RFC no válido." : null;
     },
 
     "factura.eMail": () => {
       if (!value.trim()) return "Correo obligatorio.";
 
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return !emailRegex.test(value)
-        ? "E-mail no válido."
-        : null;
+      return !emailRegex.test(value) ? "E-mail no válido." : null;
     },
   };
 
@@ -1656,7 +1703,7 @@ const hayLlantas = computed(() => {
 
 const ordenTrabajoForm = reactive({
   cotSeleccionada: 0,
-  idCotPadre:0,
+  idCotPadre: 0,
   idEmpleado: 0,
   idTipoOrdenTrabajo: 0,
   fechaEntrega: "",
@@ -1709,10 +1756,10 @@ const ordenTrabajoForm = reactive({
 const irAOrdenTrabajo = (id) => {
   const otCreada = !!id;
 
-  router.push({ 
-    name: "orden-trabajo-work", 
+  router.push({
+    name: "orden-trabajo-work",
     params: { id },
-    state: { otCreada: otCreada }
+    state: { otCreada: otCreada },
   });
 };
 
@@ -1809,6 +1856,17 @@ const cargarTipoOT = async () => {
   }
 };
 
+const cargarVehiculos = async () => {
+  try {
+    const res = await fetch(proxy.$serverIP + "api/Vehiculo/getVehiculos");
+    if (!res.ok) throw new Error("Error en la respuesta.");
+    const result = await res.json();
+    vehiculos.value = result.data;
+  } catch (e) {
+    console.error("Error al cargar vahiculos: ", e);
+  }
+};
+
 onMounted(() => {
   cargarEmpleados();
   cargarTipoOT();
@@ -1816,6 +1874,7 @@ onMounted(() => {
   cargarRegimenFiscal();
   normalizarInsumos();
   normalizarLlantas();
+  cargarVehiculos();
 
   // asignar por default  la fecha actual
   fechaEntregaFecha.value = new Date().toISOString().split("T")[0];
@@ -1958,7 +2017,6 @@ const onClienteSeleccionadoByValue = (valor) => {
       //||  normalizado.includes(correo)
     );
   });
-
 
   if (cliente) {
     // console.log('clienteSeleccionado');
@@ -2122,23 +2180,28 @@ const guardarOT = async () => {
   try {
     const userStorage = localStorage.getItem("userSession");
 
-    const dataUser = JSON.parse(userStorage)
-    console.log('Entró');
+    const dataUser = JSON.parse(userStorage);
+    console.log("Entró");
 
     let factura = {};
     const esValido = validaciones();
 
     if (!esValido) return;
 
-    
-      console.log(" Formulario válido");
+    console.log(" Formulario válido");
 
-    let insumosSelec = ({
-    ...ordenTrabajoForm.insumo,
-    llanta: (ordenTrabajoForm.insumo.llanta || []).filter(l => !l.eliminado),
-    paquete: (ordenTrabajoForm.insumo.paquete || []).filter(p => !p.eliminado),
-    adicional: (ordenTrabajoForm.insumo.adicional || []).filter(a => !a.eliminado)
-  })
+    let insumosSelec = {
+      ...ordenTrabajoForm.insumo,
+      llanta: (ordenTrabajoForm.insumo.llanta || []).filter(
+        (l) => !l.eliminado,
+      ),
+      paquete: (ordenTrabajoForm.insumo.paquete || []).filter(
+        (p) => !p.eliminado,
+      ),
+      adicional: (ordenTrabajoForm.insumo.adicional || []).filter(
+        (a) => !a.eliminado,
+      ),
+    };
 
     if (boolFactura.value) {
       factura = {
@@ -2152,11 +2215,11 @@ const guardarOT = async () => {
       };
     } else {
       factura = {
-        razonSocial: '',
-        direccion: '',
-        rfc: '',
-        eMail: '',
-        cp: '',
+        razonSocial: "",
+        direccion: "",
+        rfc: "",
+        eMail: "",
+        cp: "",
         usoCFDI: null,
         regimenFiscal: null,
       };
@@ -2177,7 +2240,9 @@ const guardarOT = async () => {
       estado: "Creado",
       cliente: {
         idCliente: ordenTrabajoForm.cliente.id_cliente,
-        nombres: ordenTrabajoForm.cliente.nombres ? ordenTrabajoForm.cliente.nombres : "",
+        nombres: ordenTrabajoForm.cliente.nombres
+          ? ordenTrabajoForm.cliente.nombres
+          : "",
         apellidos: ordenTrabajoForm.cliente.apellidos,
         rfc: ordenTrabajoForm.cliente.rfc ? ordenTrabajoForm.cliente.rfc : "",
         telefono: ordenTrabajoForm.cliente.clienteTelefono,
@@ -2196,41 +2261,41 @@ const guardarOT = async () => {
         anio: ordenTrabajoForm.vehiculo.anio,
       },
       factura: factura,
-      insumos: insumosSelec
+      insumos: insumosSelec,
     };
 
-      console.log(" OBJETO FINAL:", objSeend);
+    console.log(" OBJETO FINAL:", objSeend);
 
-      // 🔹 FETCH
-      console.log(" Enviando request...");
+    // 🔹 FETCH
+    console.log(" Enviando request...");
 
-      const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(objSeend),
-      });
+    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/crearOT`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(objSeend),
+    });
 
-      console.log(" Status:", res.status);
+    console.log(" Status:", res.status);
 
-      if (!res.ok) {
-        const text = await res.text();
-        console.error(" Error HTTP:", text);
-        alert("Error en el servidor");
-        return;
-      }
+    if (!res.ok) {
+      const text = await res.text();
+      console.error(" Error HTTP:", text);
+      alert("Error en el servidor");
+      return;
+    }
 
-      const data = await res.json();
-      console.log(" Respuesta:", data);
+    const data = await res.json();
+    console.log(" Respuesta:", data);
 
-      if (data.success) {
-        //console.log(data)
-        limpiarOrdenTrabajoForm(); // Limpia formulario
-        //console.log(data.codigo);
-        irAOrdenTrabajo(data.codigo);         // Redirige
-      } else {
-        console.warn(" Backend respondió error:", data);
-        alert(data.message || "No se pudo guardar la orden");
-      }
+    if (data.success) {
+      //console.log(data)
+      limpiarOrdenTrabajoForm(); // Limpia formulario
+      //console.log(data.codigo);
+      irAOrdenTrabajo(data.codigo); // Redirige
+    } else {
+      console.warn(" Backend respondió error:", data);
+      alert(data.message || "No se pudo guardar la orden");
+    }
   } catch (err) {
     console.error(" Error general:", err);
     alert("Error inesperado al guardar");
@@ -2292,19 +2357,18 @@ const obtenerPromosGeneralesParaServicio = async () => {
 
 const cargarInfoCotizacion = async () => {
   if (!ordenTrabajoForm.cotSeleccionada) return;
- 
+
   let serverController = "getCotizacionById";
 
-if (props.idOrdenTrabajo ) {
-  console.log("id_ot:", props.idOrdenTrabajo);
-  serverController = "getOrdenDerivada";
-  ordenTrabajoForm.esHija=1; // si se manda una OT se marcara como hija
-  ordenTrabajoForm.idOtPAdre = props.idOrdenTrabajo;
-
-} else if (props.idCotizacion ) {
-  serverController = "getCotizacionById";
-}
-  console.log("ids:", props.idOrdenTrabajo, "\n id_cot:",props.idCotizacion);
+  if (props.idOrdenTrabajo) {
+    console.log("id_ot:", props.idOrdenTrabajo);
+    serverController = "getOrdenDerivada";
+    ordenTrabajoForm.esHija = 1; // si se manda una OT se marcara como hija
+    ordenTrabajoForm.idOtPAdre = props.idOrdenTrabajo;
+  } else if (props.idCotizacion) {
+    serverController = "getCotizacionById";
+  }
+  console.log("ids:", props.idOrdenTrabajo, "\n id_cot:", props.idCotizacion);
   const res = await fetch(
     proxy.$serverIP +
       "api/OrdenTrabajo/" +
@@ -2319,9 +2383,9 @@ if (props.idOrdenTrabajo ) {
 
   // console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
-  
+
   //cliente
-   ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;
+  ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;
   ordenTrabajoForm.cliente.metodoPago = data?.metodoPago;
   ordenTrabajoForm.cliente.clienteNombre =
     data?.clienteNombre || data?.clienteOT?.nombreCompleto || "";
@@ -2339,10 +2403,10 @@ if (props.idOrdenTrabajo ) {
   if (data?.vehiculo) {
     console.log("Hay vehiculo");
     ordenTrabajoForm.vehiculo = data.vehiculo;
-    console.log(ordenTrabajoForm.vehiculo)
+    console.log(ordenTrabajoForm.vehiculo);
   }
   //empleado (OT)
-  ordenTrabajoForm.idEmpleado= data.empleadoOT?.idEmpleado;
+  ordenTrabajoForm.idEmpleado = data.empleadoOT?.idEmpleado;
   ordenTrabajoForm.factura.razonSocial = data.razonSocial || "";
   ordenTrabajoForm.factura.direccion = data.direccion;
   ordenTrabajoForm.factura.rfc = data.rfc || "";
@@ -2613,7 +2677,7 @@ const calcularTotales = () => {
 watch(
   () => [props.idCotizacion, props.idOrdenTrabajo],
   async ([idCot, idOt]) => {
-    console.log("IDCOT:",idCot , "IDOT",idOt)
+    console.log("IDCOT:", idCot, "IDOT", idOt);
     let id = null;
 
     if (idOt != null) {
@@ -2629,7 +2693,7 @@ watch(
     ordenTrabajoForm.cotSeleccionada = id;
     await cargarInfoCotizacion();
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 watch(boolFactura, (nuevoValor) => {
@@ -2645,7 +2709,7 @@ watch(boolFactura, (nuevoValor) => {
 
 const actualizarInsumos = (payload) => {
   // payload = { insumo, totales }
-console.log("INUMOS:",payload);
+  console.log("INUMOS:", payload);
   ordenTrabajoForm.insumo.llanta = payload.insumo.llanta;
   ordenTrabajoForm.insumo.paquete = payload.insumo.paquete;
   ordenTrabajoForm.insumo.adicional = payload.insumo.adicional;
@@ -2657,7 +2721,6 @@ console.log("INUMOS:",payload);
 };
 
 function validarCampo(campo, valor) {
-
   const v = (valor ?? "").toString(); // 🔥 ESTA LÍNEA ES LA CLAVE
 
   switch (campo) {
@@ -2676,10 +2739,7 @@ function validarCampo(campo, valor) {
   }
 }
 
-
-
 function validaciones() {
-
   const campos = [
     "vehiculo.serie",
     "vehiculo.marca",
@@ -2706,12 +2766,15 @@ function validaciones() {
   };
 
   // 🔹 Ver estado completo del form
-  console.log(" ordenTrabajoForm:", JSON.parse(JSON.stringify(ordenTrabajoForm)));
+  console.log(
+    " ordenTrabajoForm:",
+    JSON.parse(JSON.stringify(ordenTrabajoForm)),
+  );
 
   // limpiar errores
-  Object.keys(errores).forEach(k => delete errores[k]);
+  Object.keys(errores).forEach((k) => delete errores[k]);
 
-  campos.forEach(campo => {
+  campos.forEach((campo) => {
     const valor = campo.split(".").reduce((o, k) => o?.[k], ordenTrabajoForm);
 
     console.log(` Campo: ${campo} →`, valor);
@@ -2773,9 +2836,6 @@ function validaciones() {
 
   return true;
 }
-
-
-
 </script>
 
 <style scoped>
@@ -2813,5 +2873,26 @@ button:disabled {
 .fila-eliminada {
   opacity: 0.5;
   text-decoration: line-through;
+}
+
+.suggestions-list {
+  border: 1px solid #ddd;
+  border-top: none;
+  max-height: 100px;
+  z-index: 99;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  overflow-y: scroll;
+}
+
+.suggestions-list div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.suggestions-list div:hover {
+  background-color: #e9e9e9;
 }
 </style>

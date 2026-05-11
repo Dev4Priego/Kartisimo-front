@@ -311,9 +311,10 @@ const ValidateList = () => {
   const rechazadas = []
 
   props.llantas.forEach(llanta => {
-    const esValida = llanta.marca && llanta.modelo && llanta.carga != null && llanta.velocidad  && llanta.anchura != null; //Agregar el campo de redial
+    const esValida = llanta.marca && llanta.modelo  && llanta.anchura != null; //Agregar el campo de redial
 	llanta.medida = `${llanta.anchura}${llanta.perfil != 0 ? `/${llanta.perfil}R${llanta.rin}` : `R${llanta.rin}`}`
 	llanta.rango=`${llanta.carga}${llanta.subCarga != 0 ? `/${llanta.subCarga}${llanta.velocidad}` : llanta.velocidad }`
+	llanta.velocidad = llanta.velocidad != 0 ? llanta.velocidad : "N/A"
     if (esValida) {
       aceptadas.push(llanta)
     } else {
@@ -340,8 +341,8 @@ const ValidateList = () => {
 }
 
 const  GuardarLlantas = async ()=>{
-	const valido= ValidateList();
-	if(valido){
+	ValidateList();
+	
 		console.log("llantas a guardar:" , llantasAceptadas.value)
 		const PAYLOAD ={
 			llantas: llantasAceptadas.value,
@@ -367,9 +368,12 @@ const  GuardarLlantas = async ()=>{
 			 console.error("ERROR guardarCotizacion:", error);
 			Swal.fire("Error", "No se pudo guardar la cotización.", "error");
 		}finally{
-			closeModal();
+			if (props.llantas.length === 0) {
+				closeModal();
+ 		 	}
+			
 		}
-	}
+	
 }
 const closeModal = () => {
   // reset estado interno
