@@ -651,7 +651,7 @@
 
     <i class="bi bi-building-fill me-2"></i>
    <strong>Sucursal: </strong>
-{{ sucursales?.[loggeduser.id_sucursal] || 'N/A' }}
+{{ sucursales?.[loggeduser.id_sucursal - 1] || 'N/A' }}
   </div>
 </div>
 
@@ -2142,21 +2142,12 @@ const loggeduser = {
   id: raw.usuario?.idUsuario ?? null,
   nombre: raw.usuario?.nombre ?? '',
   login: raw.usuario?.login ?? '',
-  correo: raw.usuario?.correo ?? raw.usuario?.login ?? '', 
+  correo: raw.usuario?.correo ?? '', 
   id_sucursal: raw.usuario?.idSucursal ?? null
 };
 
-console.log("LOGGED USER:", loggeduser);
-console.log("CORREO:", loggeduser.correo);
-
 const sucursales = [ '(Ninguna)', 'Delta', 'López Mateos', 'Torres Landa', 'Martinica' ];
-
-
-
-
-
 const vistaCotizacion = ref({});
-
 const mostrarVista = ref(false);
 const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
 const tituloModal = ref("Nueva Cotización");
@@ -2419,7 +2410,6 @@ const aprobarCotizacion = (cotizacion) => {
 
 const observacionesVista = computed(() => {
   const obs = vistaCotizacion.value.cliente?.observaciones;
-  console.log("observaciones raw:", obs);
   return obs === null || obs === undefined ? "No disponible" : obs;
 });
 
@@ -3371,8 +3361,6 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
 
-    
-      console.log("Cotizacion EDIT: ",JSON.stringify(cotizacionForm) ); 
   } catch (e) {
     console.error("Error cargando cotización para edición:", e);
     mostrarToast("warning", "No se pudo cargar la cotización");
@@ -3644,7 +3632,7 @@ const guardarCotizacion = async () => {
       idPromocionGeneral: promoGeneral.value?.idPromocion ?? null,
     };
 
-    console.log("PAYLOAD FINAL:", nuevaCotizacion);
+    //console.log("PAYLOAD FINAL:", nuevaCotizacion);
 
     /* ================= REQUEST ================= */
 
@@ -3663,15 +3651,15 @@ const guardarCotizacion = async () => {
     }
 
     const data = await res.json();
-    console.log("RESPUESTA BACKEND:", data);
+    //console.log("RESPUESTA BACKEND:", data);
 
     mostrarToast("success", "Cotización guardada");
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
-    console.log(data);
+    //console.log(data);
     mostrarVistaPrevia(data , "ver");
-    console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
+    //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -3946,7 +3934,7 @@ const abrirModalCotizacion = (cotizacion = null) => {
     tituloModal.value = "Nueva Cotización";
 
   }
-  console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
+  //console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
   openModal();
 
