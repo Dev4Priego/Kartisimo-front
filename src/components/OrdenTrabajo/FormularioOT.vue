@@ -61,7 +61,7 @@
                     class="form-control"
                     @blur="validate('vehiculo.serie')"
                     :class="{ 'input-error': errores['vehiculo.serie'] }"
-                    :readonly="isReadOnly"
+                    
                   />
                   <div id="Suggestion" class="suggestions-list"></div>
                   <small v-if="errores['vehiculo.serie']" class="error-msg">

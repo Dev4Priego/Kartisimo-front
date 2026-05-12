@@ -89,6 +89,7 @@
             </div>
             </transition>
             <EasyDataTable
+                :key="tableKey"
                 :headers="headers"
                 :items="llantasFiltradas"
                 :rows-per-page="20"
@@ -137,6 +138,7 @@ import "bootstrap/dist/js/bootstrap.bundle"; // muy importante para que offcanva
 import { log } from 'pdfmake/build/pdfmake';
 import ListaLlantas from '@/components/Inventario/ListaLlantas.vue';
 import Swal from 'sweetalert2';
+import { watch } from 'vue';
 
 const { proxy } = getCurrentInstance()
 const llantas = ref([]);
@@ -159,7 +161,7 @@ const headers = [
     { text: "Nombre Almacen", value: "nombreAlmacen", sortable:true },
     //   { text: "Acciones", value: "action" },
 ];
-
+const tableKey = ref(0);
 const cargarExistenciasInventario = async () => {
     try {
         const res = await fetch(proxy.$serverIP + "api/InventarioLlanta/existenciasInventario");
@@ -171,7 +173,7 @@ const cargarExistenciasInventario = async () => {
             const runflat = llanta.runflat && llanta.runflat !== '' ? llanta.runflat : '';
             const carga = llanta.carga && llanta.carga !== 0 ? llanta.carga : '';
             const velocidad = llanta.velocidad && llanta.velocidad !== 'N/A' ? llanta.velocidad : '';
-
+            llanta.precio= Number(llanta.precio).toLocaleString("es-MX", {style: "currency",currency: "MXN",})
             let medida = '';
             if (anchura) medida += anchura;
             if (perfil) medida += `/${perfil}`;
@@ -260,6 +262,13 @@ const llantasFiltradas = computed(() => {
     });
 });
 
+
+watch(
+  [busquedaCodigoDesc, almacenSeleccionado],
+  () => {
+    tableKey.value++;
+  }
+);
 
 const limpiarBusqueda = () => {
   busquedaMedida.value = ''

@@ -826,6 +826,7 @@
                     <input
                       v-model="busquedaLlantas"
                       class="form-control"
+
                       placeholder="Buscar por nombre o medida..."
                     />
                   </div>
@@ -2135,6 +2136,8 @@ const cotizacionesRealizadas = ref([]);
 const conceptoOT = ref([]);
 //Tabla componente 
 const mostrarTabla = ref(false);
+const selectedAlmacenes = ref([]);
+const dropdownOpen = ref(false);
 
 const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
@@ -2209,6 +2212,13 @@ const resetTabla = () => {
   busquedaLlantas.value = "";
   tableKey.value++;
 };
+
+watch(
+  [busquedaLlantas, selectedAlmacenes],
+  () => {
+    tableKey.value++;
+  }
+);
 
 const cotizacionForm = reactive({
   codigo: "", // ← Para saber si es edición
@@ -3873,8 +3883,7 @@ const almacenes = ref([
   { id: 3, nombre: "Sucursal Sur" },
 ]);
 
-const selectedAlmacenes = ref([]);
-const dropdownOpen = ref(false);
+
 
 const cargarAlmacenes = async () => {
   try {
