@@ -61,7 +61,6 @@
                     class="form-control"
                     @blur="validate('vehiculo.serie')"
                     :class="{ 'input-error': errores['vehiculo.serie'] }"
-                    
                   />
                   <div id="Suggestion" class="suggestions-list"></div>
                   <small v-if="errores['vehiculo.serie']" class="error-msg">
@@ -929,7 +928,7 @@
             <button
               class="btn btn-sm btn-primary"
               title="Agregar"
-              @click="showModal = true"
+              @click="abrirModal()"
               type="button"
             >
               <i class="bi bi-plus-circle-fill"></i> &nbsp;Editar insumos
@@ -1401,10 +1400,18 @@ const props = defineProps({
   idCotizacion: {
     type: [String, Number],
   },
+  idOrdenTrabajo: {
+    type: [String, Number],
+  },
 });
 
 /* VARIABLES PARA VALIDACION DE CAMPOS */
 const errores = reactive({});
+
+function abrirModal() {
+  showModal.value = true;
+  console.log("VALOR DE INSUMOS FILTRADOS: ", insumosFiltrados);
+}
 
 /* =================== FORMATEO DE FECHAS =================== */
 
@@ -2028,14 +2035,18 @@ const onClienteSeleccionadoByValue = (valor) => {
 /***************************/
 // FUNCIONES INSUMOS
 
-const insumosFiltrados = computed(() => ({
-  ...ordenTrabajoForm.insumo,
-  llanta: (ordenTrabajoForm.insumo.llanta || []).filter((l) => !l.eliminado),
-  paquete: (ordenTrabajoForm.insumo.paquete || []).filter((p) => !p.eliminado),
-  adicional: (ordenTrabajoForm.insumo.adicional || []).filter(
-    (a) => !a.eliminado,
-  ),
-}));
+const insumosFiltrados = computed(() => {
+  return {
+    ...ordenTrabajoForm.insumo,
+    llanta: (ordenTrabajoForm.insumo.llanta || []).filter((l) => !l.eliminado),
+    paquete: (ordenTrabajoForm.insumo.paquete || []).filter(
+      (p) => !p.eliminado,
+    ),
+    adicional: (ordenTrabajoForm.insumo.adicional || []).filter(
+      (a) => !a.eliminado,
+    ),
+  };
+});
 
 const eliminarInsumo = (tipo, index) => {
   const item = ordenTrabajoForm.insumo[tipo][index];

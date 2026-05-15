@@ -141,9 +141,16 @@
                           {{ item.marca }} {{ item.modelo }}
                         </td>
                         <td>{{ item.rango }}</td>
-                        <td class="text-center"><i v-if="item.runflat == 1" class="bi bi-check-circle-fill text-success"></i></td>
+                        <td class="text-center">
+                          <i
+                            v-if="item.runflat == 1"
+                            class="bi bi-check-circle-fill text-success"
+                          ></i>
+                        </td>
                         <td class="text-start">{{ item.codigo }}</td>
-                        <td class="text-start">{{ item.medida }} {{ item.runflat == 1 ? 'RF' : '' }}</td>
+                        <td class="text-start">
+                          {{ item.medida }} {{ item.runflat == 1 ? "RF" : "" }}
+                        </td>
                         <td class="text-center">
                           {{ item.cantidad }}
                         </td>
@@ -343,7 +350,9 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(ll.cantidad * ll.precioUnitario).toLocaleString("es-MX", {
+                            Number(
+                              ll.cantidad * ll.precioUnitario,
+                            ).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -587,7 +596,9 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(paq.cantidad * paq.precioUnitario).toLocaleString("es-MX", {
+                            Number(
+                              paq.cantidad * paq.precioUnitario,
+                            ).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -810,7 +821,7 @@
                     </tr>
                   </template>
                   <!--Separar los paquetes con los servicios adicionales  para una mejor vista-->
-                  <tr v-if=" adicionales.length > 0">
+                  <tr v-if="adicionales.length > 0">
                     <td colspan="6">
                       <h4>Servicios Adicionales</h4>
                     </td>
@@ -838,9 +849,11 @@
                           </option>
                         </select>
                       </td>
-                      <td><strong>
-                        {{ ad.descripcion }}
-                      </strong></td>
+                      <td>
+                        <strong>
+                          {{ ad.descripcion }}
+                        </strong>
+                      </td>
                       <td>
                         <input
                           type="number"
@@ -896,7 +909,9 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(ad.cantidad * ad.precioUnitario).toLocaleString("es-MX", {
+                            Number(
+                              ad.cantidad * ad.precioUnitario,
+                            ).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -1089,10 +1104,14 @@
                       <h4>Total:</h4>
                     </td>
                     <td class="fs-5 fw-bold text-end">
-                      <h4>{{Number(totales.total).toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })}}</h4>
+                      <h4>
+                        {{
+                          Number(totales.total).toLocaleString("es-MX", {
+                            style: "currency",
+                            currency: "MXN",
+                          })
+                        }}
+                      </h4>
                     </td>
                   </tr>
                 </tbody>
@@ -1146,7 +1165,6 @@ const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
 
-
 const props = defineProps({
   modelValue: Boolean,
   title: { type: String, default: "Modal" },
@@ -1155,7 +1173,7 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue", "update:insumos"]);
 
-const mostrarModalAdicional = ref(false);
+//const mostrarModalAdicional = ref(false);
 
 // observar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
 const inicializado = ref(false);
@@ -1163,9 +1181,9 @@ const inicializado = ref(false);
 watch(
   () => props.insumos,
   (nuevo) => {
-    llantas.value = [...(nuevo.llantas || [])];
-    paquetes.value = [...(nuevo.paquetes || [])];
-    adicionales.value = [...(nuevo.adicionales || [])];
+    llantas.value = [...(nuevo.llanta || [])];
+    paquetes.value = [...(nuevo.paquete || [])];
+    adicionales.value = [...(nuevo.adicional || [])];
     console.log("INSUMOS MODAL:", nuevo);
   },
   { immediate: true }
@@ -1205,13 +1223,13 @@ const onPromoChange = (item) => {
 
   // Si no hay ninguna promoción
   if (!idSel && !idVuelo) {
-      item.promo = {
+    item.promo = {
       idPromocion: 0,
       valor: 0,
       tipo: false,
-      nombre: ""
+      nombre: "",
     };
-    
+
     item.precioConPromo = item.precioUnitario;
     item.isVuelo = null;
     item.idPromocion = 0; // Reset idPromocion for normal promos
@@ -1260,15 +1278,14 @@ const precioFinalItem = (item) => {
 };
 
 const recalcularSubtotal = (item) => {
-  
   const promo = obtenerPromoSeleccionada(item);
 
   item.promo = promo || {
-  idPromocion: 0,
-  valor: 0,
-  tipo: false,
-  nombre: ""
-};;
+    idPromocion: 0,
+    valor: 0,
+    tipo: false,
+    nombre: "",
+  };
   item.esAlVuelo = !!item.idPromocionVuelo;
 
   const precioFinal = precioFinalItem(item);
@@ -1530,12 +1547,12 @@ const agregarLlanta = async (itm) => {
     promosDisponibles: [],
     promosAplicables: [],
     // valores históricos
-   
-    promo:{
-      idPromocion:0,
-      valor:0,
-      tipo:false,
-      nombre:""
+
+    promo: {
+      idPromocion: 0,
+      valor: 0,
+      tipo: false,
+      nombre: "",
     },
     //  activo por defecto → botón rojo
     activo: true,
@@ -1545,7 +1562,6 @@ const agregarLlanta = async (itm) => {
     const promos = await obtenerPromosPorInventario(itm.idInventarioInicial);
 
     nuevaLlanta.promosDisponibles = promos || [];
-    
   } catch (error) {
     console.error("Error al cargar promociones", error);
     nuevaLlanta.promosDisponibles = [];
@@ -1672,19 +1688,17 @@ watch(
 
 //watch para recalcular el total cada vez que cambie el arreglo de paquetes, o las promociones seleccionadas dentro de cada paquete, llanta o adicional
 const totales = computed(() => {
-  
-
-  const insumosMapeados = mapearInsumosParaPadre()
-  console.log("INSUMOS:", insumosMapeados)
-  return calcularTotalesDesdeInsumos(insumosMapeados)
-})
+  const insumosMapeados = mapearInsumosParaPadre();
+  console.log("INSUMOS:", insumosMapeados);
+  return calcularTotalesDesdeInsumos(insumosMapeados);
+});
 // agregar o quitar a el arreglo paquetes, conforme checbox
 const onTogglePaquete = async (paqueteBase) => {
   const existe = paquetes.value.some(
     (p) => p.idPaquete === paqueteBase.idPaquete,
   );
 
-  // ➖ QUITAR
+  //  QUITAR
   if (existe) {
     paquetes.value = paquetes.value.filter(
       (p) => p.idPaquete !== paqueteBase.idPaquete,
@@ -1692,17 +1706,17 @@ const onTogglePaquete = async (paqueteBase) => {
     return;
   }
 
-  // ➕ AGREGAR
+  // AGREGAR
   const promosDisponibles =
     (await obtenerPromosPorPaquete(paqueteBase.idPaquete)) || [];
 
   paquetes.value.push({
-    idDetalleOTPaquete:0,
+    idDetalleOTPaquete: 0,
     idPaquete: paqueteBase.idPaquete,
     idPromocion: 0,
     idConceptoTrabajo: 0,
-    idPromocionVuelo:0,
-    idPromocionSeleccionada:0,
+    idPromocionVuelo: 0,
+    idPromocionSeleccionada: 0,
     descripcion: paqueteBase.nombre,
     cantidad: 1,
     precioUnitario: paqueteBase.precioUnitario,
@@ -1757,7 +1771,6 @@ const mapearInsumosParaPadre = () => {
       precioUnitario: l.precioUnitario,
       precioConPromo: l.precioConPromo,
       subTotal: l.subTotal,
-
       promosDisponibles: l.promosDisponibles,
       promo: l.promo || [],
     })),
@@ -1816,7 +1829,6 @@ const mapearInsumosParaPadre = () => {
   };
 };
 
-
 const guardarInsumo = () => {
   const insumosMapeados = mapearInsumosParaPadre();
   const totales = calcularTotalesDesdeInsumos(insumosMapeados);
@@ -1835,7 +1847,7 @@ onMounted(() => {
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
- 
+
   // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
 });
 
@@ -1932,7 +1944,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     // la promo al vuelo debe reflejarse en estos campos
     item.idPromocionVuelo = nuevaPromo.idPromocion;
     item.idPromocionSeleccionada = nuevaPromo.idPromocion;
-    item.idPromocion = 0;// promocion normal = 0
+    item.idPromocion = 0; // promocion normal = 0
     item.esAlVuelo = true;
 
     recalcularSubtotal(item);

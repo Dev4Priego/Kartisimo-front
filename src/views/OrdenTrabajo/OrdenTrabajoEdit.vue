@@ -573,15 +573,15 @@ const otEditar = ref({
 
 const insumosFiltrados = computed(() => {
   const insumo = otEditar.value.insumo || {
-    llantas: [],
-    paquetes: [],
-    adicionales: [],
+    llanta: [],
+    paquete: [],
+    adicional: [],
   };
 
   return {
-    llantas: (insumo.llantas || []).filter((l) => !l.eliminado),
-    paquetes: (insumo.paquetes || []).filter((p) => !p.eliminado),
-    adicionales: (insumo.adicionales || []).filter((a) => !a.eliminado),
+    llanta: (insumo.llantas || []).filter((l) => !l.eliminado),
+    paquete: (insumo.paquetes || []).filter((p) => !p.eliminado),
+    adicional: (insumo.adicionales || []).filter((a) => !a.eliminado),
   };
 });
 
