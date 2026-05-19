@@ -1793,7 +1793,7 @@
                                 </option>
                               </select>
                             </td>
-                            <td class="ps-4">↳ {{ det.descripcion }}</td>
+                            <td class="ps-4">↳   <span class="ms-2">{{det.nombre}}</span></td>
                             <td class="text-center">
                               <input
                                 type="number"
