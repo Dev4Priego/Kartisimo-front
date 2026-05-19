@@ -89,7 +89,7 @@
                     @input="validate('vehiculo.marca')"
                     @blur="validate('vehiculo.marca')"
                     :class="{ 'input-error': errores['vehiculo.marca'] }"
-                    :readonly="isReadOnly"
+                    :readonly="isReadOnlyVehiculo"
                   />
 
                   <small v-if="errores['vehiculo.marca']" class="error-msg">
@@ -107,7 +107,7 @@
                     @input="validate('vehiculo.modelo')"
                     @blur="validate('vehiculo.modelo')"
                     :class="{ 'input-error': errores['vehiculo.modelo'] }"
-                    :readonly="isReadOnly"
+                    :readonly="isReadOnlyVehiculo"
                   />
                   <small v-if="errores['vehiculo.modelo']" class="error-msg">
                     {{ errores["vehiculo.modelo"] }}
@@ -124,7 +124,7 @@
                     @input="validate('vehiculo.color')"
                     @blur="validate('vehiculo.color')"
                     :class="{ 'input-error': errores['vehiculo.color'] }"
-                    :readonly="isReadOnly"
+                    :readonly="isReadOnlyVehiculo"
                   />
                   <small v-if="errores['vehiculo.color']" class="error-msg">
                     {{ errores["vehiculo.color"] }}
@@ -163,7 +163,7 @@
                     @input="validate('vehiculo.anio')"
                     @blur="validate('vehiculo.anio')"
                     :class="{ 'input-error': errores['vehiculo.anio'] }"
-                    :readonly="isReadOnly"
+                    :readonly="isReadOnlyVehiculo"
                   />
                   <small v-if="errores['vehiculo.anio']" class="error-msg">
                     {{ errores["vehiculo.anio"] }}
@@ -1375,7 +1375,7 @@ import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import ModalInsumo from "./ModalInsumo.vue";
 import ModalBuscarCotizacion from "./ModalBuscarCotizacion.vue";
-const isReadOnly = ref(false);
+const isReadOnlyVehiculo = ref(false);
 const router = useRouter();
 
 const { proxy } = getCurrentInstance();
@@ -1499,11 +1499,11 @@ const suggestions = () => {
       ordenTrabajoForm.vehiculo.anio = resultado.anio;
       ordenTrabajoForm.vehiculo.placas = resultado.placas;
       suggestiondiv.innerHTML = "";
-      isReadOnly.value = true;
+      isReadOnlyVehiculo.value = true;
     });
 
     suggestiondiv.appendChild(div);
-    isReadOnly.value = false;
+    isReadOnlyVehiculo.value = false;
   });
 };
 
@@ -2240,7 +2240,7 @@ const guardarOT = async () => {
     const objSeend = {
       idUsuario: dataUser.usuario.idUsuario,
       idSucursal: dataUser.usuario.idSucursal,
-      idCotizacion: ordenTrabajoForm.cotSeleccionada,
+      idCotizacion: parseInt(ordenTrabajoForm.cotSeleccionada),
       idEmpleado: ordenTrabajoForm.idEmpleado,
       idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
       metodoPago: ordenTrabajoForm.cliente.metodoPago,
