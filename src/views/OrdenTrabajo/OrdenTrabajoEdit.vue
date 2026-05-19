@@ -78,7 +78,7 @@
                   </tr>
                   <tr>
                     <td style="font-weight: bold; color: grey">Teléfono:</td>
-                    <td>{{ otEditar.cliente.telefono }}</td>
+                    <td>{{ formatearTelefono(otEditar.cliente.telefono) }}</td>
                   </tr>
                   <tr>
                     <td style="font-weight: bold; color: grey">Correo:</td>
@@ -1037,6 +1037,13 @@ const formatearFecha = (fecha) => {
 
   return `${fechaFormateada}, ${horaFormateada}`;
 };
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+}
 
 const refrescarOrden = () => {
   console.log("🔄 Refrescando orden...");

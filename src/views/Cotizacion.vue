@@ -783,7 +783,7 @@
             <div class="card shadow-sm mx-4 my-4">
               <div class="card-body">
                 <div class="row">
-                  <div class="col-6 col-lg-3">
+                  <div class="col-12 col-lg-6">
                     <div
                       v-for="paquete in paquetesDisponibles"
                       :key="paquete.idPaquete"
@@ -801,19 +801,6 @@
                         :for="'paquete-' + paquete.idPaquete"
                       >
                         {{ paquete.nombre }} - $ {{ paquete.precioUnitario }}.00
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <div class="form-check my-2">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="mostrarTotal"
-                        v-model="cotizacionForm.mostrarTotal"
-                      />
-                      <label class="form-check-label" for="mostrarTotal">
-                        Mostrar total en la vista previa
                       </label>
                     </div>
                   </div>
@@ -1642,7 +1629,7 @@
 
                               <button
                                 type="button"
-                                class="btn btn-danger btn-sm mt-1"
+                                class="btn btn-sm btn-outline-danger"
                                 @click="eliminarPaquete(paq.idPaquete)"
                               >
                                 <i class="bi bi-trash"></i>
@@ -2162,12 +2149,27 @@
                       </tbody>
                       <tfoot>
                         <!-- TOTAL GENERAL -->
-                        <tr v-if="cotizacionForm.mostrarTotal">
-                          <td colspan="4" class="text-end fs-5 fw-bold">
-                            Total:
+                        <tr>
+                          <td colspan="2">
                           </td>
-                          <td colspan="2" class="fs-5 fw-bold text-end">
-                            {{ formatoMoneda(totalCotizacion) }}
+                          <td colspan="2">
+                            <div class="form-check my-1">
+                              <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="mostrarTotal"
+                                v-model="cotizacionForm.mostrarTotal"
+                              />
+                              <label class="form-check-label fs-7" for="mostrarTotal">
+                                Mostrar total
+                              </label>
+                            </div>
+                          </td>
+                          <td class="text-end fs-5 fw-bold">
+                            <span v-if="cotizacionForm.mostrarTotal">Total:</span>
+                          </td>
+                          <td class="fs-5 fw-bold text-end">
+                            <span v-if="cotizacionForm.mostrarTotal">{{ formatoMoneda(totalCotizacion) }}</span>
                           </td>
                         </tr>
                       </tfoot>
@@ -4884,6 +4886,12 @@ const generarPDF = async () => {
     return fechaFormateada;
   };
 
+  const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+  }
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
@@ -4988,7 +4996,7 @@ const generarPDF = async () => {
                   text: "Teléfono(s): ",
                   bold: true,
                 },
-                { text: v.cliente.telefono || "N/A", color: "#444" },
+                { text: formatearTelefono(v.cliente.telefono) || "N/A", color: "#444" },
               ],
               fontSize: 10,
               margin: [0, 0, 10, 6],
@@ -5113,7 +5121,7 @@ const generarPDF = async () => {
   //pdfMake.createPdf(docDefinition).open();
 
   // usa esta si el problema es download
-  pdfMake.createPdf(docDefinition).download(`cotizacion_${v.codigo}.pdf`);
+  pdfMake.createPdf(docDefinition).download(`Cotización_${v.codigo}.pdf`);
 };
 </script>
 

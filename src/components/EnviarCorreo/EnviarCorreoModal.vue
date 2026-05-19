@@ -290,7 +290,7 @@ tbody tr:last-child td {
 
   <div>
     <strong>Teléfono(s):</strong> 
-    ${props.cotizacion?.cliente?.telefono || 'N/A'}
+    ${formatearTelefono(props.cotizacion?.cliente?.telefono) || 'N/A'}
   </div>
 
   <div>
@@ -458,8 +458,9 @@ tbody tr:last-child td {
 				Para: email,
 				Asunto: subj,
 				Cuerpo: msg,
+				NombreRemitente: 'Kartisimo ' + datos.usuario.nombre,
 				AdjuntoBase64: pdfBase64,
-				NombreAdjunto: `${props.cotizacion.codigo}.pdf`
+				NombreAdjunto: 'Cotización Kartisimo.pdf'
 			})
 		})
 
@@ -538,6 +539,14 @@ const formatearFecha = (fecha) => {
 
   return f.toLocaleDateString('es-MX')
 }
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+}
+
 // Helper para convertir Blob → Base64
 const blobToBase64 = (blob) => new Promise((resolve, reject) => {
 	const reader = new FileReader()

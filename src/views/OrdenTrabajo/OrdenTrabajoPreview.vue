@@ -101,7 +101,7 @@
 
         <div class="mb-1">
           <span class="fw-semibold">Teléfono:</span>
-          {{ orden?.cliente?.telefono || '—' }}
+          {{ formatearTelefono(orden?.cliente?.telefono) || 'N/A' }}
         </div>
 
         <div class="mb-1">
@@ -485,6 +485,13 @@ const formatearFecha = (fecha) => {
 
     return `${fechaFormateada}, ${horaFormateada}`;
   };
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+}
 
 const cargarOrden = async () => {
   
