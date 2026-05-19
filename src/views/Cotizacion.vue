@@ -956,20 +956,18 @@
               <div class="d-flex gap-3 my-3">
                 <div class="col">
                   <select
-                      class="form-select form-select-sm"
-                      v-model="NuevoConceptoTrabajo"
+                    class="form-select form-select-sm"
+                    v-model="NuevoConceptoTrabajo"
+                  >
+                    <option :value="0">-- Seleccione concepto --</option>
+                    <option
+                      v-for="c in conceptoOT"
+                      :key="c.idConceptoOrdenTrabajo"
+                      :value="c.idConceptoOrdenTrabajo"
                     >
-                      <option :value="0">
-                        -- Seleccione concepto --
-                      </option>
-                      <option
-                        v-for="c in conceptoOT"
-                        :key="c.idConceptoOrdenTrabajo"
-                        :value="c.idConceptoOrdenTrabajo"
-                      >
-                        {{ c.nombre }}
-                      </option>
-                    </select>
+                      {{ c.nombre }}
+                    </option>
+                  </select>
                 </div>
                 <div class="col">
                   <input
@@ -1215,8 +1213,7 @@
                                 <span class="text-success fw-bold">
                                   {{
                                     formatoMoneda(
-                                      precioFinalItem(item, item.promo) *
-                                        (item.cantidad ?? 1),
+                                      item.precioConPromo,
                                     )
                                   }}
                                 </span>
@@ -1495,9 +1492,7 @@
                                 />
                               </div>
                             </td>
-                            <td
-                              class="text-center"
-                            >
+                            <td class="text-center">
                               <input
                                 type="number"
                                 min="1"
@@ -1544,8 +1539,7 @@
                                 <span class="text-success fw-bold">
                                   {{
                                     formatoMoneda(
-                                      precioFinalItem(paq, paq.promo) *
-                                        (paq.cantidad ?? 1),
+                                      paq.precioConPromo
                                     )
                                   }}
                                 </span>
@@ -1780,7 +1774,9 @@
                                 </option>
                               </select>
                             </td>
-                            <td class="ps-4">↳   <span class="ms-2">{{det.nombre}}</span></td>
+                            <td class="ps-4">
+                              ↳ <span class="ms-2">{{ det.nombre }}</span>
+                            </td>
                             <td class="text-center">
                               <input
                                 type="number"
@@ -1802,7 +1798,6 @@
                           :key="'servicio-' + i"
                         >
                           <tr>
-                            
                             <td>
                               <select
                                 class="form-select form-select-sm"
@@ -1860,7 +1855,7 @@
                             </td>
 
                             <!-- SUBTOTAL -->
-                            <td >
+                            <td>
                               <!-- Promo individual -->
                               <div
                                 v-if="extra.promo && extra.promo.valor != null"
@@ -1884,8 +1879,7 @@
                                 <span class="text-success fw-bold">
                                   {{
                                     formatoMoneda(
-                                      precioFinalItem(extra, extra.promo) *
-                                        (extra.cantidad ?? 1),
+                                     extra.precioConPromo
                                     )
                                   }}
                                 </span>
@@ -1947,10 +1941,7 @@
                             </td>
 
                             <td>
-                              <div
-                               
-                                class="mb-2 d-flex align-items-center gap-2"
-                              >
+                              <div class="mb-2 d-flex align-items-center gap-2">
                                 <select
                                   class="form-select form-select-sm"
                                   v-model="extra.idPromocionSeleccionada"
@@ -2653,7 +2644,7 @@ const cargarLlantas = async () => {
 // Función para cargar cotizaciones
 const cargarCotizaciones = async () => {
   loading.value = true;
-  try {   
+  try {
     const res = await fetch(
       proxy.$serverIP + "api/Cotizacion/resumenCotizaciones",
     );
@@ -3086,7 +3077,8 @@ const onCambioPromo = (item) => {
   item.isVuelo = !!idVuelo;
 
   // Calcular precio con la promo
-  const base = item.precioUnitario ?? 0;
+  console.log("ONCambioPromo DATA:", item);
+  const base = item.precioUnitario  * item.cantidad;
   if (promo) {
     item.precioConPromo = promo.tipo
       ? base * (1 - promo.valor / 100)
@@ -3739,7 +3731,6 @@ const guardarCotizacion = async () => {
         precioUnitario: d.precioUnitario,
         subTotal: d.subtotal,
       })),
-
     }));
 
     const serviciosAdicionales = cotizacionForm.serviciosExtras.map((s) => ({
@@ -3798,7 +3789,7 @@ const guardarCotizacion = async () => {
     cargarCotizaciones();
     //console.log(data);
     mostrarVistaPrevia(data, "ver");
-    
+
     //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
