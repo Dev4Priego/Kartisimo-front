@@ -341,7 +341,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(ll.subTotal).toLocaleString("es-MX", {
+                              Number(ll.precioConPromo).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -587,7 +587,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(paq.subTotal).toLocaleString("es-MX", {
+                              Number(paq.precioConPromo).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -900,7 +900,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(ad.subTotal).toLocaleString("es-MX", {
+                              Number(ad.precioConPromo).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -1267,7 +1267,7 @@ const obtenerPromoSeleccionada = (item) => {
   );
 };
 const precioFinalItem = (item) => {
-  const base = item.precioUnitario ?? 0;
+  const base = item.precioUnitario * item.cantidad;
   const promo = obtenerPromoSeleccionada(item);
 
   if (!promo) return base;
