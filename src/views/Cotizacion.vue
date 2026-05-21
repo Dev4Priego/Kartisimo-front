@@ -1224,11 +1224,7 @@
                                 </span>
                                 <br />
                                 <span class="text-success fw-bold">
-                                  {{
-                                    formatoMoneda(
-                                      item.precioConPromo,
-                                    )
-                                  }}
+                                  {{ formatoMoneda(item.precioConPromo) }}
                                 </span>
                               </div>
 
@@ -1550,11 +1546,7 @@
                                 </span>
                                 <br />
                                 <span class="text-success fw-bold">
-                                  {{
-                                    formatoMoneda(
-                                      paq.precioConPromo
-                                    )
-                                  }}
+                                  {{ formatoMoneda(paq.precioConPromo) }}
                                 </span>
                               </div>
 
@@ -1636,7 +1628,7 @@
 
                               <button
                                 type="button"
-                                class="btn btn-danger btn-sm mt-1"
+                                class="btn btn-sm btn-outline-danger"
                                 @click="eliminarPaquete(paq.idPaquete)"
                               >
                                 <i class="bi bi-trash"></i>
@@ -1890,11 +1882,7 @@
                                 </span>
                                 <br />
                                 <span class="text-success fw-bold">
-                                  {{
-                                    formatoMoneda(
-                                     extra.precioConPromo
-                                    )
-                                  }}
+                                  {{ formatoMoneda(extra.precioConPromo) }}
                                 </span>
                               </div>
 
@@ -3076,7 +3064,7 @@ const onCambioPromo = (item) => {
 
   // Calcular precio con la promo
   console.log("ONCambioPromo DATA:", item);
-  const base = item.precioUnitario  * item.cantidad;
+  const base = item.precioUnitario * item.cantidad;
   if (promo) {
     item.precioConPromo = promo.tipo
       ? base * (1 - promo.valor / 100)
@@ -4147,24 +4135,19 @@ watch(
     cotizacionForm.llantas.map((ll) => ({
       id: ll.idLlanta,
       precio: ll.precioUnitario,
+      cantidad: ll.cantidad,
     })),
   (nuevosValores) => {
-    nuevosValores.forEach(({ id, precio }) => {
+    nuevosValores.forEach(({ id, precio, cantidad }) => {
       const llanta = cotizacionForm.llantas.find((l) => l.idLlanta === id);
       if (!llanta) return;
 
-      // Aplica la misma lógica que tu helper actual
-      if (llanta.promo && llanta.promo.valor != null) {
-        llanta.precioConPromo = llanta.promo.tipo
-          ? precio * (1 - llanta.promo.valor / 100)
-          : Math.max(0, precio - llanta.promo.valor);
-      } else if (promoGeneral.value && promoGeneral.value.valor != null) {
-        llanta.precioConPromo = promoGeneral.value.tipo
-          ? precio * (1 - promoGeneral.value.valor / 100)
-          : Math.max(0, precio - promoGeneral.value.valor);
-      } else {
-        llanta.precioConPromo = precio; // sin promoción
-      }
+      const totalBase = (precio || 0) * (cantidad || 1);
+      llanta.precioConPromo = aplicarPromo(
+        totalBase,
+        llanta.promo,
+        promoGeneral.value,
+      );
     });
   },
   { deep: true },
@@ -4176,17 +4159,18 @@ watch(
     cotizacionForm.paquetes.map((p) => ({
       id: p.idPaquete,
       precio: p.precioUnitario,
+      cantidad: p.cantidad,
     })),
   (nuevosValores) => {
-    nuevosValores.forEach(({ id, precio }) => {
+    nuevosValores.forEach(({ id, precio, cantidad }) => {
       const paquete = cotizacionForm.paquetes.find((p) => p.idPaquete === id);
       if (!paquete) return;
-      const promo = paquete.promo || promoGeneral.value;
-      paquete.precioConPromo = promo
-        ? promo.tipo
-          ? precio * (1 - promo.valor / 100)
-          : Math.max(0, precio - promo.valor)
-        : precio;
+      const totalBase = (precio || 0) * (cantidad || 1);
+      paquete.precioConPromo = aplicarPromo(
+        totalBase,
+        paquete.promo,
+        promoGeneral.value,
+      );
     });
   },
   { deep: true },
@@ -4241,19 +4225,20 @@ watch(
     cotizacionForm.serviciosExtras.map((s) => ({
       nombre: s.nombre,
       precio: s.precioUnitario,
+      cantidad: s.cantidad,
     })),
   (nuevosValores) => {
-    nuevosValores.forEach(({ nombre, precio }) => {
+    nuevosValores.forEach(({ nombre, precio, cantidad }) => {
       const servicio = cotizacionForm.serviciosExtras.find(
         (s) => s.nombre === nombre,
       );
       if (!servicio) return;
-      const promo = servicio.promo || promoGeneral.value;
-      servicio.precioConPromo = promo
-        ? promo.tipo
-          ? precio * (1 - promo.valor / 100)
-          : Math.max(0, precio - promo.valor)
-        : precio;
+      const totalBase = (precio || 0) * (cantidad || 1);
+      servicio.precioConPromo = aplicarPromo(
+        totalBase,
+        servicio.promo,
+        promoGeneral.value,
+      );
     });
   },
   { deep: true },

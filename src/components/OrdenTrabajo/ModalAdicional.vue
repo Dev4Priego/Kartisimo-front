@@ -132,6 +132,12 @@ const agregarFila = async () => {
     precioUnitario: Precio.value,
     subTotal: (Cantidad.value * Precio.value).toFixed(2),
     promosDisponibles,
+	promo:{
+		idPromocion:0,
+		valor:0,
+		tipo:false,
+		nombre:""
+	},
     nombrePromocion: null,
     valorPromocion: null,
     tipoPromocion: null

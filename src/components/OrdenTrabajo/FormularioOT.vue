@@ -89,7 +89,7 @@
                     @input="validate('vehiculo.marca')"
                     @blur="validate('vehiculo.marca')"
                     :class="{ 'input-error': errores['vehiculo.marca'] }"
-                    :readonly="isReadOnlyVehiculo"
+                    :readonly="isReadOnlyVehiculo || readOnlyOTderivada"
                   />
 
                   <small v-if="errores['vehiculo.marca']" class="error-msg">
@@ -107,7 +107,7 @@
                     @input="validate('vehiculo.modelo')"
                     @blur="validate('vehiculo.modelo')"
                     :class="{ 'input-error': errores['vehiculo.modelo'] }"
-                    :readonly="isReadOnlyVehiculo"
+                    :readonly="isReadOnlyVehiculo || readOnlyOTderivada"
                   />
                   <small v-if="errores['vehiculo.modelo']" class="error-msg">
                     {{ errores["vehiculo.modelo"] }}
@@ -124,7 +124,7 @@
                     @input="validate('vehiculo.color')"
                     @blur="validate('vehiculo.color')"
                     :class="{ 'input-error': errores['vehiculo.color'] }"
-                    :readonly="isReadOnlyVehiculo"
+                    :readonly="isReadOnlyVehiculo || readOnlyOTderivada"
                   />
                   <small v-if="errores['vehiculo.color']" class="error-msg">
                     {{ errores["vehiculo.color"] }}
@@ -143,6 +143,7 @@
                     @input="validate('vehiculo.kilometraje')"
                     @blur="validate('vehiculo.kilometraje')"
                     :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['vehiculo.kilometraje']"
@@ -163,7 +164,7 @@
                     @input="validate('vehiculo.anio')"
                     @blur="validate('vehiculo.anio')"
                     :class="{ 'input-error': errores['vehiculo.anio'] }"
-                    :readonly="isReadOnlyVehiculo"
+                    :readonly="isReadOnlyVehiculo || readOnlyOTderivada"
                   />
                   <small v-if="errores['vehiculo.anio']" class="error-msg">
                     {{ errores["vehiculo.anio"] }}
@@ -180,6 +181,7 @@
                     @input="validate('vehiculo.placas')"
                     @blur="validate('vehiculo.placas')"
                     :class="{ 'input-error': errores['vehiculo.placas'] }"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small v-if="errores['vehiculo.placas']" class="error-msg">
                     {{ errores["vehiculo.placas"] }}
@@ -214,7 +216,7 @@
                     "
                     @blur="validate('cliente.nombres')"
                     :class="{ 'input-error': errores['cliente.nombres'] }"
-                    :readonly="isReadOnly"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.nombres']" class="error-msg">
                     {{ errores["cliente.nombres"] }}
@@ -235,7 +237,7 @@
                     @input="validate('cliente.apellidos')"
                     @blur="validate('cliente.apellidos')"
                     :class="{ 'input-error': errores['cliente.apellidos'] }"
-                    :readonly="isReadOnly"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.apellidos']" class="error-msg">
                     {{ errores["cliente.apellidos"] }}
@@ -258,7 +260,7 @@
                     :class="{
                       'input-error': errores['cliente.clienteTelefono'],
                     }"
-                    :readonly="isReadOnly"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['cliente.clienteTelefono']"
@@ -283,7 +285,7 @@
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.clienteCorreo')"
                     :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
-                    :readonly="isReadOnly"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['cliente.clienteCorreo']"
@@ -311,7 +313,7 @@
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.rfc')"
                     :class="{ 'input-error': errores['cliente.rfc'] }"
-                    :readonly="isReadOnly"
+                    :readonly=" readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.rfc']" class="error-msg">
                     {{ errores["cliente.rfc"] }}
@@ -1387,6 +1389,7 @@ const formValida = ref(false);
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const vehiculos = ref([]);
+const readOnlyOTderivada = ref(false);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
 const sucursales = [
   "(Ninguna)",
@@ -1500,6 +1503,7 @@ const suggestions = () => {
       ordenTrabajoForm.vehiculo.placas = resultado.placas;
       suggestiondiv.innerHTML = "";
       isReadOnlyVehiculo.value = true;
+      validate("vehiculo.serie");
     });
 
     suggestiondiv.appendChild(div);
@@ -1951,6 +1955,7 @@ const onSerieSeleccionada = () => {
     kilometrajeBase.value = seleccionado.kilometraje;
     //console.log(ordenTrabajoForm.vehiculo)
   }
+  validate("vehiculo.serie");
 };
 
 /***************/
@@ -2377,6 +2382,8 @@ const cargarInfoCotizacion = async () => {
     serverController = "getOrdenDerivada";
     ordenTrabajoForm.esHija = 1; // si se manda una OT se marcara como hija
     ordenTrabajoForm.idOtPAdre = props.idOrdenTrabajo;
+    readOnlyOTderivada.value = true;
+    console.log("OT DERIVADA: ", readOnlyOTderivada.value);
   } else if (props.idCotizacion) {
     serverController = "getCotizacionById";
   }
