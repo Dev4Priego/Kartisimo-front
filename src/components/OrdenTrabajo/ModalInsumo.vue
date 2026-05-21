@@ -341,7 +341,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(ll.precioConPromo).toLocaleString("es-MX", {
+                              Number(ll.subTotal).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -587,7 +587,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(paq.precioConPromo).toLocaleString("es-MX", {
+                              Number(paq.subTotal).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -900,7 +900,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(ad.precioConPromo).toLocaleString("es-MX", {
+                              Number(ad.subTotal).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -1218,6 +1218,7 @@ const PromocionesVuelo = reactive({
 
 // Si existe idPromocion, Busca la promo en ll.promosDisponibles, Copia los datos importantes al item, recalcula Subtotal
 const onPromoChange = (item) => {
+  console.log("ITEM EN PROMOCHANGE:", item);
   const idSel = item.idPromocionSeleccionada; // normal
   const idVuelo = item.idPromocionVuelo; // vuelo
 
@@ -1261,37 +1262,49 @@ const obtenerPromoSeleccionada = (item) => {
     ...(item.promosAplicables || []),
   ];
   return allPromos.find(
-    (p) =>
-      p.idPromocion === item.idPromocionVuelo ||
-      p.idPromocion === item.idPromocion,
+    (p) => p.idPromocion === item.idPromocionSeleccionada // <-- usar idSel
   );
 };
-const precioFinalItem = (item) => {
+const precioFinalItem = (item , promo) => {
+  console.log("PrecioFinalItem Item [INFO]: ", item )
   const base = item.precioUnitario * item.cantidad;
-  const promo = obtenerPromoSeleccionada(item);
-
+ 
+  console.log("PrecioFinalItem PROMO [INFO]: ", promo )
   if (!promo) return base;
 
-  return promo.tipo
+  const res =promo.tipo
     ? base * (1 - promo.valor / 100)
     : Math.max(0, base - promo.valor);
-};
+  console.log("PrecioFinalItem RES [INFO]: ", res )
+  return res;
+  };
 
 const recalcularSubtotal = (item) => {
-  const promo = obtenerPromoSeleccionada(item);
-
-  item.promo = promo || {
-    idPromocion: 0,
-    valor: 0,
-    tipo: false,
-    nombre: "",
-  };
+  // Resolver promo actual según selección
+  let promo = null;
+  if (item.idPromocionVuelo) {
+    promo = { ...item.promo }; 
+  } else if (item.idPromocionSeleccionada) {
+    promo = obtenerPromoSeleccionada(item);
+  }
+  // Si no hay promo válida, resetear
+  if (!promo) {
+    promo = {
+      idPromocion: 0,
+      valor: 0,
+      tipo: false,
+      nombre: "",
+    };
+  }
+  // Actualizar siempre item.promo con la promo vigente
+  item.promo = promo;
   item.esAlVuelo = !!item.idPromocionVuelo;
-
-  const precioFinal = precioFinalItem(item);
+  // Calcular precio final con la promo vigente
+  const precioFinal = precioFinalItem(item, promo);
   item.precioConPromo = precioFinal;
-  item.subTotal = ((item.cantidad || 0) * precioFinal).toFixed(2);
+  item.subTotal = precioFinal.toFixed(2);
 };
+
 
 const borrarInsumo = (insumo) => {
   insumo.eliminado = true;
@@ -1720,7 +1733,12 @@ const onTogglePaquete = async (paqueteBase) => {
     descripcion: paqueteBase.nombre,
     cantidad: 1,
     precioUnitario: paqueteBase.precioUnitario,
-
+    promo:{
+      idPromocion:0,
+      valor:0,
+      tipo:false,
+      nombre:""
+    },
     subTotal: (
       1 *
       precioFinalItem({
@@ -1848,7 +1866,8 @@ onMounted(() => {
   cargarConcpetoTrabajo();
   cargarPaquetes();
 
-  // console.log(props.insumos) props.insumos = { adicional: [], llanta: [], paquete: []}
+  console.log("DEBUG Props: ",props.insumos) 
+  
 });
 
 const calcularTotalesDesdeInsumos = (insumos) => {
@@ -1940,8 +1959,17 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     const data = await res.json();
     nuevaPromo.idPromocion = data.idPromoVuelo;
     item.promosAplicables.push(nuevaPromo);
+     // Inicializar promo si está null
+    if (!item.promo) {
+      item.promo = {};
+    }
 
     // la promo al vuelo debe reflejarse en estos campos
+    item.promo.idPromocion = nuevaPromo.idPromocion;
+    item.promo.valor = nuevaPromo.valor;
+    item.promo.tipo = nuevaPromo.tipo;
+    item.promo.nombre = nuevaPromo.nombre;
+
     item.idPromocionVuelo = nuevaPromo.idPromocion;
     item.idPromocionSeleccionada = nuevaPromo.idPromocion;
     item.idPromocion = 0; // promocion normal = 0
