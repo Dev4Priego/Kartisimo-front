@@ -10,9 +10,9 @@
 		</div>
 		<div id="listacotiz" class="accordion-collapse collapse">
 			<div class="accordion-body">
-			<div class="table-responsive">
+			<div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
 				<table class="table table-hover table-sm">
-					<thead>
+					<thead style="position: sticky; top: 0; background: white; z-index: 1;">
 						<tr>
 							<th>#</th>
 							<th>Sucursal</th>
@@ -38,7 +38,7 @@
 									|| 'N/A'
 								}}
 							</td>
-							<td>{{ (c.telefono && c.telefono.trim()) || "N/A"  }}</td>
+							<td>{{ formatearTelefono(c.telefono && c.telefono.trim()) || "N/A"  }}</td>
 						</tr>
 
 						<tr v-if="!itmCotizaciones.length">
@@ -103,6 +103,13 @@ const onInputCotizacion = () => {
 		cargarCotizacionesAprobadasOrRealizadas(busquedaCotizacion.value)
 	}, 300)
 }
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+  }
 
 const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
 	try {

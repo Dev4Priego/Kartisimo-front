@@ -17,6 +17,9 @@
               <div class="card-body" style="font-size: 10pt; color: slategray">
                 <i class="bi bi-person me-2"></i><strong>Usuario: </strong
                 >{{ loggeduser.usuario.nombre }}<br />
+                <i class="bi bi-envelope me-2"></i>
+                  <strong>Correo: </strong>{{ loggeduser.usuario.correo || "Sin correo"
+                  }}<br />
                 <i class="bi bi-building-fill me-2"></i>
                 <strong>Sucursal: </strong
                 >{{ sucursales[loggeduser.usuario.idSucursal - 1] }}
@@ -392,6 +395,7 @@
               <div class="col">
                 <input
                   type="date"
+                  lang="es-MX"
                   class="form-control"
                   v-model="fechaEntregaFecha"
                   @change="unirFechaHora"
@@ -619,15 +623,25 @@
         <div class="col-4">
           <h5>Desechar Llantas</h5>
         </div>
-        <div v-if="hayLlantas" class="col-8">
+        <div class="col-8">
           <label class="form-label">¿Se desea desechar llantas antiguas?</label
           ><br />
+          <input
+            class="form-check-input me-2"
+            type="checkbox"
+            id="aplicaDesechar"
+            v-model="aplicaDesecharLlanta"
+          />
+          <label class="form-check-label me-4" for="aplicaDesechar">
+              N/A
+          </label>
           Si
           <input
             v-model="boolDesecharLlanta"
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
+            :disabled="aplicaDesecharLlanta"
           />
           No
           <input
@@ -635,9 +649,9 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
+            :disabled="aplicaDesecharLlanta"
           />
         </div>
-        <div v-else class="col-8">No aplica</div>
       </div>
       <hr />
 
@@ -1381,6 +1395,7 @@ const router = useRouter();
 const { proxy } = getCurrentInstance();
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
+const aplicaDesecharLlanta = ref(false);
 const showModal = ref(false);
 const mostrarVista = ref(false);
 const formValida = ref(false);
@@ -2189,6 +2204,7 @@ const validarYMostrarPreview = async () => {
 };
 
 const guardarOT = async () => {
+  var desechar;
   try {
     const userStorage = localStorage.getItem("userSession");
 
@@ -2201,6 +2217,12 @@ const guardarOT = async () => {
     if (!esValido) return;
 
     console.log(" Formulario válido");
+    
+    if(aplicaDesecharLlanta.value) {
+      desechar = null;
+    } else {
+      desechar = boolDesecharLlanta.value;
+    }
 
     let insumosSelec = {
       ...ordenTrabajoForm.insumo,
@@ -2247,7 +2269,7 @@ const guardarOT = async () => {
       fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
       fechaEntrega: ordenTrabajoForm.fechaEntrega,
       requiereFactura: boolFactura.value,
-      desecharLlanta: boolDesecharLlanta.value,
+      desecharLlanta: desechar,
       descripcion: "",
       estado: "Creado",
       cliente: {

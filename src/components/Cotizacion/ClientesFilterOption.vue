@@ -28,7 +28,7 @@
         >
           <td>{{ cliente?.nombreCompleto || "(SIN NOMBRE)" }}</td>
           <td>{{ cliente?.correo || "(SIN CORREO)" }}</td>
-          <td>{{ cliente?.telefono || "(SIN NUMERO)" }}</td>
+          <td>{{ formatearTelefono(cliente?.telefono) || "(SIN NUMERO)" }}</td>
         </tr>
       </tbody>
     </table>
@@ -75,6 +75,13 @@ const getClientes = async ()=>{
 onMounted(()=>{
     getClientes();
 });
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+  }
 
 const handleFocusOut = () => {
   setTimeout(() => {

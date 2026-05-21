@@ -85,7 +85,7 @@
               <td>{{ item.sucursal }}</td>
               <td>{{ item.fechaCreacion }}</td>
               <td>{{ item.cliente }}</td>
-              <td>{{ item.telefono }}</td>
+              <td>{{ formatearTelefono(item.telefono) }}</td>
               <!-- <td>{{ item.paquete }}</td> -->
               <!-- <td>{{ item.total }}</td> -->
               <td>{{ item.nombreLlanta }}</td>
@@ -4656,6 +4656,13 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     Swal.fire("Error", "No se pudo guardar la promoción al vuelo.", "error");
   }
 };
+
+const formatearTelefono = (telefono) => {
+	if (!telefono) return '';
+    const digitos = telefono.replace(/\D/g, '');
+    if (digitos.length !== 10) return telefono;
+    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
+  }
 
 const generarPDF = async () => {
   const logo = await loadLogoBase64();

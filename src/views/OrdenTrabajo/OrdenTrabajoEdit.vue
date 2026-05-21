@@ -262,12 +262,22 @@
         </div>
         <div class="col-6">
           <label class="form-label">¿Desechar llanta?</label><br />
+          <input
+            class="form-check-input me-2"
+            type="checkbox"
+            id="aplicaDesechar"
+            v-model="aplicaDesecharLlanta"
+          />
+          <label class="form-check-label me-4" for="aplicaDesechar">
+              N/A
+          </label>
           Si
           <input
             v-model="otEditar.desecharLlanta"
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
+            :disabled="aplicaDesecharLlanta"
           />
           No
           <input
@@ -275,6 +285,7 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
+            :disabled="aplicaDesecharLlanta"
           />
         </div>
         <div v-if="otEditar.requiereFactura" class="col-12">
@@ -548,6 +559,7 @@ const regimenFiscal = ref([]);
 const modelValue =ref(false);
 const showModal = ref(false);
 const insumosCambios = ref(false);
+const aplicaDesecharLlanta = ref(false);
 const insumoOriginal = ref([]);
 /**
  * 🔒 Estado inicial seguro
@@ -650,6 +662,8 @@ const cargarOrden = async () => {
 
     const json = await res.json();
 
+    console.log(json);
+
     otEditar.value = {
       idOrdenTrabajo: json?.idOrdenTrabajo || 0,
       prefijoSucursal: json.prefijoSucursal,
@@ -680,7 +694,7 @@ const cargarOrden = async () => {
       idCotizacion: json.idCotizacion || 0,
 
       requiereFactura: json.requiereFactura || false,
-      desecharLlanta: json.desecharLlanta || false,
+      desecharLlanta: json.desecharLlanta,
 
      
       insumo: {
@@ -853,7 +867,13 @@ const cargarOrden = async () => {
       }
     };
     // invocar el evento imprimir 
-    
+    console.log("Desechar: " + otEditar.value.desecharLlanta);
+      if (otEditar.value.desecharLlanta == null) {
+        aplicaDesecharLlanta.value = true;
+        otEditar.value.desecharLlanta = false;
+      } else {
+        aplicaDesecharLlanta.value = false;
+      }
     if (otCreada === true) {
       modelValue.value = true;
       history.replaceState({}, document.title);
@@ -1147,11 +1167,18 @@ const guardarEdicion = async () => {
 
   console.log("usuario edita" + idUsuarioSession);
 
+  var desechar;
+  if (aplicaDesecharLlanta.value) {
+    desechar = null;
+  } else {
+    desechar = otEditar.value.desecharLlanta;
+  }
+
   const payload = {
     idUsuario: idUsuarioSession,
     idEmpleado: otEditar.value.empleado.idEmpleado,
     metodoPago: otEditar.value.metodoPago,
-    desecharLlanta: otEditar.value.desecharLlanta,
+    desecharLlanta: desechar,
     requiereFactura: otEditar.value.requiereFactura,
     llantas: otEditar.value.insumo.llantas,
     paquetes:otEditar.value.insumo.paquetes,

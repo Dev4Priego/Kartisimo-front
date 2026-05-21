@@ -411,15 +411,11 @@ const cargarProveedores = async () => {
 
     const res = await fetch(url);
     const text = await res.text();
-    
-    console.log("RESPUESTA RAW:", text);
 
     if (!res.ok) throw new Error("Error en la respuesta");
 
     const response = JSON.parse(text);
-    console.log(response);
     proveedores.value = response ?? [];
-    console.log(proveedores.value);
 
   } catch (error) {
     console.error("Error al cargar los proveedores:", error);

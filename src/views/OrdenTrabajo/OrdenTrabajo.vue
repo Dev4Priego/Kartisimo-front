@@ -95,12 +95,16 @@
               <!-- DESECHAR LLANTA -->
               <td>
                 <i
-                  v-if="ot.desecharLlanta"
+                  v-if="ot.desecharLlanta === true"
                   class="bi bi-check-circle-fill text-success"
                 ></i>
                 <i
-                  v-else
+                  v-else-if="ot.desecharLlanta === false"
                   class="bi bi-x-circle-fill text-danger"
+                ></i>
+                <i
+                  v-else
+                  class="bi bi-dash-circle-fill text-secondary"
                 ></i>
               </td>
 
