@@ -704,11 +704,12 @@ const cargarOrden = async () => {
               llanta.idInventarioInicial,
             );
             const promocionExistente = {
-              idPromocion: llanta.idPromocion || llanta.idPromocionVuelo || 0,
-              valor: llanta.valorPromocion || llanta.valorPromocionVuelo || 0,
-              tipo: llanta.tipoPromocion || llanta.tipoPromocionVuelo || null,
-              nombre: llanta.nombrePromocion || llanta.nombreVuelo || "",
-            };
+            idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
+            valor: llanta?.valorPromocion || llanta?.valorVuelo || 0,
+            tipo: llanta?.tipoPromocion || llanta?.tipoVuelo || null,
+            nombre:
+              llanta?.nombrePromocion || llanta?.nombreVuelo || "",
+          };
             return {
               idDetalleOTLlanta: llanta.idDetalleOTLlanta, // no se agrega 
               idLlanta: llanta.idLlanta,
@@ -729,17 +730,15 @@ const cargarOrden = async () => {
                 precioFinalItem({
                   precioUnitario: llanta.precioUnitario,
                   idPromocion:
-                    llanta.idPromocion != null
-                      ? llanta.idPromocion
-                      : llanta.idPromocionVuelo,
+                
+                    llanta.idPromocion
+                     || llanta.idPromocionVuelo,
                   valorPromocion:
-                    llanta.valorPromocion != null
-                      ? llanta.valorPromocion
-                      : llanta.valorPromocionVuelo,
+                    llanta.valorPromocion
+                      || llanta.valorVuelo,
                   tipoPromocion:
-                    llanta.tipoPromocion != null
-                      ? llanta.tipoPromocion
-                      : llanta.tipoPromocionVuelo,
+                     llanta.tipoPromocion
+                      || llanta.tipoVuelo,
                 })
               ).toFixed(2), // campo estetico
 
@@ -757,10 +756,10 @@ const cargarOrden = async () => {
           (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
           const promocionExistente = {
             idPromocion: paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
-            valor: paquete?.valorPromocion || paquete?.valorPromocionVuelo || 0,
-            tipo: paquete?.tipoPromocion || paquete?.tipoPromocionVuelo || null,
+            valor: paquete?.valorPromocion || paquete?.valorVuelo || 0,
+            tipo: paquete?.tipoPromocion || paquete?.tipoVuelo || null,
             nombre:
-              paquete?.nombrePromocion || paquete?.nombrePromocionVuelo || "",
+              paquete?.nombrePromocion || paquete?.nombreVuelo || "",
           };
           return {
             idDetalleOTPaquete:paquete.idDetalleOTPaquete || 0,
@@ -778,20 +777,18 @@ const cargarOrden = async () => {
             subTotal: (
               1 *
               precioFinalItem({
-                precioUnitario: paquete.precioUnitario,
-                idPromocion:
-                  paquete.idPromocion != null
-                    ? paquete.idPromocion
-                    : paquete.idPromocionVuelo,
-                valorPromocion:
-                  paquete.valorPromocion != null
-                    ? paquete.valorPromocion
-                    : paquete.valorPromocionVuelo,
-                tipoPromocion:
-                  paquete.tipoPromocion != null
-                    ? paquete.tipoPromocion
-                    : paquete.tipoPromocionVuelo,
-              })
+                  precioUnitario: paquete.precioUnitario,
+                  idPromocion:
+                
+                    paquete.idPromocion
+                     || paquete.idPromocionVuelo,
+                  valorPromocion:
+                    paquete.valorPromocion
+                      || paquete.valorVuelo,
+                  tipoPromocion:
+                     paquete.tipoPromocion
+                      || paquete.tipoVuelo,
+                })
             ).toFixed(2),
 
             detalle: paquete.detalle.map((detalle) => ({
@@ -816,9 +813,10 @@ const cargarOrden = async () => {
           
           const promocionExistente = {
             idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
-            valor: s?.valorPromocion || s?.valorPromocionVuelo || 0,
-            tipo: s?.tipoPromocion || s?.tipoPromocionVuelo || null,
-            nombre: s?.nombrePromocion || s?.nombrePromocionVuelo || "",
+            valor: s?.valorPromocion || s?.valorVuelo || 0,
+            tipo: s?.tipoPromocion || s?.tipoVuelo || null,
+            nombre:
+              s?.nombrePromocion || s?.nombreVuelo || "",
           };
           return {
             
@@ -837,19 +835,19 @@ const cargarOrden = async () => {
 
             subTotal: (
               s.cantidad *
-              precioFinalItem({
-                precioUnitario: s.precioUnitario,
-                idPromocion:
-                  s.idPromocion != null ? s.idPromocion : s.idPromocionVuelo,
-                valorPromocion:
-                  s.valorPromocion != null
-                    ? s.valorPromocion
-                    : s.valorPromocionVuelo,
-                tipoPromocion:
-                  s.tipoPromocion != null
-                    ? s.tipoPromocion
-                    : s.tipoPromocionVuelo,
-              })
+             precioFinalItem({
+                  precioUnitario: s.precioUnitario,
+                  idPromocion:
+                
+                    s.idPromocion
+                     || s.idPromocionVuelo,
+                  valorPromocion:
+                    s.valorPromocion
+                      || s.valorVuelo,
+                  tipoPromocion:
+                     s.tipoPromocion
+                      || s.tipoVuelo,
+                })
             ).toFixed(2),
 
             promosDisponibles: promosDisponibles || [],
@@ -903,6 +901,7 @@ const cargarOrden = async () => {
 };
 
 const precioFinalItem = (item, promoGlobal) => {
+console.log("ITEM:" , item);
   const base = item.precioUnitario ?? 0;
 
   // Aplica promoción individual si existe

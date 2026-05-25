@@ -47,7 +47,7 @@
                   <br />
                   <span
                     ><small class="badge bg-danger mt-1">{{
-                      llanta.promo?.nombre || "Promoción Aplicada"
+                      llanta.promo.nombre|| "Promoción Aplicada"
                     }}</small></span
                   >
                   <br />
