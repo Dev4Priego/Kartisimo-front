@@ -39,7 +39,12 @@
             @seleccionar-cotizacion="onCotizacionSeleccionada"
           />
         </div>
+        <div class="col-4"></div>
+        <div class="col-8 mt-2">
+          <b>Cotización:</b> <em>{{ ordenTrabajoForm.cotSeleccionada ? cotizSelec : "(Ninguna)" }}</em>
+        </div>
       </div>
+      
       <hr />
 
       <div class="row mb-4 align-items-stretch">
@@ -252,7 +257,7 @@
                   <label for="telefono" class="form-label">Teléfono(s) *</label>
                   <input
                     id="telefono"
-                    v-model="ordenTrabajoForm.cliente.clienteTelefono"
+                    v-model="telefonoFormateado"
                     class="form-control"
                     type="text"
                     placeholder="(10 dígitos)"
@@ -1414,6 +1419,7 @@ const sucursales = [
   "Martinica",
 ];
 
+const cotizSelec = ref('');
 const props = defineProps({
   idCotizacion: {
     type: [String, Number],
@@ -1465,6 +1471,33 @@ const formatearFechaSinHora = (fecha) => {
   });
 };
 
+const telefonoFormateado = computed({
+  get() {
+    const soloNumeros = ordenTrabajoForm.cliente.clienteTelefono.replace(/\D/g, "");
+
+    const base = soloNumeros.slice(0, 10); // teléfono principal
+    //const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
+
+    let formateado = "";
+
+    if (base.length > 6) {
+      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+    } else if (base.length > 3) {
+      formateado = base.replace(/(\d{3})(\d{0,3})/, "$1 $2");
+    } else if (base.length > 0) {
+      formateado = base.replace(/(\d{0,3})/, "$1");
+    }
+
+    //return ext ? `${formateado} ext ${ext}` : formateado;
+    return formateado;
+  },
+
+  set(v) {
+    // Guardamos SOLO números
+    ordenTrabajoForm.cliente.clienteTelefono = v.replace(/\D/g, "");
+  },
+});
+
 const listaErrores = computed(() => Object.values(errores));
 
 /* =================== HELPER PARA CAMPOS ANIDADOS =================== */
@@ -1494,7 +1527,7 @@ const suggestions = () => {
       display:flex;
       justify-content:space-between;
       align-items:center;
-      max-height:50px;
+      max-height:80px;
       width:100%;
     "
   >
@@ -1549,7 +1582,7 @@ function validate(path) {
       const num = Number(value);
 
       if (isNaN(num)) return "El kilometraje debe ser un número.";
-      if (num < 0) return "El kilometraje no puede ser negativo.";
+      if (num <= 0) return "El kilometraje no puede ser negativo o cero.";
       if (num < kilometrajeBase.value)
         return `El kilometraje no puede ser menor a ${kilometrajeBase.value}.`;
 
@@ -1561,12 +1594,21 @@ function validate(path) {
       !value.trim() ? "Color del vehículo obligatorio." : null,
 
     "vehiculo.anio": () => {
+      if (value.trim() === "") return "Año modelo obligatorio";
+
       const y = parseInt(value);
+      if (y === 0) return "Año modelo debe tener un valor válido";
       const current = new Date().getFullYear();
       const nextyear = current + 1;
 
       if (y < 1950 || y > nextyear)
         return `Año modelo debe ser entre 1950 y ${nextyear}.`;
+
+      return null;
+    },
+
+    "vehiculo.placas": () => {
+      if (value.trim() === "") return "Placas obligatorias";
 
       return null;
     },
@@ -2424,6 +2466,7 @@ const cargarInfoCotizacion = async () => {
 
   // console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
+  cotizSelec.value = 'C' + data.prefijo + '-' + data.consecutivoSucursal + ' (' + formatearFechaSinHora(data.fechaCreacion) + ')';
 
   //cliente
   ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;

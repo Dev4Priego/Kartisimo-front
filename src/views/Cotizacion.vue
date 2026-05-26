@@ -388,7 +388,7 @@
                   <!-- Paquetes -->
                   <tr
                     v-for="(paquete, index) in vistaCotizacion.paquetes"
-                    :key="'paq-' + index"
+                    :key="'paq-' + index" class="tr-servicios"
                   >
                     <td class="text-center">1</td>
                     <td>
@@ -449,7 +449,7 @@
                     v-for="(
                       servicio, i
                     ) in vistaCotizacion.serviciosAdicionales"
-                    :key="'serv-' + i"
+                    :key="'serv-' + i" class="tr-servicios"
                   >
                     <td class="text-center">{{ servicio.cantidad }}</td>
                     <td>
@@ -555,7 +555,7 @@
             </div>
 
             <div class="d-flex w-100 mt-3 justify-content-end">
-              <span class="nota-iva">Todos los precios incluyen IVA.</span>
+              <span class="nota-iva">Los precios incluyen IVA.</span>
             </div>
 
             <div class="row no-imprimir">
@@ -2356,11 +2356,11 @@ const telefonoFormateado = computed({
     let formateado = "";
 
     if (base.length > 6) {
-      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2 $3");
+      formateado = base.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
     } else if (base.length > 3) {
-      formateado = base.replace(/(\d{3})(\d{0,3})/, "($1) $2");
+      formateado = base.replace(/(\d{3})(\d{0,3})/, "$1 $2");
     } else if (base.length > 0) {
-      formateado = base.replace(/(\d{0,3})/, "($1");
+      formateado = base.replace(/(\d{0,3})/, "$1");
     }
 
     //return ext ? `${formateado} ext ${ext}` : formateado;
@@ -2391,7 +2391,7 @@ const telefonoVistaFormateado = computed(() => {
 
 const telefonoEsValido = computed(() => {
   const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
-  return cotizacionForm.clienteTelefono === "" || soloNumeros.length >= 10;
+  return cotizacionForm.clienteTelefono === "" || soloNumeros.length == 10;
 });
 
 const correoEsValido = computed(() => {
@@ -4878,6 +4878,7 @@ const generarPDF = async () => {
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
+    pageSize: 'LETTER',
     content: [
       // Logo y encabezado
       {
@@ -4899,39 +4900,43 @@ const generarPDF = async () => {
               text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
               fontSize: 9,
+              lineHeight: 1.2
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8 },
-            { text: "Tels. 477 330 6060 y\n477 390 5090", fontSize: 8 },
-            { text: "delta@kartisimo.mx", fontSize: 8 },
+            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8, lineHeight: 1.2 },
+            { text: "Tel. 477 330 6060 y\n477 390 5090", fontSize: 8, lineHeight: 1.2 },
+            { text: "delta@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
             {
               text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
               fontSize: 9,
+              lineHeight: 1.2
             },
-            { text: "Col. Obrera C.P. 37340", fontSize: 8 },
-            { text: "Tels. 477 717 7440 y\n477 470 9419", fontSize: 8 },
-            { text: "apolo@kartisimo.mx", fontSize: 8 },
+            { text: "Col. Obrera C.P. 37340", fontSize: 8, lineHeight: 1.2 },
+            { text: "Tel. 477 717 7440 y\n477 470 9419", fontSize: 8, lineHeight: 1.2 },
+            { text: "apolo@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
             {
               text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
               fontSize: 9,
+              lineHeight: 1.2
             },
-            { text: "Col. La Piscina C.P. 37440", fontSize: 8 },
-            { text: "Tels. 477 390 0290 y\n477 461 0028", fontSize: 8 },
-            { text: "torreslanda@kartisimo.mx", fontSize: 8 },
+            { text: "Col. La Piscina C.P. 37440", fontSize: 8, lineHeight: 1.2 },
+            { text: "Tel. 477 390 0290 y\n477 461 0028", fontSize: 8, lineHeight: 1.2 },
+            { text: "torreslanda@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
             {
               text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián",
               bold: true,
               fontSize: 9,
+              lineHeight: 1.2
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 8 },
-            { text: "Tels. 477 763 3285 y\n477 763 3284", fontSize: 8 },
+            { text: "Col. La Martinica, C.P. 37500", fontSize: 8, lineHeight: 1.2 },
+            { text: "Tel. 477 763 3285 y\n477 763 3284", fontSize: 8, lineHeight: 1.2 },
           ],
         ],
         columnGap: 15,
@@ -5053,7 +5058,7 @@ const generarPDF = async () => {
               },
             ],
             ...llantasRows,
-            separador("SERVICIOS"),
+            separador("SERVICIO"),
             ...paquetesRows,
             ...serviciosRows,
           ],
@@ -5081,12 +5086,14 @@ const generarPDF = async () => {
         margin: [0, 14, 0, 0],
       },
     ],
+    
     styles: {
       tableHeaderBorder: {
         bold: true,
         fontSize: 10,
         border: [true, true, true, true],
         alignment: "center",
+        margin: [0, 1, 0, 1],
       },
       promoLabel: {
         fontSize: 8,
@@ -5175,25 +5182,35 @@ const generarPDF = async () => {
     border-collapse: collapse;
     table-layout: fixed;
     margin-top: 20px;
+    border-width: 0px;
+  }
+
+  #area-imprimir .table-bordered tr {
+    border-width: 0px;
+    border-style: none;
   }
 
   /* HEADER */
-  #area-imprimir thead th {
-    background: #000000;
+  #area-imprimir .table-light th {
+    background: #ededed;
     font-weight: bold;
     font-size: 10pt;
     padding: 6px 4px;
 
-    border-top: 2px solid #000;
-    border-bottom: 2px solid #000;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
   }
 
   #area-imprimir .cotizacion-header-cliente {
     font-size: 10pt;
+    border-width: 0px;
+    background-color: transparent;
+    margin: 0px;
+    padding: 0px;
   }
 
   #area-imprimir .cotizacion-header {
-    border: 0px;
+    border-width: 0px;
     border-radius: 0;
     padding: 0;
   }
@@ -5204,10 +5221,15 @@ const generarPDF = async () => {
 
   /* FILAS */
   #area-imprimir tbody td {
-    padding: 6px 4px;
+    padding: 8px 4px;
     font-size: 9pt;
 
     border: none;
+    border-top: 1px solid #000;
+    
+  }
+
+  #area-imprimir .tr-servicios td {
     border-bottom: 1px solid #000;
   }
 
@@ -5216,7 +5238,6 @@ const generarPDF = async () => {
   #area-imprimir td {
     border-left: none !important;
     border-right: none !important;
-    background-color: grey !important;
   }
 
   /* 🔥 separador tipo SERVICIOS */

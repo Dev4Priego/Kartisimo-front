@@ -127,12 +127,11 @@ hr {
 /* 🔹 INFO CLIENTE */
 .info-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 15% 40% 45%;
   gap: 6px 20px;
   font-size: 12px;
   margin-bottom: 10px;
-  border-top: 1px solid #000;
-  padding-top: 8px;
+  padding-top: 1px;
 }
 
 /* 🔹 TABLA */
@@ -271,7 +270,6 @@ tbody tr:last-child td {
 		<div class="info-grid">
 
   <div>
-    <strong>No. Cotización:</strong> 
     C${props.cotizacion?.codigo }
   </div>
 
@@ -289,7 +287,7 @@ tbody tr:last-child td {
   </div>
 
   <div>
-    <strong>Teléfono(s):</strong> 
+    <strong>Teléfono:</strong> 
     ${formatearTelefono(props.cotizacion?.cliente?.telefono) || 'N/A'}
   </div>
 

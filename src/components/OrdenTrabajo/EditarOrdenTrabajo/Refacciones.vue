@@ -54,6 +54,8 @@
               v-model="refaccionForm.id_proveedor"
               class="form-select"
               placeholder="Selecciona el proveedor"
+              @blur="validate('id_proveedor',1)"
+                :class="{ 'input-error': errores['id_proveedor'] }"
              >
              <option disabled :value="null">-Selecciona-</option>
              <option
@@ -64,6 +66,9 @@
                 {{ itm.nombreproveedor }}
               </option>
             </select>
+            <small v-if="errores['id_proveedor']" class="error-msg">
+                {{ errores["id_proveedor"] }}
+              </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -77,8 +82,14 @@
               v-model="refaccionForm.refaccion" 
               class="form-control" 
               rows="2"
+              @input="validate('refaccion',1)"
+              @blur="validate('refaccion',1)"
+              :class="{ 'input-error': errores['refaccion'] }"
               maxlength="500">
             </textarea>
+            <small v-if="errores['refaccion']" class="error-msg">
+                {{ errores["refaccion"] }}
+              </small>
           </div>
           <div class="col-md-4">
             <label for="montoRefaccion" class="form-label">
@@ -93,7 +104,13 @@
               min="0"
               class="form-control"
               placeholder="0.00"
+              @input="validate('monto',1)"
+              @blur="validate('monto',1)"
+              :class="{ 'input-error': errores['monto'] }"
             />
+            <small v-if="errores['monto']" class="error-msg">
+                {{ errores["monto"] }}
+              </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -109,17 +126,35 @@
               type="text"
               class="form-control"
               maxlength="50"
+              @input="validate('numero_factura',1)"
+              @blur="validate('numero_factura',1)"
+              :class="{ 'input-error': errores['numero_factura'] }"
               placeholder="Ej. F-45879"
             />
+            <small v-if="errores['numero_factura']" class="error-msg">
+                {{ errores["numero_factura"] }}
+              </small>
           </div>
         </div>
-
+        <div v-if="formValida" class="row my-3">
+          <div class="col text-end">
+            <div class="error-msg d-flex justify-content-end mb-2">
+              <table>
+                <tbody>
+                  <tr v-for="valor in listaErrores" :key="valor">
+                    <td>{{ valor }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         <div class="col-12 my-2">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-sm btn-secondary shadow-sm me-3" @click="modalRefacciones = false">
                     <i class="bi bi-x-circle-fill me-2"></i> Cerrar
                 </button>
-                <button class="btn btn-sm btn-primary shadow-sm" @click="guardarRefaccion()" :disabled="refaccionForm.id_proveedor === null">
+                <button class="btn btn-sm btn-primary shadow-sm" @click="validar_formulario_nueva()">
                     <i class="bi bi-save-fill me-2"></i> Guardar
                 </button>
             </div>
@@ -159,6 +194,8 @@
               v-model="editarRefaccionForm.id_proveedor"
               class="form-select"
               placeholder="Selecciona el proveedor"
+               @blur="validate('id_proveedor',2)"
+                :class="{ 'input-error': errores['id_proveedor'] }"
              >
              <option
                 v-for="itm in proveedores"
@@ -168,6 +205,9 @@
                 {{ itm.nombreproveedor }}
               </option>
             </select>
+            <small v-if="errores['id_proveedor']" class="error-msg">
+                {{ errores["id_proveedor"] }}
+              </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -181,8 +221,14 @@
               v-model="editarRefaccionForm.refaccion" 
               class="form-control" 
               rows="2"
+              @input="validate('refaccion',2)"
+              @blur="validate('refaccion',2)"
+              :class="{ 'input-error': errores['refaccion'] }"
               maxlength="500">
             </textarea>
+            <small v-if="errores['refaccion']" class="error-msg">
+              {{ errores["refaccion"] }}
+            </small>
           </div>
           <div class="col-md-4">
             <label for="montoRefaccion" class="form-label">
@@ -197,7 +243,13 @@
               min="0"
               class="form-control"
               placeholder="0.00"
+              @input="validate('monto',2)"
+              @blur="validate('monto',2)"
+              :class="{ 'input-error': errores['monto'] }"
             />
+            <small v-if="errores['monto']" class="error-msg">
+                {{ errores["monto"] }}
+              </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -213,17 +265,35 @@
               type="text"
               class="form-control"
               maxlength="50"
+              @input="validate('nota_factura',2)"
+              @blur="validate('nota_factura',2)"
+              :class="{ 'input-error': errores['nota_factura'] }"
               placeholder="Ej. F-45879"
             />
+            <small v-if="errores['nota_factura']" class="error-msg">
+                {{ errores["nota_factura"] }}
+              </small>
           </div>
         </div>
-
+        <div v-if="formValida" class="row my-3">
+          <div class="col text-end">
+            <div class="error-msg d-flex justify-content-end mb-2">
+              <table>
+                <tbody>
+                  <tr v-for="valor in listaErrores" :key="valor">
+                    <td>{{ valor }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
         <div class="col-12 my-2">
             <div class="d-flex justify-content-end">
                 <button class="btn btn-sm btn-secondary shadow-sm me-3" @click="modalEditarRefacciones = false">
                     <i class="bi bi-x-circle-fill me-2"></i> Cerrar
                 </button>
-                <button class="btn btn-sm btn-primary shadow-sm" @click="editarRefaccionOT()">
+                <button class="btn btn-sm btn-primary shadow-sm" @click="validar_formulario_editar()">
                     <i class="bi bi-save-fill me-2"></i> Guardar
                 </button>
             </div>
@@ -346,8 +416,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, getCurrentInstance, watch } from 'vue';
-import { Modal } from 'bootstrap';
+import { onMounted, ref, getCurrentInstance, reactive, computed } from 'vue';
 import axios from 'axios';
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
@@ -457,6 +526,97 @@ const cambiarPagina = (page) => {
   cargarProveedores()
 }
 
+const errores = reactive({});
+const formValida = ref(false);
+
+const listaErrores = computed(() => Object.values(errores));
+
+const getValor = (path, tipo) => {
+  const origen =
+    tipo == 1
+      ? refaccionForm.value
+      : editarRefaccionForm.value;
+
+  return path.split(".").reduce((obj, key) => obj?.[key], origen);
+};
+
+function validate(path, tipo) {
+  formValida.value = false;
+  const value = (getValor(path, tipo) ?? "").toString();
+
+  const rules = {
+    
+    "id_proveedor": () => 
+      !value.trim() ? "Debe seleccionar un proveedor." : null,
+
+    "refaccion": () =>
+      !value.trim() ? "Se requiere la descripción de la refacción." : null,
+
+    "numero_factura": () => 
+      !value.trim() && tipo == 1 ? "Número de factura obligatorio." : null,
+
+    "nota_factura": () => 
+    !value.trim() && tipo == 2 ? "Número de factura obligatorio." : null,
+
+    "monto": () => {
+      if (value === "") return "Monto obligatorio.";
+
+      const num = Number(value);
+
+      if (isNaN(num)) return "El monto debe ser un número.";
+      if (num < 0) return "El monto debe ser igual o mayor a cero.";
+      return null;
+    },
+
+  };
+
+  const error = rules[path] ? rules[path]() : null;
+
+  if (error) errores[path] = error;
+  else delete errores[path];
+}
+
+function validar_formulario_nueva() {
+  validaciones(1);
+  formValida.value = Object.keys(errores).length > 0;
+  if (!formValida.value) {
+    console.log("Guardar: ");
+    guardarRefaccion();
+  }
+}
+
+function validar_formulario_editar() {
+  validaciones(2);
+  formValida.value = Object.keys(errores).length > 0;
+  if (!formValida.value) {
+    console.log("Guardar: ");
+    editarRefaccionOT();
+  }
+}
+
+function validaciones(tipo) {
+  const campos = [
+    "id_proveedor",
+    "refaccion",
+    "monto",
+    "numero_factura",
+    "nota_factura"
+  ];
+
+  // limpiar errores
+  Object.keys(errores).forEach((k) => delete errores[k]);
+
+  campos.forEach((campo) => {
+    const origen =
+    tipo == 1
+      ? refaccionForm.value
+      : editarRefaccionForm.value;
+    const valor = campo.split(".").reduce((o, k) => o?.[k], origen);
+    console.log(` Campo: ${campo} →`, valor);
+    validate(campo, tipo);
+  });
+  return true;
+}
 
 onMounted(() => {
   if (props.otId) {
@@ -507,8 +667,11 @@ const agregarRefaccion = () => {
   const ahora = new Date();
   refaccionForm.value.fecha = ahora.toISOString().slice(0, 10); // YYYY-MM-DD
   refaccionForm.value.hora = ahora.toTimeString().slice(0, 5);
+  refaccionForm.value.id_proveedor = null;
   refaccionForm.value.refaccion = "";
-  refaccionForm.monto = parseFloat(refaccionForm.monto).toFixed(2)
+  refaccionForm.value.monto = 0.0;
+  refaccionForm.value.numero_factura = '';
+  Object.keys(errores).forEach((k) => delete errores[k]);
   modalEditarRefacciones.value = false;
   modalRefacciones.value = !modalRefacciones.value;
 }
@@ -553,6 +716,7 @@ const getEditarRefaccionOT = (ot) => {
   editarRefaccionForm.value.refaccion = ot.refaccion;
   editarRefaccionForm.value.monto = ot.monto_refaccion;
   editarRefaccionForm.value.nota_factura = ot.nota_Factura;
+  Object.keys(errores).forEach((k) => delete errores[k]);
   modalRefacciones.value = false;
   modalEditarRefacciones.value = !modalEditarRefacciones.value
 };
@@ -600,3 +764,12 @@ const limpiarFormulario = () => {
   refaccionForm.value = { fecha: '', hora: '', refaccion: '', monto: 0, id_proveedor: null, numero_factura: ''};
 }
 </script>
+
+<style>
+
+.error-msg {
+  color: red;
+  font-size: 12px;
+}
+
+</style>
