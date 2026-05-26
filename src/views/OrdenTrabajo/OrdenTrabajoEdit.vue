@@ -92,11 +92,20 @@
                       }}
                     </td>
                   </tr>
+                  <tr>
+                    <td style="font-weight: bold; color: grey">Observacion:</td>
+                    <td>
+                      {{
+                        otEditar?.observacion
+                      }}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
+        
       </div>
       <h5>Estatus de la OT</h5>
       <div class="row my-3">
@@ -670,6 +679,7 @@ const cargarOrden = async () => {
       consecutivoSucursal: json.consecutivoSucursal,
       consecutivoCotizacion: json.consecutivoCotizacion,
       prefijoCotizacion: json.prefijoCotizacion,
+      observacion:json?.observacion,
 
       cliente: json.cliente || {},
       empleado: json.empleado || {},
