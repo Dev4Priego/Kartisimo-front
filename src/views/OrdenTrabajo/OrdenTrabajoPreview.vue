@@ -108,6 +108,10 @@
           <span class="fw-semibold">Correo:</span>
           {{ orden?.cliente?.correo || '—' }}
         </div>
+		<div class="mb-1">
+          <span class="fw-semibold">Observacion:</span>
+          {{ orden?.observacion || '—' }}
+        </div>
       </div>
 
     </div>

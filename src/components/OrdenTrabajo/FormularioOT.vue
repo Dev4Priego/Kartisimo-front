@@ -18,8 +18,8 @@
                 <i class="bi bi-person me-2"></i><strong>Usuario: </strong
                 >{{ loggeduser.usuario.nombre }}<br />
                 <i class="bi bi-envelope me-2"></i>
-                  <strong>Correo: </strong>{{ loggeduser.usuario.correo || "Sin correo"
-                  }}<br />
+                <strong>Correo: </strong
+                >{{ loggeduser.usuario.correo || "Sin correo" }}<br />
                 <i class="bi bi-building-fill me-2"></i>
                 <strong>Sucursal: </strong
                 >{{ sucursales[loggeduser.usuario.idSucursal - 1] }}
@@ -41,10 +41,13 @@
         </div>
         <div class="col-4"></div>
         <div class="col-8 mt-2">
-          <b>Cotización:</b> <em>{{ ordenTrabajoForm.cotSeleccionada ? cotizSelec : "(Ninguna)" }}</em>
+          <b>Cotización:</b>
+          <em>{{
+            ordenTrabajoForm.cotSeleccionada ? cotizSelec : "(Ninguna)"
+          }}</em>
         </div>
       </div>
-      
+
       <hr />
 
       <div class="row mb-4 align-items-stretch">
@@ -151,7 +154,7 @@
                     @input="validate('vehiculo.kilometraje')"
                     @blur="validate('vehiculo.kilometraje')"
                     :class="{ 'input-error': errores['vehiculo.kilometraje'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['vehiculo.kilometraje']"
@@ -189,7 +192,7 @@
                     @input="validate('vehiculo.placas')"
                     @blur="validate('vehiculo.placas')"
                     :class="{ 'input-error': errores['vehiculo.placas'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small v-if="errores['vehiculo.placas']" class="error-msg">
                     {{ errores["vehiculo.placas"] }}
@@ -224,7 +227,7 @@
                     "
                     @blur="validate('cliente.nombres')"
                     :class="{ 'input-error': errores['cliente.nombres'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.nombres']" class="error-msg">
                     {{ errores["cliente.nombres"] }}
@@ -245,7 +248,7 @@
                     @input="validate('cliente.apellidos')"
                     @blur="validate('cliente.apellidos')"
                     :class="{ 'input-error': errores['cliente.apellidos'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.apellidos']" class="error-msg">
                     {{ errores["cliente.apellidos"] }}
@@ -268,7 +271,7 @@
                     :class="{
                       'input-error': errores['cliente.clienteTelefono'],
                     }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['cliente.clienteTelefono']"
@@ -293,7 +296,7 @@
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.clienteCorreo')"
                     :class="{ 'input-error': errores['cliente.clienteCorreo'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small
                     v-if="errores['cliente.clienteCorreo']"
@@ -321,7 +324,7 @@
                     @change="onClienteSeleccionadoByValue($event.target.value)"
                     @blur="validate('cliente.rfc')"
                     :class="{ 'input-error': errores['cliente.rfc'] }"
-                    :readonly=" readOnlyOTderivada"
+                    :readonly="readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.rfc']" class="error-msg">
                     {{ errores["cliente.rfc"] }}
@@ -640,7 +643,7 @@
             v-model="aplicaDesecharLlanta"
           />
           <label class="form-check-label me-4" for="aplicaDesechar">
-              N/A
+            N/A
           </label>
           Si
           <input
@@ -961,6 +964,21 @@
               @update:insumos="actualizarInsumos"
             />
           </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-4">
+          <h5>Observaciones</h5>
+        </div>
+        <div class="col-8">
+          <textarea
+            id="ObservacionCliente"
+            class="form-control mb-2"
+            v-model="ordenTrabajoForm.observacion"
+            rows="2"
+            maxlength="auto"
+            placeholder="Observaciones de la orden de trabajo"
+          ></textarea>
         </div>
       </div>
       <div v-if="formValida" class="row my-3">
@@ -1419,7 +1437,7 @@ const sucursales = [
   "Martinica",
 ];
 
-const cotizSelec = ref('');
+const cotizSelec = ref("");
 const props = defineProps({
   idCotizacion: {
     type: [String, Number],
@@ -1473,7 +1491,10 @@ const formatearFechaSinHora = (fecha) => {
 
 const telefonoFormateado = computed({
   get() {
-    const soloNumeros = ordenTrabajoForm.cliente.clienteTelefono.replace(/\D/g, "");
+    const soloNumeros = ordenTrabajoForm.cliente.clienteTelefono.replace(
+      /\D/g,
+      "",
+    );
 
     const base = soloNumeros.slice(0, 10); // teléfono principal
     //const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
@@ -1778,6 +1799,7 @@ const ordenTrabajoForm = reactive({
   fechaEntrega: "",
   esHija: 0,
   idOtPAdre: 0,
+  observacion:"",
   cliente: {
     id_cliente: 0,
     nombres: "",
@@ -2264,8 +2286,8 @@ const guardarOT = async () => {
     if (!esValido) return;
 
     console.log(" Formulario válido");
-    
-    if(aplicaDesecharLlanta.value) {
+
+    if (aplicaDesecharLlanta.value) {
       desechar = null;
     } else {
       desechar = boolDesecharLlanta.value;
@@ -2318,6 +2340,7 @@ const guardarOT = async () => {
       requiereFactura: boolFactura.value,
       desecharLlanta: desechar,
       descripcion: "",
+      observacion:ordenTrabajoForm.observacion,
       estado: "Creado",
       cliente: {
         idCliente: ordenTrabajoForm.cliente.id_cliente,
@@ -2466,7 +2489,14 @@ const cargarInfoCotizacion = async () => {
 
   // console.log(JSON.stringify(data))
   ordenTrabajoForm.cotSeleccionada = data.idCotizacion || 0;
-  cotizSelec.value = 'C' + data.prefijo + '-' + data.consecutivoSucursal + ' (' + formatearFechaSinHora(data.fechaCreacion) + ')';
+  cotizSelec.value =
+    "C" +
+    data.prefijo +
+    "-" +
+    data.consecutivoSucursal +
+    " (" +
+    formatearFechaSinHora(data.fechaCreacion) +
+    ")";
 
   //cliente
   ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;
