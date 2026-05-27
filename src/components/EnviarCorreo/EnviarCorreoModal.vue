@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import { getCurrentInstance, ref, defineProps } from 'vue'
+import { getCurrentInstance } from 'vue'
 import Swal from 'sweetalert2'
 import html2pdf from 'html2pdf.js'; 
 
@@ -27,19 +27,18 @@ const abrirModal = async () => {
 
 	// console.log('llanta ' + JSON.stringify(props.cotizacion.llantasSelecionadas[1].medidas))
 
-	const texto = props.cotizacion?.llantasSelecionadas[0]?.medidas || "";
-
-	const match = texto.match(/\d{3}\/\d{2}\s*r?\d{2}/i);
-
-	const medida = match ? match[0].toUpperCase() : null || "";
-
-	const correo = props.cotizacion.cliente.correo ;
-	console.log(correo);
-
 	if (!props.cotizacion) {
 		Swal.fire('Error', 'No hay cotización cargada.', 'error')
 		return
 	}
+
+	const texto = props.cotizacion?.llantasSelecionadas?.[0]?.medidas || "";
+
+	const match = texto.match(/\d{3}\/\d{2}\s*r?\d{2}/i);
+
+	const medida = match ? match[0].toUpperCase() : "";
+
+	const correo = props.cotizacion?.cliente?.correo || "";
 
 	const { value: formValues } = await Swal.fire({
 		title: '<h3>Enviar cotización por correo</h3>',
@@ -71,15 +70,34 @@ const abrirModal = async () => {
 	})
 
 	if (formValues) {
-		await generarPDFyEnviar(formValues)
+		mostrarConfirmacionEnvio()
+		enviarCorreoEnSegundoPlano(formValues)
 	}
 }
 
 
-const generarPDFyEnviar = async ({ email, subj, msg }) => {
-	try {
+const mostrarConfirmacionEnvio = () => {
+	Swal.fire({
+		icon: 'success',
+		title: 'Correo enviado exitosamente',
+		text: 'El correo ha sido enviado exitosamente.',
+		confirmButtonText: 'OK'
+	})
+}
 
-		Swal.fire({ title: 'PDF Generado y enviado '})
+const enviarCorreoEnSegundoPlano = (formValues) => {
+	generarPDFyEnviar(formValues).catch((error) => {
+		console.error(error)
+		Swal.fire('Error', error.message || 'No se pudo enviar el correo.', 'error')
+	})
+}
+
+
+const generarPDFyEnviar = async ({ email, subj, msg }) => {
+	const llantas = props.cotizacion?.llantasSelecionadas || []
+	const paquetes = props.cotizacion?.paquetes || []
+	const serviciosAdicionales = props.cotizacion?.serviciosAdicionales || []
+	const datosUsuarioPromise = obtenerDatosUsuarioCorreo()
 
 		// Crear un contenedor temporal para el PDF
 		const pdfContent = document.createElement('div')
@@ -318,7 +336,7 @@ tbody tr:last-child td {
 			</thead>
 			<tbody>
 
-				${props.cotizacion.llantasSelecionadas.map(l => `
+				${llantas.map(l => `
 				<tr>
 				<td class="center">${l.cantidad}</td>
 				<td>${l.medidas}</td>
@@ -342,7 +360,7 @@ tbody tr:last-child td {
 
 				<!-- 🔹 SEPARADOR -->
 				${
-				(props.cotizacion.paquetes.length || props.cotizacion.serviciosAdicionales.length)
+				(paquetes.length || serviciosAdicionales.length)
 				? `
 					<tr>
 					<td class="separador center">CANT</td>
@@ -375,7 +393,7 @@ tbody tr:last-child td {
 
 				
 
-				${props.cotizacion.paquetes.map(p => `
+				${paquetes.map(p => `
 				<tr>
 				<td class="center">1</td>
 				<td>${p.nombre.toUpperCase()}, ${p.descripcion.toUpperCase()}</td>
@@ -393,7 +411,7 @@ tbody tr:last-child td {
 				</tr>
 				`).join('')}
 
-				${props.cotizacion.serviciosAdicionales.map(s => `
+				${serviciosAdicionales.map(s => `
 				<tr>
 				<td class="center">${s.cantidad}</td>
 				<td>${s.nombreServicio.toUpperCase()}</td>
@@ -436,17 +454,18 @@ tbody tr:last-child td {
 						const opt = {
 							margin: 10,
 							filename: `${props.cotizacion.codigo}.pdf`,
-							html2canvas: { scale: 2 },
-							jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+							image: { type: 'jpeg', quality: 0.92 },
+							html2canvas: { scale: 1.5, useCORS: true },
+							jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
 						}
 
-		const pdfBlob = await html2pdf().set(opt).from(pdfContent).outputPdf('blob')
+		const [pdfBlob, datos] = await Promise.all([
+			html2pdf().set(opt).from(pdfContent).outputPdf('blob'),
+			datosUsuarioPromise
+		])
 		const pdfBase64 = await blobToBase64(pdfBlob)
 
 		// Enviar correo
-		const datoscorreo = await fetch(`${proxy.$serverIP}api/Usuario/${raw.usuario.idUsuario}`);
-		let datos = await datoscorreo.json();
-		//console.log(JSON.stringify(datos));
 		const response = await fetch(`${proxy.$serverIP}api/Email/enviar`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
@@ -462,19 +481,28 @@ tbody tr:last-child td {
 			})
 		})
 
-		Swal.close()
-		
 		if (response.ok) {
           console.log('Correo enviado exitosamente');
-
 		} else {
-			Swal.fire(' Error', 'No se pudo enviar el correo.', 'error')
-			let data = await response.json()
+			let data = null
+			try {
+				data = await response.json()
+			} catch {
+				data = null
+			}
 			console.log(JSON.stringify(data))
+			throw new Error(data?.message || data?.mensaje || 'No se pudo enviar el correo.')
 		}
-	} catch (error) {
-		Swal.fire('Error', error.message, 'error')
+}
+
+const obtenerDatosUsuarioCorreo = async () => {
+	const response = await fetch(`${proxy.$serverIP}api/Usuario/${raw.usuario.idUsuario}`)
+
+	if (!response.ok) {
+		throw new Error('No se pudieron obtener los datos del usuario para enviar el correo.')
 	}
+
+	return response.json()
 }
 
 const renderTotalConPromo = ({
@@ -485,24 +513,11 @@ const renderTotalConPromo = ({
 }) => {
   const totalOriginal = precioUnitario * cantidad
 
-  // 🔍 DEBUG
-  console.log('--- renderTotalConPromo ---')
-  console.log('precioUnitario:', precioUnitario)
-  console.log('cantidad:', cantidad)
-  console.log('total recibido:', total)
-  console.log('promoLabel:', promoLabel)
-
   const totalFinal = (typeof total === 'number' && !isNaN(total))
     ? total
     : totalOriginal
 
-  console.log('totalOriginal:', totalOriginal)
-  console.log('totalFinal:', totalFinal)
-
   const tienePromo = promoLabel && totalFinal < totalOriginal
-
-  console.log('tienePromo:', tienePromo)
-  console.log('--------------------------')
 
   return `
     <div style="text-align:right; line-height:1.2;">

@@ -11,7 +11,7 @@
 						Orden de Trabajo O{{ orden?.prefijoSucursal }}-{{ orden?.consecutivoSucursal }}
 					</h5>
 					<div class="row">
-						<div class="col-7">
+						<div class="col-6">
 							<div class="text-muted small">
 								<i class="bi bi-person me-1"></i>
 								{{ orden?.cliente?.nombreCompleto }}
@@ -22,7 +22,7 @@
 								Técnico: {{ orden?.empleado?.nombreCompleto }}
 							</div>
 						</div>
-						<div class="col-5">
+						<div class="col-6">
 							<div class="text-muted small">
 								<i class="bi bi-cash me-1"></i>
 								Forma de pago: {{ orden?.metodoPago }}
@@ -41,8 +41,8 @@
 					</div>
 				</div>
 
-				<span class="badge px-3 py-2 fs-6" :class="estadoClass">
-				{{ orden?.estado }}
+				<span class="badge px-3 py-2 fs-6 ms-2" :class="estadoClass">
+				{{ orden?.estatus == 0 ? 'Cancelada' : orden?.estado }}
 				</span>
 			</div>
 		</div>
@@ -534,18 +534,22 @@ const imprimir = () => {
 }
 
 const estadoClass = computed(() => {
-	switch (orden.value?.estado) {
+	if (orden.value?.estatus == 0) {
+		return "bg-danger";
+	} else {
+		switch (orden.value?.estado) {
 
-		case "Creado":
-			return "bg-secondary";
-		case "En Proceso":
-			return "bg-warning text-dark";
-		case "Finalizado":
-			return "bg-success";
-		case "Cancelado":
-			return "bg-danger";
-		default:
-			return "bg-light text-dark";
+			case "Creado":
+				return "bg-secondary";
+			case "En Proceso":
+				return "bg-warning text-dark";
+			case "Finalizado":
+				return "bg-success";
+			case "Cancelado":
+				return "bg-danger";
+			default:
+				return "bg-light text-dark";
+		}
 	}
 });
 

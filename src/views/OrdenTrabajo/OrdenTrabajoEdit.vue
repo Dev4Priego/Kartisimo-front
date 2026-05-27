@@ -148,16 +148,12 @@
         <div class="col-12 d-flex justify-content-end mt-3">
           <button
             class="btn btn-danger btn-sm shadow-sm"
-            @click="cambiarEstatusOT(0)"
+            @click="preguntaCancelar('O'+ otEditar.prefijoSucursal + '-' + otEditar.consecutivoSucursal)"
             :disabled="otEditar.estatus == 0"
           >
             <i class="bi bi-x-circle-fill me-3"></i>Cancelar OT
           </button>
 
-          <!-- <button class="btn btn-warning btn-sm shadow-sm ms-2" @click="cambiarEstatusOT(2)"
-            :disabled="otEditar.estatus == 0">
-            <i class="bi bi-stop-circle-fill me-3"></i>Suspender OT 
-          </button> -->
           <button
             class="btn btn-sm shadow-sm ms-2"
             :class="otEditar.estatus == 2 ? 'btn-success' : 'btn-warning'"
@@ -544,6 +540,7 @@ import {
   watch,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
+import Swal from 'sweetalert2';
 import OrdenTrabajoProgress from "@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue";
 import LlantasSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue";
 import PaquetesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue";
@@ -656,6 +653,21 @@ const obtenerPromosGeneralesParaServicio = async () => {
     );
     return [];
   }
+};
+
+const preguntaCancelar = async (ot) => {
+  await Swal.fire({
+		title: 'Cancelar orden de trabajo',
+		text: '¿Desea cancelar la orden de trabajo ' + ot + '? Esta acción no se puede deshacer.',
+		icon: 'warning',
+		confirmButtonText: 'Sí, cancelar la OT',
+		showCancelButton: true,
+		cancelButtonText: 'No, volver'
+	}).then((result) => {
+    if (result.isConfirmed) {
+      cambiarEstatusOT(0);
+    }
+  })
 };
 
 const cargarOrden = async () => {

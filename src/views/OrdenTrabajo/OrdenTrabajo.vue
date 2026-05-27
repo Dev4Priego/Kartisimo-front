@@ -87,8 +87,8 @@
 
               <!-- ESTADO -->
               <td>
-                <span :class="badgeEstado(ot.estado)">
-                  {{ ot.estado }}
+                <span :class="ot.vigente == 0 ? 'badge bg-danger' : badgeEstado(ot.estado)">
+                  {{ ot.vigente == 0 ? 'Cancelada' : ot.estado }}
                 </span>
               </td>
 
@@ -227,7 +227,8 @@ const colorTotal = (k) =>
   ({
     finalizado: "border-success text-success",
     enCurso: "border-primary text-primary",
-    creado: "border-danger text-danger",
+    creado: "border-warning text-warning",
+    cancelado: "border-danger text-danger",
   }[k]);
 
 const nombreTotal = (k) =>
@@ -235,6 +236,7 @@ const nombreTotal = (k) =>
     finalizado: "Completadas",
     enCurso: "En curso",
     creado: "Pendientes",
+    cancelado: "Canceladas"
   }[k]);
 
 onMounted(cargarOrdenTrabajo);
