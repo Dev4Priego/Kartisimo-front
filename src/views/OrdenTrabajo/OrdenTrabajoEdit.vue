@@ -92,20 +92,11 @@
                       }}
                     </td>
                   </tr>
-                  <tr>
-                    <td style="font-weight: bold; color: grey">Observacion:</td>
-                    <td>
-                      {{
-                        otEditar?.observacion
-                      }}
-                    </td>
-                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
         </div>
-        
       </div>
       <h5>Estatus de la OT</h5>
       <div class="row my-3">
@@ -148,7 +139,14 @@
         <div class="col-12 d-flex justify-content-end mt-3">
           <button
             class="btn btn-danger btn-sm shadow-sm"
-            @click="preguntaCancelar('O'+ otEditar.prefijoSucursal + '-' + otEditar.consecutivoSucursal)"
+            @click="
+              preguntaCancelar(
+                'O' +
+                  otEditar.prefijoSucursal +
+                  '-' +
+                  otEditar.consecutivoSucursal,
+              )
+            "
             :disabled="otEditar.estatus == 0"
           >
             <i class="bi bi-x-circle-fill me-3"></i>Cancelar OT
@@ -185,7 +183,7 @@
             :disabled="insumosCambios"
             @click="PrintOtFunction()"
           >
-          <i class="bi bi-printer-fill me-3"></i>
+            <i class="bi bi-printer-fill me-3"></i>
             Imprimir
           </button>
         </div>
@@ -274,7 +272,7 @@
             v-model="aplicaDesecharLlanta"
           />
           <label class="form-check-label me-4" for="aplicaDesechar">
-              N/A
+            N/A
           </label>
           Si
           <input
@@ -310,7 +308,7 @@
                     class="form-control"
                     type="text"
                     placeholder="(Razón Social a facturar)"
-                    @input = "validate('factura.razonSocial')"
+                    @input="validate('factura.razonSocial')"
                     @blur="validate('factura.razonSocial')"
                     :class="{ 'input-error': errores['factura.razonSocial'] }"
                   />
@@ -437,48 +435,52 @@
       </div>
       <h5>Tareas</h5>
       <div class="text-center m-3">
-            <button
-              class="btn btn-sm btn-primary"
-              title="Agregar"
-              @click="showModal = true"
-              type="button"
-            >
-              <i class="bi bi-plus-circle-fill"></i> &nbsp;Editar insumos
-            </button>
+        <button
+          class="btn btn-sm btn-primary"
+          title="Agregar"
+          @click="showModal = true"
+          type="button"
+        >
+          <i class="bi bi-plus-circle-fill"></i> &nbsp;Editar insumos
+        </button>
 
-            <ModalInsumo
-              v-model="showModal"
-              :insumos="insumosFiltrados"
-              @update:insumos="actualizarInsumos"
-            />
-          </div>
+        <ModalInsumo
+          v-model="showModal"
+          :insumos="insumosFiltrados"
+          @update:insumos="actualizarInsumos"
+        />
+      </div>
       <div v-if="otEditar.insumo?.llantas">
-          <LlantasSection
-            :llantas="otEditar.insumo.llantas"
-            @agregarLlanta="agregarLlanta"
-            @eliminarLlanta="eliminarLlanta"
-            @guardarLLantasOT="guardarLLantasOT"
-          />
-        </div>
+        <LlantasSection
+          :llantas="otEditar.insumo.llantas"
+          @agregarLlanta="agregarLlanta"
+          @eliminarLlanta="eliminarLlanta"
+          @guardarLLantasOT="guardarLLantasOT"
+        />
+      </div>
 
-        <div v-if="otEditar.insumo.paquetes">
-          <PaquetesSection :paquetes="otEditar.insumo.paquetes" />
-        </div>
+      <div v-if="otEditar.insumo.paquetes">
+        <PaquetesSection :paquetes="otEditar.insumo.paquetes" />
+      </div>
 
-        <div v-if="otEditar.insumo?.adicionales">
-          <OtrosSection :adicionales="otEditar.insumo.adicionales" />
-        </div>
-        <!-- Contenedor del total -->
-        <div class="d-flex justify-content-end align-items-center my-3 bg-light p-2 ">
-          <h5 class="mb-0 me-2">Total:</h5>
-          <span class="fw-bold text-success fs-5">
-            {{ otEditar.totales.subtotal.toLocaleString("es-MX", {
+      <div v-if="otEditar.insumo?.adicionales">
+        <OtrosSection :adicionales="otEditar.insumo.adicionales" />
+      </div>
+      <!-- Contenedor del total -->
+      <div
+        class="d-flex justify-content-end align-items-center my-3 bg-light p-2"
+      >
+        <h5 class="mb-0 me-2">Total:</h5>
+        <span class="fw-bold text-success fs-5">
+          {{
+            otEditar.totales.subtotal.toLocaleString("es-MX", {
               style: "currency",
               currency: "MXN",
-            }) }}
-          </span>
-        </div>
-      
+            })
+          }}
+        </span>
+      </div>
+
       <h5>Otros</h5>
       <div class="my-3 gp-2">
         <div class="row">
@@ -496,38 +498,47 @@
             />
           </div>
         </div>
+        <h5>Observacion</h5>
+        <div class="my-3">
+          <div class="row">
+            <div class="col-12 col-lg-12">
+              <textarea
+                id="ObservacionCliente"
+                class="form-control mb-2"
+                v-model="otEditar.observacion"
+                rows="2"
+                maxlength="auto"
+                placeholder="Observaciones de la orden de trabajo"
+              ></textarea>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="border-top py-2 px-3 bg-light d-flex justify-content-between align-items-center">
-  <!-- Total y cantidad en una sola línea -->
-  
-
-  <!-- Botones alineados a la derecha -->
-  <div>
-    <button class="btn btn-secondary mx-2" @click="volver()">
-      <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
-    </button>
-    
-    <button
-      class="btn btn-primary mx-2"
-      :disabled="!formValido"
-      @click="guardarEdicion"
+    <div
+      class="border-top py-2 px-3 bg-light d-flex justify-content-between align-items-center"
     >
-      Guardar cambios
-    </button>
-    
-  </div>
-</div>
+      <!-- Total y cantidad en una sola línea -->
 
+      <!-- Botones alineados a la derecha -->
+      <div>
+        <button class="btn btn-secondary mx-2" @click="volver()">
+          <i class="bi bi-arrow-left-circle-fill me-2"></i>Volver
+        </button>
+
+        <button
+          class="btn btn-primary mx-2"
+          :disabled="!formValido"
+          @click="guardarEdicion"
+        >
+          Guardar cambios
+        </button>
+      </div>
+    </div>
   </div>
- 
-    <ImprimirOT
-    v-model="modelValue"
-    :OT="prepararDatosImpresion()"
-  />
- 
-  
+
+  <ImprimirOT v-model="modelValue" :OT="prepararDatosImpresion()" />
 </template>
 
 <script setup>
@@ -540,7 +551,7 @@ import {
   watch,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import OrdenTrabajoProgress from "@/components/OrdenTrabajo/EditarOrdenTrabajo/OrdenTrabajoProgress.vue";
 import LlantasSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Llantas/LlantasSection.vue";
 import PaquetesSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Paquete/PaquetesSection.vue";
@@ -553,7 +564,7 @@ import { parse } from "vue/compiler-sfc";
 import axios from "axios";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
-import ModalInsumo from '../../components/OrdenTrabajo/ModalInsumo.vue'
+import ModalInsumo from "../../components/OrdenTrabajo/ModalInsumo.vue";
 
 const { proxy } = getCurrentInstance();
 const route = useRoute();
@@ -562,7 +573,7 @@ const router = useRouter();
 const itmEmpleados = ref({});
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
-const modelValue =ref(false);
+const modelValue = ref(false);
 const showModal = ref(false);
 const insumosCambios = ref(false);
 const aplicaDesecharLlanta = ref(false);
@@ -574,18 +585,16 @@ const insumoOriginal = ref([]);
 const data45 = JSON.parse(localStorage.getItem("userSession")); // o el nombre de la key que usaste
 const idUsuarioSession = data45?.usuario?.idUsuario;
 
-
 const otEditar = ref({
   insumo: {
     llantas: [],
     paquetes: [],
     adicionales: [],
   },
-  totales:{
-    subtotal:0,
-    descuento:0,
-    iva:0,
-
+  totales: {
+    subtotal: 0,
+    descuento: 0,
+    iva: 0,
   },
 });
 
@@ -602,7 +611,6 @@ const insumosFiltrados = computed(() => {
     adicional: (insumo.adicionales || []).filter((a) => !a.eliminado),
   };
 });
-
 
 const obtenerPromosPorInventario = async (idInventarioInicial) => {
   try {
@@ -657,26 +665,29 @@ const obtenerPromosGeneralesParaServicio = async () => {
 
 const preguntaCancelar = async (ot) => {
   await Swal.fire({
-		title: 'Cancelar orden de trabajo',
-		text: '¿Desea cancelar la orden de trabajo ' + ot + '? Esta acción no se puede deshacer.',
-		icon: 'warning',
-		confirmButtonText: 'Sí, cancelar la OT',
-		showCancelButton: true,
-		cancelButtonText: 'No, volver'
-	}).then((result) => {
+    title: "Cancelar orden de trabajo",
+    text:
+      "¿Desea cancelar la orden de trabajo " +
+      ot +
+      "? Esta acción no se puede deshacer.",
+    icon: "warning",
+    confirmButtonText: "Sí, cancelar la OT",
+    showCancelButton: true,
+    cancelButtonText: "No, volver",
+  }).then((result) => {
     if (result.isConfirmed) {
       cambiarEstatusOT(0);
     }
-  })
+  });
 };
 
 const cargarOrden = async () => {
   try {
     const id = route.params.id;
     const otCreada = history.state?.otCreada ?? false;
-    console.log("isCreated?: " ,otCreada)
+    console.log("isCreated?: ", otCreada);
     const res = await fetch(
-      `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`
+      `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`,
     );
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -691,7 +702,7 @@ const cargarOrden = async () => {
       consecutivoSucursal: json.consecutivoSucursal,
       consecutivoCotizacion: json.consecutivoCotizacion,
       prefijoCotizacion: json.prefijoCotizacion,
-      observacion:json?.observacion,
+      observacion: json?.observacion,
 
       cliente: json.cliente || {},
       empleado: json.empleado || {},
@@ -718,22 +729,20 @@ const cargarOrden = async () => {
       requiereFactura: json.requiereFactura || false,
       desecharLlanta: json.desecharLlanta,
 
-     
       insumo: {
         llantas: await Promise.all(
-          json.llantas.map(async (llanta) =>{
+          json.llantas.map(async (llanta) => {
             const promosDisponibles = await obtenerPromosPorInventario(
               llanta.idInventarioInicial,
             );
             const promocionExistente = {
-            idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
-            valor: llanta?.valorPromocion || llanta?.valorVuelo || 0,
-            tipo: llanta?.tipoPromocion || llanta?.tipoVuelo || null,
-            nombre:
-              llanta?.nombrePromocion || llanta?.nombreVuelo || "",
-          };
+              idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
+              valor: llanta?.valorPromocion || llanta?.valorVuelo || 0,
+              tipo: llanta?.tipoPromocion || llanta?.tipoVuelo || null,
+              nombre: llanta?.nombrePromocion || llanta?.nombreVuelo || "",
+            };
             return {
-              idDetalleOTLlanta: llanta.idDetalleOTLlanta, // no se agrega 
+              idDetalleOTLlanta: llanta.idDetalleOTLlanta, // no se agrega
               idLlanta: llanta.idLlanta,
               idAlmacen: llanta.idAlmacen,
               idConceptoTrabajo: 1,
@@ -751,157 +760,129 @@ const cargarOrden = async () => {
                 llanta.cantidad *
                 precioFinalItem({
                   precioUnitario: llanta.precioUnitario,
-                  idPromocion:
-                
-                    llanta.idPromocion
-                     || llanta.idPromocionVuelo,
-                  valorPromocion:
-                    llanta.valorPromocion
-                      || llanta.valorVuelo,
-                  tipoPromocion:
-                     llanta.tipoPromocion
-                      || llanta.tipoVuelo,
+                  idPromocion: llanta.idPromocion || llanta.idPromocionVuelo,
+                  valorPromocion: llanta.valorPromocion || llanta.valorVuelo,
+                  tipoPromocion: llanta.tipoPromocion || llanta.tipoVuelo,
                 })
               ).toFixed(2), // campo estetico
 
-             promosDisponibles: promosDisponibles || [],
+              promosDisponibles: promosDisponibles || [],
               esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
               // si ya tiene promo existente rellenar valores
               promo: promocionExistente,
             };
-
-          })
+          }),
         ),
         paquetes: await Promise.all(
-        json.paquetes.map(async (paquete) => {
-          const promosDisponibles =
-          (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
-          const promocionExistente = {
-            idPromocion: paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
-            valor: paquete?.valorPromocion || paquete?.valorVuelo || 0,
-            tipo: paquete?.tipoPromocion || paquete?.tipoVuelo || null,
-            nombre:
-              paquete?.nombrePromocion || paquete?.nombreVuelo || "",
-          };
-          return {
-            idDetalleOTPaquete:paquete.idDetalleOTPaquete || 0,
-            idPaquete: paquete.idPaquete,
-            idPromocion: paquete?.idPromocion || null,
-            idConceptoTrabajo: 0,
-            idPromocionVuelo: paquete?.idPromocionVuelo || null,
-            idPromocionSeleccionada:
-              paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
-            nombre: paquete.nombre,
-            descripcion: paquete.descripcion,
-            cantidad: 1,
-            precioUnitario: paquete.precioUnitario,
+          json.paquetes.map(async (paquete) => {
+            const promosDisponibles =
+              (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
+            const promocionExistente = {
+              idPromocion:
+                paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
+              valor: paquete?.valorPromocion || paquete?.valorVuelo || 0,
+              tipo: paquete?.tipoPromocion || paquete?.tipoVuelo || null,
+              nombre: paquete?.nombrePromocion || paquete?.nombreVuelo || "",
+            };
+            return {
+              idDetalleOTPaquete: paquete.idDetalleOTPaquete || 0,
+              idPaquete: paquete.idPaquete,
+              idPromocion: paquete?.idPromocion || null,
+              idConceptoTrabajo: 0,
+              idPromocionVuelo: paquete?.idPromocionVuelo || null,
+              idPromocionSeleccionada:
+                paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
+              nombre: paquete.nombre,
+              descripcion: paquete.descripcion,
+              cantidad: 1,
+              precioUnitario: paquete.precioUnitario,
 
-            subTotal: (
-              1 *
-              precioFinalItem({
+              subTotal: (
+                1 *
+                precioFinalItem({
                   precioUnitario: paquete.precioUnitario,
-                  idPromocion:
-                
-                    paquete.idPromocion
-                     || paquete.idPromocionVuelo,
-                  valorPromocion:
-                    paquete.valorPromocion
-                      || paquete.valorVuelo,
-                  tipoPromocion:
-                     paquete.tipoPromocion
-                      || paquete.tipoVuelo,
+                  idPromocion: paquete.idPromocion || paquete.idPromocionVuelo,
+                  valorPromocion: paquete.valorPromocion || paquete.valorVuelo,
+                  tipoPromocion: paquete.tipoPromocion || paquete.tipoVuelo,
                 })
-            ).toFixed(2),
+              ).toFixed(2),
 
-            detalle: paquete.detalle.map((detalle) => ({
-              idDesglosePaquete: detalle.idDesglosePaquete,
-              idConceptoTrabajo: detalle.idConceptoTrabajo,
-              descripcion: detalle.nombre,
-              cantidad: detalle.cantidad,
-              
-            })),
+              detalle: paquete.detalle.map((detalle) => ({
+                idDesglosePaquete: detalle.idDesglosePaquete,
+                idConceptoTrabajo: detalle.idConceptoTrabajo,
+                descripcion: detalle.nombre,
+                cantidad: detalle.cantidad,
+              })),
 
-            promosDisponibles: promosDisponibles || [],
-            esAlVuelo: paquete.idPromocionVuelo != 0 ? true : false,
-            // info histórica (si viene de backend)
-            promo: promocionExistente,
-          };
-        }),
-      ),
-      adicionales: await Promise.all(
-        json.adicionales.map(async (s) => {
-           const promosDisponibles =
-          (await obtenerPromosGeneralesParaServicio()) || [];
-          
-          const promocionExistente = {
-            idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
-            valor: s?.valorPromocion || s?.valorVuelo || 0,
-            tipo: s?.tipoPromocion || s?.tipoVuelo || null,
-            nombre:
-              s?.nombrePromocion || s?.nombreVuelo || "",
-          };
-          return {
-            
-            idDetalleOTServicio : s.idDetalleOTServicio,
-            idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
-            idPromocion: s?.idPromocion || null,
-            idConceptoTrabajo: s.idConceptoTrabajo,
-            idPromocionVuelo: s?.idPromocionVuelo || null,
-            idPromocionSeleccionada: s?.idPromocion || s?.idPromocionVuelo || 0,
-            descripcion: s.descripcionServicio,
-            observacion: s.observacion,
-            comentario: s.comentario,
+              promosDisponibles: promosDisponibles || [],
+              esAlVuelo: paquete.idPromocionVuelo != 0 ? true : false,
+              // info histórica (si viene de backend)
+              promo: promocionExistente,
+            };
+          }),
+        ),
+        adicionales: await Promise.all(
+          json.adicionales.map(async (s) => {
+            const promosDisponibles =
+              (await obtenerPromosGeneralesParaServicio()) || [];
 
-            cantidad: s.cantidad,
-            precioUnitario: s.precioUnitario,
+            const promocionExistente = {
+              idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
+              valor: s?.valorPromocion || s?.valorVuelo || 0,
+              tipo: s?.tipoPromocion || s?.tipoVuelo || null,
+              nombre: s?.nombrePromocion || s?.nombreVuelo || "",
+            };
+            return {
+              idDetalleOTServicio: s.idDetalleOTServicio,
+              idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
+              idPromocion: s?.idPromocion || null,
+              idConceptoTrabajo: s.idConceptoTrabajo,
+              idPromocionVuelo: s?.idPromocionVuelo || null,
+              idPromocionSeleccionada:
+                s?.idPromocion || s?.idPromocionVuelo || 0,
+              descripcion: s.descripcionServicio,
+              observacion: s.observacion,
+              comentario: s.comentario,
 
-            subTotal: (
-              s.cantidad *
-             precioFinalItem({
+              cantidad: s.cantidad,
+              precioUnitario: s.precioUnitario,
+
+              subTotal: (
+                s.cantidad *
+                precioFinalItem({
                   precioUnitario: s.precioUnitario,
-                  idPromocion:
-                
-                    s.idPromocion
-                     || s.idPromocionVuelo,
-                  valorPromocion:
-                    s.valorPromocion
-                      || s.valorVuelo,
-                  tipoPromocion:
-                     s.tipoPromocion
-                      || s.tipoVuelo,
+                  idPromocion: s.idPromocion || s.idPromocionVuelo,
+                  valorPromocion: s.valorPromocion || s.valorVuelo,
+                  tipoPromocion: s.tipoPromocion || s.tipoVuelo,
                 })
-            ).toFixed(2),
+              ).toFixed(2),
 
-            promosDisponibles: promosDisponibles || [],
-            esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
-            // info histórica
-            promo: promocionExistente,
-          };
-        }),
-      ),
-       /* llantas: Array.isArray(json.llantas) ? json.llantas : [],
+              promosDisponibles: promosDisponibles || [],
+              esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
+              // info histórica
+              promo: promocionExistente,
+            };
+          }),
+        ),
+        /* llantas: Array.isArray(json.llantas) ? json.llantas : [],
         paquetes: Array.isArray(json.paquetes) ? json.paquetes : [],
         adicionales: Array.isArray(json.adicionales) ? json.adicionales : [],*/
-
-
-      }
+      },
     };
-    // invocar el evento imprimir 
+    // invocar el evento imprimir
     console.log("Desechar: " + otEditar.value.desecharLlanta);
-      if (otEditar.value.desecharLlanta == null) {
-        aplicaDesecharLlanta.value = true;
-        otEditar.value.desecharLlanta = false;
-      } else {
-        aplicaDesecharLlanta.value = false;
-      }
+    if (otEditar.value.desecharLlanta == null) {
+      aplicaDesecharLlanta.value = true;
+      otEditar.value.desecharLlanta = false;
+    } else {
+      aplicaDesecharLlanta.value = false;
+    }
     if (otCreada === true) {
       modelValue.value = true;
       history.replaceState({}, document.title);
     }
     // GUARDAR UNA COPIA DEL LOS INSUMOS ORIGINALES
-    insumoOriginal.value = JSON.parse(
-      JSON.stringify(otEditar.value.insumo)
-    );
+    insumoOriginal.value = JSON.parse(JSON.stringify(otEditar.value.insumo));
   } catch (err) {
     console.error("❌ Error cargando OT:", err);
 
@@ -911,19 +892,18 @@ const cargarOrden = async () => {
         paquetes: [],
         adicionales: [],
       },
-      totales:{
-      subtotal:0,
-      descuento:0,
-      iva:0,
-
-    },
+      totales: {
+        subtotal: 0,
+        descuento: 0,
+        iva: 0,
+      },
     };
   }
   calcularTotales();
 };
 
 const precioFinalItem = (item, promoGlobal) => {
-console.log("ITEM:" , item);
+  console.log("ITEM:", item);
   const base = item.precioUnitario ?? 0;
 
   // Aplica promoción individual si existe
@@ -960,14 +940,14 @@ const actualizarInsumos = (payload) => {
   otEditar.value.totales.total = payload.totales.total;
 };
 // provicional, lo ideal es usar computed
-const PrintOtFunction = ()=>{
-  if (insumosCambios.value == true ){
+const PrintOtFunction = () => {
+  if (insumosCambios.value == true) {
     console.log("DEBES GUARDAR LOS CAMBIOS");
-    insumosCambios.value= true; // Solo cambia a false al guardar
-  }else{
+    insumosCambios.value = true; // Solo cambia a false al guardar
+  } else {
     modelValue.value = true; // imprimir
   }
-}
+};
 watch(
   () => otEditar.value.insumo,
   (newInsumo) => {
@@ -976,21 +956,21 @@ watch(
 
     console.log("cambios en insumos", insumosCambios.value);
   },
-  { deep: true }
+  { deep: true },
 );
 
 const calcularTotales = () => {
   const totalLlantas = (otEditar.value.insumo.llantas || []).reduce(
     (acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0),
-    0
+    0,
   );
   const totalPaquetes = (otEditar.value.insumo.paquetes || []).reduce(
     (acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0),
-    0
+    0,
   );
   const totalAdicionales = (otEditar.value.insumo.adicionales || []).reduce(
     (acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0),
-    0
+    0,
   );
   const subtotal = totalLlantas + totalPaquetes + totalAdicionales;
 
@@ -999,7 +979,7 @@ const calcularTotales = () => {
       subtotal: 0,
       descuento: 0,
       iva: 0,
-      total: 0
+      total: 0,
     };
   }
 
@@ -1008,10 +988,7 @@ const calcularTotales = () => {
 
   otEditar.value.totales.subtotal = Number(subtotal.toFixed(2));
   otEditar.value.totales.iva = Number(iva.toFixed(2));
-  otEditar.value.totales.total = Number(
-    (subtotal - descuento).toFixed(2)
-  );
-
+  otEditar.value.totales.total = Number((subtotal - descuento).toFixed(2));
 };
 
 const cargarEmpleados = async () => {
@@ -1080,11 +1057,11 @@ const formatearFecha = (fecha) => {
 };
 
 const formatearTelefono = (telefono) => {
-	if (!telefono) return '';
-    const digitos = telefono.replace(/\D/g, '');
-    if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
-}
+  if (!telefono) return "";
+  const digitos = telefono.replace(/\D/g, "");
+  if (digitos.length !== 10) return telefono;
+  return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
+};
 
 const refrescarOrden = () => {
   console.log("🔄 Refrescando orden...");
@@ -1186,7 +1163,7 @@ const cambiarEstatusOT = async (estatus) => {
 const guardarEdicion = async () => {
   const idOT = otEditar.value.idOrdenTrabajo;
 
-  console.log("usuario edita" + idUsuarioSession);
+  //console.log("usuario edita" , otEditar.observacion);
 
   var desechar;
   if (aplicaDesecharLlanta.value) {
@@ -1200,10 +1177,11 @@ const guardarEdicion = async () => {
     idEmpleado: otEditar.value.empleado.idEmpleado,
     metodoPago: otEditar.value.metodoPago,
     desecharLlanta: desechar,
+    observacion: otEditar.value.observacion,
     requiereFactura: otEditar.value.requiereFactura,
     llantas: otEditar.value.insumo.llantas,
-    paquetes:otEditar.value.insumo.paquetes,
-    adicionales:otEditar.value.insumo.adicionales,
+    paquetes: otEditar.value.insumo.paquetes,
+    adicionales: otEditar.value.insumo.adicionales,
     factura: otEditar.value.factura,
   };
 
@@ -1217,7 +1195,7 @@ const guardarEdicion = async () => {
     console.log("OT actualizada:", response.data);
     cargarOrden();
     //Habilitar boton imprimir
-    insumosCambios.value= false;
+    insumosCambios.value = false;
     //volver()
   } catch (error) {
     console.error("Error al editar OT:", error);
@@ -1351,7 +1329,7 @@ const agregarLlanta = (nueva) => {
 // Eliminar
 const eliminarLlanta = (idLlanta) => {
   otEditar.value.llanta = otEditar.value.llanta.filter(
-    (l) => l.idLlanta !== idLlanta
+    (l) => l.idLlanta !== idLlanta,
   );
 };
 
@@ -1359,7 +1337,7 @@ const guardarLLantasOT = async () => {
   const payload = {
     idOrdenTrabajo: otEditar.value.idOrdenTrabajo,
     idUsuario: idUsuarioSession,
-    llanta: otEditar.value.llanta.map(llanta => ({
+    llanta: otEditar.value.llanta.map((llanta) => ({
       idDetalleOTLlanta: llanta.idDetalleOTLlanta,
       idLlanta: llanta.idLlanta,
       idAlmacen: llanta.idAlmacen,
@@ -1367,25 +1345,27 @@ const guardarLLantasOT = async () => {
       cantidad: llanta.cantidad,
       precioUnitario: llanta.precioUnitario,
       idPromocion: llanta.idPromocion,
-      idPromocionVuelo: llanta.idPromocionVuelo
-    }))
+      idPromocionVuelo: llanta.idPromocionVuelo,
+    })),
   };
 
   console.log("payload:", payload);
 
   // Ejemplo de envío al backend
-    const res = await fetch( `${proxy.$serverIP}api/OrdenTrabajo/InsertarLlantasOT`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      throw new Error(`Error HTTP ${res.status}`);
-    }
+  const res = await fetch(
+    `${proxy.$serverIP}api/OrdenTrabajo/InsertarLlantasOT`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Error HTTP ${res.status}`);
+  }
 
-    const data = await res.json();
-    //console.log("RESPUESTA BACKEND:", data);
-    
+  const data = await res.json();
+  //console.log("RESPUESTA BACKEND:", data);
 };
 const prepararDatosImpresion = () => {
   const insumo = otEditar.value.insumo || {};
@@ -1400,8 +1380,7 @@ const prepararDatosImpresion = () => {
     },
   };
 };
-console.log("PROPIEDADES PARA IMPRIMIR:" , prepararDatosImpresion())
-
+console.log("PROPIEDADES PARA IMPRIMIR:", prepararDatosImpresion());
 </script>
 
 <style>

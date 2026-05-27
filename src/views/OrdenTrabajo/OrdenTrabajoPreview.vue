@@ -108,10 +108,7 @@
           <span class="fw-semibold">Correo:</span>
           {{ orden?.cliente?.correo || '—' }}
         </div>
-		<div class="mb-1">
-          <span class="fw-semibold">Observacion:</span>
-          {{ orden?.observacion || '—' }}
-        </div>
+		
       </div>
 
     </div>
@@ -398,7 +395,11 @@
 
 			
 		</template>
-
+		<h5 class="text-uppercase text-muted mb-2">Observaciones</h5>
+		<div class="card border-1 shadow-sm mb-2">
+			<span class="py-3 px-3">{{orden?.observacion}}</span>
+		</div>
+		<hr>
 		<!-- TOTAL -->
 		<div class="card border-1 mb-2">
 			<div class="card-body d-flex justify-content-between align-items-center">

@@ -116,10 +116,6 @@
                   <span class="fw-semibold">Correo:</span>
                   {{ props.OT?.cliente?.correo || "—" }}
                 </div>
-                <div class="">
-                  <span class="fw-semibold">Observacion:</span>
-                  {{ props.OT?.observacion || "" }}
-                </div>
               </div>
             </div>
           </div>
@@ -177,7 +173,7 @@
 
         <!-- LLANTAS -->
         <template v-if="tieneLlantas">
-          <h5 class="text-uppercase text-muted mt-2 mb-2">Llantas</h5>
+          <h5 class="text-uppercase text-muted mt-2 mb-1">Llantas</h5>
 
           <div class="card border-1 shadow-sm mb-2">
             <ul class="list-group list-group-flush">
@@ -252,9 +248,9 @@
 
         <!-- PAQUETES -->
         <template v-if="tienePaquetes">
-          <h5 class="text-uppercase text-muted mb-2">Paquetes</h5>
+          <h5 class="text-uppercase text-muted mb-1">Paquetes</h5>
 
-          <div class="card border-1 shadow-sm mb-2">
+          <div class="card border-1 shadow-sm mb-1">
             <ul class="list-group list-group-flush">
               <li
                 v-for="paquete in OT.insumo.paquetes"
@@ -333,9 +329,9 @@
 
         <!-- SERVICIOS -->
         <template v-if="tieneServicios">
-          <h5 class="text-uppercase text-muted mb-2">Servicios</h5>
+          <h5 class="text-uppercase text-muted mb-1">Servicios</h5>
 
-          <div class="card border-1 shadow-sm mb-2">
+          <div class="card border-1 shadow-sm mb-1">
             <ul class="list-group list-group-flush">
               <li
                 v-for="s in OT.insumo.adicionales"
@@ -405,6 +401,11 @@
             </ul>
           </div>
         </template>
+       <h5 class="text-uppercase text-muted mb-2">Observaciones</h5>
+		<div class="card border-1 shadow-sm mb-2">
+			<span class="py-3 px-3">{{props.OT?.observacion}}</span>
+		</div>
+		<hr>
 
         <!-- TOTAL -->
         <div class="card border-1 mb-2">
