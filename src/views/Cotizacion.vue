@@ -1,2187 +1,9 @@
 <template>
   <div class="container-fluid mp-4 p-4">
-    <div class="row mx-4 no-imprimir">
-      <h2><i class="bi bi-file-ruled-fill me-2"></i> Cotizaciones</h2>
-    </div>
-    <div class="row m-4 no-imprimir">
-      <div class="col-5 d-flex align-items-center">
-        <input
-          class="form-control"
-          placeholder="Buscar por código, cliente, fecha..."
-          v-model="busquedaCotizaciones"
-          @keydown.stop
-        />
-      </div>
-
-      <div class="col-5 d-flex align-items-center">
-        <label for="select" class="form-label m-2">Estatus: </label>
-        <select v-model="filtroEstatus" class="form-select">
-          <option value="">Todos</option>
-          <option value="Creada">Activos</option>
-          <option value="Cancelada">Cancelados</option>
-          <option value="Aprobada">Aprobados</option>
-          <option value="Realizada">Finalizados</option>
-        </select>
-      </div>
-
-      <div class="col-2 d-flex align-items-right">
-        <!-- Botón para abrir el modal -->
-        <button
-          class="btn btn-primary position-relative shadow w-100"
-          @click="abrirModalCotizacion()"
-        >
-          <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva
-          cotización
-        </button>
-      </div>
-    </div>
-    <div class="row mx-4 no-imprimir">
-      <div v-if="loading" class="text-center my-4">
-        <table class="table table-hover table-sm">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Sucursal</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <!-- <th>Paquete</th> -->
-              <!-- <th>Total</th> -->
-              <th>Llanta</th>
-              <th>Estatus</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-        </table>
-        <div class="text-center my-4">
-          <div class="spinner-border text-primary" role="status"></div>
-          <p class="mt-2 text-muted">Cargando Cotizaciones...</p>
-        </div>
-      </div>
-
-      <div v-else>
-        <table class="table table-hover table-sm">
-          <caption>
-            <strong>Lista de cotizaciones</strong>
-          </caption>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Sucursal</th>
-              <th>Fecha</th>
-              <th>Cliente</th>
-              <th>Teléfono</th>
-              <th>Llanta</th>
-              <th>Estatus</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="item in cotizacionesTransformadas"
-              :key="item.idCotizacion"
-            >
-              <td>C{{ item.codigo }}</td>
-              <td>{{ item.sucursal }}</td>
-              <td>{{ item.fechaCreacion }}</td>
-              <td>{{ item.cliente }}</td>
-              <td>{{ formatearTelefono(item.telefono) }}</td>
-              <!-- <td>{{ item.paquete }}</td> -->
-              <!-- <td>{{ item.total }}</td> -->
-              <td>{{ item.nombreLlanta }}</td>
-              <td>{{ item.estatus }}</td>
-              <td>
-                <div class="d-flex gap-1">
-                  <button
-                    class="btn btn-sm btn-outline-info"
-                    @click="mostrarVistaPrevia(item.acciones, 'ver')"
-                    title="Ver"
-                  >
-                    <i class="bi bi-eye"></i>
-                  </button>
-
-                  <button
-                    v-if="item.estatus != 'Realizada'"
-                    class="btn btn-sm btn-outline-warning"
-                    @click="abrirModalCotizacion(item.acciones)"
-                    title="Editar"
-                  >
-                    <i class="bi bi-pencil-square"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    v-if="item.estatus != 'Cancelada'"
-                    class="btn btn-sm btn-outline-danger"
-                    @click="cancelarCotizacion(item.acciones)"
-                    title="Cancelar"
-                  >
-                    <i class="bi bi-x-circle"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    v-if="item.estatus === 'Cancelada'"
-                    class="btn btn-sm btn-outline-success"
-                    @click="reactivarCotizacion(item.acciones)"
-                    title="Reactivar"
-                  >
-                    <i class="bi bi-arrow-clockwise"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    v-if="item.estatus === 'Creada'"
-                    class="btn btn-sm btn-outline-primary"
-                    @click="aprobarCotizacion(item.acciones)"
-                    title="Aprobar"
-                  >
-                    <i class="bi bi-check-circle"></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    v-if="item.estatus === 'Aprobada'"
-                    class="btn btn-sm btn-outline-secondary"
-                    @click="finalizarCotizacion(item.acciones)"
-                    title="Finalizar"
-                  >
-                    <i class="bi bi-flag"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- MODAL PARA SCREENSHOT Y DESCARGA DE PDF -->
-
-    <div
-      v-if="mostrarVista"
-      class="modal fade show d-block"
-      tabindex="-1"
-      :style="{ background: 'rgba(0,0,0,0.5)' }"
-    >
-      <div class="modal-dialog modal-xl modal-dialog-centered modal-1000">
-        <div class="modal-content p-4">
-          <div class="modal-header no-imprimir">
-            <h4 class="modal-title">Vista Previa de Cotización</h4>
-            <button
-              type="button"
-              class="btn-close"
-              @click="mostrarVista = false"
-            ></button>
-          </div>
-          <div
-            id="area-imprimir"
-            ref="pdfContent"
-            class="modal-body bg-white p-4 fs-6 print-area"
-            :style="{ fontSize: '14px' }"
-          >
-            <!-- Encabezado con direcciones y logo -->
-            <div class="row my-3">
-              <div class="col">
-                <img
-                  class="float-start"
-                  src="/images/Logo-Kartisimo.png"
-                  alt="Logo"
-                  :style="{ maxWidth: '250px' }"
-                />
-              </div>
-            </div>
-            <div class="row border-bottom pb-3 mb-4 direcciones">
-              <div class="col-3">
-                <small>
-                  <strong>Blvd. Delta 2002 <br />esq. Rio Mayo</strong><br />
-                  Col. Valle de Jerez C.P 37538<br />
-                  Tel. 477 330 6060 y<br />
-                  477 390 5090<br />
-                  delta@kartisimo.mx </small
-                ><br />
-              </div>
-              <div class="col-3">
-                <small>
-                  <strong>Blvd. Lopez Mateos 827<br />esq. Apolo</strong><br />
-                  Col. Obrera C.P. 37340<br />
-                  Tel. 477 717 7440 y<br />
-                  477 470 9419<br />
-                  apolo@kartisimo.mx
-                </small>
-              </div>
-              <div class="col-3">
-                <small>
-                  <strong
-                    >Blvd. Torres Landa 1901<br />
-                    esq. San Jacobo</strong
-                  ><br />
-                  Col. La Piscina C.P. 37440<br />
-                  Tel. 477 390 0290 y<br />
-                  477 461 0028<br />
-                  torreslanda@kartisimo.mx<br />
-                </small>
-              </div>
-              <div class="col-3">
-                <small>
-                  <strong
-                    >Blvd. Mariano Escobedo Pte. 2715 esq. San Sebastián</strong
-                  ><br />
-                  Col. La Martinica, C.P. 37500<br />
-                  Tel. 477 763 3285 y<br />
-                  477 763 3284
-                </small>
-              </div>
-            </div>
-
-            <!-- Información del cliente -->
-            <div class="mb-4 cotizacion-header-cliente">
-              <div class="row">
-                <div class="col-2">
-                  <span class="me-2">
-                    {{ "C" + vistaCotizacion.codigo || "N/A" }}
-                  </span>
-                </div>
-                <div class="col-5">
-                  <span>
-                    <strong>Fecha emisión: </strong>
-                    {{ vistaCotizacion.fechaCreacion || "N/A" }}
-                  </span>
-                </div>
-                <div class="col-5">
-                  <span class="me-2">
-                    <strong>Cliente: </strong>
-                    {{ vistaCotizacion.cliente?.nombre || "N/A" }}
-                  </span>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-2"></div>
-
-                <div class="col-5">
-                  <span class="me-2">
-                    <strong>Teléfono: </strong>
-                    {{ telefonoVistaFormateado || "N/A" }}
-                  </span>
-                </div>
-                <div class="col-5">
-                  <span class="me-2">
-                    <strong>Correo: </strong>
-                    {{ vistaCotizacion.cliente?.correo || "N/A" }}
-                  </span>
-                </div>
-                <div class="col mt-1">
-                  <span>
-                    <strong>Observaciones: </strong>
-                    {{ vistaCotizacion.observaciones || "N/A" }}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tabla Llantas -->
-            <div class="table-responsive mx-auto mt-3 cotizacion-header">
-              <table
-                class="table table-bordered table-sm align-middle"
-                style="table-layout: fixed"
-              >
-                <colgroup>
-                  <col style="width: 50px" />
-                  <col />
-                  <col style="width: 120px" />
-                  <col style="width: 120px" />
-                </colgroup>
-                <thead class="table-light">
-                  <tr>
-                    <th class="text-center">CANT</th>
-                    <th>MEDIDA - MARCA - MODELO - RANGO</th>
-                    <th class="text-end">PRECIO UNIT.</th>
-                    <th class="text-end">TOTAL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas"
-                    :key="'ll-' + i"
-                  >
-                    <td class="text-center">{{ llanta.cantidad }}</td>
-                    <td>
-                      {{ llanta.medidas }}
-                      <br />
-                      <small class="badge bg-secondary mt-1">{{
-                        llanta.comentario
-                      }}</small>
-                    </td>
-                    <td class="text-end">
-                      {{
-                        llanta.precioUnitario.toLocaleString("es-MX", {
-                          style: "currency",
-                          currency: "MXN",
-                        })
-                      }}
-                    </td>
-                    <td class="text-end">
-                      <div
-                        v-if="
-                          llanta.promoLabel &&
-                          llanta.promoLabel !== '(Excluido de promoción)'
-                        "
-                      >
-                        <span class="text-decoration-line-through text-muted">
-                          {{
-                            (
-                              llanta.precioUnitario * llanta.cantidad
-                            ).toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })
-                          }}
-                          <small
-                            class="badge bg-danger d-inline-block mt-1 text-wrap"
-                          >
-                            {{ llanta.promoLabel }}
-                          </small>
-                        </span>
-                        <br />
-                        <span class="text-success fw-bold d-block">{{
-                          llanta.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}</span>
-                      </div>
-                      <div v-else>
-                        {{
-                          llanta.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <!-- Tabla Paquetes y Servicios (sin encabezado) -->
-            <div class="table-responsive mt-3 cotizacion-header">
-              <table
-                class="table table-bordered table-sm align-middle"
-                style="table-layout: fixed"
-              >
-                <colgroup>
-                  <col style="width: 50px" />
-                  <col />
-                  <col style="width: 120px" />
-                  <col style="width: 120px" />
-                </colgroup>
-                <thead class="table-light">
-                  <tr>
-                    <th class="text-center">CANT</th>
-                    <th>SERVICIO</th>
-                    <th class="text-end">PRECIO UNIT.</th>
-                    <th class="text-end">TOTAL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Paquetes -->
-                  <tr
-                    v-for="(paquete, index) in vistaCotizacion.paquetes"
-                    :key="'paq-' + index" class="tr-servicios"
-                  >
-                    <td class="text-center">1</td>
-                    <td>
-                      {{ paquete.nombre.toUpperCase() }},
-                      {{ paquete.descripcion.toUpperCase() }}
-                      <br />
-                      <small class="badge bg-secondary mt-1">{{
-                        paquete.comentario
-                      }}</small>
-                    </td>
-                    <td class="text-end">
-                      {{
-                        paquete.precioUnitario.toLocaleString("es-MX", {
-                          style: "currency",
-                          currency: "MXN",
-                        })
-                      }}
-                    </td>
-                    <td class="text-end">
-                      <div
-                        v-if="
-                          paquete.promoLabel &&
-                          paquete.promoLabel !== '(Excluido de promoción)'
-                        "
-                      >
-                        <span class="text-decoration-line-through text-muted">
-                          {{
-                            paquete.precioUnitario.toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })
-                          }}
-                          <small class="badge bg-danger mt-1 text-wrap">{{
-                            paquete.promoLabel
-                          }}</small>
-                        </span>
-                        <br />
-                        <span class="text-success fw-bold d-block">{{
-                          paquete.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}</span>
-                      </div>
-                      <div v-else>
-                        {{
-                          paquete.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}
-                      </div>
-                    </td>
-                  </tr>
-
-                  <!-- Servicios Adicionales -->
-                  <tr
-                    v-for="(
-                      servicio, i
-                    ) in vistaCotizacion.serviciosAdicionales"
-                    :key="'serv-' + i" class="tr-servicios"
-                  >
-                    <td class="text-center">{{ servicio.cantidad }}</td>
-                    <td>
-                      {{ servicio.nombreServicio }} {{ servicio.observacion }}
-                      <br />
-                      <small class="badge bg-secondary mt-1">{{
-                        servicio.comentario
-                      }}</small>
-                    </td>
-                    <td class="text-end">
-                      {{
-                        servicio.precioUnitario.toLocaleString("es-MX", {
-                          style: "currency",
-                          currency: "MXN",
-                        })
-                      }}
-                    </td>
-                    <td class="text-end">
-                      <div
-                        v-if="
-                          servicio.promoLabel &&
-                          servicio.promoLabel !== '(Excluido de promoción)'
-                        "
-                      >
-                        <span class="text-decoration-line-through text-muted">
-                          {{
-                            servicio.precioUnitario.toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })
-                          }}
-                          <small class="badge bg-danger mt-1 text-wrap">{{
-                            servicio.promoLabel
-                          }}</small>
-                        </span>
-                        <br />
-                        <span class="text-success fw-bold d-block">{{
-                          servicio.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}</span>
-                      </div>
-                      <div v-else>
-                        {{
-                          servicio.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div
-              v-if="vistaCotizacion.mostrarTotal"
-              class="table-responsive mt-3 cotizacion-header"
-            >
-              <table
-                class="table table-bordered table-sm align-middle"
-                style="table-layout: fixed"
-              >
-                <colgroup>
-                  <col />
-                  <col style="width: 120px" />
-                </colgroup>
-                <tbody>
-                  <tr class="fw-bold">
-                    <td class="text-center">Total:</td>
-                    <td class="text-end">
-                      <div v-if="vistaCotizacion.tienePromocion">
-                        <span class="text-decoration-line-through text-muted">
-                          {{
-                            vistaCotizacion.totalBase.toLocaleString("es-MX", {
-                              style: "currency",
-                              currency: "MXN",
-                            })
-                          }}
-                        </span>
-                        <br />
-                        <span class="text-success fw-bold d-block">{{
-                          vistaCotizacion.total.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}</span>
-                      </div>
-                      <div v-else>
-                        {{
-                          vistaCotizacion.totalBase.toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="d-flex w-100 mt-3 justify-content-end">
-              <span class="nota-iva">Los precios incluyen IVA.</span>
-            </div>
-
-            <div class="row no-imprimir">
-              <div class="col">
-                <!-- Botón enviar correo -->
-                <EnviarCorreoModal :cotizacion="vistaCotizacion" />
-              </div>
-
-              <div class="col">
-                <!-- Botón enviar pdf a imprimir -->
-                <div class="mt-4">
-                  <button
-                    class="btn btn-primary position-relative shadow-lg w-100 btn-sm py-2 rounded"
-                    @click="imprimirCotizacion"
-                  >
-                    <i
-                      class="bi-printer-fill position-absolute start-0 ms-2"
-                    ></i>
-                    Imprimir
-                  </button>
-                </div>
-              </div>
-
-              <div class="col">
-                <!-- Botón PDF -->
-                <div class="mt-4">
-                  <button
-                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
-                    @click="generarPDF"
-                  >
-                    <i
-                      class="bi-file-pdf-fill position-absolute start-0 ms-2"
-                    ></i>
-                    Descargar PDF
-                  </button>
-                </div>
-              </div>
-
-              <div class="col">
-                <div class="mt-4">
-                  <button
-                    class="btn btn-primary position-relative shadow w-100 btn-sm py-2 rounded"
-                    @click="abrirModalCotizacion(vistaCotizacion)"
-                  >
-                    <i
-                      class="bi-pencil-fill position-absolute start-0 ms-2"
-                    ></i>
-                    Editar
-                  </button>
-                </div>
-              </div>
-
-              <div class="col">
-                <div class="mt-4">
-                  <button
-                    class="btn btn-success position-relative shadow w-100 btn-sm py-2 rounded"
-                    @click="confirmarAccion(vistaCotizacion)"
-                  >
-                    <i
-                      class="bi-forward-fill position-absolute start-0 ms-2"
-                    ></i>
-                    Generar OT
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL PARA CREAR/EDITAR COTIZACION -->
-    <div
-      class="modal fade"
-      ref="modalRef"
-      tabindex="-1"
-      aria-labelledby="exampleModalLabel"
-      aria-hidden="true"
-    >
-      <div
-        class="modal-dialog modal-centered modal-dialog-scrollable modal-lg"
-        style="max-width: 95vw"
-      >
-        <div
-          class="modal-content"
-          :style="{
-            maxHeight: '90vh',
-            display: 'flex',
-            flexDirection: 'column',
-          }"
-        >
-          <div class="modal-header bg-light border-bottom">
-            <div class="modal-title w-100 text-center">
-              <h3 class="mb-0 fw-semibold">{{ tituloModal }}</h3>
-            </div>
-
-            <button
-              type="button"
-              class="btn-close"
-              @click="closeModal"
-              aria-label="Close"
-            ></button>
-          </div>
-
-          <div class="modal-body" :style="{ overflowY: 'auto' }">
-            <div class="d-flex justify-content-end">
-              <div v-if="loggeduser" class="card bg-light shadow-sm mx-4 my-2">
-                <div
-                  class="card-body"
-                  style="font-size: 10pt; color: slategray"
-                >
-                  <i class="bi bi-person me-2"></i>
-                  <strong>Usuario: </strong>{{ loggeduser.nombre }}<br />
-
-                  <i class="bi bi-envelope me-2"></i>
-                  <strong>Correo: </strong>{{ loggeduser.correo || "Sin correo"
-                  }}<br />
-
-                  <i class="bi bi-building-fill me-2"></i>
-                  <strong>Sucursal: </strong>
-                  {{ sucursales?.[loggeduser.id_sucursal - 1] || "N/A" }}
-                </div>
-              </div>
-            </div>
-
-            <!-- Seccion informacion cliente -->
-
-            <div class="card shadow-sm mx-4 my-3">
-              <div class="card-header" style="font-size: 14pt">
-                <i class="bi bi-person-fill me-2"></i> Datos del cliente
-              </div>
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-12 col-lg-6">
-                    <!-- Select de cliente existente -->
-
-                    <label for="clienteExistente" class="mb-1 form-label"
-                      ><i class="bi bi-search"></i> Buscar cliente
-                      existente</label
-                    >
-
-                    <ClientesFilterOption
-                      v-model="mostrarTabla"
-                      @seleccionar-cliente="manejarCliente"
-                    />
-
-                    <!--
-                    <select
-                      id="clienteExistente"
-                      class="form-select mb-3"
-                      v-model="cotizacionForm.clienteExistente"
-                    >
-                      <option value="">Selecciona un cliente</option>
-
-                      <option
-                        v-for="(cliente, i) in clientesDisponibles"
-                        :key="i"
-                        :value="cliente.nombres"
-                      >
-                        {{ cliente.nombres }} {{ cliente.apPaterno ? cliente.apPaterno : '' }} {{ cliente.apMaterno ? cliente.apMaterno : '' }}
-                      </option>
-                    </select>
-                    -->
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-6 col-lg-3">
-                    <label for="nombre" class="form-label">Nombre</label>
-                    <input
-                      id="nombre"
-                      v-model="cotizacionForm.nombre"
-                      class="form-control mb-3"
-                      type="text"
-                      placeholder="Ej. Nombre"
-                      @change="ajustaNombre()"
-                    />
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <label for="apellido" class="form-label">Apellidos</label>
-                    <input
-                      id="apellido"
-                      v-model="cotizacionForm.apellidos"
-                      class="form-control mb-3"
-                      type="text"
-                      placeholder="Ej. Apellido"
-                      @change="ajustaNombre()"
-                    />
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <label for="numTelefono" class="form-label"
-                      ><i class="bi bi-telephone-fill"></i> Teléfono(s)</label
-                    >
-
-                    <input
-                      id="numTelefono"
-                      v-model="telefonoFormateado"
-                      type="text"
-                      class="form-control"
-                      placeholder="XXX XXX XXXX"
-                      :class="{ 'is-invalid': !telefonoEsValido }"
-                    />
-
-                    <div class="invalid-feedback">
-                      El teléfono debe tener al menos 10 dígitos
-                    </div>
-                  </div>
-                  <div class="col-6 col-lg-3">
-                    <label for="correoCliente" class="form-label"
-                      ><i class="bi bi-envelope-fill"></i> Correo</label
-                    >
-                    <input
-                      id="correoCliente"
-                      v-model="cotizacionForm.clienteCorreo"
-                      type="email"
-                      class="form-control"
-                      placeholder="ejemplo@correo.com"
-                      :class="{ 'is-invalid': !correoEsValido }"
-                    />
-                    <div class="invalid-feedback">capture un correo válido</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card shadow-sm mx-4 my-4">
-              <div class="card-body">
-                <div class="row">
-                  <div class="col-12 col-lg-6">
-                    <div
-                      v-for="paquete in paquetesDisponibles"
-                      :key="paquete.idPaquete"
-                      class="form-check mx-3 my-2"
-                    >
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        :id="'paquete-' + paquete.idPaquete"
-                        :value="paquete.idPaquete"
-                        v-model="paquetesSeleccionados"
-                      />
-                      <label
-                        class="form-check-label"
-                        :for="'paquete-' + paquete.idPaquete"
-                      >
-                        {{ paquete.nombre }} - $ {{ paquete.precioUnitario }}.00
-                      </label>
-                    </div>
-                  </div>
-                  <div class="col-12 col-lg-6">
-                    <label for="ObservacionCliente" class="form-label mt-2"
-                      ><i class="bi bi-sticky-fill"></i> Observaciones</label
-                    >
-                    <textarea
-                      id="ObservacionCliente"
-                      v-model="cotizacionForm.observaciones"
-                      class="form-control mb-2"
-                      rows="2"
-                      maxlength="255"
-                      placeholder="Notas adicionales de la cotización"
-                    ></textarea>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Seccion seleccion de llantas -->
-
-            <div class="row m-4">
-              <div class="col">
-                <h5>Seleccionar las llantas deseadas</h5>
-                <div class="row m-2 mt-3">
-                  <div class="col-9">
-                    <input
-                      v-model="busquedaLlantas"
-                      class="form-control"
-                      placeholder="Buscar por nombre o medida..."
-                    />
-                  </div>
-
-                  <div class="col-3">
-                    <div class="position-relative">
-                      <button
-                        type="button"
-                        class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
-                        @click="dropdownOpen = !dropdownOpen"
-                      >
-                        <span>{{
-                          selectedAlmacenes.length
-                            ? selectedAlmacenes.join(", ")
-                            : "Elegir almacenes"
-                        }}</span>
-                        <i class="bi bi-caret-down-fill"></i>
-                      </button>
-
-                      <!-- menú -->
-                      <div
-                        v-if="dropdownOpen"
-                        class="border rounded shadow bg-white position-absolute w-100 mt-1 p-2"
-                        style="z-index: 1050"
-                        @mouseleave="dropdownOpen = false"
-                      >
-                        <div class="form-check mb-2">
-                          <input
-                            type="checkbox"
-                            class="form-check-input"
-                            id="alm-todos"
-                            @change="toggleTodos"
-                            :checked="selectedAlmacenes.length === 0"
-                          />
-                          <label class="form-check-label" for="alm-todos">
-                            Todos
-                          </label>
-                        </div>
-
-                        <div
-                          v-for="alm in almacenes"
-                          :key="alm.id"
-                          class="form-check"
-                        >
-                          <input
-                            type="checkbox"
-                            class="form-check-input"
-                            :id="'alm-' + alm.id"
-                            :value="alm.nombre"
-                            v-model="selectedAlmacenes"
-                          />
-                          <label
-                            class="form-check-label"
-                            :for="'alm-' + alm.id"
-                          >
-                            {{ alm.nombre }}
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <!-- style="max-height: 400px; overflow-y: auto;" -->
-                  <EasyDataTable
-                    :key="tableKey"
-                    :headers="tblHeadersModal"
-                    :items="itemsFiltrados"
-                    :rows-per-page="100"
-                    show-index
-                    :table-height="400"
-                    :sort-by="sortBy"
-                    :sort-type="sortType"
-                    @update:sort-by="onUpdateSortBy"
-                    @update:sort-type="onUpdateSortType"
-                  >
-                    <!-- TEMPLATE PARA ADAPTAR LA INFORMACION A LA ORGANIZACION medida - marca - modelo - rango -->
-                    <template #item-runflat="runFlat">
-                      <div class="text-center">
-                        <i
-                          v-if="runFlat.runflat === '1'"
-                          class="bi bi-check-circle-fill text-success"
-                        ></i>
-                      </div>
-                    </template>
-
-                    <template #item-medida="slotProps">
-                      {{ slotProps.medida }} {{ slotProps.rango }}
-                      {{ slotProps.runflat === "1" ? "RF" : "" }}
-                    </template>
-
-                    <template #item-acciones="slotProps">
-                      <button
-                        v-if="
-                          !cotizacionForm.llantas.some(
-                            (ll) => ll.idLlanta === slotProps.id,
-                          )
-                        "
-                        type="button"
-                        class="btn btn-success btn-sm d-flex align-items-center gap-1"
-                        @click="agregarLlanta(slotProps)"
-                        :title="
-                          cotizacionForm.llantas.some(
-                            (ll) => ll.idLlanta === slotProps.id,
-                          )
-                            ? 'Llanta ya agregada'
-                            : 'Agregar llanta'
-                        "
-                      >
-                        <i class="bi bi-plus"></i>
-                      </button>
-                      <span v-else class="text-secondary small">
-                        Ya agregada
-                      </span>
-                    </template>
-                  </EasyDataTable>
-                </div>
-              </div>
-            </div>
-
-            <div class="row mt-3 mx-3">
-              <h5>Agregar servicio adicional</h5>
-              <div class="d-flex gap-3 my-3">
-                <div class="col">
-                  <select
-                    class="form-select form-select-sm"
-                    v-model="NuevoConceptoTrabajo"
-                  >
-                    <option :value="0">-- Seleccione concepto --</option>
-                    <option
-                      v-for="c in conceptoOT"
-                      :key="c.idConceptoOrdenTrabajo"
-                      :value="c.idConceptoOrdenTrabajo"
-                    >
-                      {{ c.nombre }}
-                    </option>
-                  </select>
-                </div>
-                <div class="col">
-                  <input
-                    class="form-control"
-                    placeholder="Nombre del servicio"
-                    v-model="nuevoServicio"
-                  />
-                </div>
-                <div class="col-1">
-                  <input
-                    class="form-control"
-                    type="number"
-                    min="1"
-                    placeholder="Cantidad"
-                    v-model="nuevaCantidad"
-                  />
-                </div>
-
-                <div class="col">
-                  <input
-                    class="form-control"
-                    min="0"
-                    type="number"
-                    placeholder="Precio unitario"
-                    v-model="nuevoPrecio"
-                  />
-                </div>
-                <button
-                  class="btn btn-primary position-relative shadow"
-                  style="width: 130px"
-                  @click="agregarServicioExtra"
-                >
-                  <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>
-                  &nbsp;Agregar
-                </button>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col border">
-                <div class="row justify-content-center">
-                  <div class="col-12 p-4 rounded-3">
-                    <div class="row mb-3 d-flex">
-                      <div class="col text-start">
-                        <img
-                          src="/images/Logo-Kartisimo.png"
-                          alt="Logo"
-                          :style="{ maxWidth: '250px' }"
-                        />
-                      </div>
-                    </div>
-                    <div class="row my-3 d-flex justify-content-between">
-                      <div class="col">
-                        <small
-                          ><strong
-                            >Blvd. Delta 2002 esq. Rio Mayo</strong
-                          ></small
-                        ><br />
-                        <small>Col. Valle de Jerez C.P. 37538</small><br />
-                        <small>Tel. 477 330 6060 y 477 390 5090</small><br />
-                        <small>delta@kartisimo.mx</small><br />
-                      </div>
-                      <div class="col">
-                        <small
-                          ><strong
-                            >Blvd. Lopez Mateos 827 esq. Apolo</strong
-                          ></small
-                        ><br />
-                        <small>Col. Obrera C.P. 37340</small><br />
-                        <small>Tel. 477 717 7440 y 477 470 9419</small><br />
-                        <small>apolo@kartisimo.mx</small><br />
-                      </div>
-                      <div class="col">
-                        <small
-                          ><strong
-                            >Blvd. Torres Landa 1901 esq. San Jacobo</strong
-                          ></small
-                        ><br />
-                        <small>Col. La Piscina C.P. 37440</small><br />
-                        <small>Tel. 477 390 0290 y 477 461 0028</small><br />
-                        <small>torreslanda@kartisimo.mx</small><br />
-                      </div>
-                      <div class="col">
-                        <small
-                          ><strong
-                            >Blvd. Mariano Escobedo Pte. 2715 esq. San
-                            Sebastián</strong
-                          ></small
-                        ><br />
-                        <small>Col. La Martinica, C.P. 37500</small><br />
-                        <small>Tel. 477 763 3285 y 477 763 3284</small>
-                      </div>
-                    </div>
-
-                    <div class="row mb-2 d-flex">
-                      <div class="col-2">
-                        {{
-                          cotizacionForm.codigo
-                            ? "C" + cotizacionForm.codigo
-                            : "(Por definir)"
-                        }}
-                      </div>
-                      <div class="col-3">
-                        <strong>Fecha de emisión: </strong>
-                        {{
-                          cotizacionForm.fechaCreacion
-                            ? new Date(
-                                cotizacionForm.fechaCreacion,
-                              ).toLocaleString("es-MX", {
-                                day: "2-digit",
-                                month: "2-digit",
-                                year: "numeric",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: true,
-                              })
-                            : "N/A"
-                        }}
-                      </div>
-                      <div class="col-3">
-                        <strong>Cliente: </strong>
-                        {{ cotizacionForm.clienteNombre || "N/A" }}
-                      </div>
-                      <div class="col-2">
-                        <strong>Teléfono(s): </strong>
-                        {{ telefonoFormateado || "N/A" }}
-                      </div>
-                      <div class="col-2">
-                        <strong>Correo: </strong>
-                        {{ cotizacionForm.clienteCorreo || "N/A" }}
-                      </div>
-                    </div>
-                    <div
-                      v-if="cotizacionForm.observaciones"
-                      class="mb-2 d-flex"
-                    >
-                      <span class="mx-2">
-                        <strong>Observaciones</strong>
-                        {{ cotizacionForm.observaciones || "N/A" }}
-                      </span>
-                    </div>
-                    <table class="table align-middle">
-                      <thead>
-                        <tr>
-                          <th>Concepto de trabajo</th>
-                          <th>Descripción</th>
-                          <th style="text-align: center">Cantidad</th>
-                          <th>Precio Unitario</th>
-                          <th>Total</th>
-                          <th>Promociones</th>
-                          <!-- <th></th> -->
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <!-- Llantas -->
-                        <template
-                          v-for="item in cotizacionForm.llantas"
-                          :key="'llanta-' + item.idLlanta"
-                        >
-                          <tr>
-                            <td>
-                              <select
-                                class="form-select form-select-sm"
-                                v-model="item.idConceptoTrabajo"
-                              >
-                                <!-- Default -->
-                                <option :value="0">
-                                  -- Seleccione concepto --
-                                </option>
-
-                                <option
-                                  v-for="c in conceptoOT"
-                                  :key="c.idConceptoOrdenTrabajo"
-                                  :value="c.idConceptoOrdenTrabajo"
-                                >
-                                  {{ c.nombre }}
-                                </option>
-                              </select>
-                            </td>
-                            <td>
-                              {{ item.modeloMedidas }}
-                              <span class="badge bg-warning text-dark ms-2">
-                                {{ item.ubicacion }}
-                              </span>
-
-                              <div class="mt-1">
-                                <input
-                                  type="text"
-                                  v-model="item.comentario"
-                                  class="form-control form-control-sm"
-                                  placeholder="Agregar comentario..."
-                                />
-                              </div>
-                            </td>
-
-                            <!-- Cantidad -->
-                            <td class="text-center">
-                              <input
-                                type="number"
-                                min="1"
-                                class="form-control mx-auto"
-                                :style="{ width: '70px' }"
-                                v-model.number="item.cantidad"
-                              />
-                            </td>
-
-                            <!-- PRECIO UNITARIO -->
-                            <td>
-                              <div>
-                                <input
-                                  min="0"
-                                  class="form-control input-precio-unitario"
-                                  :style="{ width: '90px' }"
-                                  v-model.number="item.precioUnitario"
-                                  placeholder="Precio c/u"
-                                  @keydown="irAlSiguientePrecio"
-                                />
-                              </div>
-                            </td>
-
-                            <!-- SUBTOTAL -->
-                            <td>
-                              <!-- Promo individual -->
-                              <div
-                                v-if="item.promo && item.promo.valor != null"
-                              >
-                                <span
-                                  class="text-decoration-line-through text-muted small"
-                                >
-                                  {{
-                                    formatoMoneda(
-                                      (item.precioUnitario || 0) *
-                                        (item.cantidad ?? 1),
-                                    )
-                                  }}
-                                  <span>
-                                    <small class="badge bg-danger mt-1">
-                                      {{ item.promo.nombre }}
-                                    </small>
-                                  </span>
-                                </span>
-                                <br />
-                                <span class="text-success fw-bold">
-                                  {{ formatoMoneda(item.precioConPromo) }}
-                                </span>
-                              </div>
-
-                              <!-- Promo general -->
-                              <div
-                                v-else-if="
-                                  promoGeneral && !item.excluirPromocionGeneral
-                                "
-                              >
-                                <span
-                                  class="text-decoration-line-through text-muted small"
-                                >
-                                  {{
-                                    formatoMoneda(
-                                      (item.precioUnitario || 0) *
-                                        (item.cantidad ?? 1),
-                                    )
-                                  }}
-                                  <span>
-                                    <small class="badge bg-danger mt-1">
-                                      {{ promoGeneral.nombre }}
-                                    </small>
-                                  </span>
-                                </span>
-                                <br />
-                                <span class="text-success fw-bold d-block">
-                                  {{
-                                    formatoMoneda(
-                                      precioFinalItem(item, promoGeneral) *
-                                        (item.cantidad ?? 1),
-                                    )
-                                  }}
-                                </span>
-                              </div>
-
-                              <!-- Excluido -->
-                              <div
-                                v-else-if="item.excluirPromocionGeneral"
-                                class="text-muted fst-italic small"
-                              >
-                                {{
-                                  formatoMoneda(
-                                    (item.precioUnitario || 0) *
-                                      (item.cantidad ?? 1),
-                                  )
-                                }}
-                              </div>
-
-                              <!-- Sin promoción -->
-                              <div v-else>
-                                {{
-                                  formatoMoneda(
-                                    (item.precioUnitario || 0) *
-                                      (item.cantidad ?? 1),
-                                  )
-                                }}
-                              </div>
-                            </td>
-
-                            <!-- Acciones -->
-                            <td>
-                              <div class="mb-2 d-flex align-items-center gap-2">
-                                <select
-                                  class="form-select form-select-sm"
-                                  v-model.number="item.idPromocionSeleccionada"
-                                  @change="onCambioPromo(item)"
-                                  :disabled="item.idPromocionAlVuelo > 0"
-                                >
-                                  <!-- Opción visual SOLO cuando es promo vuelo -->
-                                  <option
-                                    v-if="item.idPromocionAlVuelo > 0"
-                                    :value="item.idPromocionSeleccionada"
-                                  >
-                                    {{ item.promo?.nombre }}
-                                    ({{
-                                      item.promo.tipo
-                                        ? item.promo?.valor + "%"
-                                        : "$" + item.promo?.valor
-                                    }})
-                                  </option>
-
-                                  <!-- Sin promo -->
-                                  <option :value="0">Sin promoción</option>
-
-                                  <!-- Promos normales -->
-                                  <option
-                                    v-for="promo in item.promosAplicables.filter(
-                                      (p) => !p.esAlVuelo,
-                                    )"
-                                    :key="promo.idPromocion"
-                                    :value="promo.idPromocion"
-                                  >
-                                    {{ promo.nombre }}
-                                    {{
-                                      promo.tipo
-                                        ? promo.valor + "%"
-                                        : "$" + promo.valor
-                                    }}
-                                  </option>
-                                </select>
-                                <!---ESTE BOTON CAMBIARA SI YA HAY O NO PROMOCION SELECCIONADA O APLICADA  punto 1-->
-                                <button
-                                  class="btn btn-sm"
-                                  :class="
-                                    buscarPromocionAplicada(item)
-                                      ? 'btn-outline-danger'
-                                      : 'btn-outline-primary'
-                                  "
-                                  @click="togglePromoAlVuelo(item)"
-                                  :disabled="
-                                    item.idPromocionSeleccionada > 0 &&
-                                    !buscarPromocionAplicada(item)
-                                  "
-                                >
-                                  <i
-                                    :class="
-                                      buscarPromocionAplicada(item)
-                                        ? 'bi bi-x-lg'
-                                        : 'bi bi-plus-lg'
-                                    "
-                                  ></i>
-                                </button>
-                              </div>
-
-                              <button
-                                class="btn btn-sm btn-outline-danger"
-                                @click="eliminarLlanta(item.idLlanta)"
-                                title="Eliminar llanta"
-                              >
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </td>
-                          </tr>
-                          <tr
-                            v-if="item.mostrarEditorPromo"
-                            :key="'editor-' + item.idLlanta"
-                          >
-                            <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
-                            <td
-                              colspan="6"
-                              class="bg-light justify-content-end align-items-end"
-                            >
-                              <div
-                                class="d-flex gap-2 justify-content-end align-items-center"
-                              >
-                                <!-- Nombre -->
-                                <div>
-                                  <label class="small">Nombre</label>
-                                  <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    v-model="PromocionesVuelo.nombre"
-                                  />
-                                </div>
-
-                                <!-- Tipo -->
-                                <div>
-                                  <label class="small">Tipo</label>
-                                  <select
-                                    class="form-select form-select-sm"
-                                    v-model="PromocionesVuelo.tipo"
-                                  >
-                                    <option :value="false">Monto</option>
-                                    <option :value="true">Porcentaje</option>
-                                  </select>
-                                </div>
-
-                                <!-- Valor -->
-                                <div>
-                                  <label class="small">Valor</label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    class="form-control form-control-sm"
-                                    v-model.number="PromocionesVuelo.valor"
-                                  />
-                                </div>
-                                <!-- Radios -->
-                                <div>
-                                  <label class="samll">
-                                    Tipo de Promocion
-                                  </label>
-                                  <div
-                                    calss=" d-flex align-items-center justify-content-center "
-                                  >
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcTienda"
-                                        >Tienda</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcTienda"
-                                        value="0"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                        checked
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Promocion</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcPromo"
-                                        value="1"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Cupón</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcCupon"
-                                        value="2"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <!-- Guardar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-success btn-sm"
-                                  @click="guardarPromoAlVuelo(item)"
-                                >
-                                  Agregar
-                                </button>
-
-                                <!-- Cancelar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-secondary btn-sm"
-                                  @click="item.mostrarEditorPromo = false"
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        </template>
-
-                        <!-- Paquetes -->
-                        <template
-                          v-for="(paq, j) in cotizacionForm.paquetes || []"
-                          :key="'paq-' + j"
-                        >
-                          <!-- FILA DEL PAQUETE -->
-                          <tr>
-                            <td></td>
-
-                            <td>
-                              {{ paq.nombre }}
-                              <div class="mt-1">
-                                <input
-                                  type="text"
-                                  v-model="paq.comentario"
-                                  class="form-control form-control-sm"
-                                  placeholder="Agregar comentario..."
-                                />
-                              </div>
-                            </td>
-                            <td class="text-center">
-                              <input
-                                type="number"
-                                min="1"
-                                class="form-control mx-auto"
-                                :style="{ width: '70px' }"
-                                v-model.number="paq.cantidad"
-                              />
-                            </td>
-
-                            <!-- PRECIO UNITARIO  -->
-                            <td>
-                              <div>
-                                <input
-                                  min="0"
-                                  class="form-control input-precio-unitario"
-                                  :style="{ width: '90px' }"
-                                  v-model.number="paq.precioUnitario"
-                                  placeholder="Precio c/u"
-                                  @keydown="irAlSiguientePrecio"
-                                />
-                              </div>
-                            </td>
-
-                            <!-- SUBTOTAL -->
-                            <td>
-                              <!-- Caso 1: Promoción individual -->
-                              <div v-if="paq.promo && paq.promo.valor != null">
-                                <span
-                                  class="text-decoration-line-through text-muted small"
-                                >
-                                  {{
-                                    formatoMoneda(
-                                      (paq.precioUnitario || 0) *
-                                        (paq.cantidad ?? 1),
-                                    )
-                                  }}
-                                  <span>
-                                    <small class="badge bg-danger mt-1">
-                                      {{ paq.promo.nombre }}
-                                    </small>
-                                  </span>
-                                </span>
-                                <br />
-                                <span class="text-success fw-bold">
-                                  {{ formatoMoneda(paq.precioConPromo) }}
-                                </span>
-                              </div>
-
-                              <!-- Sin promoción -->
-                              <div v-else>
-                                {{
-                                  formatoMoneda(
-                                    (paq.precioUnitario || 0) *
-                                      (paq.cantidad ?? 1),
-                                  )
-                                }}
-                              </div>
-                            </td>
-
-                            <td>
-                              <div class="mb-2 d-flex align-items-center gap-2">
-                                <select
-                                  class="form-select form-select-sm"
-                                  v-model.number="paq.idPromocionSeleccionada"
-                                  @change="onCambioPromo(paq)"
-                                  :disabled="paq.idPromocionAlVuelo > 0"
-                                >
-                                  <!-- Opción visual SOLO cuando es promo vuelo -->
-                                  <option
-                                    v-if="paq.idPromocionAlVuelo > 0"
-                                    :value="paq.idPromocionSeleccionada"
-                                  >
-                                    {{ paq.promo?.nombre }}
-                                    ({{
-                                      paq.promo.tipo
-                                        ? paq.promo?.valor + "%"
-                                        : "$" + paq.promo?.valor
-                                    }})
-                                  </option>
-
-                                  <!-- Sin promo -->
-                                  <option :value="0">Sin promoción</option>
-
-                                  <!-- Promos normales -->
-                                  <option
-                                    v-for="promo in paq.promosAplicables.filter(
-                                      (p) => !p.esAlVuelo,
-                                    )"
-                                    :key="promo.idPromocion"
-                                    :value="promo.idPromocion"
-                                  >
-                                    {{ promo.nombre }}
-                                    {{
-                                      promo.tipo
-                                        ? promo.valor + "%"
-                                        : "$" + promo.valor
-                                    }}
-                                  </option>
-                                </select>
-
-                                <button
-                                  type="button"
-                                  class="btn btn-sm"
-                                  :class="
-                                    buscarPromocionAplicada(paq)
-                                      ? 'btn-outline-danger'
-                                      : 'btn-outline-primary'
-                                  "
-                                  @click="togglePromoAlVuelo(paq)"
-                                  :disabled="
-                                    paq.idPromocionSeleccionada > 0 &&
-                                    !buscarPromocionAplicada(paq)
-                                  "
-                                >
-                                  <i
-                                    :class="
-                                      buscarPromocionAplicada(paq)
-                                        ? 'bi bi-x-lg'
-                                        : 'bi bi-plus-lg'
-                                    "
-                                  ></i>
-                                </button>
-                              </div>
-
-                              <button
-                                type="button"
-                                class="btn btn-sm btn-outline-danger"
-                                @click="eliminarPaquete(paq.idPaquete)"
-                              >
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </td>
-                          </tr>
-                          <tr
-                            v-if="paq.mostrarEditorPromo"
-                            :key="'editor-' + paq.idPaquete"
-                          >
-                            <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
-                            <td
-                              colspan="6"
-                              class="bg-light justify-content-end align-items-end"
-                            >
-                              <div
-                                class="d-flex gap-2 justify-content-end align-items-center"
-                              >
-                                <!-- Nombre -->
-                                <div>
-                                  <label class="small">Nombre</label>
-                                  <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    v-model="PromocionesVuelo.nombre"
-                                  />
-                                </div>
-
-                                <!-- Tipo -->
-                                <div>
-                                  <label class="small">Tipo</label>
-                                  <select
-                                    class="form-select form-select-sm"
-                                    v-model="PromocionesVuelo.tipo"
-                                  >
-                                    <option :value="false">Monto</option>
-                                    <option :value="true">Porcentaje</option>
-                                  </select>
-                                </div>
-
-                                <!-- Valor -->
-                                <div>
-                                  <label class="small">Valor</label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    class="form-control form-control-sm"
-                                    v-model.number="PromocionesVuelo.valor"
-                                  />
-                                </div>
-                                <!-- Radios -->
-                                <div>
-                                  <label class="samll">
-                                    Tipo de Promocion
-                                  </label>
-                                  <div
-                                    calss=" d-flex align-items-center justify-content-center "
-                                  >
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcTienda"
-                                        >Tienda</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcTienda"
-                                        value="0"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                        checked
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Promocion</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcPromo"
-                                        value="1"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Cupón</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcCupon"
-                                        value="2"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <!-- Guardar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-success btn-sm"
-                                  @click="guardarPromoAlVuelo(paq)"
-                                >
-                                  Agregar
-                                </button>
-
-                                <!-- Cancelar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-secondary btn-sm"
-                                  @click="paq.mostrarEditorPromo = false"
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-
-                          <!-- FILAS DE DETALLE DEL PAQUETE -->
-                          <tr
-                            v-for="(det, k) in paq.detalle"
-                            :key="'det-' + paq.idPaquete + '-' + k"
-                          >
-                            <td>
-                              <select
-                                class="form-select form-select-sm"
-                                v-model="det.idConceptoTrabajo"
-                              >
-                                <option :value="0">
-                                  -- Seleccione concepto --
-                                </option>
-                                <option
-                                  v-for="c in conceptoOT"
-                                  :key="c.idConceptoOrdenTrabajo"
-                                  :value="c.idConceptoOrdenTrabajo"
-                                >
-                                  {{ c.nombre }}
-                                </option>
-                              </select>
-                            </td>
-                            <td class="ps-4">
-                              ↳ <span class="ms-2">{{ det.nombre }}</span>
-                            </td>
-                            <td class="text-center">
-                              <input
-                                type="number"
-                                min="1"
-                                class="form-control mx-auto"
-                                :style="{ width: '70px' }"
-                                v-model.number="det.cantidad"
-                              />
-                            </td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                          </tr>
-                        </template>
-
-                        <!-- Servicios adicionales -->
-                        <template
-                          v-for="(extra, i) in cotizacionForm.serviciosExtras"
-                          :key="'servicio-' + i"
-                        >
-                          <tr>
-                            <td>
-                              <select
-                                class="form-select form-select-sm"
-                                v-model="extra.idConceptoTrabajo"
-                              >
-                                <!-- Default -->
-                                <option :value="0">
-                                  -- Seleccione concepto --
-                                </option>
-
-                                <option
-                                  v-for="c in conceptoOT"
-                                  :key="c.idConceptoOrdenTrabajo"
-                                  :value="c.idConceptoOrdenTrabajo"
-                                >
-                                  {{ c.nombre }}
-                                </option>
-                              </select>
-                            </td>
-                            <td>
-                              {{ extra.nombre }} {{ extra.observacion }}
-                              <div class="mt-1">
-                                <input
-                                  type="text"
-                                  v-model="extra.comentario"
-                                  class="form-control form-control-sm"
-                                  placeholder="Agregar comentario..."
-                                />
-                              </div>
-                            </td>
-
-                            <td class="text-center">
-                              <input
-                                type="number"
-                                min="1"
-                                class="form-control mx-auto"
-                                :style="{ width: '70px' }"
-                                v-model.number="extra.cantidad"
-                                placeholder="1"
-                              />
-                            </td>
-
-                            <!-- PRECIO UNITARIO -->
-                            <td>
-                              <div>
-                                <input
-                                  min="0"
-                                  class="form-control input-precio-unitario"
-                                  :style="{ width: '90px' }"
-                                  v-model.number="extra.precioUnitario"
-                                  placeholder="Precio c/u"
-                                  @keydown="irAlSiguientePrecio"
-                                />
-                              </div>
-                            </td>
-
-                            <!-- SUBTOTAL -->
-                            <td>
-                              <!-- Promo individual -->
-                              <div
-                                v-if="extra.promo && extra.promo.valor != null"
-                              >
-                                <span
-                                  class="text-decoration-line-through text-muted small"
-                                >
-                                  {{
-                                    formatoMoneda(
-                                      (extra.precioUnitario || 0) *
-                                        (extra.cantidad ?? 1),
-                                    )
-                                  }}
-                                  <span>
-                                    <small class="badge bg-danger mt-1">
-                                      {{ extra.promo.nombre }}
-                                    </small>
-                                  </span>
-                                </span>
-                                <br />
-                                <span class="text-success fw-bold">
-                                  {{ formatoMoneda(extra.precioConPromo) }}
-                                </span>
-                              </div>
-
-                              <!-- Promo general -->
-                              <div
-                                v-else-if="
-                                  promoGeneral && !extra.excluirPromocionGeneral
-                                "
-                              >
-                                <span
-                                  class="text-decoration-line-through text-muted d-block small"
-                                >
-                                  {{
-                                    formatoMoneda(
-                                      (extra.precioUnitario || 0) *
-                                        (extra.cantidad ?? 1),
-                                    )
-                                  }}
-                                  <span>
-                                    <small class="badge bg-danger mt-1">
-                                      {{ promoGeneral.nombre }}
-                                    </small>
-                                  </span>
-                                </span>
-                                <span class="text-success fw-bold d-block">
-                                  {{
-                                    formatoMoneda(
-                                      precioFinalItem(extra, promoGeneral) *
-                                        (extra.cantidad ?? 1),
-                                    )
-                                  }}
-                                </span>
-                              </div>
-
-                              <!-- Excluido -->
-                              <div
-                                v-else-if="extra.excluirPromocionGeneral"
-                                class="text-muted fst-italic small"
-                              >
-                                {{
-                                  formatoMoneda(
-                                    (extra.precioUnitario || 0) *
-                                      (extra.cantidad ?? 1),
-                                  )
-                                }}
-                              </div>
-
-                              <!-- Sin promoción -->
-                              <div v-else>
-                                {{
-                                  formatoMoneda(
-                                    (extra.precioUnitario || 0) *
-                                      (extra.cantidad ?? 1),
-                                  )
-                                }}
-                              </div>
-                            </td>
-
-                            <td>
-                              <div class="mb-2 d-flex align-items-center gap-2">
-                                <select
-                                  class="form-select form-select-sm"
-                                  v-model="extra.idPromocionSeleccionada"
-                                  @change="onCambioPromo(extra)"
-                                  :disabled="extra.idPromocionAlVuelo > 0"
-                                >
-                                  <!-- Opción visual SOLO cuando es promo vuelo -->
-                                  <option
-                                    v-if="extra.idPromocionAlVuelo > 0"
-                                    :value="extra.idPromocionSeleccionada"
-                                  >
-                                    {{ extra.promo?.nombre }}
-                                    ({{
-                                      extra.promo.tipo
-                                        ? extra.promo?.valor + "%"
-                                        : "$" + extra.promo?.valor
-                                    }})
-                                  </option>
-
-                                  <!-- Sin promo -->
-                                  <option :value="0">Sin promoción</option>
-
-                                  <!-- Promos normales -->
-                                  <option
-                                    v-for="promo in extra.promosAplicables.filter(
-                                      (p) => !extra.esAlVuelo,
-                                    )"
-                                    :key="promo.idPromocion"
-                                    :value="promo.idPromocion"
-                                  >
-                                    {{ promo.nombre }}
-                                    {{
-                                      promo.tipo
-                                        ? promo.valor + "%"
-                                        : "$" + promo.valor
-                                    }}
-                                  </option>
-                                </select>
-                                <button
-                                  class="btn btn-sm"
-                                  :class="
-                                    buscarPromocionAplicada(extra)
-                                      ? 'btn-outline-danger'
-                                      : 'btn-outline-primary'
-                                  "
-                                  @click="togglePromoAlVuelo(extra)"
-                                  :disabled="
-                                    extra.idPromocionSeleccionada > 0 &&
-                                    !buscarPromocionAplicada(extra)
-                                  "
-                                >
-                                  <i
-                                    :class="
-                                      buscarPromocionAplicada(extra)
-                                        ? 'bi bi-x-lg'
-                                        : 'bi bi-plus-lg'
-                                    "
-                                  ></i>
-                                </button>
-                              </div>
-                              <button
-                                class="btn btn-sm btn-outline-danger"
-                                @click="
-                                  eliminarServicioExtra(
-                                    extra.idDetalleCotizacionServicio ?? i,
-                                  )
-                                "
-                                title="Eliminar servicio"
-                              >
-                                <i class="bi bi-trash"></i>
-                              </button>
-                            </td>
-                          </tr>
-                          <tr
-                            v-if="extra.mostrarEditorPromo"
-                            :key="'editor-' + extra.idLlanta"
-                          >
-                            <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
-                            <td
-                              colspan="6"
-                              class="bg-light justify-content-end align-items-end"
-                            >
-                              <div
-                                class="d-flex gap-2 justify-content-end align-items-center"
-                              >
-                                <!-- Nombre -->
-                                <div>
-                                  <label class="small">Nombre</label>
-                                  <input
-                                    type="text"
-                                    class="form-control form-control-sm"
-                                    v-model="PromocionesVuelo.nombre"
-                                  />
-                                </div>
-
-                                <!-- Tipo -->
-                                <div>
-                                  <label class="small">Tipo</label>
-                                  <select
-                                    class="form-select form-select-sm"
-                                    v-model="PromocionesVuelo.tipo"
-                                  >
-                                    <option :value="false">Monto</option>
-                                    <option :value="true">Porcentaje</option>
-                                  </select>
-                                </div>
-
-                                <!-- Valor -->
-                                <div>
-                                  <label class="small">Valor</label>
-                                  <input
-                                    type="number"
-                                    min="0"
-                                    class="form-control form-control-sm"
-                                    v-model.number="PromocionesVuelo.valor"
-                                  />
-                                </div>
-                                <!-- Radios -->
-                                <div>
-                                  <label class="samll">
-                                    Tipo de Promocion
-                                  </label>
-                                  <div
-                                    calss=" d-flex align-items-center justify-content-center "
-                                  >
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcTienda"
-                                        >Tienda</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcTienda"
-                                        value="0"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                        checked
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Promocion</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcPromo"
-                                        value="1"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                    <div class="form-checK float-start mx-2">
-                                      <label
-                                        class="form-check-label mx-2"
-                                        for="opcPromo"
-                                        >Cupón</label
-                                      >
-                                      <input
-                                        class="form-check-input me-2"
-                                        type="radio"
-                                        name="opcPromocion"
-                                        id="opcCupon"
-                                        value="2"
-                                        v-model="PromocionesVuelo.tipoPromocion"
-                                      />
-                                    </div>
-                                  </div>
-                                </div>
-
-                                <!-- Guardar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-success btn-sm"
-                                  @click="guardarPromoAlVuelo(extra)"
-                                >
-                                  Agregar
-                                </button>
-
-                                <!-- Cancelar -->
-                                <button
-                                  type="button"
-                                  class="btn btn-secondary btn-sm"
-                                  @click="extra.mostrarEditorPromo = false"
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        </template>
-                      </tbody>
-                      <tfoot>
-                        <!-- TOTAL GENERAL -->
-                        <tr>
-                          <td colspan="2">
-                          </td>
-                          <td colspan="2">
-                            <div class="form-check my-1">
-                              <input
-                                class="form-check-input"
-                                type="checkbox"
-                                id="mostrarTotal"
-                                v-model="cotizacionForm.mostrarTotal"
-                              />
-                              <label class="form-check-label fs-7" for="mostrarTotal">
-                                Mostrar total
-                              </label>
-                            </div>
-                          </td>
-                          <td class="text-end fs-5 fw-bold">
-                            <span v-if="cotizacionForm.mostrarTotal">Total:</span>
-                          </td>
-                          <td class="fs-5 fw-bold text-end">
-                            <span v-if="cotizacionForm.mostrarTotal">{{ formatoMoneda(totalCotizacion) }}</span>
-                          </td>
-                        </tr>
-                      </tfoot>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary position-relative shadow mx-3"
-              style="width: 140px"
-              @click="closeModal"
-            >
-              <i class="bi-x-circle-fill position-absolute start-0 ms-2"></i>
-              Cerrar
-            </button>
-            <button
-              type="button"
-              class="btn btn-success position-relative shadow mx-3"
-              style="width: 140px"
-              @click="guardarCotizacion"
-              :disabled="!telefonoEsValido || !correoEsValido"
-            >
-              <i class="bi-save-fill position-absolute start-0 ms-2"></i>
-              Guardar
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <CotizacionToolbar :ctx="cotizacionContext" />
+    <CotizacionesTable :ctx="cotizacionContext" />
+    <CotizacionPreviewModal :ctx="cotizacionContext" />
+    <CotizacionEditorModal :ctx="cotizacionContext" />
   </div>
 </template>
 
@@ -2196,18 +18,17 @@ import {
   onBeforeUnmount,
   nextTick,
   toRaw,
-  onUnmounted,
 } from "vue";
-import EasyDataTable from "vue3-easy-data-table";
 import Swal from "sweetalert2";
-import EnviarCorreoModal from "@/components/EnviarCorreo/EnviarCorreoModal.vue";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
 import { useRouter } from "vue-router";
-import { fontStringify } from "pdfmake/src/helpers";
-import ClientesFilterOption from "@/components/Cotizacion/ClientesFilterOption.vue";
+import CotizacionToolbar from "@/components/Cotizacion/CotizacionToolbar.vue";
+import CotizacionesTable from "@/components/Cotizacion/CotizacionesTable.vue";
+import CotizacionPreviewModal from "@/components/Cotizacion/CotizacionPreviewModal.vue";
+import CotizacionEditorModal from "@/components/Cotizacion/CotizacionEditorModal.vue";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -2250,7 +71,6 @@ const sucursales = [
 ];
 const vistaCotizacion = ref({});
 const mostrarVista = ref(false);
-const mostrarTotalEnVista = ref(false); // TODO: correjir este apartado o buscar otra forma de implementarlo
 const tituloModal = ref("Nueva Cotización");
 const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
 const filtroEstatus = ref("");
@@ -2409,7 +229,7 @@ const cancelarCotizacion = (cotizacion) => {
   const json = {
     idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 4, // se puede obtimizar mas los estatus y usar una sola funcion para las 4 operaciones
-    idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+    idUsuario: 1,
   };
 
   fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
@@ -2425,7 +245,6 @@ const cancelarCotizacion = (cotizacion) => {
       return res.json();
     })
     .then((data) => {
-      //console.log("Cotización actualizada:", data);
       cargarCotizaciones();
     })
     .catch((error) => {
@@ -2438,7 +257,7 @@ const reactivarCotizacion = (cotizacion) => {
   const json = {
     idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 1,
-    idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+    idUsuario: 1,
   };
   fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
     method: "PUT",
@@ -2453,7 +272,6 @@ const reactivarCotizacion = (cotizacion) => {
       return res.json();
     })
     .then((data) => {
-      //console.log("Cotización actualizada:", data);
       cargarCotizaciones();
     })
     .catch((error) => {
@@ -2473,7 +291,7 @@ const aprobarCotizacion = (cotizacion) => {
   const json = {
     idCotizacion: idCotizacion, // parseInt(cotizacion.codigo.replace('COT-', ''), 10),
     idEstadoCotizacion: 2,
-    idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+    idUsuario: 1,
   };
 
   fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
@@ -2489,9 +307,6 @@ const aprobarCotizacion = (cotizacion) => {
       return res.json();
     })
     .then((data) => {
-      console.log(
-        "Cotización actualizada:" + data + " idCot: " + json.idCotizacion,
-      );
       cargarCotizaciones();
 
       router.push({
@@ -2516,7 +331,7 @@ const finalizarCotizacion = (cotizacion) => {
   const json = {
     idCotizacion: cotizacion.idCotizacion,
     idEstadoCotizacion: 3,
-    idUsuario: 1, //TODO: cambiar por el usercurrent, falta desarrollar los usuarios
+    idUsuario: 1,
   };
   fetch(`${proxy.$serverIP}api/Cotizacion/editarEstado`, {
     method: "PUT",
@@ -2531,7 +346,6 @@ const finalizarCotizacion = (cotizacion) => {
       return res.json();
     })
     .then((data) => {
-      //console.log("Cotización actualizada:", data);
       cargarCotizaciones();
     })
     .catch((error) => {
@@ -2672,7 +486,6 @@ const cargarCotizaciones = async () => {
 };
 
 const registrarCerrarConEsc = (mostrarVista) => {
-  //console.log()
   const listener = (e) => {
     if (e.key !== "Escape") return;
 
@@ -2902,11 +715,8 @@ const agregarLlanta = async (item) => {
     return;
   }
 
-  // console.log(item.llanta)
-
   const yaExiste = cotizacionForm.llantas.some((ll) => ll.idLlanta === item.id);
   if (yaExiste) {
-    console.log("agregarLLanta: ya existe esa llanta");
     return;
   }
 
@@ -2929,11 +739,7 @@ const agregarLlanta = async (item) => {
     comentario: "",
   };
 
-  //console.log('Agregar Llanta: obj enviado '+ JSON.stringify(item))
-  //console.log('Agregar Llanta: nuevo obj '+JSON.stringify(nuevaLlanta))
-
   try {
-    //console.log(nuevaLlanta.idInventarioInicial)
     const promosDisponibles = await obtenerPromosPorInventario(
       nuevaLlanta.idInventarioInicial,
     );
@@ -2971,7 +777,6 @@ const agregarLlanta = async (item) => {
     return (b.precioUnitario || 0) - (a.precioUnitario || 0);
   });
 
-  //console.log('agregarLlanta2: '+ JSON.stringify(cotizacionForm.llantas))
 };
 
 // Obtener promociones aplicables a una llanta (por inventario)
@@ -3065,7 +870,6 @@ const onCambioPromo = (item) => {
   item.isVuelo = !!idVuelo;
 
   // Calcular precio con la promo
-  console.log("ONCambioPromo DATA:", item);
   const base = item.precioUnitario * item.cantidad;
   if (promo) {
     item.precioConPromo = promo.tipo
@@ -3185,7 +989,6 @@ const cargarConcpetoTrabajo = async () => {
       nombre: a.nombre,
     }));
 
-    // console.log('Datos recibidos:', conceptoOT.value)
   } catch (error) {
     console.error("Error cargando ConceptoTrabajo:", error);
   }
@@ -3225,8 +1028,6 @@ const cargarFormulario = async (cotizacion = null) => {
     ) {
       paquetesSeleccionados.value = [paquetesDisponibles.value[0].idPaquete];
     }
-
-    //console.log("🧹 FORM LIMPIO:", JSON.stringify(cotizacionForm)); // 🔹 log claro
 
     return;
   }
@@ -3335,7 +1136,6 @@ const cargarFormulario = async (cotizacion = null) => {
     paquetesSeleccionados.value = cotizacionForm.paquetes
       .filter((p) => p && p.idPaquete != null)
       .map((p) => p.idPaquete);
-    //console.log("paquetes Completo:", JSON.stringify(cotizacionForm.paquete));
     // ===============================
     // 🔹 LLANTAS
     // ===============================
@@ -3485,9 +1285,7 @@ const cargarPromosGenerales = async () => {
     promosGeneralesDisponibles.value = data;
 
     if (data.length > 0) {
-      //console.log(`Se cargaron ${data.length} promociones generales activas.`);
     } else {
-      console.log(" No hay promociones generales activas.");
     }
   } catch (error) {
     console.error("Error al cargar promociones generales:", error);
@@ -3750,8 +1548,6 @@ const guardarCotizacion = async () => {
       idPromocionGeneral: promoGeneral.value?.idPromocion ?? null,
     };
 
-    console.log("PAYLOAD FINAL:", nuevaCotizacion);
-
     /* ================= REQUEST ================= */
 
     const url = cotizacionForm.codigo
@@ -3769,16 +1565,13 @@ const guardarCotizacion = async () => {
     }
 
     const data = await res.json();
-    //console.log("RESPUESTA BACKEND:", data);
 
     mostrarToast("success", "Cotización guardada");
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
-    //console.log(data);
     mostrarVistaPrevia(data, "ver");
 
-    //console.log('guardarCotizacion: '+JSON.stringify(nuevaCotizacion))
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -3995,7 +1788,6 @@ const cargarAlmacenes = async () => {
 
     const data = await response.json(); // <- aquí parseas el JSON real
 
-    //console.log('Datos recibidos:', data)
     // Aquí mapeamos para que tenga el mismo formato que esperabas
     almacenes.value = data.map((a) => ({
       id: a.idAlmacen,
@@ -4040,7 +1832,6 @@ const abrirModalCotizacion = (cotizacion = null) => {
   } else {
     tituloModal.value = "Nueva Cotización";
   }
-  //console.log("AbirModalCotizacion "+JSON.stringify(cotizacion));
   cargarFormulario(cotizacion);
   openModal();
 
@@ -4472,7 +2263,6 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         sucursal: data.sucursal,
         observaciones: data.observaciones,
       };
-      console.log(data);
       mostrarVista.value = true;
     } catch (error) {
       console.error("Error al cargar detalle de cotización:", error);
@@ -4497,7 +2287,6 @@ const confirmarAccion = async (vistaCotizacion) => {
 
   // if (!result.isConfirmed) return;
 
-  // console.log('confirmar: ' + vistaCotizacion.codigo)
   aprobarCotizacion(vistaCotizacion);
 };
 
@@ -4583,7 +2372,6 @@ const togglePaquete = (paquete) => {
 // Guardar Promociones al vuelo
 const guardarPromoAlVuelo = async (itemPromoActual) => {
   const item = itemPromoActual;
-  console.log(JSON.stringify(item));
   if (!item) {
     console.error("No hay item seleccionada");
     return;
@@ -5113,6 +2901,127 @@ const generarPDF = async () => {
   // usa esta si el problema es download
   pdfMake.createPdf(docDefinition).download(`Cotización_${v.codigo}.pdf`);
 };
+
+const cotizacionContext = {
+  router,
+  modalRef,
+  modalInstance,
+  paquetesDisponibles,
+  clientesDisponibles,
+  items,
+  nuevoServicio,
+  NuevoConceptoTrabajo,
+  nuevoPrecio,
+  nuevaCantidad,
+  nuevaObservacion,
+  busquedaLlantas,
+  busquedaCotizaciones,
+  cotizacionesRealizadas,
+  conceptoOT,
+  mostrarTabla,
+  selectedAlmacenes,
+  dropdownOpen,
+  raw,
+  loggeduser,
+  sucursales,
+  vistaCotizacion,
+  mostrarVista,
+  tituloModal,
+  codigoCotizacionEnEdicion,
+  filtroEstatus,
+  loading,
+  itemsSelected,
+  paquetesSeleccionados,
+  esNuevaCotizacion,
+  sortBy,
+  sortType,
+  tableKey,
+  idCliente,
+  onUpdateSortBy,
+  onUpdateSortType,
+  mostrarToast,
+  promoGeneral,
+  promosGeneralesDisponibles,
+  resetTabla,
+  cotizacionForm,
+  preciosLlantas,
+  PromocionesVuelo,
+  telefonoFormateado,
+  telefonoVistaFormateado,
+  telefonoEsValido,
+  correoEsValido,
+  cancelarCotizacion,
+  reactivarCotizacion,
+  ajustaNombre,
+  aprobarCotizacion,
+  observacionesVista,
+  finalizarCotizacion,
+  cargarPaquetes,
+  cargarClientes,
+  cargarLlantas,
+  cargarCotizaciones,
+  registrarCerrarConEsc,
+  cleanupEscListener,
+  irAlSiguientePrecio,
+  eliminarPaquete,
+  agregarServicioExtra,
+  eliminarServicioExtra,
+  eliminarLlanta,
+  agregarLlanta,
+  obtenerPromosPorInventario,
+  obtenerPromosPorPaquete,
+  obtenerPromosGeneralesParaServicio,
+  aplicarPromo,
+  onCambioPromo,
+  onCambioPromoPaquete,
+  onCambioPromoServicio,
+  precioFinalItem,
+  cargarConcpetoTrabajo,
+  cargarFormulario,
+  cargarPromosGenerales,
+  aplicarPromocionGeneral,
+  guardarCotizacion,
+  subtotalLlantas,
+  subtotalPaquete,
+  subtotalExtras,
+  totalCotizacion,
+  brandPriority,
+  multiwordBrands,
+  reSplit,
+  reNonAN,
+  collator,
+  extractMarcaFromLlanta,
+  parsePrecio,
+  parseMedida,
+  preparedItems,
+  baseSorted,
+  q,
+  qDebounced,
+  _t,
+  itemsFiltrados,
+  toggleTodos,
+  almacenes,
+  cargarAlmacenes,
+  openModal,
+  closeModal,
+  formatoMoneda,
+  abrirModalCotizacion,
+  tblHeadersModal,
+  cotizacionesTransformadas,
+  mostrarVistaPrevia,
+  confirmarAccion,
+  imprimirCotizacion,
+  logoBase64,
+  loadLogoBase64,
+  manejarCliente,
+  buscarPromocionAplicada,
+  togglePromoAlVuelo,
+  togglePaquete,
+  guardarPromoAlVuelo,
+  formatearTelefono,
+  generarPDF
+};
+
 </script>
 
 <style>
