@@ -26,8 +26,9 @@
                   <div
                     v-for="(paquete, i) in paqueteDisponibles"
                     :key="i"
-                    class="form-check-inline"
+                    class="form-check-inline"  
                   >
+
                     <input
                       class="form-check-input mx-2"
                       type="checkbox"
@@ -294,7 +295,7 @@
                           </option>
                         </select>
                       </td>
-                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }}</td>
+                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }} </td>
                       <td>
                         <input
                           type="number"
@@ -552,12 +553,15 @@
                       <td>{{ paq.cantidad }}</td>
 
                       <td>
-                        {{
-                          Number(paq.precioUnitario).toLocaleString("es-MX", {
-                            style: "currency",
-                            currency: "MXN",
-                          })
-                        }}
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control"
+                          v-model.number="paq.precioUnitario"
+                          @input="recalcularSubtotal(paq)"
+                        />
+                        
                       </td>
 
                       <td>
@@ -587,7 +591,7 @@
                           <br />
                           <span class="text-success fw-bold mx-2">
                             {{
-                              Number(paq.subTotal).toLocaleString("es-MX", {
+                              subtotalItem(paq).toLocaleString("es-MX", {
                                 style: "currency",
                                 currency: "MXN",
                               })
@@ -596,9 +600,7 @@
                         </div>
                         <div v-else>
                           {{
-                            Number(
-                              paq.cantidad * paq.precioUnitario,
-                            ).toLocaleString("es-MX", {
+                            subtotalItem(paq).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -1265,19 +1267,32 @@ const obtenerPromoSeleccionada = (item) => {
     (p) => p.idPromocion === item.idPromocionSeleccionada // <-- usar idSel
   );
 };
-const precioFinalItem = (item , promo) => {
-  console.log("PrecioFinalItem Item [INFO]: ", item )
-  const base = item.precioUnitario * item.cantidad;
- 
-  console.log("PrecioFinalItem PROMO [INFO]: ", promo )
+const toNumber = (value) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+};
+
+const cantidadItem = (item) => {
+  const cantidad = Number(item?.cantidad);
+  return Number.isFinite(cantidad) ? cantidad : 1;
+};
+
+const subtotalItem = (item) => {
+  const subtotal = Number(item?.subTotal);
+  if (Number.isFinite(subtotal)) return subtotal;
+
+  return toNumber(item?.precioUnitario) * cantidadItem(item);
+};
+
+const precioFinalItem = (item, promo) => {
+  const base = toNumber(item?.precioUnitario) * cantidadItem(item);
+
   if (!promo) return base;
 
-  const res =promo.tipo
-    ? base * (1 - promo.valor / 100)
-    : Math.max(0, base - promo.valor);
-  console.log("PrecioFinalItem RES [INFO]: ", res )
-  return res;
-  };
+  return promo.tipo
+    ? base * (1 - toNumber(promo.valor) / 100)
+    : Math.max(0, base - toNumber(promo.valor));
+};
 
 const recalcularSubtotal = (item) => {
   // Resolver promo actual según selección
@@ -1302,7 +1317,7 @@ const recalcularSubtotal = (item) => {
   // Calcular precio final con la promo vigente
   const precioFinal = precioFinalItem(item, promo);
   item.precioConPromo = precioFinal;
-  item.subTotal = precioFinal.toFixed(2);
+  item.subTotal = Number(precioFinal.toFixed(2));
 };
 
 
@@ -1554,8 +1569,8 @@ const agregarLlanta = async (itm) => {
     ubicacion: itm.ubicacion,
 
     cantidad: 4,
-    precioUnitario: Math.trunc(itm.precio || 0),
-    subTotal: (4 * Math.trunc(itm.precio || 0)).toFixed(2),
+    precioUnitario: toNumber(itm.precio),
+    subTotal: Number((4 * toNumber(itm.precio)).toFixed(2)),
 
     promosDisponibles: [],
     promosAplicables: [],
@@ -1722,6 +1737,11 @@ const onTogglePaquete = async (paqueteBase) => {
   // AGREGAR
   const promosDisponibles =
     (await obtenerPromosPorPaquete(paqueteBase.idPaquete)) || [];
+  const precioUnitario = toNumber(paqueteBase.precioUnitario);
+  const cantidad = 1;
+  const subTotal = Number(
+    precioFinalItem({ precioUnitario, cantidad }, null).toFixed(2),
+  );
 
   paquetes.value.push({
     idDetalleOTPaquete: 0,
@@ -1731,31 +1751,26 @@ const onTogglePaquete = async (paqueteBase) => {
     idPromocionVuelo: 0,
     idPromocionSeleccionada: 0,
     descripcion: paqueteBase.nombre,
-    cantidad: 1,
-    precioUnitario: paqueteBase.precioUnitario,
-    promo:{
-      idPromocion:0,
-      valor:0,
-      tipo:false,
-      nombre:""
+    cantidad,
+    precioUnitario,
+    precioConPromo: subTotal,
+    promo: {
+      idPromocion: 0,
+      valor: 0,
+      tipo: false,
+      nombre: "",
     },
-    subTotal: (
-      1 *
-      precioFinalItem({
-        precioUnitario: paqueteBase.precioUnitario,
-        idPromocion: 0,
-        valorPromocion: null,
-        tipoPromocion: null,
-      })
-    ).toFixed(2),
+    subTotal,
 
     detalle: (paqueteBase.detalle || []).map((det) => ({
       idDesglosePaquete: det.idDesglosePaquete,
       idConceptoTrabajo: det.idConceptoTrabajo,
       descripcion: det.nombre,
-      cantidad: det.cantidad,
-      precioUnitario: 0,
-      subTotal: 0,
+      cantidad: toNumber(det.cantidad),
+      precioUnitario: toNumber(det.precioUnitario),
+      subTotal: Number(
+        (toNumber(det.cantidad) * toNumber(det.precioUnitario)).toFixed(2),
+      ),
     })),
 
     promosDisponibles,
@@ -1814,7 +1829,7 @@ const mapearInsumosParaPadre = () => {
         descripcion: d.descripcion,
         cantidad: d.cantidad,
         precioUnitario: d.precioUnitario,
-        subTotal: d.subtotal,
+        subTotal: subtotalItem(d),
       })),
 
       promosDisponibles: p.promosDisponibles,
@@ -1872,17 +1887,17 @@ onMounted(() => {
 
 const calcularTotalesDesdeInsumos = (insumos) => {
   const totalLlantas = insumos.llanta.reduce(
-    (acc, i) => acc + Number(i.subTotal || 0),
+    (acc, i) => acc + subtotalItem(i),
     0,
   );
 
   const totalPaquetes = insumos.paquete.reduce(
-    (acc, i) => acc + Number(i.subTotal || 0),
+    (acc, i) => acc + subtotalItem(i),
     0,
   );
 
   const totalAdicionales = insumos.adicional.reduce(
-    (acc, i) => acc + Number(i.subTotal || 0),
+    (acc, i) => acc + subtotalItem(i),
     0,
   );
 

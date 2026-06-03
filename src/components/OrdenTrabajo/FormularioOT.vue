@@ -2333,6 +2333,8 @@ const guardarOT = async () => {
       idSucursal: dataUser.usuario.idSucursal,
       idCotizacion: parseInt(ordenTrabajoForm.cotSeleccionada),
       idEmpleado: ordenTrabajoForm.idEmpleado,
+      idOtPadre: parseInt( ordenTrabajoForm.idOtPAdre),
+      isHija:ordenTrabajoForm.esHija,
       idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
       metodoPago: ordenTrabajoForm.cliente.metodoPago,
       fechaAlta: ordenTrabajoForm.cliente.fechaAlta,

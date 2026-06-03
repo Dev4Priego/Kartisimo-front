@@ -152,7 +152,7 @@
                         class="form-check-label"
                         :for="'paquete-' + paquete.idPaquete"
                       >
-                        {{ paquete.nombre }} - $ {{ paquete.precioUnitario }}.00
+                        {{ paquete.nombre }} - {{ formatoMoneda(paquete.precioUnitario) }}
                       </label>
                     </div>
                   </div>
@@ -520,7 +520,9 @@
                             <td>
                               <div>
                                 <input
+                                  type="number"
                                   min="0"
+                                  step="0.01"
                                   class="form-control input-precio-unitario"
                                   :style="{ width: '90px' }"
                                   v-model.number="item.precioUnitario"
@@ -824,7 +826,9 @@
                             <td>
                               <div>
                                 <input
+                                  type="number"
                                   min="0"
+                                  step="0.01"
                                   class="form-control input-precio-unitario"
                                   :style="{ width: '90px' }"
                                   v-model.number="paq.precioUnitario"
@@ -1141,7 +1145,9 @@
                             <td>
                               <div>
                                 <input
+                                  type="number"
                                   min="0"
+                                  step="0.01"
                                   class="form-control input-precio-unitario"
                                   :style="{ width: '90px' }"
                                   v-model.number="extra.precioUnitario"

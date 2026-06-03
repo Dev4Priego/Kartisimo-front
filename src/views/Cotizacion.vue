@@ -62,6 +62,11 @@ const loggeduser = {
   id_sucursal: raw.usuario?.idSucursal ?? null,
 };
 
+const normalizarPrecio = (valor) => {
+  const precio = Number.parseFloat(valor);
+  return Number.isFinite(precio) ? Number(precio.toFixed(2)) : 0;
+};
+
 const sucursales = [
   "(Ninguna)",
   "Delta",
@@ -369,7 +374,7 @@ const cargarPaquetes = async () => {
         idPaquete: p.idPaquete,
         nombre: p.nombre,
         descripcion: p.descripcion,
-        precioUnitario: Math.trunc(parseFloat(p.precioUnitario)) || 0,
+        precioUnitario: normalizarPrecio(p.precioUnitario),
         detalle: (p.detalle || []).map((d) => ({
           idDesglosePaquete: d.idDesglosePaquete,
           idConceptoTrabajo: d.idConceptoTrabajo,
@@ -667,12 +672,12 @@ const agregarServicioExtra = async () => {
     nombre,
     observacion,
     cantidad,
-    precioUnitario: Math.trunc(parseFloat(precio)) || 0,
+    precioUnitario: normalizarPrecio(precio),
     idConceptoTrabajo: NuevoConceptoTrabajo.value,
     promo: null,
     promosAplicables: [],
     idPromocionSeleccionada: 0,
-    precioConPromo: precio,
+    precioConPromo: normalizarPrecio(precio),
     excluirPromocionGeneral: false,
     comentario: "",
   };
@@ -725,7 +730,7 @@ const agregarLlanta = async (item) => {
     idLlanta: item.id,
     idInventarioInicial: item.idInventarioInicial,
     cantidad: 4,
-    precioUnitario: Math.trunc(parseFloat(item.precio)) || 0,
+    precioUnitario: normalizarPrecio(item.precio),
     modeloMedidas: `${item.medida} ${item.rango} ${item.llanta}`,
     marca: item.marca,
     idAlmacen: item.idAlmacen,
