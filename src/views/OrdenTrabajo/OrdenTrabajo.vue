@@ -1,14 +1,24 @@
 <template>
   <div class="container-fluid p-4">
-
     <!-- HEADER -->
-    <div class="row mx-4 align-items-center">
-      <div class="col">
-        <h2>
+    <div class="row my-3 align-items-center">
+      <div>
+        <h1>
           <i class="bi bi-wrench-adjustable me-2"></i>
           Órdenes de Trabajo
-        </h2>
+        </h1>
       </div>
+    </div>
+    <div class="row mx-4 align-items-center">
+      <div class="col">
+        <input
+          type="text"
+          placeholder="Buscar órden de trabajo."
+          class="form-control form-control-md w-50"
+          v-model="buscarOrdenTrabajo"
+        />
+      </div>
+      <div class="col"></div>
 
       <div class="col-4 col-lg-3">
         <router-link :to="{ name: 'orden-trabajo-form' }">
@@ -58,84 +68,101 @@
           </thead>
 
           <tbody>
-            <tr
-              v-for="ot in listaOrdenTrabajo.ordenes"
-              :key="ot.idOrdenTrabajo"
-            >
-              <td style="white-space: nowrap;">O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }} 
-                <div v-if="ot.isHija" class="float-sm-end" >
-                  <i class="bi bi-node-plus-fill ms-1" title="OT Derivada"></i>
-                </div>
-              </td>
-              <td>{{ ot.clienteNombre }}</td>
-              <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
-              <td>{{ formatearFecha(ot.fechaAlta) }}</td>
-              <td>{{ ot.empleadoNombre }}</td>
-              <td>{{ ot.metodoPago }}</td>
+            <template v-if="listaOrdenTrabajoFilter.ordenes.length">
+              <tr
+                v-for="ot in listaOrdenTrabajoFilter.ordenes"
+                :key="ot.idOrdenTrabajo"
+              >
+                <td style="white-space: nowrap">
+                  O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }}
+                  <div v-if="ot.isHija" class="float-sm-end">
+                    <i
+                      class="bi bi-node-plus-fill ms-1"
+                      title="OT Derivada"
+                    ></i>
+                  </div>
+                </td>
+                <td>{{ ot.clienteNombre }}</td>
+                <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
+                <td>{{ formatearFecha(ot.fechaAlta) }}</td>
+                <td>{{ ot.empleadoNombre }}</td>
+                <td>{{ ot.metodoPago }}</td>
 
-              <!-- FACTURA -->
-              <td>
-                <i
-                  v-if="ot.requiereFactura"
-                  class="bi bi-check-circle-fill text-success"
-                ></i>
-                <i
-                  v-else
-                  class="bi bi-x-circle-fill text-danger"
-                ></i>
-              </td>
+                <!-- FACTURA -->
+                <td>
+                  <i
+                    v-if="ot.requiereFactura"
+                    class="bi bi-check-circle-fill text-success"
+                  ></i>
+                  <i v-else class="bi bi-x-circle-fill text-danger"></i>
+                </td>
 
-              <!-- ESTADO -->
-              <td>
-                <span :class="ot.vigente == 0 ? 'badge bg-danger' : badgeEstado(ot.estado)">
-                  {{ ot.vigente == 0 ? 'Cancelada' : ot.estado }}
-                </span>
-              </td>
-
-              <!-- DESECHAR LLANTA -->
-              <td>
-                <i
-                  v-if="ot.desecharLlanta === true"
-                  class="bi bi-check-circle-fill text-success"
-                ></i>
-                <i
-                  v-else-if="ot.desecharLlanta === false"
-                  class="bi bi-x-circle-fill text-danger"
-                ></i>
-                <i
-                  v-else
-                  class="bi bi-dash-circle-fill text-secondary"
-                ></i>
-              </td>
-
-              <!-- ACCIONES -->
-              <td>
-                <div class="d-flex gap-1 justify-content-center">
-                  <button
-                    class="btn btn-sm btn-outline-info"
-                    @click="verOT(ot.idOrdenTrabajo)"
+                <!-- ESTADO -->
+                <td>
+                  <span
+                    :class="
+                      ot.vigente == 0
+                        ? 'badge bg-danger'
+                        : badgeEstado(ot.estado)
+                    "
                   >
-                    <i class="bi bi-eye"></i>
-                  </button>
+                    {{ ot.vigente == 0 ? "Cancelada" : ot.estado }}
+                  </span>
+                </td>
 
-                 <button
-                  class="btn btn-sm btn-outline-warning"
-                  @click="editarOT(ot.idOrdenTrabajo)"
-                >
-                  <i class="bi bi-pencil-square"></i>
-                </button>
+                <!-- DESECHAR LLANTA -->
+                <td>
+                  <i
+                    v-if="ot.desecharLlanta === true"
+                    class="bi bi-check-circle-fill text-success"
+                  ></i>
+                  <i
+                    v-else-if="ot.desecharLlanta === false"
+                    class="bi bi-x-circle-fill text-danger"
+                  ></i>
+                  <i v-else class="bi bi-dash-circle-fill text-secondary"></i>
+                </td>
 
+                <!-- ACCIONES -->
+                <td>
+                  <div class="d-flex gap-1 justify-content-center">
+                    <button
+                      class="btn btn-sm btn-outline-info"
+                      @click="verOT(ot.idOrdenTrabajo)"
+                    >
+                      <i class="bi bi-eye"></i>
+                    </button>
 
-
-
-                </div>
-              </td>
-            </tr>
+                    <button
+                      class="btn btn-sm btn-outline-warning"
+                      @click="editarOT(ot.idOrdenTrabajo)"
+                    >
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <td colspan="10" class="text-center py-5">
+                  <div>
+                    <i
+                      class="bi bi-inbox"
+                      style="font-size: 3rem; color: #ccc"
+                    ></i>
+                    <p class="mt-3 text-muted fw-semibold">
+                      No hay órdenes de trabajo.
+                    </p>
+                    
+                  </div>
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -153,17 +180,17 @@ const listaOrdenTrabajo = ref({
   ordenes: [],
   totales: { finalizado: 0, enCurso: 0, creado: 0 },
 });
-
+const buscarOrdenTrabajo = ref("");
 /* ===== MODAL ===== */
 const otEditar = ref({});
 let modalEditar;
 let modalIncidente;
 
-const abrirModalEditar = async(ot) => {
+const abrirModalEditar = async (ot) => {
   const resp = await fetch(
-		`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${ot}`
-	)
-	const data = await resp.json()
+    `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${ot}`,
+  );
+  const data = await resp.json();
   otEditar.value = data;
   console.log(otEditar.value);
   cargarEmpleados();
@@ -188,6 +215,25 @@ const cargarOrdenTrabajo = async () => {
   listaOrdenTrabajo.value = result.data;
   loading.value = false;
 };
+// ======= FILTRAR ORDENES ========
+const listaOrdenTrabajoFilter = computed(() => {
+  if (!buscarOrdenTrabajo.value) return listaOrdenTrabajo.value;
+
+  const busqueda = buscarOrdenTrabajo.value.toLowerCase();
+
+  const ordenesFiltered = listaOrdenTrabajo.value.ordenes.filter((ot) => {
+    const orden = `o${ot?.prefijo?.toLowerCase() ?? ""}-${
+      ot?.consecutivoSucursal
+    }`;
+    const nombre = ot?.clienteNombre.toLowerCase() ?? "";
+    return orden.includes(busqueda) || nombre.includes(busqueda);
+  });
+
+  return {
+    ordenes: ordenesFiltered,
+    totales: listaOrdenTrabajo.value.totales,
+  };
+});
 
 const verOT = (id) => {
   router.push(`/content/orden-trabajo/${id}`);
@@ -199,7 +245,7 @@ const cargarEmpleados = async () => {
     const res = await fetch(
       proxy.$serverIP +
         "api/Empleado/getEmpleado?idSucursal=" +
-        userSession.usuario.idSucursal
+        userSession.usuario.idSucursal,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const data = await res.json();
@@ -213,8 +259,7 @@ const cargarEmpleados = async () => {
 };
 
 /* ===== HELPERS ===== */
-const formatearFecha = (f) =>
-  new Date(f).toLocaleDateString("es-MX");
+const formatearFecha = (f) => new Date(f).toLocaleDateString("es-MX");
 
 const badgeEstado = (e) =>
   ({
@@ -236,52 +281,46 @@ const nombreTotal = (k) =>
     finalizado: "Completadas",
     enCurso: "En curso",
     creado: "Pendientes",
-    cancelado: "Canceladas"
+    cancelado: "Canceladas",
   }[k]);
 
 onMounted(cargarOrdenTrabajo);
 
 const editarOT = (id) => {
-  console.log(' Editar OT:', id)
-  router.push(`/content/orden-trabajo/${id}/work`)
-}
+  console.log(" Editar OT:", id);
+  router.push(`/content/orden-trabajo/${id}/work`);
+};
 
-const estados = [
-  'Creado',
-  'En curso',
-  'Finalizado',
-  'Entregado'
-]
+const estados = ["Creado", "En curso", "Finalizado", "Entregado"];
 
 const indiceActual = computed(() => {
-  return estados.indexOf(otEditar.value.estado)
-})
+  return estados.indexOf(otEditar.value.estado);
+});
 
 // ¿ya pasó este estado?
 const esCompletado = (estado) => {
-  return estados.indexOf(estado) < indiceActual.value
-}
+  return estados.indexOf(estado) < indiceActual.value;
+};
 
 // clases del círculo
 const clasePaso = (estado) => {
-  const idx = estados.indexOf(estado)
+  const idx = estados.indexOf(estado);
 
   if (idx < indiceActual.value) {
-    return 'bg-success text-white'
+    return "bg-success text-white";
   }
 
   if (idx === indiceActual.value) {
-    return 'bg-primary text-white'
+    return "bg-primary text-white";
   }
 
-  return 'bg-light border'
-}
+  return "bg-light border";
+};
 
 // clases de la línea entre pasos
 const lineaClase = (estado) => {
   return estados.indexOf(estado) < indiceActual.value
-    ? 'bg-success'
-    : 'bg-secondary'
-}
-
+    ? "bg-success"
+    : "bg-secondary";
+};
 </script>
