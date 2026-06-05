@@ -92,7 +92,8 @@
 							<th class="text-center" style="width: 4%;">RunFlat</th>
 							<th class="text-center">Cantidad*</th>
 							<th class="text-center">Precio*</th>
-							<th class="text-center">nom</th>
+							<th class="text-center" style="min-width: 180px;">Nomenclatura*</th>
+							<th class="text-center" style="min-width: 180px;">Medida a guardar</th>
 
 						</tr>
 					</thead>
@@ -155,7 +156,19 @@
 								<input type="number" class="form-control" v-model="llanta.precio" step="any" >
 							</td>
 							<td>
-								<input type="number" class="form-control" v-model="llanta.nomenclatura"  >
+								<select class="form-select" v-model.number="llanta.nomenclatura">
+									<option :value="0">-- Seleccionar --</option>
+									<option
+										v-for="opcion in nomenclaturas"
+										:key="opcion.value"
+										:value="opcion.value"
+									>
+										{{ opcion.label }}
+									</option>
+								</select>
+							</td>
+							<td class="text-nowrap fw-semibold">
+								{{ buildMedida(llanta) || '-' }}
 							</td>
 						</tr>
 					</tbody>
@@ -298,12 +311,94 @@ onMounted(async () => {
 // validar que la lista no tenga llantas con campos nulos
 const llantasAceptadas = ref([])
 
-const nomenclatura = (item)=>{
-	if (llanta.nomenclatura == 1){
-		return item / 100;
-	}
-	return item;	
-	
+const nomenclaturas = [
+  { value: 1, label: 'Métrica radial', example: '205/55R16' },
+  { value: 2, label: 'Americana', example: '31X10.50R15' },
+  { value: 3, label: 'Radial sin perfil / camión', example: '195R15, 11R22.5' },
+  { value: 4, label: 'Convencional / agrícola', example: '10.00-16, 17.5-25' },
+]
+
+const toNumber = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+
+const hasValue = (value) => value !== null && value !== undefined && value !== ''
+
+const formatStoredDecimal = (value, forceTwoDecimals = false) => {
+  const number = toNumber(value)
+  if (!number) return ''
+
+  const shouldNormalize = Number.isInteger(number) && (forceTwoDecimals || Math.abs(number) >= 1000)
+  const normalized = shouldNormalize ? number / 100 : number
+
+  if (forceTwoDecimals) {
+    return normalized.toFixed(2)
+  }
+
+  return String(Number(normalized.toFixed(2)))
+}
+
+const formatRin = (value) => formatStoredDecimal(value)
+
+const buildMedida = (llanta) => {
+  const nomenclatura = Number(llanta.nomenclatura || 0)
+  const ancho = toNumber(llanta.anchura)
+  const perfil = toNumber(llanta.perfil)
+  const rin = toNumber(llanta.rin)
+
+  if (!nomenclatura || !ancho || !rin) return ''
+
+  if (nomenclatura === 1) {
+    if (!perfil) return ''
+    return `${ancho}/${perfil}R${formatRin(rin)}`
+  }
+
+  if (nomenclatura === 2) {
+    if (!perfil) return ''
+    return `${formatStoredDecimal(ancho)}X${formatStoredDecimal(perfil, true)}R${formatRin(rin)}`
+  }
+
+  if (nomenclatura === 3) {
+    return `${formatStoredDecimal(ancho, ancho >= 1000 || (ancho >= 500 && rin >= 1000))}R${formatRin(rin)}`
+  }
+
+  if (nomenclatura === 4) {
+    const medidaActual = String(llanta.medida || '').toUpperCase()
+    const separador = medidaActual.includes('L-') ? 'L-' : '-'
+    return `${formatStoredDecimal(ancho, ancho >= 1000)}${separador}${formatRin(rin)}`
+  }
+
+  return ''
+}
+
+const buildRango = (llanta) => {
+  const carga = toNumber(llanta.carga)
+  const subCarga = toNumber(llanta.subCarga)
+  const velocidad = String(llanta.velocidad || '').trim().toUpperCase()
+
+  if (!carga || !velocidad || velocidad === 'N/A') return null
+  return subCarga ? `${carga}/${subCarga}${velocidad}` : `${carga}${velocidad}`
+}
+
+const prepararLlantaParaGuardar = (llanta) => {
+  const medida = buildMedida(llanta)
+  const velocidad = String(llanta.velocidad || '').trim().toUpperCase()
+
+  llanta.nomenclatura = Number(llanta.nomenclatura || 0)
+  llanta.anchura = toNumber(llanta.anchura)
+  llanta.perfil = toNumber(llanta.perfil)
+  llanta.rin = toNumber(llanta.rin)
+  llanta.carga = toNumber(llanta.carga)
+  llanta.subCarga = toNumber(llanta.subCarga)
+  llanta.rf = toNumber(llanta.rf)
+  llanta.cantidad = toNumber(llanta.cantidad)
+  llanta.precio = Number(llanta.precio || 0)
+  llanta.velocidad = velocidad && velocidad !== '0' ? velocidad : 'N/A'
+  llanta.medida = medida
+  llanta.rango = buildRango(llanta)
+
+  return medida
 }
 
 const ValidateList = () => {
@@ -311,10 +406,16 @@ const ValidateList = () => {
   const rechazadas = []
 
   props.llantas.forEach(llanta => {
-    const esValida = llanta.marca && llanta.modelo  && llanta.anchura != null; //Agregar el campo de redial
-	llanta.medida = `${llanta.anchura}${llanta.perfil != 0 ? `/${llanta.perfil}R${llanta.rin}` : `R${llanta.rin}`}`
-	llanta.rango=`${llanta.carga}${llanta.subCarga != 0 ? `/${llanta.subCarga}${llanta.velocidad}` : llanta.velocidad }`
-	llanta.velocidad = llanta.velocidad != 0 ? llanta.velocidad : "N/A"
+    const medida = prepararLlantaParaGuardar(llanta)
+    const esValida = Boolean(
+      llanta.marca &&
+      llanta.modelo &&
+      llanta.nomenclatura &&
+      medida &&
+      hasValue(llanta.anchura) &&
+      hasValue(llanta.rin)
+    )
+
     if (esValida) {
       aceptadas.push(llanta)
     } else {
@@ -322,58 +423,54 @@ const ValidateList = () => {
     }
   })
 
-  // guardas las válidas
   llantasAceptadas.value = aceptadas
-
-  //reemplazo el array original
   props.llantas.splice(0, props.llantas.length, ...rechazadas)
+
   if (props.llantas.length === 0) {
-    return true;
-  } else {
-    Swal.fire({
-      icon: "warning",
-      title: "Campos vacíos",
-      text: `Faltan ${props.llantas.length} llantas por completar.`,
-      confirmButtonColor: "#3085d6",
-    });
-    return false;
+    return true
   }
+
+  Swal.fire({
+    icon: "warning",
+    title: "Campos vacíos",
+    text: `Faltan ${props.llantas.length} llantas por completar. Revisa marca, modelo, nomenclatura y medida.`,
+    confirmButtonColor: "#3085d6",
+  })
+  return false
 }
 
-const  GuardarLlantas = async ()=>{
-	ValidateList();
-	
-		console.log("llantas a guardar:" , llantasAceptadas.value)
-		const PAYLOAD ={
-			llantas: llantasAceptadas.value,
-			almacen : almacen.value
-		}
-		console.log("PAYLOAD [DEBUG]:", PAYLOAD);
-		try{
-			const res = await fetch(`${proxy.$serverIP}api/Listas/GuardarNuevas`,{
-				method: "POST",
-				headers:{"Content-Type": "application/json"},
-				body:JSON.stringify(PAYLOAD),
-			});
-			if (!res.ok){
-				throw new Error(`Error HTTP ${res.status}`);
-			}
-			console.log("Guardado...")
-			Swal.fire({
-				icon: "success",
-				title: "Llantas Guardadas",
-				text: `Las llantas se guardaron correctamente`,
-			});
-		}catch{
-			 console.error("ERROR guardarCotizacion:", error);
-			Swal.fire("Error", "No se pudo guardar la cotización.", "error");
-		}finally{
-			if (props.llantas.length === 0) {
-				closeModal();
- 		 	}
-			
-		}
-	
+const GuardarLlantas = async () => {
+  if (!ValidateList()) return
+
+  const PAYLOAD = {
+    llantas: llantasAceptadas.value,
+    almacen: almacen.value
+  }
+
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/Listas/GuardarNuevas`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(PAYLOAD),
+    })
+
+    if (!res.ok) {
+      throw new Error(`Error HTTP ${res.status}`)
+    }
+
+    Swal.fire({
+      icon: "success",
+      title: "Llantas Guardadas",
+      text: `Las llantas se guardaron correctamente`,
+    })
+  } catch (error) {
+    console.error("ERROR guardar llantas:", error)
+    Swal.fire("Error", "No se pudieron guardar las llantas.", "error")
+  } finally {
+    if (props.llantas.length === 0) {
+      closeModal()
+    }
+  }
 }
 const closeModal = () => {
   // reset estado interno
