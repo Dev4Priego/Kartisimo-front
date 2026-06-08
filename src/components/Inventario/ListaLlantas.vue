@@ -424,26 +424,28 @@ const ValidateList = () => {
   })
 
   llantasAceptadas.value = aceptadas
-  props.llantas.splice(0, props.llantas.length, ...rechazadas)
 
-  if (props.llantas.length === 0) {
-    return true
+  return {
+    aceptadas,
+    rechazadas,
   }
-
-  Swal.fire({
-    icon: "warning",
-    title: "Campos vacíos",
-    text: `Faltan ${props.llantas.length} llantas por completar. Revisa marca, modelo, nomenclatura y medida.`,
-    confirmButtonColor: "#3085d6",
-  })
-  return false
 }
 
 const GuardarLlantas = async () => {
-  if (!ValidateList()) return
+  const { aceptadas, rechazadas } = ValidateList()
+
+  if (aceptadas.length === 0) {
+    Swal.fire({
+      icon: "warning",
+      title: "Campos vacíos",
+      text: `Faltan ${rechazadas.length} llantas por completar. Revisa marca, modelo, nomenclatura y medida.`,
+      confirmButtonColor: "#3085d6",
+    })
+    return
+  }
 
   const PAYLOAD = {
-    llantas: llantasAceptadas.value,
+    llantas: aceptadas,
     almacen: almacen.value
   }
 
@@ -458,18 +460,26 @@ const GuardarLlantas = async () => {
       throw new Error(`Error HTTP ${res.status}`)
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Llantas Guardadas",
-      text: `Las llantas se guardaron correctamente`,
-    })
+    props.llantas.splice(0, props.llantas.length, ...rechazadas)
+
+    if (rechazadas.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Llantas guardadas parcialmente",
+        text: `Se guardaron ${aceptadas.length} llantas. Faltan ${rechazadas.length} por completar.`,
+        confirmButtonColor: "#3085d6",
+      })
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Llantas Guardadas",
+        text: `Las llantas se guardaron correctamente`,
+      })
+      closeModal()
+    }
   } catch (error) {
     console.error("ERROR guardar llantas:", error)
     Swal.fire("Error", "No se pudieron guardar las llantas.", "error")
-  } finally {
-    if (props.llantas.length === 0) {
-      closeModal()
-    }
   }
 }
 const closeModal = () => {
