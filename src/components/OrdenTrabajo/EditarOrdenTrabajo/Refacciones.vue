@@ -1,39 +1,42 @@
 <template>
   <div class="card mb-4 shadow-sm">
-    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-        <div>
-            <i class="bi bi-nut-fill me-2"></i>Refacciones
-        </div>
-        <button class="btn btn-sm btn-outline-primary  shadow-sm" @click="agregarRefaccion()">
-          <i class="bi bi-plus me-3"></i>Recibir Refacciones
-        </button>
+    <div
+      class="card-header bg-light d-flex justify-content-between align-items-center"
+    >
+      <div><i class="bi bi-nut-fill me-2"></i>Refacciones</div>
+      <button
+        class="btn btn-sm btn-outline-primary shadow-sm"
+        @click="agregarRefaccion()"
+      >
+        <i class="bi bi-plus me-3"></i>Recibir Refacciones
+      </button>
     </div>
     <div class="card-body">
       <div v-if="modalRefacciones" class="row">
         <div class="col-6 mb-2">
-            <label for="fechaRefaccion" class="form-label"><i class="bi bi-calendar-event mx-1"></i> Fecha</label>
-            <input
-                id="fechaRefaccion"
-                v-model="refaccionForm.fecha"
-                type="date"
-                class="form-control"
-            />
+          <label for="fechaRefaccion" class="form-label"
+            ><i class="bi bi-calendar-event mx-1"></i> Fecha</label
+          >
+          <input
+            id="fechaRefaccion"
+            v-model="refaccionForm.fecha"
+            type="date"
+            class="form-control"
+          />
         </div>
         <div class="col-6 mb-2">
-            <label for="horaRefaccion" class="form-label"><i class="bi bi-clock-fill mx-1"></i> Hora</label>
-            <input
-                id="horaRefaccion"
-                v-model="refaccionForm.hora"
-                type="time"
-                class="form-control"
-            />
+          <label for="horaRefaccion" class="form-label"
+            ><i class="bi bi-clock-fill mx-1"></i> Hora</label
+          >
+          <input
+            id="horaRefaccion"
+            v-model="refaccionForm.hora"
+            type="time"
+            class="form-control"
+          />
         </div>
         <div class="col-12 mb-2">
           <div class="mb-3">
-            <label class="form-label">
-              <i class="bi bi-building mx-1"></i>
-              Proveedor
-            </label>
             <!-- <div class="input-group">
               <input
                 type="text"
@@ -50,7 +53,7 @@
                 Buscar
               </button>
             </div> -->
-            <select
+            <!--            <select
               v-model="refaccionForm.id_proveedor"
               class="form-select"
               placeholder="Selecciona el proveedor"
@@ -66,9 +69,17 @@
                 {{ itm.nombreproveedor }}
               </option>
             </select>
+            -->
+            <label for="ProveedoresExistentes" class="mb-1 form-label">
+              <i class="bi bi-building mx-1"></i> Proveedores
+            </label>
+            <ProveedoresFiltro
+              v-model="mostrarTabla"
+              @seleccionar-cliente="manejarProveedor"
+            />
             <small v-if="errores['id_proveedor']" class="error-msg">
-                {{ errores["id_proveedor"] }}
-              </small>
+              {{ errores["id_proveedor"] }}
+            </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -77,19 +88,20 @@
               <i class="bi bi-exclamation-triangle-fill mx-1"></i>
               Detalle de la Refacción
             </label>
-            <textarea 
-              id="textoRefaccion" 
-              v-model="refaccionForm.refaccion" 
-              class="form-control" 
+            <textarea
+              id="textoRefaccion"
+              v-model="refaccionForm.refaccion"
+              class="form-control"
               rows="2"
-              @input="validate('refaccion',1)"
-              @blur="validate('refaccion',1)"
+              @input="validate('refaccion', 1)"
+              @blur="validate('refaccion', 1)"
               :class="{ 'input-error': errores['refaccion'] }"
-              maxlength="500">
+              maxlength="500"
+            >
             </textarea>
             <small v-if="errores['refaccion']" class="error-msg">
-                {{ errores["refaccion"] }}
-              </small>
+              {{ errores["refaccion"] }}
+            </small>
           </div>
           <div class="col-md-4">
             <label for="montoRefaccion" class="form-label">
@@ -104,13 +116,13 @@
               min="0"
               class="form-control"
               placeholder="0.00"
-              @input="validate('monto',1)"
-              @blur="validate('monto',1)"
+              @input="validate('monto', 1)"
+              @blur="validate('monto', 1)"
               :class="{ 'input-error': errores['monto'] }"
             />
             <small v-if="errores['monto']" class="error-msg">
-                {{ errores["monto"] }}
-              </small>
+              {{ errores["monto"] }}
+            </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -126,14 +138,14 @@
               type="text"
               class="form-control"
               maxlength="50"
-              @input="validate('numero_factura',1)"
-              @blur="validate('numero_factura',1)"
+              @input="validate('numero_factura', 1)"
+              @blur="validate('numero_factura', 1)"
               :class="{ 'input-error': errores['numero_factura'] }"
               placeholder="Ej. F-45879"
             />
             <small v-if="errores['numero_factura']" class="error-msg">
-                {{ errores["numero_factura"] }}
-              </small>
+              {{ errores["numero_factura"] }}
+            </small>
           </div>
         </div>
         <div v-if="formValida" class="row my-3">
@@ -150,38 +162,47 @@
           </div>
         </div>
         <div class="col-12 my-2">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-sm btn-secondary shadow-sm me-3" @click="modalRefacciones = false">
-                    <i class="bi bi-x-circle-fill me-2"></i> Cerrar
-                </button>
-                <button class="btn btn-sm btn-primary shadow-sm" @click="validar_formulario_nueva()">
-                    <i class="bi bi-save-fill me-2"></i> Guardar
-                </button>
-            </div>
+          <div class="d-flex justify-content-end">
+            <button
+              class="btn btn-sm btn-secondary shadow-sm me-3"
+              @click="modalRefacciones = false"
+            >
+              <i class="bi bi-x-circle-fill me-2"></i> Cerrar
+            </button>
+            <button
+              class="btn btn-sm btn-primary shadow-sm"
+              @click="validar_formulario_nueva()"
+            >
+              <i class="bi bi-save-fill me-2"></i> Guardar
+            </button>
+          </div>
         </div>
       </div>
 
-
       <!-- MODAL EDITAR OT-->
-       
+
       <div v-if="modalEditarRefacciones" class="row">
         <div class="col-6 mb-2">
-            <label for="fechaRefaccion" class="form-label"><i class="bi bi-calendar-event mx-1"></i> Fecha</label>
-            <input
-                id="fechaRefaccion"
-                v-model="editarRefaccionForm.fecha"
-                type="date"
-                class="form-control"
-            />
+          <label for="fechaRefaccion" class="form-label"
+            ><i class="bi bi-calendar-event mx-1"></i> Fecha</label
+          >
+          <input
+            id="fechaRefaccion"
+            v-model="editarRefaccionForm.fecha"
+            type="date"
+            class="form-control"
+          />
         </div>
         <div class="col-6 mb-2">
-            <label for="horaRefaccion" class="form-label"><i class="bi bi-clock-fill mx-1"></i> Hora</label>
-            <input
-                id="horaRefaccion"
-                v-model="editarRefaccionForm.hora"
-                type="time"
-                class="form-control"
-            />
+          <label for="horaRefaccion" class="form-label"
+            ><i class="bi bi-clock-fill mx-1"></i> Hora</label
+          >
+          <input
+            id="horaRefaccion"
+            v-model="editarRefaccionForm.hora"
+            type="time"
+            class="form-control"
+          />
         </div>
         <div class="col-12 mb-2">
           <div class="mb-3">
@@ -189,15 +210,15 @@
               <i class="bi bi-building mx-1"></i>
               Proveedor
             </label>
-            
+
             <select
               v-model="editarRefaccionForm.id_proveedor"
               class="form-select"
               placeholder="Selecciona el proveedor"
-               @blur="validate('id_proveedor',2)"
-                :class="{ 'input-error': errores['id_proveedor'] }"
-             >
-             <option
+              @blur="validate('id_proveedor', 2)"
+              :class="{ 'input-error': errores['id_proveedor'] }"
+            >
+              <option
                 v-for="itm in proveedores"
                 :key="itm.id_proveedor"
                 :value="itm.id_proveedor"
@@ -206,8 +227,8 @@
               </option>
             </select>
             <small v-if="errores['id_proveedor']" class="error-msg">
-                {{ errores["id_proveedor"] }}
-              </small>
+              {{ errores["id_proveedor"] }}
+            </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -216,15 +237,16 @@
               <i class="bi bi-exclamation-triangle-fill mx-1"></i>
               Detalle de la Refacción
             </label>
-            <textarea 
-              id="textoRefaccion" 
-              v-model="editarRefaccionForm.refaccion" 
-              class="form-control" 
+            <textarea
+              id="textoRefaccion"
+              v-model="editarRefaccionForm.refaccion"
+              class="form-control"
               rows="2"
-              @input="validate('refaccion',2)"
-              @blur="validate('refaccion',2)"
+              @input="validate('refaccion', 2)"
+              @blur="validate('refaccion', 2)"
               :class="{ 'input-error': errores['refaccion'] }"
-              maxlength="500">
+              maxlength="500"
+            >
             </textarea>
             <small v-if="errores['refaccion']" class="error-msg">
               {{ errores["refaccion"] }}
@@ -243,13 +265,13 @@
               min="0"
               class="form-control"
               placeholder="0.00"
-              @input="validate('monto',2)"
-              @blur="validate('monto',2)"
+              @input="validate('monto', 2)"
+              @blur="validate('monto', 2)"
               :class="{ 'input-error': errores['monto'] }"
             />
             <small v-if="errores['monto']" class="error-msg">
-                {{ errores["monto"] }}
-              </small>
+              {{ errores["monto"] }}
+            </small>
           </div>
         </div>
         <div class="row mb-2">
@@ -265,14 +287,14 @@
               type="text"
               class="form-control"
               maxlength="50"
-              @input="validate('nota_factura',2)"
-              @blur="validate('nota_factura',2)"
+              @input="validate('nota_factura', 2)"
+              @blur="validate('nota_factura', 2)"
               :class="{ 'input-error': errores['nota_factura'] }"
               placeholder="Ej. F-45879"
             />
             <small v-if="errores['nota_factura']" class="error-msg">
-                {{ errores["nota_factura"] }}
-              </small>
+              {{ errores["nota_factura"] }}
+            </small>
           </div>
         </div>
         <div v-if="formValida" class="row my-3">
@@ -289,14 +311,20 @@
           </div>
         </div>
         <div class="col-12 my-2">
-            <div class="d-flex justify-content-end">
-                <button class="btn btn-sm btn-secondary shadow-sm me-3" @click="modalEditarRefacciones = false">
-                    <i class="bi bi-x-circle-fill me-2"></i> Cerrar
-                </button>
-                <button class="btn btn-sm btn-primary shadow-sm" @click="validar_formulario_editar()">
-                    <i class="bi bi-save-fill me-2"></i> Guardar
-                </button>
-            </div>
+          <div class="d-flex justify-content-end">
+            <button
+              class="btn btn-sm btn-secondary shadow-sm me-3"
+              @click="modalEditarRefacciones = false"
+            >
+              <i class="bi bi-x-circle-fill me-2"></i> Cerrar
+            </button>
+            <button
+              class="btn btn-sm btn-primary shadow-sm"
+              @click="validar_formulario_editar()"
+            >
+              <i class="bi bi-save-fill me-2"></i> Guardar
+            </button>
+          </div>
         </div>
       </div>
 
@@ -304,144 +332,193 @@
         No hay refacciones en esta orden de trabajo.
       </div>
       <div v-else>
-        <table class="table table-sm" style="font-size: 10pt;">
+        <table class="table table-sm" style="font-size: 10pt">
           <thead>
-              <tr>
+            <tr>
               <th scope="col">Proveedor</th>
               <th scope="col">Refacción</th>
               <th scope="col">Monto</th>
               <th scope="col">Factura/Nota</th>
               <th scope="col">Fecha/hora</th>
-              <th scope="col"> </th>
-              </tr>
+              <th scope="col"></th>
+            </tr>
           </thead>
           <tbody>
-              <tr v-for="i in Refacciones" :key="i.idRefacciones">
-                  <td>{{ i.nombreProveedor }}</td>
-                  <td>{{ i.refaccion }}</td>
-                  <td style="text-align: right;">{{'$' + formatNumber(i.monto_refaccion) }}</td>
-                  <td>{{ i.nota_Factura }}</td>
-                  <td>{{ formatearFecha(i.fecha) }}</td>
-                  <td><button
-                    class="btn btn-sm btn-outline-warning"
-                    @click="getEditarRefaccionOT(i)"
-                    >
-                    <i class="bi bi-pencil-square"></i>
-                  </button></td>
-              </tr>
+            <tr v-for="i in Refacciones" :key="i.idRefacciones">
+              <td>{{ i.nombreProveedor }}</td>
+              <td>{{ i.refaccion }}</td>
+              <td style="text-align: right">
+                {{ "$" + formatNumber(i.monto_refaccion) }}
+              </td>
+              <td>{{ i.nota_Factura }}</td>
+              <td>{{ formatearFecha(i.fecha) }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-warning"
+                  @click="getEditarRefaccionOT(i)"
+                >
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+              </td>
+            </tr>
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="2" style="font-size: 11pt;"><strong>Total:</strong></td>
-              <td style="text-align: right; font-size: 11pt;"><strong>${{ formatNumber(totalMonto) }}</strong></td>
+              <td colspan="2" style="font-size: 11pt">
+                <strong>Total:</strong>
+              </td>
+              <td style="text-align: right; font-size: 11pt">
+                <strong>${{ formatNumber(totalMonto) }}</strong>
+              </td>
               <td colspan="3"></td>
             </tr>
           </tfoot>
         </table>
       </div>
-    
-  </div>
+    </div>
 
-  <!--Modal Proveedores-->
-  <div class="modal fade" id="modalProveedores" tabindex="-1" ref="modalProveedoresRef">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-
-        <div class="modal-header">
-          <h5 class="modal-title">Buscar proveedor</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-
-        <div class="modal-body">
-
-          <!-- Buscador -->
-          <input
-            v-model="busqueda"
-            @input="buscarProveedores"
-            type="text"
-            class="form-control mb-3"
-            placeholder="Buscar proveedor..."
-          />
-
-          <!-- Lista -->
-          <div class="list-group mb-3" style="max-height: 350px; overflow-y: auto;">
+    <!--Modal Proveedores-->
+    <div
+      class="modal fade"
+      id="modalProveedores"
+      tabindex="-1"
+      ref="modalProveedoresRef"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Buscar proveedor</h5>
             <button
-              v-for="proveedor in proveedores"
-              :key="proveedor.id_proveedor"
-              class="list-group-item list-group-item-action"
+              type="button"
+              class="btn-close"
               data-bs-dismiss="modal"
-              @click="seleccionarProveedor(proveedor)"
-            >
-              {{ proveedor.nombreproveedor }}
-            </button>
-
-            <div v-if="!proveedores || proveedores.length === 0" class="text-muted p-2">
-              Sin resultados
-            </div>
+            ></button>
           </div>
 
-          <!-- Paginación -->
-          <nav v-if="lastPage > 1">
-            <ul class="pagination justify-content-center">
+          <div class="modal-body">
+            <!-- Buscador -->
+            <input
+              v-model="busqueda"
+              @input="buscarProveedores"
+              type="text"
+              class="form-control mb-3"
+              placeholder="Buscar proveedor..."
+            />
 
-              <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <button class="page-link" @click="cambiarPagina(currentPage - 1)">
-                  Anterior
-                </button>
-              </li>
-
-              <li
-                v-for="page in lastPage"
-                :key="page"
-                class="page-item"
-                :class="{ active: page === currentPage }"
+            <!-- Lista -->
+            <div
+              class="list-group mb-3"
+              style="max-height: 350px; overflow-y: auto"
+            >
+              <button
+                v-for="proveedor in proveedores"
+                :key="proveedor.id_proveedor"
+                class="list-group-item list-group-item-action"
+                data-bs-dismiss="modal"
+                @click="seleccionarProveedor(proveedor)"
               >
-                <button class="page-link" @click="cambiarPagina(page)">
-                  {{ page }}
-                </button>
-              </li>
+                {{ proveedor.nombreproveedor }}
+              </button>
 
-              <li class="page-item" :class="{ disabled: currentPage === lastPage }">
-                <button class="page-link" @click="cambiarPagina(currentPage + 1)">
-                  Siguiente
-                </button>
-              </li>
-            </ul>
-          </nav>
+              <div
+                v-if="!proveedores || proveedores.length === 0"
+                class="text-muted p-2"
+              >
+                Sin resultados
+              </div>
+            </div>
+
+            <!-- Paginación -->
+            <nav v-if="lastPage > 1">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                  <button
+                    class="page-link"
+                    @click="cambiarPagina(currentPage - 1)"
+                  >
+                    Anterior
+                  </button>
+                </li>
+
+                <li
+                  v-for="page in lastPage"
+                  :key="page"
+                  class="page-item"
+                  :class="{ active: page === currentPage }"
+                >
+                  <button class="page-link" @click="cambiarPagina(page)">
+                    {{ page }}
+                  </button>
+                </li>
+
+                <li
+                  class="page-item"
+                  :class="{ disabled: currentPage === lastPage }"
+                >
+                  <button
+                    class="page-link"
+                    @click="cambiarPagina(currentPage + 1)"
+                  >
+                    Siguiente
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 </template>
 
 <script setup>
-import { onMounted, ref, getCurrentInstance, reactive, computed } from 'vue';
-import axios from 'axios';
+import { onMounted, ref, getCurrentInstance, reactive, computed } from "vue";
+import axios from "axios";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
-defineExpose({})
+defineExpose({});
+import ProveedoresFiltro from "./Paquete/ProveedoresFiltro.vue";
 
 const modalAgregarRefaccion = ref(false);
 const { proxy } = getCurrentInstance();
 const Refacciones = ref([]);
 const modalRefacciones = ref(false);
-const modalEditarRefacciones =ref(false)
-const refaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0, proveedor: null, id_proveedor: null, numero_factura: ''});
-const editarRefaccionForm = ref({ fecha: '', hora: '', refaccion: '', monto: 0.0, proveedor: null, id_proveedor: null, nota_factura: '', usuario: '', nombreProveedor: '', idRefacciones: null});
+const modalEditarRefacciones = ref(false);
+const refaccionForm = ref({
+  fecha: "",
+  hora: "",
+  refaccion: "",
+  monto: 0,
+  proveedor: null,
+  id_proveedor: null,
+  numero_factura: "",
+});
+const editarRefaccionForm = ref({
+  fecha: "",
+  hora: "",
+  refaccion: "",
+  monto: 0.0,
+  proveedor: null,
+  id_proveedor: null,
+  nota_factura: "",
+  usuario: "",
+  nombreProveedor: "",
+  idRefacciones: null,
+});
 const props = defineProps({
   otId: Number,
-  usuario: Number
+  usuario: Number,
 });
 
 /// Proveedores
 const proveedores = ref([]);
-const busqueda = ref('');
+const busqueda = ref("");
 const currentPage = ref(1);
 const lastPage = ref(1);
-const proveedorNombre = ref('')
-const modalProveedores = ref(null)
-const totalMonto = ref(0)
+const proveedorNombre = ref("");
+const modalProveedores = ref(null);
+const totalMonto = ref(0);
+const mostrarTabla = ref(false);
 
 const cargarProveedoresPag = async () => {
   proveedores.value = [];
@@ -455,7 +532,7 @@ const cargarProveedoresPag = async () => {
 
     const res = await fetch(url);
     const text = await res.text();
-    
+
     //console.log("RESPUESTA RAW:", text);
 
     if (!res.ok) throw new Error("Error en la respuesta");
@@ -465,7 +542,6 @@ const cargarProveedoresPag = async () => {
     proveedores.value = response.data ?? [];
     currentPage.value = response.current_page ?? 1;
     lastPage.value = response.last_page ?? 1;
-
   } catch (error) {
     console.error("Error al cargar los proveedores:", error);
   }
@@ -474,9 +550,7 @@ const cargarProveedoresPag = async () => {
 const cargarProveedores = async () => {
   proveedores.value = [];
   try {
-    const url =
-      proxy.$serverIP +
-      "api/Proveedores/proveedores";
+    const url = proxy.$serverIP + "api/Proveedores/proveedores";
 
     const res = await fetch(url);
     const text = await res.text();
@@ -485,46 +559,50 @@ const cargarProveedores = async () => {
 
     const response = JSON.parse(text);
     proveedores.value = response ?? [];
-
   } catch (error) {
     console.error("Error al cargar los proveedores:", error);
   }
-}
+};
 
 function formatNumber(value, decimals = 2) {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) return "";
 
-  return Number(value).toLocaleString('es-MX', {
+  return Number(value).toLocaleString("es-MX", {
     minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
+    maximumFractionDigits: decimals,
   });
 }
 
 const seleccionarProveedor = (proveedor) => {
-  refaccionForm.value.id_proveedor = proveedor.id_proveedor
-  editarRefaccionForm.value.id_proveedor = proveedor.id_proveedor
+  refaccionForm.value.id_proveedor = proveedor.id_proveedor;
+  editarRefaccionForm.value.id_proveedor = proveedor.id_proveedor;
   proveedorNombre.value = proveedor.nombreproveedor;
-  editarRefaccionForm.value.nombreProveedor = proveedor.nombreproveedor
+  editarRefaccionForm.value.nombreProveedor = proveedor.nombreproveedor;
 
   if (document.activeElement) {
-    document.activeElement.blur()
+    document.activeElement.blur();
   }
 
-  const modal = bootstrap.Modal.getInstance(modalProveedores.value)
+  const modal = bootstrap.Modal.getInstance(modalProveedores.value);
 
-  if (modal) modal.hide()
-}
-
+  if (modal) modal.hide();
+};
+const manejarProveedor = (proveedor) => {
+  refaccionForm.value.id_proveedor = proveedor.id_proveedor;
+  refaccionForm.value.proveedor = proveedor.nombreproveedor;
+  proveedorNombre.value = proveedor.nombreproveedor;
+  mostrarTabla.value = false;
+};
 const buscarProveedores = () => {
-  currentPage.value = 1
-  cargarProveedores()
-}
+  currentPage.value = 1;
+  cargarProveedores();
+};
 
 const cambiarPagina = (page) => {
-  if (page < 1 || page > lastPage.value) return
-  currentPage.value = page
-  cargarProveedores()
-}
+  if (page < 1 || page > lastPage.value) return;
+  currentPage.value = page;
+  cargarProveedores();
+};
 
 const errores = reactive({});
 const formValida = ref(false);
@@ -532,10 +610,7 @@ const formValida = ref(false);
 const listaErrores = computed(() => Object.values(errores));
 
 const getValor = (path, tipo) => {
-  const origen =
-    tipo == 1
-      ? refaccionForm.value
-      : editarRefaccionForm.value;
+  const origen = tipo == 1 ? refaccionForm.value : editarRefaccionForm.value;
 
   return path.split(".").reduce((obj, key) => obj?.[key], origen);
 };
@@ -545,20 +620,19 @@ function validate(path, tipo) {
   const value = (getValor(path, tipo) ?? "").toString();
 
   const rules = {
-    
-    "id_proveedor": () => 
+    id_proveedor: () =>
       !value.trim() ? "Debe seleccionar un proveedor." : null,
 
-    "refaccion": () =>
+    refaccion: () =>
       !value.trim() ? "Se requiere la descripción de la refacción." : null,
 
-    "numero_factura": () => 
+    numero_factura: () =>
       !value.trim() && tipo == 1 ? "Número de factura obligatorio." : null,
 
-    "nota_factura": () => 
-    !value.trim() && tipo == 2 ? "Número de factura obligatorio." : null,
+    nota_factura: () =>
+      !value.trim() && tipo == 2 ? "Número de factura obligatorio." : null,
 
-    "monto": () => {
+    monto: () => {
       if (value === "") return "Monto obligatorio.";
 
       const num = Number(value);
@@ -567,7 +641,6 @@ function validate(path, tipo) {
       if (num < 0) return "El monto debe ser igual o mayor a cero.";
       return null;
     },
-
   };
 
   const error = rules[path] ? rules[path]() : null;
@@ -600,17 +673,14 @@ function validaciones(tipo) {
     "refaccion",
     "monto",
     "numero_factura",
-    "nota_factura"
+    "nota_factura",
   ];
 
   // limpiar errores
   Object.keys(errores).forEach((k) => delete errores[k]);
 
   campos.forEach((campo) => {
-    const origen =
-    tipo == 1
-      ? refaccionForm.value
-      : editarRefaccionForm.value;
+    const origen = tipo == 1 ? refaccionForm.value : editarRefaccionForm.value;
     const valor = campo.split(".").reduce((o, k) => o?.[k], origen);
     console.log(` Campo: ${campo} →`, valor);
     validate(campo, tipo);
@@ -620,44 +690,43 @@ function validaciones(tipo) {
 
 onMounted(() => {
   if (props.otId) {
-     cargarRefacciones(props.otId)
-     cargarProveedores()
-   }
-})
+    cargarRefacciones(props.otId);
+    cargarProveedores();
+  }
+});
 
 const formatearFecha = (fecha) => {
-    if (!fecha) return "";
+  if (!fecha) return "";
 
-    const d = new Date(fecha);
+  const d = new Date(fecha);
 
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+  const fechaFormateada = d.toLocaleDateString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 
-    const horaFormateada = d.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+  const horaFormateada = d.toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
-    return `${fechaFormateada}, ${horaFormateada}`;
+  return `${fechaFormateada}, ${horaFormateada}`;
 };
 
-const cargarRefacciones =  async(ot) => {
+const cargarRefacciones = async (ot) => {
   Refacciones.value = [];
   try {
     const res = await fetch(
-      proxy.$serverIP +
-        "api/OrdenTrabajo/getRefaccionesPorOT?idOT=" + ot
+      proxy.$serverIP + "api/OrdenTrabajo/getRefaccionesPorOT?idOT=" + ot,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const response = await res.json();
     Refacciones.value = response.data;
     totalMonto.value = Refacciones.value.reduce((total, r) => {
-      return total + Number(r.monto_refaccion)
-    }, 0)
+      return total + Number(r.monto_refaccion);
+    }, 0);
   } catch (error) {
     console.error("Error al cargar los refacciones:", error);
   }
@@ -670,29 +739,28 @@ const agregarRefaccion = () => {
   refaccionForm.value.id_proveedor = null;
   refaccionForm.value.refaccion = "";
   refaccionForm.value.monto = 0.0;
-  refaccionForm.value.numero_factura = '';
+  refaccionForm.value.numero_factura = "";
   Object.keys(errores).forEach((k) => delete errores[k]);
   modalEditarRefacciones.value = false;
   modalRefacciones.value = !modalRefacciones.value;
-}
+};
 
 const guardarRefaccion = async () => {
   const idOT = props.otId;
   const payload = {
     usuario: props.usuario,
-    fecha: refaccionForm.value.fecha + 'T' + refaccionForm.value.hora,
+    fecha: refaccionForm.value.fecha + "T" + refaccionForm.value.hora,
     idOrdenTrabajo: idOT,
     refaccion: refaccionForm.value.refaccion,
     monto: parseFloat(refaccionForm.value.monto).toFixed(2),
     id_proveedor: refaccionForm.value.id_proveedor,
-    nota_factura: refaccionForm.value.numero_factura
+    nota_factura: refaccionForm.value.numero_factura,
   };
   console.log(payload);
   try {
-    
     const response = await axios.post(
-       proxy.$serverIP + 'api/Proveedores/agregarRefaccion',
-      payload
+      proxy.$serverIP + "api/Proveedores/agregarRefaccion",
+      payload,
     );
     cargarRefacciones(idOT);
     limpiarFormulario();
@@ -703,73 +771,78 @@ const guardarRefaccion = async () => {
 };
 
 const getEditarRefaccionOT = (ot) => {
-  console.log(ot)
+  console.log(ot);
   const idOT = props.otId;
-  const [fecha, hora] = ot.fecha.split('T')
+  const [fecha, hora] = ot.fecha.split("T");
   editarRefaccionForm.value.idRefacciones = ot.idRefacciones;
   editarRefaccionForm.value.id_proveedor = ot.id_proveedor;
-  editarRefaccionForm.value.nombreProveedor = ot.nombreProveedor
+  editarRefaccionForm.value.nombreProveedor = ot.nombreProveedor;
   editarRefaccionForm.value.usuario = props.usuario;
   editarRefaccionForm.value.fecha = fecha;
-  editarRefaccionForm.value.hora = hora.substring(0,5);
+  editarRefaccionForm.value.hora = hora.substring(0, 5);
   editarRefaccionForm.value.idOrdenTrabajo = ot.idOrdenTrabajo;
   editarRefaccionForm.value.refaccion = ot.refaccion;
   editarRefaccionForm.value.monto = ot.monto_refaccion;
   editarRefaccionForm.value.nota_factura = ot.nota_Factura;
   Object.keys(errores).forEach((k) => delete errores[k]);
   modalRefacciones.value = false;
-  modalEditarRefacciones.value = !modalEditarRefacciones.value
+  modalEditarRefacciones.value = !modalEditarRefacciones.value;
 };
 
-const editarRefaccionOT = async() => {
+const editarRefaccionOT = async () => {
   const idOT = props.otId;
   const idRefacciones = editarRefaccionForm.value.idRefacciones;
   const payload = {
     usuario: props.usuario,
-    fecha:  editarRefaccionForm.value.fecha + 'T' +  editarRefaccionForm.value.hora,
+    fecha:
+      editarRefaccionForm.value.fecha + "T" + editarRefaccionForm.value.hora,
     idOrdenTrabajo: editarRefaccionForm.value.idOrdenTrabajo,
     idRefacciones: editarRefaccionForm.value.idRefacciones,
     refaccion: editarRefaccionForm.value.refaccion,
     monto: parseFloat(editarRefaccionForm.value.monto).toFixed(2),
-    id_proveedor:  editarRefaccionForm.value.id_proveedor,
-    nota_factura: editarRefaccionForm.value.nota_factura
+    id_proveedor: editarRefaccionForm.value.id_proveedor,
+    nota_factura: editarRefaccionForm.value.nota_factura,
   };
   console.log(payload);
   try {
-    
-   const response = await axios.put(
+    const response = await axios.put(
       `${proxy.$serverIP}api/OrdenTrabajo/editarRefaccionOT/${idRefacciones}`,
-      payload
+      payload,
     );
     cargarRefacciones(idOT);
-    limpiarFormulario()
-    modalEditarRefacciones.value = !modalEditarRefacciones.value
+    limpiarFormulario();
+    modalEditarRefacciones.value = !modalEditarRefacciones.value;
   } catch (error) {
     console.error("Error al crear el refacciones:", error);
   }
 };
 const limpiarFormulario = () => {
   editarRefaccionForm.value = {
-    fecha: '',
-    hora: '',
-    refaccion: '',
+    fecha: "",
+    hora: "",
+    refaccion: "",
     monto: 0.0,
     id_proveedor: null,
-    nota_factura: '',
-    usuario: '',
-    nombreProveedor: '',
-    idRefacciones: null
-  }
-  proveedorNombre.value = '';
-  refaccionForm.value = { fecha: '', hora: '', refaccion: '', monto: 0, id_proveedor: null, numero_factura: ''};
-}
+    nota_factura: "",
+    usuario: "",
+    nombreProveedor: "",
+    idRefacciones: null,
+  };
+  proveedorNombre.value = "";
+  refaccionForm.value = {
+    fecha: "",
+    hora: "",
+    refaccion: "",
+    monto: 0,
+    id_proveedor: null,
+    numero_factura: "",
+  };
+};
 </script>
 
 <style>
-
 .error-msg {
   color: red;
   font-size: 12px;
 }
-
 </style>

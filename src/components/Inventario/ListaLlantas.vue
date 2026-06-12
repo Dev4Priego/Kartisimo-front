@@ -89,6 +89,7 @@
 							<th class="text-center">Anchura*</th>
 							<th class="text-center">Perfil*</th>
 							<th class="text-center">Rin*</th>
+							<th class="text-center">Capas</th>
 							<th class="text-center" style="width: 4%;">RunFlat</th>
 							<th class="text-center">Cantidad*</th>
 							<th class="text-center">Precio*</th>
@@ -139,6 +140,15 @@
 							<!--rin-->
 							<td>
 								<input type="number" class="form-control" v-model="llanta.rin">
+							</td>
+							<!--capas-->
+							<td>
+								<input
+									type="number"
+									class="form-control"
+									v-model="llanta.capas"
+									:disabled="!usaCapas(llanta.nomenclatura)"
+								>
 							</td>
 							<!--runFlat-->
 							<td>
@@ -224,13 +234,13 @@ const marcas = ref([]);
 const page = ref(1);
 const pageSize = ref(100);
 const numrow =ref(1)
-const almacen=ref('Avante')
 const filtroMarca=ref("")
 const filtroTexto=ref("")
 const emit = defineEmits(['close'])
 const props = defineProps({
   showModal: Boolean,
   llantas: { type: Array, required: true },
+  almacen: { type: String, required: true },
 });
 
 // paginacion de la tabla
@@ -316,6 +326,9 @@ const nomenclaturas = [
   { value: 2, label: 'Americana', example: '31X10.50R15' },
   { value: 3, label: 'Radial sin perfil / camión', example: '195R15, 11R22.5' },
   { value: 4, label: 'Convencional / agrícola', example: '10.00-16, 17.5-25' },
+  { value: 5, label: 'Flotacion / ATV', example: '25X10-12, 25X10-12-6C' },
+  { value: 6, label: 'Metrica con rin por guion', example: '145/70-6, 145/70-6-6C' },
+  { value: 7, label: 'Trailer sin perfil', example: '4.80X12, 4.80X12-6C' },
 ]
 
 const toNumber = (value) => {
@@ -341,13 +354,51 @@ const formatStoredDecimal = (value, forceTwoDecimals = false) => {
 
 const formatRin = (value) => formatStoredDecimal(value)
 
+const usaCapas = (nomenclatura) => [2, 4, 5, 6, 7].includes(Number(nomenclatura || 0))
+
+const requiereRin = (nomenclatura) => Number(nomenclatura || 0) !== 5
+
+const buildCapas = (llanta) => {
+  if (!usaCapas(llanta.nomenclatura)) return ''
+  const capas = obtenerCapas(llanta)
+  return capas > 0 ? `-${capas}C` : ''
+}
+
+const obtenerCapas = (llanta) => {
+  const directa = toNumber(llanta.capas ?? llanta.Capas ?? llanta.capa ?? llanta.Capa)
+  if (directa > 0) return directa
+
+  const texto = [
+    llanta.medida,
+    llanta.descripcion,
+    llanta.normalizada,
+    llanta.descripcionNormalizada,
+  ].filter(Boolean).join(' ').toUpperCase()
+
+  const match = texto.match(/(?:^|[-\s])(\d{1,2})(?:C|PR)(?:\s|$)/)
+  return match ? toNumber(match[1]) : 0
+}
+
+const normalizarCapasLlanta = (llanta) => {
+  llanta.capas = usaCapas(llanta.nomenclatura) ? obtenerCapas(llanta) : 0
+}
+
+watch(
+  () => props.llantas,
+  (llantas) => {
+    llantas.forEach(normalizarCapasLlanta)
+  },
+  { immediate: true, deep: true }
+)
+
 const buildMedida = (llanta) => {
   const nomenclatura = Number(llanta.nomenclatura || 0)
   const ancho = toNumber(llanta.anchura)
   const perfil = toNumber(llanta.perfil)
   const rin = toNumber(llanta.rin)
 
-  if (!nomenclatura || !ancho || !rin) return ''
+  if (!nomenclatura || !ancho) return ''
+  if (requiereRin(nomenclatura) && !rin) return ''
 
   if (nomenclatura === 1) {
     if (!perfil) return ''
@@ -356,7 +407,7 @@ const buildMedida = (llanta) => {
 
   if (nomenclatura === 2) {
     if (!perfil) return ''
-    return `${formatStoredDecimal(ancho)}X${formatStoredDecimal(perfil, true)}R${formatRin(rin)}`
+    return `${formatStoredDecimal(ancho)}X${formatStoredDecimal(perfil, true)}R${formatRin(rin)}${buildCapas(llanta)}`
   }
 
   if (nomenclatura === 3) {
@@ -366,7 +417,24 @@ const buildMedida = (llanta) => {
   if (nomenclatura === 4) {
     const medidaActual = String(llanta.medida || '').toUpperCase()
     const separador = medidaActual.includes('L-') ? 'L-' : '-'
-    return `${formatStoredDecimal(ancho, ancho >= 1000)}${separador}${formatRin(rin)}`
+    return `${formatStoredDecimal(ancho, ancho >= 1000)}${separador}${formatRin(rin)}${buildCapas(llanta)}`
+  }
+
+  if (nomenclatura === 5) {
+    if (!perfil) return ''
+    const alto = formatStoredDecimal(ancho, ancho >= 1000)
+    const anchoSeccion = formatStoredDecimal(perfil, perfil >= 100)
+    const rinMedida = rin > 0 ? `-${formatRin(rin)}` : ''
+    return `${alto}X${anchoSeccion}${rinMedida}${buildCapas(llanta)}`
+  }
+
+  if (nomenclatura === 6) {
+    if (!perfil) return ''
+    return `${ancho}/${perfil}-${formatRin(rin)}${buildCapas(llanta)}`
+  }
+
+  if (nomenclatura === 7) {
+    return `${formatStoredDecimal(ancho, ancho >= 100)}X${formatRin(rin)}${buildCapas(llanta)}`
   }
 
   return ''
@@ -392,6 +460,7 @@ const prepararLlantaParaGuardar = (llanta) => {
   llanta.carga = toNumber(llanta.carga)
   llanta.subCarga = toNumber(llanta.subCarga)
   llanta.rf = toNumber(llanta.rf)
+  llanta.capas = usaCapas(llanta.nomenclatura) ? obtenerCapas(llanta) : 0
   llanta.cantidad = toNumber(llanta.cantidad)
   llanta.precio = Number(llanta.precio || 0)
   llanta.velocidad = velocidad && velocidad !== '0' ? velocidad : 'N/A'
@@ -413,7 +482,7 @@ const ValidateList = () => {
       llanta.nomenclatura &&
       medida &&
       hasValue(llanta.anchura) &&
-      hasValue(llanta.rin)
+      (!requiereRin(llanta.nomenclatura) || hasValue(llanta.rin))
     )
 
     if (esValida) {
@@ -434,6 +503,11 @@ const ValidateList = () => {
 const GuardarLlantas = async () => {
   const { aceptadas, rechazadas } = ValidateList()
 
+  if (!props.almacen) {
+    Swal.fire("Error", "No se pudo identificar el almacen de la lista.", "error")
+    return
+  }
+
   if (aceptadas.length === 0) {
     Swal.fire({
       icon: "warning",
@@ -446,7 +520,7 @@ const GuardarLlantas = async () => {
 
   const PAYLOAD = {
     llantas: aceptadas,
-    almacen: almacen.value
+    almacen: props.almacen
   }
 
   try {
