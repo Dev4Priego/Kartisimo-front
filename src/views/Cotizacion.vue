@@ -538,7 +538,7 @@ onMounted(async () => {
   cargarCotizaciones();
   cargarConcpetoTrabajo();
   cargarAlmacenes();
-  cargarPromosGenerales();
+  cargarPromosRapidas();
   cleanupEscListener = registrarCerrarConEsc(mostrarVista);
 });
 
@@ -683,7 +683,7 @@ const agregarServicioExtra = async () => {
   };
 
   try {
-    const promos = await obtenerPromosGeneralesParaServicio();
+    const promos = promosGeneralesDisponibles.value;
     servicio.promosAplicables = promos;
   } catch (error) {
     servicio.promosAplicables = [];
@@ -745,9 +745,7 @@ const agregarLlanta = async (item) => {
   };
 
   try {
-    const promosDisponibles = await obtenerPromosPorInventario(
-      nuevaLlanta.idInventarioInicial,
-    );
+    const promosDisponibles = promosGeneralesDisponibles.value;
 
     nuevaLlanta.promosAplicables = promosDisponibles || [];
     nuevaLlanta.idPromocionSeleccionada = 0;
@@ -781,7 +779,6 @@ const agregarLlanta = async (item) => {
     // Si tienen la misma prioridad, ordenar por precio de mayor a menor
     return (b.precioUnitario || 0) - (a.precioUnitario || 0);
   });
-
 };
 
 // Obtener promociones aplicables a una llanta (por inventario)
@@ -971,7 +968,7 @@ watch(
       p.excluirPromocionGeneral = false;
 
       // Consultar promociones aplicables
-      const promos = await obtenerPromosPorPaquete(p.idPaquete);
+      const promos = promosGeneralesDisponibles.value;
 
       p.promosAplicables = promos || [];
     }
@@ -993,7 +990,6 @@ const cargarConcpetoTrabajo = async () => {
       idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
       nombre: a.nombre,
     }));
-
   } catch (error) {
     console.error("Error cargando ConceptoTrabajo:", error);
   }
@@ -1099,7 +1095,7 @@ const cargarFormulario = async (cotizacion = null) => {
           : null;
 
         // 🔹 Obtener promociones aplicables desde la API
-        const promosAplicables = await obtenerPromosPorPaquete(p.idPaquete);
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         // 🔹 Calcular precio con la función estándar
         const precioBase = p.precioUnitario;
@@ -1167,9 +1163,7 @@ const cargarFormulario = async (cotizacion = null) => {
           : null;
 
         // 2. Obtener promociones aplicables desde API
-        const promosAplicables = await obtenerPromosPorInventario(
-          ll.idInventarioInicial,
-        );
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         // 3. Calcular precio con promo
         const precioBase = ll.precioUnitario;
@@ -1235,7 +1229,7 @@ const cargarFormulario = async (cotizacion = null) => {
             }
           : null;
 
-        const promosAplicables = await obtenerPromosGeneralesParaServicio();
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         const precioBase = s.precioUnitario ?? 0;
 
@@ -1279,11 +1273,27 @@ const cargarFormulario = async (cotizacion = null) => {
   }
 };
 
-const cargarPromosGenerales = async () => {
+/* const cargarPromosGenerales = async () => {
   try {
     const res = await fetch(
       `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
     );
+    if (!res.ok) throw new Error("Error al obtener promociones generales");
+
+    const data = await res.json();
+    promosGeneralesDisponibles.value = data;
+
+    if (data.length > 0) {
+    } else {
+    }
+  } catch (error) {
+    console.error("Error al cargar promociones generales:", error);
+  }
+}; */
+
+const cargarPromosRapidas = async () => {
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromosRapidas`);
     if (!res.ok) throw new Error("Error al obtener promociones generales");
 
     const data = await res.json();
@@ -1576,7 +1586,6 @@ const guardarCotizacion = async () => {
     closeModal();
     cargarCotizaciones();
     mostrarVistaPrevia(data, "ver");
-
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -2002,9 +2011,7 @@ watch(
           mostrarEditorPromo: false,
         };
 
-        paqueteObj.promosAplicables = await obtenerPromosPorPaquete(
-          paqueteObj.idPaquete,
-        );
+        paqueteObj.promosAplicables =  promosGeneralesDisponibles.value
         cotizacionForm.paquetes.push(paqueteObj);
       }
     }
@@ -2436,11 +2443,11 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 };
 
 const formatearTelefono = (telefono) => {
-	if (!telefono) return '';
-    const digitos = telefono.replace(/\D/g, '');
-    if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
-  }
+  if (!telefono) return "";
+  const digitos = telefono.replace(/\D/g, "");
+  if (digitos.length !== 10) return telefono;
+  return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
+};
 
 const generarPDF = async () => {
   const logo = await loadLogoBase64();
@@ -2663,15 +2670,15 @@ const generarPDF = async () => {
   };
 
   const formatearTelefono = (telefono) => {
-	if (!telefono) return '';
-    const digitos = telefono.replace(/\D/g, '');
+    if (!telefono) return "";
+    const digitos = telefono.replace(/\D/g, "");
     if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
-  }
+    return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
+  };
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
-    pageSize: 'LETTER',
+    pageSize: "LETTER",
     content: [
       // Logo y encabezado
       {
@@ -2693,10 +2700,18 @@ const generarPDF = async () => {
               text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 330 6060 y\n477 390 5090", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. Valle de Jerez C.P 37538",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 330 6060 y\n477 390 5090",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "delta@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2704,10 +2719,14 @@ const generarPDF = async () => {
               text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
             { text: "Col. Obrera C.P. 37340", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 717 7440 y\n477 470 9419", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Tel. 477 717 7440 y\n477 470 9419",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "apolo@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2715,10 +2734,18 @@ const generarPDF = async () => {
               text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. La Piscina C.P. 37440", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 390 0290 y\n477 461 0028", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. La Piscina C.P. 37440",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 390 0290 y\n477 461 0028",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "torreslanda@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2726,10 +2753,18 @@ const generarPDF = async () => {
               text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 763 3285 y\n477 763 3284", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. La Martinica, C.P. 37500",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 763 3285 y\n477 763 3284",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
           ],
         ],
         columnGap: 15,
@@ -2777,7 +2812,10 @@ const generarPDF = async () => {
                   text: "Teléfono(s): ",
                   bold: true,
                 },
-                { text: formatearTelefono(v.cliente.telefono) || "N/A", color: "#444" },
+                {
+                  text: formatearTelefono(v.cliente.telefono) || "N/A",
+                  color: "#444",
+                },
               ],
               fontSize: 10,
               margin: [0, 0, 10, 6],
@@ -2879,7 +2917,7 @@ const generarPDF = async () => {
         margin: [0, 14, 0, 0],
       },
     ],
-    
+
     styles: {
       tableHeaderBorder: {
         bold: true,
@@ -2973,9 +3011,7 @@ const cotizacionContext = {
   eliminarServicioExtra,
   eliminarLlanta,
   agregarLlanta,
-  obtenerPromosPorInventario,
-  obtenerPromosPorPaquete,
-  obtenerPromosGeneralesParaServicio,
+  cargarPromosRapidas,
   aplicarPromo,
   onCambioPromo,
   onCambioPromoPaquete,
@@ -2983,7 +3019,7 @@ const cotizacionContext = {
   precioFinalItem,
   cargarConcpetoTrabajo,
   cargarFormulario,
-  cargarPromosGenerales,
+  cargarPromosRapidas,
   aplicarPromocionGeneral,
   guardarCotizacion,
   subtotalLlantas,
@@ -3024,9 +3060,8 @@ const cotizacionContext = {
   togglePaquete,
   guardarPromoAlVuelo,
   formatearTelefono,
-  generarPDF
+  generarPDF,
 };
-
 </script>
 
 <style>
@@ -3140,7 +3175,6 @@ const cotizacionContext = {
 
     border: none;
     border-top: 1px solid #000;
-    
   }
 
   #area-imprimir .tr-servicios td {

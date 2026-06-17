@@ -102,6 +102,8 @@
 						<th>¿Vigente?</th>
 						<!-- <th>Estado</th> -->
 						<th>Acciones</th>
+						<th>Promoción rápida</th>
+						
 					</tr>
 				</thead>
 
@@ -149,6 +151,11 @@
 							<i class="bi bi-trash"></i>
 						</button>
 						</td>
+						
+						<td>
+
+							<input type="checkbox" name="checkPromoRapida" class="form-check-input" style="width: 20px; height: 20px;" @change="SwitchPromocionRapida(promo, $event)" v-model="promo.isQuickPromo" />
+						</td>
 					</tr>
 
 					<tr v-if="promociones.length === 0">
@@ -163,7 +170,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, getCurrentInstance } from "vue";
+import { ref, computed, onMounted, getCurrentInstance, toRaw } from "vue";
 import Swal from "sweetalert2";
 const { proxy } = getCurrentInstance();
 import Toastify from "toastify-js";
@@ -284,7 +291,36 @@ function validarFormulario() {
 	errorFormulario.value = mensaje;
 	return valido;
 }
+const SwitchPromocionRapida = async (promo, event) => {
+	const isChecked = event?.target?.checked ?? !!promo.isQuickPromo;
+	const activeCount = promociones.value.filter((p) => p.isQuickPromo === true).length;
 
+	if (isChecked && activeCount > 3) {
+		promo.isQuickPromo = false;
+		mostrarToast("warning", "Solo se permiten 3 promociones rápidas activas.");
+		return;
+	}
+
+	promo.isQuickPromo = isChecked;
+
+	// actualizar estado en la base de datos
+	const body = {
+		idPromocion: promo.idPromocion,
+		estado: isChecked,
+	};
+
+	const res = await fetch(`${proxy.$serverIP}api/Promocion/ChangeEstadoPromocion`, {
+		method: "PUT",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(body),
+	});
+
+	if (!res.ok) {
+		throw new Error(`Error HTTP ${res.status}`);
+	}
+
+	mostrarToast("success", `Promoción rápida ${isChecked ? "activada" : "desactivada"}`);
+};
 // Ver detalles de una promoción
 const verPromocion = async (idPromocion) => {
 	try {
@@ -376,7 +412,7 @@ const verPromocion = async (idPromocion) => {
 };
 
 const abrirModalPromocion = async () => {
-	promocionForm.value = { nombre: '', tipo: true, valor: 0, fechaInicio: null, fechaFin: null, esGeneral: true }
+	promocionForm.value = { nombre: '', tipo: true, valor: 0, fechaInicio: null, fechaFin: null, esGeneral: true, isQuickPromo: false }
 	formValida.value = true;
 	modalPromocion.value = true;
 }
@@ -394,7 +430,8 @@ const guardarPromocion = async () => {
 					EsGeneral: promocionForm.value.esGeneral,
 					FechaInicio: promocionForm.value.fechaInicio,
 					FechaFin: promocionForm.value.fechaFin,
-					Activo: true
+					Activo: true,
+					isQuickPromo:false
 				}
 			}
 			const res = await fetch(`${proxy.$serverIP}api/Promocion/crear?usuario=${idUsuarioSession}`, {
