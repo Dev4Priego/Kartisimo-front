@@ -362,31 +362,39 @@
                       </td>
                       <!-- Acciones -->
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="ll.idPromocionSeleccionada"
-                            @change="onPromoChange(ll)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ll.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(ll)"
                             :disabled="ll.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="ll.idPromocionVuelo > 0"
-                              :value="ll.idPromocionVuelo"
-                            >
-                              {{ ll.promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                            <!-- Default -->
-                            <option :value="0">-- Sin promoción --</option>
-                            <!-- Promociones disponibles -->
-                            <option
-                              v-for="promo in ll.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo.nombre }}
-                            </option>
-                          </select>
+                            Sin promoción
+                          </button>
 
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(ll)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ll.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(ll, promo)"
+                            :disabled="ll.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -609,31 +617,39 @@
                       </td>
 
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="paq.idPromocionSeleccionada"
-                            @change="onPromoChange(paq)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              paq.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(paq)"
                             :disabled="paq.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="paq.idPromocionVuelo > 0"
-                              :value="paq.idPromocionVuelo"
-                            >
-                              {{
-                                paq.promo?.nombre || "Promocion Vuelo APlicada"
-                              }}
-                            </option>
-                            <option :value="0">-- Sin promoción --</option>
-                            <option
-                              v-for="promo in paq.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                          </select>
+                            Sin promoción
+                          </button>
 
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(paq)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              paq.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(paq, promo)"
+                            :disabled="paq.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -922,32 +938,39 @@
                       </td>
                       <!-- Acciones -->
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="ad.idPromocionSeleccionada"
-                            @change="onPromoChange(ad)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ad.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(ad)"
                             :disabled="ad.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="ad.idPromocionVuelo > 0"
-                              :value="ad.idPromocionVuelo"
-                            >
-                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                            <!-- Default -->
-                            <option :value="0">-- Sin promoción --</option>
+                            Sin promoción
+                          </button>
 
-                            <!-- Promociones disponibles -->
-                            <option
-                              v-for="promo in ad.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                          </select>
-
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(ad)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ad.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(ad, promo)"
+                            :disabled="ad.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -1161,11 +1184,13 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import ModalAdicional from "./ModalAdicional.vue";
 import { reactive } from "vue";
+import Swal from "sweetalert2";
 const { proxy } = getCurrentInstance();
 
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
+const promosGeneralesDisponibles = ref([]);
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1180,12 +1205,80 @@ const emit = defineEmits(["update:modelValue", "update:insumos"]);
 // observar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
 const inicializado = ref(false);
 
+const promocionesRapidasParaItem = (item) => {
+  const promosItem = Array.isArray(item?.promosAplicables)
+    ? item.promosAplicables
+    : [];
+
+  const base = promosItem.length ? promosItem : promosGeneralesDisponibles.value;
+  return base.filter((promo) => !promo.esAlVuelo);
+};
+
+const aplicarPromosRapidasAItem = (item) => {
+  if (!item) return;
+
+  const promosVuelo = (item.promosAplicables || []).filter(
+    (promo) => promo.esAlVuelo,
+  );
+  const promoVueloActual =
+    item.idPromocionVuelo > 0 && item.promo
+      ? {
+          ...item.promo,
+          idPromocion: item.idPromocionVuelo,
+          esAlVuelo: true,
+        }
+      : null;
+  const promosRapidas = promosGeneralesDisponibles.value.filter(
+    (promo) => !promo.esAlVuelo,
+  );
+
+  item.promosAplicables = [
+    ...promosRapidas,
+    ...promosVuelo,
+    ...(promoVueloActual &&
+    !promosVuelo.some((promo) => promo.idPromocion === promoVueloActual.idPromocion)
+      ? [promoVueloActual]
+      : []),
+  ];
+};
+
+const aplicarPromosRapidasAInsumos = () => {
+  [...llantas.value, ...paquetes.value, ...adicionales.value].forEach(
+    aplicarPromosRapidasAItem,
+  );
+};
+
+const cargarPromosRapidas = async () => {
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromosRapidas`);
+    if (!res.ok) throw new Error("Error al obtener promociones rápidas");
+
+    const data = await res.json();
+    promosGeneralesDisponibles.value = Array.isArray(data) ? data : [];
+    aplicarPromosRapidasAInsumos();
+  } catch (error) {
+    console.error("Error al cargar promociones rápidas:", error);
+  }
+};
+
+const limpiarPromoRapida = (item) => {
+  item.idPromocionSeleccionada = 0;
+  onPromoChange(item);
+};
+
+const seleccionarPromoRapida = (item, promo) => {
+  aplicarPromosRapidasAItem(item);
+  item.idPromocionSeleccionada = promo.idPromocion;
+  onPromoChange(item);
+};
+
 watch(
   () => props.insumos,
   (nuevo) => {
     llantas.value = [...(nuevo.llanta || [])];
     paquetes.value = [...(nuevo.paquete || [])];
     adicionales.value = [...(nuevo.adicional || [])];
+    aplicarPromosRapidasAInsumos();
     console.log("INSUMOS MODAL:", nuevo);
   },
   { immediate: true }
@@ -1260,8 +1353,8 @@ const onPromoChange = (item) => {
 };
 const obtenerPromoSeleccionada = (item) => {
   const allPromos = [
-    ...(item.promosDisponibles || []),
     ...(item.promosAplicables || []),
+    ...(item.promosDisponibles || []),
   ];
   return allPromos.find(
     (p) => p.idPromocion === item.idPromocionSeleccionada // <-- usar idSel
@@ -1498,9 +1591,13 @@ const handleEsc = (event) => {
 
 watch(
   () => props.modelValue,
-  (v) => {
-    if (v) document.addEventListener("keydown", handleEsc);
-    else document.removeEventListener("keydown", handleEsc);
+  async (v) => {
+    if (v) {
+      document.addEventListener("keydown", handleEsc);
+      await cargarPromosRapidas();
+    } else {
+      document.removeEventListener("keydown", handleEsc);
+    }
   },
 );
 
@@ -1573,7 +1670,7 @@ const agregarLlanta = async (itm) => {
     subTotal: Number((4 * toNumber(itm.precio)).toFixed(2)),
 
     promosDisponibles: [],
-    promosAplicables: [],
+    promosAplicables: [...promosGeneralesDisponibles.value],
     // valores históricos
 
     promo: {
@@ -1774,7 +1871,7 @@ const onTogglePaquete = async (paqueteBase) => {
     })),
 
     promosDisponibles,
-    promosAplicables: [],
+    promosAplicables: [...promosGeneralesDisponibles.value],
     nombrePromocion: null,
     valorPromocion: null,
     tipoPromocion: null,
@@ -1805,6 +1902,7 @@ const mapearInsumosParaPadre = () => {
       precioConPromo: l.precioConPromo,
       subTotal: l.subTotal,
       promosDisponibles: l.promosDisponibles,
+      promosAplicables: l.promosAplicables,
       promo: l.promo || [],
     })),
 
@@ -1833,6 +1931,7 @@ const mapearInsumosParaPadre = () => {
       })),
 
       promosDisponibles: p.promosDisponibles,
+      promosAplicables: p.promosAplicables,
 
       promo: p.promo || [],
     })),
@@ -1856,6 +1955,7 @@ const mapearInsumosParaPadre = () => {
       subTotal: a.subTotal,
 
       promosDisponibles: a.promosDisponibles,
+      promosAplicables: a.promosAplicables,
 
       promo: a.promo || null,
     })),
@@ -1874,8 +1974,9 @@ const guardarInsumo = () => {
 };
 
 // Mounted
-onMounted(() => {
+onMounted(async () => {
   if (props.modelValue) document.addEventListener("keydown", handleEsc);
+  await cargarPromosRapidas();
   cargarLlantas();
   cargarAlmacenes();
   cargarConcpetoTrabajo();

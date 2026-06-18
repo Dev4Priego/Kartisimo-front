@@ -129,6 +129,14 @@
         </div>
         <div class="col-auto">
           <button
+            class="btn btn-success shadow-sm me-2"
+            @click="retrocederEstado"
+            :disabled="estados.indexOf(otEditar.estado) == 3 "
+          >
+            <i class="bi bi-arrow-left-short me-1"></i>
+            Retroceder estado
+          </button>
+          <button
             class="btn btn-success shadow-sm"
             @click="avanzarEstado"
             :disabled="otEditar.estatus != 1"
@@ -1104,14 +1112,44 @@ const lineaClase = (estado) => {
     ? "bg-success"
     : "bg-secondary";
 };
+/*const preguntaEntregar = async (ot) => {
+  await Swal.fire({
+    title: "Entregar vehiculo",
+    text:
+      "Al entregar el vehículo no podrás retroceder la Orden de trabajo ¿Estás seguro?",
+    icon: "warning",
+    confirmButtonText: "Sí, cancelar la OT",
+    showCancelButton: true,
+    cancelButtonText: "No, volver",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      return 1; 
+    }
+  });
+};*/
 
 const avanzarEstado = async () => {
+  console.log(estados.indexOf(otEditar.value.estado));
   const idx = estados.indexOf(otEditar.value.estado);
 
   // si no existe o ya es el último → no hace nada
   if (idx === -1 || idx >= estados.length - 1) return;
 
   const nuevoEstado = estados[idx + 1];
+
+  // Si vamos a avanzar al último estado ('Entregado'), pedir confirmación
+  if (idx + 1 === estados.length - 1) {
+    const preguntaEntregar = await Swal.fire({
+      title: "Entregar vehiculo",
+      text: "Al entregar el vehículo no podrás retroceder la Orden de trabajo ¿Estás seguro?",
+      icon: "warning",
+      confirmButtonText: "Sí, Entregar vehículo",
+      showCancelButton: true,
+      cancelButtonText: "No, volver",
+    });
+
+    if (!preguntaEntregar.isConfirmed) return;
+  }
 
   try {
     // actualizar en frontend
@@ -1122,6 +1160,33 @@ const avanzarEstado = async () => {
       `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
       {
         estado: nuevoEstado,
+        idUsuario: idUsuarioSession,
+      },
+    );
+
+    mostrarToast("success", "Orden de trabajo avanzada correctamente");
+  } catch (error) {
+    console.error("No se pudo actualizar el estado", error);
+  }
+};
+const retrocederEstado = async () => {
+  const idx = estados.indexOf(otEditar.value.estado);
+
+  // si no existe o ya es el último → no hace nada
+  if (idx === 0 || idx >= estados.length - 1) return;
+
+  const nuevoEstado = estados[idx - 1];
+
+  try {
+    // actualizar en frontend
+    otEditar.value.estado = nuevoEstado;
+
+    // guardar en backend
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        estado: nuevoEstado,
+        idUsuario: idUsuarioSession,
       },
     );
 
