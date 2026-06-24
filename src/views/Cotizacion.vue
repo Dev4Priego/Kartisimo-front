@@ -1113,7 +1113,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
           comentario: p.comentario || "",
           excluirPromocionGeneral: p.excluirPromocionGeneral ?? false,
-          cantidad: 1,
+          cantidad: p.cantidad,
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
@@ -1520,7 +1520,7 @@ const guardarCotizacion = async () => {
       idPromocion: p.isVuelo ? null : p.idPromocionSeleccionada || null,
       idPromocionVuelo: p.isVuelo ? p.idPromocionAlVuelo : null,
       isVuelo: p.isVuelo || false,
-      cantidad: p.cantidad ?? 1, // o el valor que requieras
+      cantidad: p.cantidad , // o el valor que requieras
       precioUnitario: p.precioUnitario ?? p.precio ?? 0,
       excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
       comentario: p.comentario || "",
@@ -2166,6 +2166,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           idPaquete: p.idPaquete,
           nombre: p.nombre,
           descripcion: p.descripcion,
+          cantidad: p.cantidad,
           precioUnitario: precioBase,
           precio: precioConPromo,
           total: precioConPromo,
@@ -2575,7 +2576,7 @@ const generarPDF = async () => {
 
     celdaTotalConPromo({
       precioUnitario: p.precioUnitario,
-      cantidad: 1,
+      cantidad: p.cantidad,
       total: p.total,
       fontSize: 10,
       promoLabel: p.promoLabel,

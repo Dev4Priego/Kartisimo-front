@@ -2501,6 +2501,7 @@ const cargarInfoCotizacion = async () => {
     ")";
 
   //cliente
+  ordenTrabajoForm.observacion = data?.observaciones || "";
   ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;
   ordenTrabajoForm.cliente.metodoPago = data?.metodoPago;
   ordenTrabajoForm.cliente.clienteNombre =

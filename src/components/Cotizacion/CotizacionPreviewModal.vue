@@ -228,7 +228,7 @@
                     v-for="(paquete, index) in vistaCotizacion.paquetes"
                     :key="'paq-' + index" class="tr-servicios"
                   >
-                    <td class="text-center">1</td>
+                    <td class="text-center">{{paquete.cantidad}}</td>
                     <td>
                       {{ paquete.nombre.toUpperCase() }},
                       {{ paquete.descripcion.toUpperCase() }}
@@ -265,7 +265,7 @@
                         </span>
                         <br />
                         <span class="text-success fw-bold d-block">{{
-                          paquete.total.toLocaleString("es-MX", {
+                          (paquete.precioUnitario * paquete.cantidad ?? 1).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -273,7 +273,7 @@
                       </div>
                       <div v-else>
                         {{
-                          paquete.total.toLocaleString("es-MX", {
+                          (paquete.precioUnitario * paquete.cantidad ?? 1).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
