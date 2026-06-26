@@ -51,7 +51,7 @@ const conceptoOT = ref([]);
 const mostrarTabla = ref(false);
 const selectedAlmacenes = ref([]);
 const dropdownOpen = ref(false);
-
+const userData = JSON.parse(localStorage.getItem("userSession"));
 const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
 const loggeduser = {
@@ -449,11 +449,22 @@ const cargarLlantas = async () => {
 // Función para cargar detalles de la sucursal del usuario
 
 // Función para cargar cotizaciones
-const cargarCotizaciones = async () => {
+const cargarCotizaciones = async (options={}) => {
   loading.value = true;
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (userData?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+  }
     const res = await fetch(
-      proxy.$serverIP + "api/Cotizacion/resumenCotizaciones",
+      proxy.$serverIP + "api/Cotizacion/resumenCotizaciones", options
     );
     if (!res.ok) throw new Error("Error al obtener cotizaciones");
     const data = await res.json();
@@ -1568,11 +1579,12 @@ const guardarCotizacion = async () => {
     const url = cotizacionForm.codigo
       ? `${proxy.$serverIP}api/Cotizacion/editarCotizacion`
       : `${proxy.$serverIP}api/Cotizacion/crearCotizacion`;
-
+    
     const res = await fetch(url, {
       method: cotizacionForm.codigo ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevaCotizacion),
+      Authorization : `Bearer ${userData?.token}`
     });
 
     if (!res.ok) {
@@ -1792,9 +1804,20 @@ const almacenes = ref([
   { id: 3, nombre: "Sucursal Sur" },
 ]);
 
-const cargarAlmacenes = async () => {
+const cargarAlmacenes = async (options = {}) => {
   try {
-    const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`);
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+  
+  if (userData?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+  }
+    const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`,options);
 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);

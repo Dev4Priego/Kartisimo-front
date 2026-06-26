@@ -26,9 +26,8 @@
                   <div
                     v-for="(paquete, i) in paqueteDisponibles"
                     :key="i"
-                    class="form-check-inline"  
+                    class="form-check-inline"
                   >
-
                     <input
                       class="form-check-input mx-2"
                       type="checkbox"
@@ -295,7 +294,7 @@
                           </option>
                         </select>
                       </td>
-                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }} </td>
+                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }}</td>
                       <td>
                         <input
                           type="number"
@@ -393,7 +392,9 @@
                             :disabled="ll.idPromocionVuelo > 0"
                           >
                             {{ promo.nombre }}
-                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
                           </button>
                           <button
                             type="button"
@@ -569,7 +570,6 @@
                           v-model.number="paq.precioUnitario"
                           @input="recalcularSubtotal(paq)"
                         />
-                        
                       </td>
 
                       <td>
@@ -648,7 +648,9 @@
                             :disabled="paq.idPromocionVuelo > 0"
                           >
                             {{ promo.nombre }}
-                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
                           </button>
                           <button
                             type="button"
@@ -969,7 +971,9 @@
                             :disabled="ad.idPromocionVuelo > 0"
                           >
                             {{ promo.nombre }}
-                            {{ promo.tipo ? promo.valor + "%" : "$" + promo.valor }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
                           </button>
                           <button
                             type="button"
@@ -1191,6 +1195,7 @@ const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
 const promosGeneralesDisponibles = ref([]);
+const userData = JSON.parse(localStorage.getItem("userSession"));
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1210,7 +1215,9 @@ const promocionesRapidasParaItem = (item) => {
     ? item.promosAplicables
     : [];
 
-  const base = promosItem.length ? promosItem : promosGeneralesDisponibles.value;
+  const base = promosItem.length
+    ? promosItem
+    : promosGeneralesDisponibles.value;
   return base.filter((promo) => !promo.esAlVuelo);
 };
 
@@ -1236,7 +1243,9 @@ const aplicarPromosRapidasAItem = (item) => {
     ...promosRapidas,
     ...promosVuelo,
     ...(promoVueloActual &&
-    !promosVuelo.some((promo) => promo.idPromocion === promoVueloActual.idPromocion)
+    !promosVuelo.some(
+      (promo) => promo.idPromocion === promoVueloActual.idPromocion,
+    )
       ? [promoVueloActual]
       : []),
   ];
@@ -1281,7 +1290,7 @@ watch(
     aplicarPromosRapidasAInsumos();
     console.log("INSUMOS MODAL:", nuevo);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const close = () => emit("update:modelValue", false);
@@ -1357,7 +1366,7 @@ const obtenerPromoSeleccionada = (item) => {
     ...(item.promosDisponibles || []),
   ];
   return allPromos.find(
-    (p) => p.idPromocion === item.idPromocionSeleccionada // <-- usar idSel
+    (p) => p.idPromocion === item.idPromocionSeleccionada, // <-- usar idSel
   );
 };
 const toNumber = (value) => {
@@ -1391,7 +1400,7 @@ const recalcularSubtotal = (item) => {
   // Resolver promo actual según selección
   let promo = null;
   if (item.idPromocionVuelo) {
-    promo = { ...item.promo }; 
+    promo = { ...item.promo };
   } else if (item.idPromocionSeleccionada) {
     promo = obtenerPromoSeleccionada(item);
   }
@@ -1412,7 +1421,6 @@ const recalcularSubtotal = (item) => {
   item.precioConPromo = precioFinal;
   item.subTotal = Number(precioFinal.toFixed(2));
 };
-
 
 const borrarInsumo = (insumo) => {
   insumo.eliminado = true;
@@ -1472,9 +1480,22 @@ const mostrarToast = (type, message) => {
   }).showToast();
 };
 
-const cargarAlmacenes = async () => {
+const cargarAlmacenes = async (options = {}) => {
   try {
-    const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`);
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (userData?.token) {
+      options.headers["Authorization"] = `Bearer ${userData?.token}`;
+    }
+    const response = await fetch(
+      `${proxy.$serverIP}api/Almacen/getAlmacen`,
+      options,
+    );
 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
@@ -1982,8 +2003,7 @@ onMounted(async () => {
   cargarConcpetoTrabajo();
   cargarPaquetes();
 
-  console.log("DEBUG Props: ",props.insumos) 
-  
+  console.log("DEBUG Props: ", props.insumos);
 });
 
 const calcularTotalesDesdeInsumos = (insumos) => {
@@ -2075,7 +2095,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     const data = await res.json();
     nuevaPromo.idPromocion = data.idPromoVuelo;
     item.promosAplicables.push(nuevaPromo);
-     // Inicializar promo si está null
+    // Inicializar promo si está null
     if (!item.promo) {
       item.promo = {};
     }

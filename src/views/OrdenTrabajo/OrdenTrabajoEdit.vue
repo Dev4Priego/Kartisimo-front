@@ -620,10 +620,21 @@ const insumosFiltrados = computed(() => {
   };
 });
 
-const obtenerPromosPorInventario = async (idInventarioInicial) => {
+const obtenerPromosPorInventario = async (idInventarioInicial, options = {}) => {
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`,
+      `${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`,options
     );
 
     if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
@@ -636,10 +647,21 @@ const obtenerPromosPorInventario = async (idInventarioInicial) => {
     return [];
   }
 };
-const obtenerPromosPorPaquete = async (idPaquete) => {
+const obtenerPromosPorPaquete = async (idPaquete , options = {}) => {
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`,
+      `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`, options
     );
 
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
@@ -651,10 +673,21 @@ const obtenerPromosPorPaquete = async (idPaquete) => {
     return [];
   }
 };
-const obtenerPromosGeneralesParaServicio = async () => {
+const obtenerPromosGeneralesParaServicio = async (options = {}) => {
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
     const res = await fetch(
-      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
+      `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`, options
     );
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
 
@@ -689,13 +722,26 @@ const preguntaCancelar = async (ot) => {
   });
 };
 
-const cargarOrden = async () => {
+const cargarOrden = async ( options = {} ) => {
   try {
     const id = route.params.id;
     const otCreada = history.state?.otCreada ?? false;
     console.log("isCreated?: ", otCreada);
+
+    options.headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    // Adjuntar el token Bearer si existe
+  
+    if (data45?.token) {
+      
+      options.headers['Authorization'] = `Bearer ${data45?.token}`;
+    }
+
     const res = await fetch(
-      `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`,
+      `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`, options
     );
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -999,13 +1045,24 @@ const calcularTotales = () => {
   otEditar.value.totales.total = Number((subtotal - descuento).toFixed(2));
 };
 
-const cargarEmpleados = async () => {
+const cargarEmpleados = async ( options = {} ) => {
   const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
+    options.headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    // Adjuntar el token Bearer si existe
+  
+    if (data45?.token) {
+      
+      options.headers['Authorization'] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       proxy.$serverIP +
         "api/Empleado/getEmpleado?idSucursal=" +
-        userSession.usuario.idSucursal,
+        userSession.usuario.idSucursal, options
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const data = await res.json();
@@ -1018,9 +1075,20 @@ const cargarEmpleados = async () => {
   }
 };
 
-const cargarUsosCFDI = async () => {
+const cargarUsosCFDI = async ( options = {} ) => {
   try {
-    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI");
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
+    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI" ,options);
     if (!res.ok) throw new Error("Error en la respuesta");
 
     const result = await res.json();
@@ -1030,10 +1098,21 @@ const cargarUsosCFDI = async () => {
   }
 };
 
-const cargarRegimenFiscal = async () => {
+const cargarRegimenFiscal = async (options = {}) => {
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
     const res = await fetch(
-      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",
+      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal", options
     );
     if (!res.ok) throw new Error("Error en la respuesta");
 
@@ -1161,7 +1240,7 @@ const avanzarEstado = async () => {
       {
         estado: nuevoEstado,
         idUsuario: idUsuarioSession,
-      },
+      },{headers:{'Authorization' : `Bearer ${data45?.token}`}}
     );
 
     mostrarToast("success", "Orden de trabajo avanzada correctamente");
@@ -1187,7 +1266,7 @@ const retrocederEstado = async () => {
       {
         estado: nuevoEstado,
         idUsuario: idUsuarioSession,
-      },
+      },{headers:{'Authorization' : `Bearer ${data45?.token}`}}
     );
 
     mostrarToast("success", "Orden de trabajo avanzada correctamente");
@@ -1203,7 +1282,7 @@ const cambiarEstatusOT = async (estatus) => {
       `${proxy.$serverIP}api/OrdenTrabajo/cambiarEstatusOT/${otEditar.value.idOrdenTrabajo}`,
       {
         estatus: estatus,
-      },
+      },{headers:{'Authorization' : `Bearer ${data45?.token}`}}
     );
 
     switch (estatus) {
@@ -1253,7 +1332,7 @@ const guardarEdicion = async () => {
   try {
     const response = await axios.put(
       `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${idOT}`,
-      payload,
+      payload,{headers:{'Authorization' : `Bearer ${data45?.token}`}}
     );
 
     mostrarToast("success", "Orden de trabajo editada correctamente");
@@ -1417,6 +1496,17 @@ const guardarLLantasOT = async () => {
   console.log("payload:", payload);
 
   // Ejemplo de envío al backend
+  options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (data45?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${data45?.token}`;
+  }
   const res = await fetch(
     `${proxy.$serverIP}api/OrdenTrabajo/InsertarLlantasOT`,
     {

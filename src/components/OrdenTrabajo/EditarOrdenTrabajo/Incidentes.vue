@@ -57,7 +57,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="i in incidentes">
+                <tr v-for="i in incidentes" >
                     <td>{{ i.incidente }}</td>
                     <td style="white-space: nowrap;">{{ formatearFecha(i.fecha) }}</td>
                     <td style="white-space: nowrap;">{{ i.usuario }}</td>
@@ -81,7 +81,7 @@ const { proxy } = getCurrentInstance()
 const incidentes = ref([]);
 const incidenteForm = ref({ fecha: '', hora: '', incidente: '' });
 const modalIncidente = ref(false);
-
+const userData = JSON.parse(localStorage.getItem('userSession'));
 const props = defineProps({
   otId: Number,
   usuario: Number
@@ -107,12 +107,23 @@ const formatearFecha = (fecha) => {
     return `${fechaFormateada}, ${horaFormateada}`;
 };
 
-const cargarIncidentes =  async(ot) => {
+const cargarIncidentes =  async(ot , options = {}) => {
     incidentes.value = [];
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (userData?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+  }
     const res = await fetch(
       proxy.$serverIP +
-        "api/OrdenTrabajo/getIncidentesPorOT?idOT=" + ot
+        "api/OrdenTrabajo/getIncidentesPorOT?idOT=" + ot, options
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const response = await res.json();
@@ -144,7 +155,7 @@ const guardarIncidente = async () => {
   try {
     const response = await axios.post(
        proxy.$serverIP + 'api/OrdenTrabajo/crearIncidenteOT',
-      payload
+      payload,{headers:{'Authorization':`Bearer ${userData?.token}`}}
     );
     cargarIncidentes(idOT);
   } catch (error) {

@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
+import { clearSession } from "@/services/auth";
 
 const router = useRouter();
 let inactivityTimer = null;
@@ -8,7 +9,7 @@ let inactivityTimer = null;
 const INACTIVITY_TIME = 30 * 60 * 1000; // 30 minutos
 
 const logoutUser = () => {
-	localStorage.removeItem('userSession'); // o el token
+	clearSession();
 	router.push("/");
 };
 

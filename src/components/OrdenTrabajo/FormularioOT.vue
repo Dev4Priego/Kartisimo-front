@@ -1905,9 +1905,20 @@ const cargarEmpleados = async () => {
   }
 };
 
-const cargarUsosCFDI = async () => {
+const cargarUsosCFDI = async (options={}) => {
   try {
-    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI");
+    options.headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+  
+    // Adjuntar el token Bearer si existe
+    
+    if (loggeduser?.token) {
+      
+      options.headers['Authorization'] = `Bearer ${loggeduser?.token}`;
+    }
+    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI",options);
     if (!res.ok) throw new Error("Error en la respuesta");
 
     const result = await res.json();
@@ -1917,10 +1928,21 @@ const cargarUsosCFDI = async () => {
   }
 };
 
-const cargarRegimenFiscal = async () => {
+const cargarRegimenFiscal = async (options={}) => {
   try {
+    options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+  
+  if (loggeduser?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${loggeduser?.token}`;
+  }
     const res = await fetch(
-      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",
+      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",options
     );
     if (!res.ok) throw new Error("Error en la respuesta");
 

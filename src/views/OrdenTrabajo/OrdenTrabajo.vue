@@ -173,7 +173,7 @@ import { Modal } from "bootstrap";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
-
+const userData = JSON.parse(localStorage.getItem("userSession"));
 const itmEmpleados = ref({});
 const loading = ref(true);
 const listaOrdenTrabajo = ref({
@@ -209,8 +209,19 @@ const guardarEdicion = async () => {
 };
 
 /* ===== DATA ===== */
-const cargarOrdenTrabajo = async () => {
-  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`);
+const cargarOrdenTrabajo = async ( options = {} ) => {
+  options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+ 
+  if (userData?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+  }
+  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`,options);
   const result = await res.json();
   listaOrdenTrabajo.value = result.data;
   loading.value = false;
@@ -239,13 +250,23 @@ const verOT = (id) => {
   router.push(`/content/orden-trabajo/${id}`);
 };
 
-const cargarEmpleados = async () => {
-  const userSession = JSON.parse(localStorage.getItem("userSession"));
+const cargarEmpleados = async (options={}) => {
+  options.headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+
+  // Adjuntar el token Bearer si existe
+  
+  if (userData?.token) {
+    
+    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+  }
   try {
     const res = await fetch(
       proxy.$serverIP +
         "api/Empleado/getEmpleado?idSucursal=" +
-        userSession.usuario.idSucursal,
+        userSession.usuario.idSucursal, options
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const data = await res.json();

@@ -519,10 +519,26 @@ const proveedorNombre = ref("");
 const modalProveedores = ref(null);
 const totalMonto = ref(0);
 const mostrarTabla = ref(false);
+const userData = JSON.parse(localStorage.getItem("userSession") || "null");
 
-const cargarProveedoresPag = async () => {
+const getAuthToken = () => {
+  return userData?.token  || "";
+};
+
+const authHeaders = () => {
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const cargarProveedoresPag = async (options = {}) => {
   proveedores.value = [];
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+      ...authHeaders(),
+    };
+
     const url =
       proxy.$serverIP +
       "api/Proveedores/proveedorespag?page=" +
@@ -530,7 +546,7 @@ const cargarProveedoresPag = async () => {
       "&search=" +
       encodeURIComponent(busqueda.value);
 
-    const res = await fetch(url);
+    const res = await fetch(url, options);
     const text = await res.text();
 
     //console.log("RESPUESTA RAW:", text);
@@ -547,12 +563,17 @@ const cargarProveedoresPag = async () => {
   }
 };
 
-const cargarProveedores = async () => {
+const cargarProveedores = async (options = {}) => {
   proveedores.value = [];
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+      ...authHeaders(),
+    };
     const url = proxy.$serverIP + "api/Proveedores/proveedores";
 
-    const res = await fetch(url);
+    const res = await fetch(url, options);
     const text = await res.text();
 
     if (!res.ok) throw new Error("Error en la respuesta");
@@ -715,12 +736,16 @@ const formatearFecha = (fecha) => {
   return `${fechaFormateada}, ${horaFormateada}`;
 };
 
-const cargarRefacciones = async (ot) => {
+const cargarRefacciones = async (ot, options = {}) => {
   Refacciones.value = [];
   try {
-    const res = await fetch(
-      proxy.$serverIP + "api/OrdenTrabajo/getRefaccionesPorOT?idOT=" + ot,
-    );
+    options.headers = {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      ...options.headers,
+      ...authHeaders(),
+    };
+    console.log("TOKEN EN REFACCION:", userData?.token)
+    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getRefaccionesPorOT?idOT=${ot}`,options);
     if (!res.ok) throw new Error("Error en la respuesta");
     const response = await res.json();
     Refacciones.value = response.data;
@@ -761,6 +786,7 @@ const guardarRefaccion = async () => {
     const response = await axios.post(
       proxy.$serverIP + "api/Proveedores/agregarRefaccion",
       payload,
+      { headers: authHeaders() },
     );
     cargarRefacciones(idOT);
     limpiarFormulario();
@@ -808,6 +834,7 @@ const editarRefaccionOT = async () => {
     const response = await axios.put(
       `${proxy.$serverIP}api/OrdenTrabajo/editarRefaccionOT/${idRefacciones}`,
       payload,
+      { headers: authHeaders() },
     );
     cargarRefacciones(idOT);
     limpiarFormulario();

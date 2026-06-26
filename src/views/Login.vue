@@ -104,6 +104,7 @@
 
 import { ref, watch, getCurrentInstance } from 'vue'
 import { useRouter } from 'vue-router'
+import { saveSession } from '@/services/auth'
 
 const { proxy } = getCurrentInstance()
 const router = useRouter()
@@ -141,7 +142,7 @@ async function handleLogin () {
     const result = await response.json()
 
     if (result.success) {
-      localStorage.setItem('userSession', JSON.stringify(result))
+      saveSession(result)
       router.push('/content/orden-trabajo')
     } else {
       errorMsg.value = result.error || 'Usuario o contraseña incorrectos'

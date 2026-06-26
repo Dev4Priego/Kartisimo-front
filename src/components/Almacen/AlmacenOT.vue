@@ -28,7 +28,7 @@ import AlmacenForm from '@/components/Almacen/AlmacenForm.vue'
 import AlmacenTable from '@/components/Almacen/AlmacenTable.vue'
 
 const { proxy } = getCurrentInstance()
-
+const userSession = JSON.parse(localStorage.getItem("userSession"))
 const API_ALMACENES =`${proxy.$serverIP}api/Almacen`
 const API_SUCURSALES =`${proxy.$serverIP}api/Sucursales/getSucursales`
 
@@ -51,7 +51,11 @@ onMounted(() => {
 
 async function fetchAlmacenes() {
   try {
-    const res = await axios.get(API_ALMACENES)
+    const res = await axios.get(API_ALMACENES,{
+      headers:{
+        'Authorization': `Bearer ${userSession?.token}`
+      }
+    })
     almacenes.value = res.data
   } catch (error) {
     console.error('Error al obtener almacenes:', error)
@@ -61,7 +65,11 @@ async function fetchAlmacenes() {
 
 async function fetchSucursales() {
   try {
-    const res = await axios.get(API_SUCURSALES)
+    const res = await axios.get(API_SUCURSALES, {
+      headers:{
+        'Authorization':`Bearer ${userSession?.token}`
+      }
+    })
     sucursales.value = res.data
   } catch (error) {
     console.error('Error al obtener sucursales:', error)
