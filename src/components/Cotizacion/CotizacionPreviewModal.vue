@@ -120,7 +120,10 @@
               </div>
             </div>
 
-            <div class="table-responsive mx-auto mt-3 cotizacion-header">
+            <div
+              class="table-responsive mx-auto mt-3 cotizacion-header"
+              v-if="(vistaCotizacion.llantasSelecionadas && vistaCotizacion.llantasSelecionadas.length > 0) "
+            >
               <table
                 class="table table-bordered table-sm align-middle"
                 style="table-layout: fixed"
@@ -141,7 +144,7 @@
                 </thead>
                 <tbody>
                   <tr
-                    v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas"
+                    v-for="(llanta, i) in vistaCotizacion.llantasSelecionadasvistaCotizacion.llantasSelecionadas"
                     :key="'ll-' + i"
                   >
                     <td class="text-center">{{ llanta.cantidad }}</td>
