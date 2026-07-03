@@ -340,24 +340,28 @@
               <th scope="col">Monto</th>
               <th scope="col">Factura/Nota</th>
               <th scope="col">Fecha/hora</th>
-              <th scope="col"></th>
+              <th scope="col">Acciones</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="i in Refacciones" :key="i.idRefacciones">
               <td>{{ i.nombreProveedor }}</td>
               <td>{{ i.refaccion }}</td>
-              <td style="text-align: right">
+              <td style="text-align: left">
                 {{ "$" + formatNumber(i.monto_refaccion) }}
               </td>
               <td>{{ i.nota_Factura }}</td>
               <td>{{ formatearFecha(i.fecha) }}</td>
               <td>
                 <button
-                  class="btn btn-sm btn-outline-warning"
+                  class="btn btn-sm btn-outline-warning me-1"
                   @click="getEditarRefaccionOT(i)"
                 >
                   <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger ms-2"
+                @click="EliminarRefaccion(i)">
+                  <i class="bi bi-trash"></i  >
                 </button>
               </td>
             </tr>
@@ -478,6 +482,7 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 defineExpose({});
 import ProveedoresFiltro from "./Paquete/ProveedoresFiltro.vue";
+import Swal from "sweetalert2";
 
 const modalAgregarRefaccion = ref(false);
 const { proxy } = getCurrentInstance();
@@ -815,6 +820,30 @@ const getEditarRefaccionOT = (ot) => {
   modalEditarRefacciones.value = !modalEditarRefacciones.value;
 };
 
+const EliminarRefaccion = async (ot) => {
+  const idOT = props.otId;
+
+  try {
+    const res = await fetch(
+      `${proxy.$serverIP}api/OrdenTrabajo/eliminarRefaccionOT/${ot.idRefacciones}/${ot.idOrdenTrabajo}`,
+      {
+        method: "PUT",
+        headers: authHeaders(),
+      },
+    );
+
+    if (!res.ok) {
+      throw new Error("Error al eliminar la refacción en la OT");
+    }
+
+    await cargarRefacciones(idOT);
+    mostrarToast("success", "Refacción eliminada correctamente");
+  } catch (e) {
+    console.error("Error en el fetch al eliminar refacción en la OT:", e);
+    mostrarToast("warning", "Error al eliminar refacción.");
+  }
+};
+
 const editarRefaccionOT = async () => {
   const idOT = props.otId;
   const idRefacciones = editarRefaccionForm.value.idRefacciones;
@@ -864,6 +893,30 @@ const limpiarFormulario = () => {
     id_proveedor: null,
     numero_factura: "",
   };
+};
+const mostrarToast = (type, message) => {
+  const color =
+    type === "success"
+      ? "linear-gradient(to right, #96c93d)"
+      : type === "warning"
+      ? "linear-gradient(to right, #f5af19, #f12711)"
+      : "linear-gradient(to right, #6dd5ed, #2193b0)";
+
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    stopOnFocus: true,
+    style: {
+      background: color,
+      borderRadius: "6px",
+      color: "white",
+      fontSize: "14px",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
+    },
+  }).showToast();
 };
 </script>
 

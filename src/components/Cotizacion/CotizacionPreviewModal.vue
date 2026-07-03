@@ -144,7 +144,7 @@
                 </thead>
                 <tbody>
                   <tr
-                    v-for="(llanta, i) in vistaCotizacion.llantasSelecionadasvistaCotizacion.llantasSelecionadas"
+                    v-for="(llanta, i) in vistaCotizacion.llantasSelecionadas"
                     :key="'ll-' + i"
                   >
                     <td class="text-center">{{ llanta.cantidad }}</td>

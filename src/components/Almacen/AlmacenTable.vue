@@ -139,7 +139,7 @@ async function guardar() {
       nombreSucursal: getNombreSucursal(form.idSucursal)
     }
 
-    await axios.put(`${proxy.$serverIP}/api/Almacen/${form.idAlmacen}`, payload)
+    await axios.put(`${proxy.$serverIP}api/Almacen/${form.idAlmacen}`, payload)
 
     await Swal.fire({
       icon: 'success',
@@ -178,7 +178,7 @@ async function eliminar(idAlmacen) {
 
   if (result.isConfirmed) {
     try {
-      await axios.delete(`https://localhost:7172/api/Almacen/${idAlmacen}`, {
+      await axios.delete(`${proxy.$serverIP}api/Almacen/${idAlmacen}`, {
         data: { sysBorradoPor: currentUserId }
       })
 

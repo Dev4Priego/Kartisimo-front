@@ -388,9 +388,11 @@
         </ul>
       </div>
     </template>
-    <h5 class="text-uppercase text-muted mb-2">Observaciones</h5>
-    <div class="card border-1 shadow-sm mb-2">
-      <span class="py-3 px-3">{{ orden?.observacion }}</span>
+    <div v-if="orden?.observacion">
+      <h5 class="text-uppercase text-muted mb-2">Observaciones</h5>
+      <div class="card border-1 shadow-sm mb-2">
+        <span class="py-3 px-3">{{ orden?.observacion }}</span>
+      </div>
     </div>
     <hr />
     <!-- TOTAL -->
@@ -403,7 +405,12 @@
         <h4 class="mb-0 text-success fw-bold">${{ totalFinalOrden }}</h4>
       </div>
     </div>
-
+    <!--Espacio para la firma del cliente. solo para imprimir-->
+    <div class="firma-cliente print-only mt-5 mb-4">
+      <br>
+      <div class="firma-line"></div>
+      <div class="fw-semibold mt-2">Firma del cliente</div>
+    </div>
     <!-- ACCIONES -->
     <div class="d-flex justify-content-between mt-4">
       <button
@@ -499,7 +506,8 @@ const cargarOrden = async (options = {}) => {
   const id = route.params.id;
 
   const resp = await fetch(
-    `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`, options
+    `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`,
+    options,
   );
 
   const data = await resp.json();
@@ -663,7 +671,39 @@ const totalFinalOrden = computed(() => {
   transition: width 0.3s ease;
 }
 
+.firma-cliente,
+.firma-cliente-footer {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.print-only {
+  display: none;
+}
+
+.firma-cliente-footer {
+  margin-top: 4.5rem;
+}
+
+.firma-line {
+  width: 100%;
+  max-width: 280px;
+  height: 1px;
+  margin: 0 auto;
+  border-top: 1px solid #000;
+}
+
+.firma-cliente .fw-semibold,
+.firma-cliente-footer .fw-semibold {
+  font-size: 0.95rem;
+}
+
 @media print {
+  .print-only {
+    display: block !important;
+  }
   body {
     background: white !important;
     font-size: 6pt;
@@ -771,6 +811,25 @@ const totalFinalOrden = computed(() => {
   /* total grande */
   h2 {
     font-size: 26px !important;
+  }
+
+  .firma-cliente {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .firma-line {
+    width: 100%;
+    max-width: 280px;
+    height: 1px;
+    margin: 0 auto;
+    border-top: 1px solid #000;
+  }
+
+  .firma-cliente .fw-semibold {
+    font-size: 9pt;
   }
 
   /* compactar columnas */
