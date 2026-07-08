@@ -35,7 +35,7 @@
             class="form-control"
           />
         </div>
-        <div class="col-12 mb-2">
+        <div class="col-10 mb-2">
           <div class="mb-3">
             <!-- <div class="input-group">
               <input
@@ -82,49 +82,66 @@
             </small>
           </div>
         </div>
-        <div class="row mb-2">
-          <div class="col-md-8">
-            <label for="textoRefaccion" class="form-label">
-              <i class="bi bi-exclamation-triangle-fill mx-1"></i>
-              Detalle de la Refacción
-            </label>
-            <textarea
-              id="textoRefaccion"
-              v-model="refaccionForm.refaccion"
-              class="form-control"
-              rows="2"
-              @input="validate('refaccion', 1)"
-              @blur="validate('refaccion', 1)"
-              :class="{ 'input-error': errores['refaccion'] }"
-              maxlength="500"
-            >
-            </textarea>
-            <small v-if="errores['refaccion']" class="error-msg">
-              {{ errores["refaccion"] }}
-            </small>
-          </div>
-          <div class="col-md-4">
-            <label for="montoRefaccion" class="form-label">
-              <i class="bi bi-cash-coin mx-1"></i>
-              Monto
+        <div class="col-2 mb-2">
+          <div class="mb-3">
+            <label for="CantidadRefacciones" class="mb-1 form-label">
+              <i class="bi bi-wrench mx-1"></i>Num. Refacciones
             </label>
             <input
-              id="montoRefaccion"
-              v-model="refaccionForm.monto"
               type="number"
-              step="0.01"
-              min="0"
               class="form-control"
-              placeholder="0.00"
-              @input="validate('monto', 1)"
-              @blur="validate('monto', 1)"
-              :class="{ 'input-error': errores['monto'] }"
+              v-model="refaccionForm.numRefacciones"
+              min="1"
+             
             />
-            <small v-if="errores['monto']" class="error-msg">
-              {{ errores["monto"] }}
-            </small>
           </div>
         </div>
+        <template v-for="(refaccion, index) in refaccionForm.refacciones" :key="refaccion.id">
+         
+          <div class="row mb-2">
+            <div class="col-md-8">
+              <label for="textoRefaccion" class="form-label">
+                <i class="bi bi-exclamation-triangle-fill mx-1"></i>
+                Detalle de la Refacción
+              </label>
+              <textarea
+                id="textoRefaccion"
+                v-model="refaccion.refaccion"
+                class="form-control"
+                rows="2"
+                @input="validacionesNuevaRefaccion()"
+                @blur="validacionesNuevaRefaccion()"
+                :class="{ 'input-error': errores[`refaccion_${index}`] }"
+                maxlength="500"
+              >
+              </textarea>
+              <small v-if="errores[`refaccion_${index}`]" class="error-msg">
+                {{ errores[`refaccion_${index}`] }}
+              </small>
+            </div>
+            <div class="col-md-4">
+              <label for="montoRefaccion" class="form-label">
+                <i class="bi bi-cash-coin mx-1"></i>
+                Monto
+              </label>
+              <input
+                id="montoRefaccion"
+                v-model="refaccion.monto"
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                placeholder="0.00"
+                @input="validacionesNuevaRefaccion()"
+                @blur="validacionesNuevaRefaccion()"
+                :class="{ 'input-error': errores[`monto_${index}`] }"
+              />
+              <small v-if="errores[`monto_${index}`]" class="error-msg">
+                {{ errores[`monto_${index}`] }}
+              </small>
+            </div>
+          </div>
+        </template>
         <div class="row mb-2">
           <!-- Número de Factura -->
           <div class="col-md-6">
@@ -359,9 +376,11 @@
                 >
                   <i class="bi bi-pencil-square"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-danger ms-2"
-                @click="EliminarRefaccion(i)">
-                  <i class="bi bi-trash"></i  >
+                <button
+                  class="btn btn-sm btn-outline-danger ms-2"
+                  @click="EliminarRefaccion(i)"
+                >
+                  <i class="bi bi-trash"></i>
                 </button>
               </td>
             </tr>
@@ -476,24 +495,32 @@
 </template>
 
 <script setup>
-import { onMounted, ref, getCurrentInstance, reactive, computed } from "vue";
+import { onMounted, ref, getCurrentInstance, reactive, computed, watch } from "vue";
 import axios from "axios";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 defineExpose({});
 import ProveedoresFiltro from "./Paquete/ProveedoresFiltro.vue";
 import Swal from "sweetalert2";
+import FormularioOT from "../FormularioOT.vue";
 
 const modalAgregarRefaccion = ref(false);
 const { proxy } = getCurrentInstance();
 const Refacciones = ref([]);
 const modalRefacciones = ref(false);
 const modalEditarRefacciones = ref(false);
-const refaccionForm = ref({
+let contadorID = 0
+const refaccionForm = reactive({
   fecha: "",
   hora: "",
-  refaccion: "",
-  monto: 0,
+  numRefacciones: 1,
+  refacciones: [
+    {
+      id: contadorID++,
+      refaccion: "",
+      monto: 0,
+    },
+  ],
   proveedor: null,
   id_proveedor: null,
   numero_factura: "",
@@ -527,7 +554,7 @@ const mostrarTabla = ref(false);
 const userData = JSON.parse(localStorage.getItem("userSession") || "null");
 
 const getAuthToken = () => {
-  return userData?.token  || "";
+  return userData?.token || "";
 };
 
 const authHeaders = () => {
@@ -600,7 +627,7 @@ function formatNumber(value, decimals = 2) {
 }
 
 const seleccionarProveedor = (proveedor) => {
-  refaccionForm.value.id_proveedor = proveedor.id_proveedor;
+  refaccionForm.id_proveedor = proveedor.id_proveedor;
   editarRefaccionForm.value.id_proveedor = proveedor.id_proveedor;
   proveedorNombre.value = proveedor.nombreproveedor;
   editarRefaccionForm.value.nombreProveedor = proveedor.nombreproveedor;
@@ -614,8 +641,8 @@ const seleccionarProveedor = (proveedor) => {
   if (modal) modal.hide();
 };
 const manejarProveedor = (proveedor) => {
-  refaccionForm.value.id_proveedor = proveedor.id_proveedor;
-  refaccionForm.value.proveedor = proveedor.nombreproveedor;
+  refaccionForm.id_proveedor = proveedor.id_proveedor;
+  refaccionForm.proveedor = proveedor.nombreproveedor;
   proveedorNombre.value = proveedor.nombreproveedor;
   mostrarTabla.value = false;
 };
@@ -636,10 +663,29 @@ const formValida = ref(false);
 const listaErrores = computed(() => Object.values(errores));
 
 const getValor = (path, tipo) => {
-  const origen = tipo == 1 ? refaccionForm.value : editarRefaccionForm.value;
+  const origen = tipo == 1 ? refaccionForm : editarRefaccionForm.value;
 
   return path.split(".").reduce((obj, key) => obj?.[key], origen);
 };
+
+watch(
+  () => refaccionForm.numRefacciones,
+  (NuevaCantidad, cantidadAnterior)=>{
+    const diff = NuevaCantidad - cantidadAnterior;
+    if ( diff > 0){ // AGREGAR
+      for(let i = 0; i < diff; i++){
+        refaccionForm.refacciones.push({
+          id:contadorID++,
+          refaccion: "",
+          monto:0
+        })
+      }
+    }else if(diff < 0){
+      refaccionForm.refacciones.splice(NuevaCantidad, Math.abs(diff))
+    }
+  }
+)
+
 
 function validate(path, tipo) {
   formValida.value = false;
@@ -676,7 +722,7 @@ function validate(path, tipo) {
 }
 
 function validar_formulario_nueva() {
-  validaciones(1);
+  validacionesNuevaRefaccion();
   formValida.value = Object.keys(errores).length > 0;
   if (!formValida.value) {
     console.log("Guardar: ");
@@ -706,12 +752,36 @@ function validaciones(tipo) {
   Object.keys(errores).forEach((k) => delete errores[k]);
 
   campos.forEach((campo) => {
-    const origen = tipo == 1 ? refaccionForm.value : editarRefaccionForm.value;
+    const origen = tipo == 1 ? refaccionForm : editarRefaccionForm.value;
     const valor = campo.split(".").reduce((o, k) => o?.[k], origen);
     console.log(` Campo: ${campo} →`, valor);
     validate(campo, tipo);
   });
   return true;
+}
+
+function validacionesNuevaRefaccion() {
+  Object.keys(errores).forEach((k) => delete errores[k]);
+
+  validate("id_proveedor", 1);
+  validate("numero_factura", 1);
+
+  if (!refaccionForm.refacciones.length) {
+    errores.refacciones = "Debe capturar al menos una refacción.";
+  }
+
+  refaccionForm.refacciones.forEach((item, index) => {
+    const descripcion = (item.refaccion ?? "").toString().trim();
+    const monto = Number(item.monto);
+
+    if (!descripcion) {
+      errores[`refaccion_${index}`] = `La refacción ${index + 1} requiere descripción.`;
+    }
+
+    if (item.monto === "" || Number.isNaN(monto) || monto < 0) {
+      errores[`monto_${index}`] = `La refacción ${index + 1} requiere un monto válido.`;
+    }
+  });
 }
 
 onMounted(() => {
@@ -745,12 +815,15 @@ const cargarRefacciones = async (ot, options = {}) => {
   Refacciones.value = [];
   try {
     options.headers = {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      "Content-Type": "application/x-www-form-urlencoded",
       ...options.headers,
       ...authHeaders(),
     };
-    console.log("TOKEN EN REFACCION:", userData?.token)
-    const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getRefaccionesPorOT?idOT=${ot}`,options);
+    console.log("TOKEN EN REFACCION:", userData?.token);
+    const res = await fetch(
+      `${proxy.$serverIP}api/OrdenTrabajo/getRefaccionesPorOT?idOT=${ot}`,
+      options,
+    );
     if (!res.ok) throw new Error("Error en la respuesta");
     const response = await res.json();
     Refacciones.value = response.data;
@@ -764,12 +837,18 @@ const cargarRefacciones = async (ot, options = {}) => {
 
 const agregarRefaccion = () => {
   const ahora = new Date();
-  refaccionForm.value.fecha = ahora.toISOString().slice(0, 10); // YYYY-MM-DD
-  refaccionForm.value.hora = ahora.toTimeString().slice(0, 5);
-  refaccionForm.value.id_proveedor = null;
-  refaccionForm.value.refaccion = "";
-  refaccionForm.value.monto = 0.0;
-  refaccionForm.value.numero_factura = "";
+  refaccionForm.fecha = ahora.toISOString().slice(0, 10); // YYYY-MM-DD
+  refaccionForm.hora = ahora.toTimeString().slice(0, 5);
+  refaccionForm.id_proveedor = null;
+  refaccionForm.refacciones = [
+    {
+      id: contadorID++,
+      refaccion: "",
+      monto: 0,
+    },
+  ];
+  refaccionForm.numero_factura = "";
+  refaccionForm.numRefacciones = 1;
   Object.keys(errores).forEach((k) => delete errores[k]);
   modalEditarRefacciones.value = false;
   modalRefacciones.value = !modalRefacciones.value;
@@ -777,14 +856,20 @@ const agregarRefaccion = () => {
 
 const guardarRefaccion = async () => {
   const idOT = props.otId;
+  const refacciones = refaccionForm.refacciones.map((item) => ({
+    refaccion: item.refaccion,
+    monto: Number(Number(item.monto || 0).toFixed(2)),
+  }));
+
   const payload = {
     usuario: props.usuario,
-    fecha: refaccionForm.value.fecha + "T" + refaccionForm.value.hora,
+    fecha: refaccionForm.fecha + "T" + refaccionForm.hora,
     idOrdenTrabajo: idOT,
-    refaccion: refaccionForm.value.refaccion,
-    monto: parseFloat(refaccionForm.value.monto).toFixed(2),
-    id_proveedor: refaccionForm.value.id_proveedor,
-    nota_factura: refaccionForm.value.numero_factura,
+    refaccion: refacciones[0]?.refaccion ?? "",
+    monto: refacciones[0]?.monto ?? 0,
+    id_proveedor: refaccionForm.id_proveedor,
+    nota_factura: refaccionForm.numero_factura,
+    refacciones,
   };
   console.log(payload);
   try {
@@ -885,14 +970,21 @@ const limpiarFormulario = () => {
     idRefacciones: null,
   };
   proveedorNombre.value = "";
-  refaccionForm.value = {
+  Object.assign(refaccionForm, {
     fecha: "",
     hora: "",
-    refaccion: "",
-    monto: 0,
+    numRefacciones: 1,
+    refacciones: [
+      {
+        id: contadorID++,
+        refaccion: "",
+        monto: 0,
+      },
+    ],
+    proveedor: null,
     id_proveedor: null,
     numero_factura: "",
-  };
+  });
 };
 const mostrarToast = (type, message) => {
   const color =
