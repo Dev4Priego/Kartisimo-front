@@ -526,4 +526,5 @@ const generarPDF = computed({
   get: () => getContextValue("generarPDF"),
   set: (nextValue) => setContextValue("generarPDF", nextValue),
 });
+
 </script>

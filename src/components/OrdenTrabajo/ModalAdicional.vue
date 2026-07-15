@@ -41,6 +41,16 @@
 						v-model="Cantidad"
 					  />
 					</div>
+					<div class="col">
+						<label for="costo" class="form-label">Costo Unit.</label>
+					  <input id="costo"
+						class="form-control"
+						min="0"
+						type="number"
+						placeholder="Costo unitario"
+						v-model="costo"
+					  />
+					</div>
 	
 					<div class="col">
 						<label for="precio" class="form-label">Precio Unit.</label>
@@ -72,6 +82,7 @@ const { proxy } = getCurrentInstance()
 const Concepto = ref(0)
 const Servicio = ref('')
 const Cantidad = ref(1)
+const costo =ref(0);
 const Precio = ref(0)
 const props = defineProps({
   adicionales: {
@@ -129,6 +140,7 @@ const agregarFila = async () => {
     observacion: '',
     comentario: '',
     cantidad: Cantidad.value,
+	costo:costo.value,
     precioUnitario: Precio.value,
     subTotal: (Cantidad.value * Precio.value).toFixed(2),
     promosDisponibles,

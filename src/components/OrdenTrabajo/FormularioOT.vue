@@ -676,6 +676,8 @@
                 <tr>
                   <th>Descripción</th>
                   <th style="text-align: center">Cantidad</th>
+                  <th style="text-align: right">Costo Unit.</th>
+
                   <th style="text-align: right">Precio Unit.</th>
                   <th style="text-align: right">Subtotal</th>
                   <th></th>
@@ -699,6 +701,7 @@
                         })
                       }}
                     </td>
+                    
                     <td style="text-align: right">
                       <div v-if="llanta.idPromocion || llanta.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
@@ -2585,6 +2588,7 @@ const cargarInfoCotizacion = async () => {
 
           cantidad: llanta.cantidad,
           precioUnitario: llanta.precioUnitario,
+          costo: llanta?.costo || 0,
           subTotal: (
             llanta.cantidad *
             precioFinalItem({
@@ -2632,7 +2636,7 @@ const cargarInfoCotizacion = async () => {
           descripcion: paquete.nombre,
           cantidad: 1,
           precioUnitario: paquete.precioUnitario,
-
+          costo: paquete?.costo || 0,
           subTotal: (
             1 *
             precioFinalItem({

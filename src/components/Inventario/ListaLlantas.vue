@@ -85,13 +85,15 @@
 							<th class="text-center" style="width: 15%;" >Modelo*</th>
 							<th class="text-center">Carga*</th>
 							<th class="text-center">Carga Dual</th>
-							<th class="text-center">Velocidad*</th>
-							<th class="text-center">Anchura*</th>
-							<th class="text-center">Perfil*</th>
+							<th class="text-center">Velocidad</th>
+							<th class="text-center">Anchura</th>
+							<th class="text-center">Perfil</th>
 							<th class="text-center">Rin*</th>
 							<th class="text-center">Capas</th>
 							<th class="text-center" style="width: 4%;">RunFlat</th>
 							<th class="text-center">Cantidad*</th>
+							<th class="text-center">Costo*</th>
+
 							<th class="text-center">Precio*</th>
 							<th class="text-center" style="min-width: 180px;">Nomenclatura*</th>
 							<th class="text-center" style="min-width: 180px;">Medida a guardar</th>
@@ -162,6 +164,9 @@
 								<input type="number" class="form-control" v-model="llanta.cantidad">
 							</td>
 							<!--runFlat-->
+              <td>
+								<input type="number" class="form-control" v-model="llanta.costo" step="any" >
+							</td>
 							<td>
 								<input type="number" class="form-control" v-model="llanta.precio" step="any" >
 							</td>

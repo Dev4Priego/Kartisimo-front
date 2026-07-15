@@ -130,6 +130,8 @@
                         <th>Medidas</th>
                         <th class="text-center">Cantidad</th>
                         <th>Ubicación</th>
+                        <th class="text-end">Costo</th>
+
                         <th class="text-end">Precio</th>
                         <th class="text-end"></th>
                       </tr>
@@ -155,6 +157,8 @@
                           {{ item.cantidad }}
                         </td>
                         <td>{{ item.ubicacion }}</td>
+                        <td class="text-end">${{ item.costo }}</td>
+
                         <td class="text-end">${{ item.precio }}</td>
                         <td class="text-end">
                           <button
@@ -268,6 +272,7 @@
                     <th>Concepto trabajo</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
+                    <th>C/U</th>
                     <th>P/U</th>
                     <th>Subtotal</th>
                     <th>Acciones</th>
@@ -302,6 +307,17 @@
                           class="form-control form-control-sm"
                           v-model.number="ll.cantidad"
                           @input="recalcularSubtotal(ll)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control form-control-sm input-precio-unitario"
+                          v-model.number="ll.costo  "
+                          
+                          @keydown="irAlSiguientePrecio"
                         />
                       </td>
                       <td>
@@ -560,6 +576,18 @@
 
                       <td>{{ paq.descripcion }}</td>
                       <td>{{ paq.cantidad }}</td>
+                      <td>
+
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="form-control"
+                            v-model.number="paq.costo  "
+                            
+                            @keydown="irAlSiguientePrecio"
+                          />
+                      </td>
 
                       <td>
                         <input
@@ -838,11 +866,13 @@
                       <td></td>
                       <td></td>
                       <td></td>
+
+                      <td></td>
                     </tr>
                   </template>
                   <!--Separar los paquetes con los servicios adicionales  para una mejor vista-->
                   <tr v-if="adicionales.length > 0">
-                    <td colspan="6">
+                    <td colspan="7">
                       <h4>Servicios Adicionales</h4>
                     </td>
                   </tr>
@@ -881,6 +911,17 @@
                           class="form-control form-control-sm"
                           v-model.number="ad.cantidad"
                           @input="recalcularSubtotal(ad)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control form-control-sm input-precio-unitario"
+                          v-model.number="ad.costo"
+                          
+                          @keydown="irAlSiguientePrecio"
                         />
                       </td>
                       <td>
@@ -1129,7 +1170,7 @@
                   </template>
                   <!--Total de insumos-->
                   <tr>
-                    <td colspan="5" class="text-end fs-5 fw-bold">
+                    <td colspan="6" class="text-end fs-5 fw-bold">
                       <h4>Total:</h4>
                     </td>
                     <td class="fs-5 fw-bold text-end">
@@ -1563,6 +1604,8 @@ const cargarLlantas = async () => {
         runflat: l.runflat,
         rango: l.rango,
         precio: Number(l.precio),
+        costo: Number(l.costo),
+
         ubicacion: l.nombreAlmacen,
         cantidad: Number(l.cantidad),
         eliminado: l.eliminado,
@@ -1687,6 +1730,7 @@ const agregarLlanta = async (itm) => {
     ubicacion: itm.ubicacion,
 
     cantidad: 4,
+    costo: toNumber(itm.costo),
     precioUnitario: toNumber(itm.precio),
     subTotal: Number((4 * toNumber(itm.precio)).toFixed(2)),
 
@@ -1870,6 +1914,7 @@ const onTogglePaquete = async (paqueteBase) => {
     idPromocionSeleccionada: 0,
     descripcion: paqueteBase.nombre,
     cantidad,
+    costo: 0,
     precioUnitario,
     precioConPromo: subTotal,
     promo: {
@@ -1919,6 +1964,7 @@ const mapearInsumosParaPadre = () => {
       ubicacion: l.ubicacion,
 
       cantidad: l.cantidad,
+      costo:l.costo,
       precioUnitario: l.precioUnitario,
       precioConPromo: l.precioConPromo,
       subTotal: l.subTotal,
@@ -1939,6 +1985,7 @@ const mapearInsumosParaPadre = () => {
       descripcion: p.descripcion,
       cantidad: p.cantidad,
       precioUnitario: p.precioUnitario,
+      costo:p.costo,
       precioConPromo: p.precioConPromo,
       subTotal: p.subTotal,
 
@@ -1971,6 +2018,7 @@ const mapearInsumosParaPadre = () => {
       comentario: a.comentario,
 
       cantidad: a.cantidad,
+      costo:a.costo,
       precioUnitario: a.precioUnitario,
       precioConPromo: a.precioConPromo,
       subTotal: a.subTotal,

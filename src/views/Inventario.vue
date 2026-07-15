@@ -159,6 +159,8 @@ const headers = [
     { text: "Medidas", value: "medidas", sortable:true },
     { text: "Runflat", value: "runflat" },
     { text: "Existencia", value: "cantidad", sortable:true },
+{ text: "Costo", value: "costo", sortable:true },
+
     { text: "Precio", value: "precio", sortable:true },
     { text: "Nombre Almacen", value: "nombreAlmacen", sortable:true },
     //   { text: "Acciones", value: "action" },
