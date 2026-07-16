@@ -29,10 +29,21 @@
         </div>
         <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
-            <div class="card-header">
-              <i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo</span>
+              <button
+                class="btn btn-sm"
+                :class="editandoClienteVehiculo ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                @click="toggleEdicionClienteVehiculo"
+              >
+                <i
+                  class="bi me-1"
+                  :class="editandoClienteVehiculo ? 'bi-lock-fill' : 'bi-pencil-square'"
+                ></i>
+                {{ editandoClienteVehiculo ? "Desactivar edición" : "Editar" }}
+              </button>
             </div>
-            <div v-if="otEditar.idOrdenTrabajo" class="card-body">
+            <div v-if="false" class="card-body">
               <table style="width: 100%">
                 <tbody>
                   <tr>
@@ -62,14 +73,91 @@
                 </tbody>
               </table>
             </div>
+            <div v-else-if="otEditar.idOrdenTrabajo" class="card-body">
+              <div class="row">
+                <div class="col-12 mb-2">
+                  <label class="form-label">Núm. serie</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.serie"
+                    list="vehiculosEdit"
+                    class="form-control"
+                    maxlength="20"
+                    :disabled="!editandoClienteVehiculo"
+                    @input="buscarVehiculosEdicion(datosClienteVehiculo.vehiculo.serie)"
+                    @change="seleccionarVehiculoEdicion"
+                  />
+                  <datalist id="vehiculosEdit">
+                    <option
+                      v-for="v in sugerenciasVehiculosEdicion"
+                      :key="v.idVehiculo"
+                      :value="v.serie"
+                    >
+                      {{ v.marca }} {{ v.modelo }} {{ v.placas }}
+                    </option>
+                  </datalist>
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Marca</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.marca"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Modelo</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.modelo"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Color</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.color"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Kilometraje</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.kilometraje"
+                    type="number"
+                    min="0"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Año</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.anio"
+                    type="number"
+                    min="1900"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Placas</label>
+                  <input
+                    v-model="datosClienteVehiculo.vehiculo.placas"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
-            <div class="card-header">
-              <i class="bi bi-person-fill me-2"></i> Datos del Cliente
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-person-fill me-2"></i> Datos del Cliente</span>
             </div>
-            <div v-if="otEditar.idOrdenTrabajo" class="card-body">
+            <div v-if="false" class="card-body">
               <table style="width: 100%">
                 <tbody>
                   <tr>
@@ -94,6 +182,71 @@
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div v-else-if="otEditar.idOrdenTrabajo" class="card-body">
+              <datalist id="clientesEdit">
+                <option
+                  v-for="c in sugerenciasClientesEdicion"
+                  :key="c.idCliente"
+                  :value="[c.nombres, c.apPaterno, c.apMaterno].filter(Boolean).join(' ')"
+                >
+                  {{ c.telefono }} {{ c.correo }}
+                </option>
+              </datalist>
+              <div class="row">
+                <div class="col-6 mb-2">
+                  <label class="form-label">Nombre(s)</label>
+                  <input
+                    v-model="datosClienteVehiculo.cliente.nombres"
+                    list="clientesEdit"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.nombres)"
+                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.nombres)"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Apellidos</label>
+                  <input
+                    v-model="datosClienteVehiculo.cliente.apellidos"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Teléfono</label>
+                  <input
+                    v-model="datosClienteVehiculo.cliente.telefono"
+                    list="clientesEdit"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.telefono)"
+                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.telefono)"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">Correo</label>
+                  <input
+                    v-model="datosClienteVehiculo.cliente.correo"
+                    list="clientesEdit"
+                    type="email"
+                    class="form-control"
+                    :disabled="!editandoClienteVehiculo"
+                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.correo)"
+                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.correo)"
+                  />
+                </div>
+                <div class="col-6 mb-2">
+                  <label class="form-label">RFC</label>
+                  <input
+                    v-model="datosClienteVehiculo.cliente.rfc"
+                    class="form-control"
+                    maxlength="13"
+                    :disabled="!editandoClienteVehiculo"
+                    @input="datosClienteVehiculo.cliente.rfc = (datosClienteVehiculo.cliente.rfc || '').toUpperCase()"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -605,6 +758,69 @@ const otEditar = ref({
   },
 });
 
+const editandoClienteVehiculo = ref(false);
+const sugerenciasVehiculosEdicion = ref([]);
+const sugerenciasClientesEdicion = ref([]);
+let debounceClienteVehiculo = null;
+
+const datosClienteVehiculo = reactive({
+  cliente: {
+    idCliente: 0,
+    nombres: "",
+    apellidos: "",
+    rfc: "",
+    telefono: "",
+    correo: "",
+  },
+  vehiculo: {
+    idVehiculo: 0,
+    marca: "",
+    modelo: "",
+    color: "",
+    serie: "",
+    anio: "",
+    placas: "",
+    kilometraje: "",
+  },
+});
+
+const copiarClienteVehiculoDesdeOT = () => {
+  const cliente = otEditar.value.cliente || {};
+  const vehiculo = otEditar.value.vehiculo || {};
+  const nombreCompleto = (cliente.nombreCompleto || "").trim();
+  const partesNombre = nombreCompleto.split(" ").filter(Boolean);
+  const nombresCliente = cliente.nombres || cliente.nombre || partesNombre[0] || "";
+  const apellidosCliente =
+    [cliente.apPaterno, cliente.apMaterno].filter(Boolean).join(" ") ||
+    partesNombre.slice(1).join(" ");
+
+  Object.assign(datosClienteVehiculo.cliente, {
+    idCliente: cliente.idCliente || 0,
+    nombres: nombresCliente || cliente.nombreCompleto || "",
+    apellidos: apellidosCliente,
+    rfc: cliente.rfc || "",
+    telefono: cliente.telefono || "",
+    correo: cliente.correo || "",
+  });
+
+  Object.assign(datosClienteVehiculo.vehiculo, {
+    idVehiculo: vehiculo.idVehiculo || 0,
+    marca: vehiculo.marca || "",
+    modelo: vehiculo.modelo || "",
+    color: vehiculo.color || "",
+    serie: vehiculo.serie || "",
+    anio: vehiculo.anio || "",
+    placas: vehiculo.placas || "",
+    kilometraje: vehiculo.kilometraje ?? "",
+  });
+};
+
+const toggleEdicionClienteVehiculo = () => {
+  editandoClienteVehiculo.value = !editandoClienteVehiculo.value;
+  sugerenciasClientesEdicion.value = [];
+  sugerenciasVehiculosEdicion.value = [];
+};
+
 const insumosFiltrados = computed(() => {
   const insumo = otEditar.value.insumo || {
     llanta: [],
@@ -812,6 +1028,7 @@ const cargarOrden = async (options = {}) => {
               marca: llanta.marca, // campo estetica
               cantidad: llanta.cantidad,
               precioUnitario: llanta.precioUnitario,
+              costo:llanta.costo,
               subTotal: Number(
                 (
                   llanta.cantidad *
@@ -854,7 +1071,7 @@ const cargarOrden = async (options = {}) => {
               descripcion: paquete.descripcion,
               cantidad: 1,
               precioUnitario: paquete.precioUnitario,
-
+              costo:paquete.costo,
               subTotal: Number(
                 (
                   1 *
@@ -908,7 +1125,7 @@ const cargarOrden = async (options = {}) => {
 
               cantidad: s.cantidad,
               precioUnitario: s.precioUnitario,
-
+              costo:s.costo,
               subTotal: Number(
                 (
                   s.cantidad *
@@ -933,6 +1150,7 @@ const cargarOrden = async (options = {}) => {
         adicionales: Array.isArray(json.adicionales) ? json.adicionales : [],*/
       },
     };
+    copiarClienteVehiculoDesdeOT();
     // invocar el evento imprimir
     console.log("Desechar: " + otEditar.value.desecharLlanta);
     if (otEditar.value.desecharLlanta == null) {
@@ -1389,6 +1607,153 @@ const cambiarEstatusOT = async (estatus) => {
 };
 
 // funcion para guardar los datos editados de la OT
+const buscarVehiculosEdicion = (serie) => {
+  clearTimeout(debounceClienteVehiculo);
+
+  if (!serie || serie.trim().length < 2) {
+    sugerenciasVehiculosEdicion.value = [];
+    return;
+  }
+
+  debounceClienteVehiculo = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `${proxy.$serverIP}api/Vehiculo/bySerie?strSerie=${encodeURIComponent(
+          serie.trim(),
+        )}`,
+      );
+
+      sugerenciasVehiculosEdicion.value = res.ok ? await res.json() : [];
+    } catch (error) {
+      console.error("Error al buscar vehículos:", error);
+      sugerenciasVehiculosEdicion.value = [];
+    }
+  }, 300);
+};
+
+const seleccionarVehiculoEdicion = () => {
+  const serie = datosClienteVehiculo.vehiculo.serie?.trim().toLowerCase();
+  const vehiculo = sugerenciasVehiculosEdicion.value.find(
+    (v) => v.serie?.toLowerCase() === serie,
+  );
+
+  if (!vehiculo) {
+    datosClienteVehiculo.vehiculo.idVehiculo = 0;
+    return;
+  }
+
+  Object.assign(datosClienteVehiculo.vehiculo, {
+    idVehiculo: vehiculo.idVehiculo || 0,
+    marca: vehiculo.marca || "",
+    modelo: vehiculo.modelo || "",
+    color: vehiculo.color || "",
+    serie: vehiculo.serie || "",
+    anio: vehiculo.anio || "",
+    placas: vehiculo.placas || "",
+    kilometraje: vehiculo.kilometraje ?? "",
+  });
+};
+
+const buscarClientesEdicion = (texto) => {
+  clearTimeout(debounceClienteVehiculo);
+
+  if (!texto || texto.trim().length < 2) {
+    sugerenciasClientesEdicion.value = [];
+    return;
+  }
+
+  debounceClienteVehiculo = setTimeout(async () => {
+    try {
+      const res = await fetch(
+        `${proxy.$serverIP}api/Cliente/sugerenciaCliente?texto=${encodeURIComponent(
+          texto.trim(),
+        )}`,
+      );
+
+      sugerenciasClientesEdicion.value = res.ok ? await res.json() : [];
+    } catch (error) {
+      console.error("Error al buscar clientes:", error);
+      sugerenciasClientesEdicion.value = [];
+    }
+  }, 300);
+};
+
+const seleccionarClienteEdicion = (cliente) => {
+  Object.assign(datosClienteVehiculo.cliente, {
+    idCliente: cliente.idCliente || 0,
+    nombres: cliente.nombres || "",
+    apellidos: [cliente.apPaterno, cliente.apMaterno].filter(Boolean).join(" "),
+    rfc: cliente.rfc || "",
+    telefono: cliente.telefono || "",
+    correo: cliente.correo || "",
+  });
+};
+
+const seleccionarClienteEdicionPorValor = (valor) => {
+  if (!valor) return;
+
+  const normalizado = valor.trim().toLowerCase();
+  const cliente = sugerenciasClientesEdicion.value.find((c) => {
+    const nombreCompleto = [c.nombres, c.apPaterno, c.apMaterno]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    const telefono = c.telefono?.toLowerCase() || "";
+    const correo = c.correo?.toLowerCase() || "";
+    const rfc = c.rfc?.toLowerCase() || "";
+
+    return (
+      nombreCompleto === normalizado ||
+      telefono === normalizado ||
+      correo === normalizado ||
+      rfc === normalizado
+    );
+  });
+
+  if (cliente) {
+    seleccionarClienteEdicion(cliente);
+  } else {
+    datosClienteVehiculo.cliente.idCliente = 0;
+  }
+};
+
+const clienteVehiculoPayload = () => ({
+  cliente: {
+    idCliente: datosClienteVehiculo.cliente.idCliente || 0,
+    nombres: datosClienteVehiculo.cliente.nombres?.trim() || "",
+    apellidos: datosClienteVehiculo.cliente.apellidos?.trim() || "",
+    rfc: datosClienteVehiculo.cliente.rfc?.trim() || "",
+    telefono: datosClienteVehiculo.cliente.telefono?.trim() || "",
+    correo: datosClienteVehiculo.cliente.correo?.trim() || "",
+  },
+  vehiculo: {
+    idVehiculo: datosClienteVehiculo.vehiculo.idVehiculo || 0,
+    marca: datosClienteVehiculo.vehiculo.marca?.trim() || "",
+    modelo: datosClienteVehiculo.vehiculo.modelo?.trim() || "",
+    color: datosClienteVehiculo.vehiculo.color?.trim() || "",
+    serie: datosClienteVehiculo.vehiculo.serie?.trim() || "",
+    anio: Number(datosClienteVehiculo.vehiculo.anio || 0),
+    placas: datosClienteVehiculo.vehiculo.placas?.trim() || "",
+    kilometraje: Number(datosClienteVehiculo.vehiculo.kilometraje || 0),
+  },
+});
+
+const validarClienteVehiculoEdicion = () => {
+  const { cliente, vehiculo } = clienteVehiculoPayload();
+  const erroresClienteVehiculo = [];
+
+  if (!cliente.nombres) erroresClienteVehiculo.push("El nombre del cliente es obligatorio.");
+  if (!vehiculo.serie) erroresClienteVehiculo.push("El número de serie del vehículo es obligatorio.");
+  if (!vehiculo.marca) erroresClienteVehiculo.push("La marca del vehículo es obligatoria.");
+
+  if (erroresClienteVehiculo.length) {
+    mostrarToast("warning", erroresClienteVehiculo[0]);
+    return false;
+  }
+
+  return true;
+};
+
 const guardarEdicion = async () => {
   const idOT = otEditar.value.idOrdenTrabajo;
 
@@ -1412,7 +1777,10 @@ const guardarEdicion = async () => {
     paquetes: otEditar.value.insumo.paquetes,
     adicionales: otEditar.value.insumo.adicionales,
     factura: otEditar.value.factura,
+    ...clienteVehiculoPayload(),
   };
+
+  if (!validarClienteVehiculoEdicion()) return;
 
   try {
     const response = await axios.put(
@@ -1425,6 +1793,7 @@ const guardarEdicion = async () => {
     console.log("OT actualizada:", response.data);
     // Recargar OT y luego desactivar indicador de cambios
     await cargarOrden();
+    editandoClienteVehiculo.value = false;
     // Habilitar boton imprimir
     insumosCambios.value = false;
     //volver()

@@ -1849,6 +1849,7 @@ const cargarPaquetes = async () => {
       nombre: p.nombre,
       descripcion: p.descripcion,
       precioUnitario: p.precioUnitario,
+      costo:p.costo,
 
       // MISMO NOMBRE que usas después
       detalle: (p.detalle || []).map((d) => ({
@@ -1914,7 +1915,7 @@ const onTogglePaquete = async (paqueteBase) => {
     idPromocionSeleccionada: 0,
     descripcion: paqueteBase.nombre,
     cantidad,
-    costo: 0,
+    costo: paqueteBase.costo,
     precioUnitario,
     precioConPromo: subTotal,
     promo: {
