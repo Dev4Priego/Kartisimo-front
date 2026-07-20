@@ -13,6 +13,7 @@ import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' 
 import OrdenTrabajoPreview from '@/views/OrdenTrabajo/OrdenTrabajoPreview.vue'
 import OrdenTrabajoEdit from '@/views/OrdenTrabajo/OrdenTrabajoEdit.vue'
 import OrdenTrabajoLayout from '@/views/OrdenTrabajo/OrdenTrabajoLayout.vue'
+import { clearSession, isSessionValid } from '@/services/auth'
 
 const routes = [
   {
@@ -108,17 +109,22 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const userSession =  localStorage.getItem('userSession');
+    const requiresAuth = to.matched.some(route => route.meta.requiereAuth)
+    const hasValidSession = isSessionValid()
 
-    // Si la ruta requiere auth y no hay sesión
-    if (to.matched.some(route => route.meta.requiereAuth) && !userSession) {
+    // Si la ruta requiere auth y no hay sesión válida
+    if (requiresAuth && !hasValidSession) {
+        clearSession()
         next('/') // login
     }
     // Si ya está logueado, no dejar volver al login
-    else if (to.path === '/' && userSession) {
+    else if (to.path === '/' && hasValidSession) {
         next('/content/orden-trabajo')
     }
     else {
+        if (to.path === '/' && !hasValidSession) {
+            clearSession()
+        }
         next()
     }
 })

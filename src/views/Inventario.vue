@@ -124,6 +124,7 @@
         <ListaLlantas
         :showModal="mostrarModal"
         :llantas="ListaLLantas"
+        :almacen="almacenLista"
         @close="handleClose"
         />
      
@@ -144,6 +145,7 @@ const { proxy } = getCurrentInstance()
 const llantas = ref([]);
 const almacen = ref([]);
 const ListaLLantas = ref([]);
+const almacenLista = ref('');
 const mostrarModal=ref(false);
 const busquedaMedida = ref('')
 const almacenSeleccionado = ref('');
@@ -157,6 +159,8 @@ const headers = [
     { text: "Medidas", value: "medidas", sortable:true },
     { text: "Runflat", value: "runflat" },
     { text: "Existencia", value: "cantidad", sortable:true },
+{ text: "Costo", value: "costo", sortable:true },
+
     { text: "Precio", value: "precio", sortable:true },
     { text: "Nombre Almacen", value: "nombreAlmacen", sortable:true },
     //   { text: "Acciones", value: "action" },
@@ -175,12 +179,16 @@ const cargarExistenciasInventario = async () => {
             const velocidad = llanta.velocidad && llanta.velocidad !== 'N/A' ? llanta.velocidad : '';
             llanta.precio= Number(llanta.precio).toLocaleString("es-MX", {style: "currency",currency: "MXN",})
             let medida = '';
-            if (anchura) medida += anchura;
-            if (perfil) medida += `/${perfil}`;
-            if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
-            if (runflat) medida+= (runflat === '1' ? ' RF' : '');
-            if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
-            medida = medida.trim();
+            if (llanta.medida){ medida = llanta.medida; medida+=' '+ carga + velocidad;}
+            else{
+
+                if (anchura) medida += anchura;
+                if (perfil) medida += `/${perfil}`;
+                if (rin) medida += (perfil ? ` R${rin}` : `R${rin}`);
+                if (runflat) medida+= (runflat === '1' ? ' RF' : '');
+                if (carga || velocidad) medida += ` ${(carga ? carga : '')}${(velocidad ? velocidad : '')}`;
+                medida = medida.trim();
+            }
 
             const nombre = llanta.nombre ? llanta.nombre : '';
             const modelo = llanta.modelo ? llanta.modelo : '';
@@ -396,6 +404,7 @@ async function submit() {
     const data = await resp.json();
     closeModal();
     ListaLLantas.value = data.llantas; // pasamos el resultado 
+    almacenLista.value = data.almacen || '';
    if(ListaLLantas.value.length != 0){// llantas nuevas
     mostrarModal.value = true;
     isLoading.value = false;
@@ -419,6 +428,7 @@ async function submit() {
 const handleClose = () => {
   mostrarModal.value = false
   ListaLLantas.value = [] // 
+  almacenLista.value = ''
 }
 </script>
 

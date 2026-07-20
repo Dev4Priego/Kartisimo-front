@@ -98,10 +98,21 @@ const busquedaLlantas = ref('');
 const selectedAlmacenes = ref([])
 const dropdownOpen = ref(false)
 const almacenes = ref([])
+const userData = JSON.stringify(localStorage.getItem("'userSession"));
 
-const cargarAlmacenes = async () =>{
+const cargarAlmacenes = async (options={}) =>{
 	try {
-		const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`)
+		options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (userData?.token) {
+      options.headers["Authorization"] = `Bearer ${userData?.token}`;
+    }
+		const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`,options)
 		
 		if (!response.ok) {
 			throw new Error(`Error HTTP: ${response.status}`)

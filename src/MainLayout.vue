@@ -119,6 +119,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { clearSession } from '@/services/auth'
 // #d43535
 const router = useRouter()
 const sidebarRef = ref(null)
@@ -138,7 +139,7 @@ const irA = (ruta) => {
 
 const cerrarSesion = () => {
     // Limpia sesión
-    localStorage.removeItem('userSession');
+    clearSession();
 
     // Redirige al login
     router.replace('/')

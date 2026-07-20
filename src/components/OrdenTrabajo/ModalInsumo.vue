@@ -26,9 +26,8 @@
                   <div
                     v-for="(paquete, i) in paqueteDisponibles"
                     :key="i"
-                    class="form-check-inline"  
+                    class="form-check-inline"
                   >
-
                     <input
                       class="form-check-input mx-2"
                       type="checkbox"
@@ -131,6 +130,8 @@
                         <th>Medidas</th>
                         <th class="text-center">Cantidad</th>
                         <th>Ubicación</th>
+                        <th class="text-end">Costo</th>
+
                         <th class="text-end">Precio</th>
                         <th class="text-end"></th>
                       </tr>
@@ -156,6 +157,8 @@
                           {{ item.cantidad }}
                         </td>
                         <td>{{ item.ubicacion }}</td>
+                        <td class="text-end">${{ item.costo }}</td>
+
                         <td class="text-end">${{ item.precio }}</td>
                         <td class="text-end">
                           <button
@@ -269,6 +272,7 @@
                     <th>Concepto trabajo</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
+                    <th>C/U</th>
                     <th>P/U</th>
                     <th>Subtotal</th>
                     <th>Acciones</th>
@@ -295,7 +299,7 @@
                           </option>
                         </select>
                       </td>
-                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }} </td>
+                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }}</td>
                       <td>
                         <input
                           type="number"
@@ -303,6 +307,17 @@
                           class="form-control form-control-sm"
                           v-model.number="ll.cantidad"
                           @input="recalcularSubtotal(ll)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control form-control-sm input-precio-unitario"
+                          v-model.number="ll.costo  "
+                          
+                          @keydown="irAlSiguientePrecio"
                         />
                       </td>
                       <td>
@@ -362,31 +377,41 @@
                       </td>
                       <!-- Acciones -->
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="ll.idPromocionSeleccionada"
-                            @change="onPromoChange(ll)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ll.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(ll)"
                             :disabled="ll.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="ll.idPromocionVuelo > 0"
-                              :value="ll.idPromocionVuelo"
-                            >
-                              {{ ll.promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                            <!-- Default -->
-                            <option :value="0">-- Sin promoción --</option>
-                            <!-- Promociones disponibles -->
-                            <option
-                              v-for="promo in ll.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo.nombre }}
-                            </option>
-                          </select>
+                            Sin promoción
+                          </button>
 
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(ll)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ll.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(ll, promo)"
+                            :disabled="ll.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -551,6 +576,18 @@
 
                       <td>{{ paq.descripcion }}</td>
                       <td>{{ paq.cantidad }}</td>
+                      <td>
+
+                        <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="form-control"
+                            v-model.number="paq.costo  "
+                            
+                            @keydown="irAlSiguientePrecio"
+                          />
+                      </td>
 
                       <td>
                         <input
@@ -561,7 +598,6 @@
                           v-model.number="paq.precioUnitario"
                           @input="recalcularSubtotal(paq)"
                         />
-                        
                       </td>
 
                       <td>
@@ -609,31 +645,41 @@
                       </td>
 
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="paq.idPromocionSeleccionada"
-                            @change="onPromoChange(paq)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              paq.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(paq)"
                             :disabled="paq.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="paq.idPromocionVuelo > 0"
-                              :value="paq.idPromocionVuelo"
-                            >
-                              {{
-                                paq.promo?.nombre || "Promocion Vuelo APlicada"
-                              }}
-                            </option>
-                            <option :value="0">-- Sin promoción --</option>
-                            <option
-                              v-for="promo in paq.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                          </select>
+                            Sin promoción
+                          </button>
 
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(paq)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              paq.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(paq, promo)"
+                            :disabled="paq.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -820,11 +866,13 @@
                       <td></td>
                       <td></td>
                       <td></td>
+
+                      <td></td>
                     </tr>
                   </template>
                   <!--Separar los paquetes con los servicios adicionales  para una mejor vista-->
                   <tr v-if="adicionales.length > 0">
-                    <td colspan="6">
+                    <td colspan="7">
                       <h4>Servicios Adicionales</h4>
                     </td>
                   </tr>
@@ -863,6 +911,17 @@
                           class="form-control form-control-sm"
                           v-model.number="ad.cantidad"
                           @input="recalcularSubtotal(ad)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control form-control-sm input-precio-unitario"
+                          v-model.number="ad.costo"
+                          
+                          @keydown="irAlSiguientePrecio"
                         />
                       </td>
                       <td>
@@ -922,32 +981,41 @@
                       </td>
                       <!-- Acciones -->
                       <td>
-                        <div class="mb-2 d-flex align-items-center gap-2">
-                          <select
-                            class="form-select form-select-sm"
-                            v-model="ad.idPromocionSeleccionada"
-                            @change="onPromoChange(ad)"
+                        <div
+                          class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                        >
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ad.idPromocionSeleccionada === 0
+                                ? 'btn-light'
+                                : 'btn-outline-light'
+                            "
+                            @click="limpiarPromoRapida(ad)"
                             :disabled="ad.idPromocionVuelo > 0"
                           >
-                            <option
-                              v-if="ad.idPromocionVuelo > 0"
-                              :value="ad.idPromocionVuelo"
-                            >
-                              {{ ad.promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                            <!-- Default -->
-                            <option :value="0">-- Sin promoción --</option>
+                            Sin promoción
+                          </button>
 
-                            <!-- Promociones disponibles -->
-                            <option
-                              v-for="promo in ad.promosDisponibles"
-                              :key="promo.idPromocion"
-                              :value="promo.idPromocion"
-                            >
-                              {{ promo?.nombre || "Promocion Aplicada" }}
-                            </option>
-                          </select>
-
+                          <button
+                            v-for="promo in promocionesRapidasParaItem(ad)"
+                            :key="promo.idPromocion"
+                            type="button"
+                            class="btn btn-sm"
+                            :class="
+                              ad.idPromocionSeleccionada === promo.idPromocion
+                                ? 'btn-primary'
+                                : 'btn-outline-primary'
+                            "
+                            @click="seleccionarPromoRapida(ad, promo)"
+                            :disabled="ad.idPromocionVuelo > 0"
+                          >
+                            {{ promo.nombre }}
+                            {{
+                              promo.tipo ? promo.valor + "%" : "$" + promo.valor
+                            }}
+                          </button>
                           <button
                             type="button"
                             class="btn btn-sm"
@@ -1102,7 +1170,7 @@
                   </template>
                   <!--Total de insumos-->
                   <tr>
-                    <td colspan="5" class="text-end fs-5 fw-bold">
+                    <td colspan="6" class="text-end fs-5 fw-bold">
                       <h4>Total:</h4>
                     </td>
                     <td class="fs-5 fw-bold text-end">
@@ -1161,11 +1229,14 @@ import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import ModalAdicional from "./ModalAdicional.vue";
 import { reactive } from "vue";
+import Swal from "sweetalert2";
 const { proxy } = getCurrentInstance();
 
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
+const promosGeneralesDisponibles = ref([]);
+const userData = JSON.parse(localStorage.getItem("userSession"));
 
 const props = defineProps({
   modelValue: Boolean,
@@ -1180,15 +1251,87 @@ const emit = defineEmits(["update:modelValue", "update:insumos"]);
 // observar si hay cambios en prpos.insumo, si hay cambios copiar el arreglo y establecer el del componente
 const inicializado = ref(false);
 
+const promocionesRapidasParaItem = (item) => {
+  const promosItem = Array.isArray(item?.promosAplicables)
+    ? item.promosAplicables
+    : [];
+
+  const base = promosItem.length
+    ? promosItem
+    : promosGeneralesDisponibles.value;
+  return base.filter((promo) => !promo.esAlVuelo);
+};
+
+const aplicarPromosRapidasAItem = (item) => {
+  if (!item) return;
+
+  const promosVuelo = (item.promosAplicables || []).filter(
+    (promo) => promo.esAlVuelo,
+  );
+  const promoVueloActual =
+    item.idPromocionVuelo > 0 && item.promo
+      ? {
+          ...item.promo,
+          idPromocion: item.idPromocionVuelo,
+          esAlVuelo: true,
+        }
+      : null;
+  const promosRapidas = promosGeneralesDisponibles.value.filter(
+    (promo) => !promo.esAlVuelo,
+  );
+
+  item.promosAplicables = [
+    ...promosRapidas,
+    ...promosVuelo,
+    ...(promoVueloActual &&
+    !promosVuelo.some(
+      (promo) => promo.idPromocion === promoVueloActual.idPromocion,
+    )
+      ? [promoVueloActual]
+      : []),
+  ];
+};
+
+const aplicarPromosRapidasAInsumos = () => {
+  [...llantas.value, ...paquetes.value, ...adicionales.value].forEach(
+    aplicarPromosRapidasAItem,
+  );
+};
+
+const cargarPromosRapidas = async () => {
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromosRapidas`);
+    if (!res.ok) throw new Error("Error al obtener promociones rápidas");
+
+    const data = await res.json();
+    promosGeneralesDisponibles.value = Array.isArray(data) ? data : [];
+    aplicarPromosRapidasAInsumos();
+  } catch (error) {
+    console.error("Error al cargar promociones rápidas:", error);
+  }
+};
+
+const limpiarPromoRapida = (item) => {
+  item.idPromocionSeleccionada = 0;
+  onPromoChange(item);
+};
+
+const seleccionarPromoRapida = (item, promo) => {
+  aplicarPromosRapidasAItem(item);
+  item.idPromocionSeleccionada = promo.idPromocion;
+  onPromoChange(item);
+};
+
 watch(
   () => props.insumos,
   (nuevo) => {
     llantas.value = [...(nuevo.llanta || [])];
     paquetes.value = [...(nuevo.paquete || [])];
     adicionales.value = [...(nuevo.adicional || [])];
+    aplicarPromosRapidasAInsumos();
     console.log("INSUMOS MODAL:", nuevo);
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 const close = () => emit("update:modelValue", false);
@@ -1260,11 +1403,11 @@ const onPromoChange = (item) => {
 };
 const obtenerPromoSeleccionada = (item) => {
   const allPromos = [
-    ...(item.promosDisponibles || []),
     ...(item.promosAplicables || []),
+    ...(item.promosDisponibles || []),
   ];
   return allPromos.find(
-    (p) => p.idPromocion === item.idPromocionSeleccionada // <-- usar idSel
+    (p) => p.idPromocion === item.idPromocionSeleccionada, // <-- usar idSel
   );
 };
 const toNumber = (value) => {
@@ -1298,7 +1441,7 @@ const recalcularSubtotal = (item) => {
   // Resolver promo actual según selección
   let promo = null;
   if (item.idPromocionVuelo) {
-    promo = { ...item.promo }; 
+    promo = { ...item.promo };
   } else if (item.idPromocionSeleccionada) {
     promo = obtenerPromoSeleccionada(item);
   }
@@ -1319,7 +1462,6 @@ const recalcularSubtotal = (item) => {
   item.precioConPromo = precioFinal;
   item.subTotal = Number(precioFinal.toFixed(2));
 };
-
 
 const borrarInsumo = (insumo) => {
   insumo.eliminado = true;
@@ -1379,9 +1521,22 @@ const mostrarToast = (type, message) => {
   }).showToast();
 };
 
-const cargarAlmacenes = async () => {
+const cargarAlmacenes = async (options = {}) => {
   try {
-    const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`);
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (userData?.token) {
+      options.headers["Authorization"] = `Bearer ${userData?.token}`;
+    }
+    const response = await fetch(
+      `${proxy.$serverIP}api/Almacen/getAlmacen`,
+      options,
+    );
 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
@@ -1449,6 +1604,8 @@ const cargarLlantas = async () => {
         runflat: l.runflat,
         rango: l.rango,
         precio: Number(l.precio),
+        costo: Number(l.costo),
+
         ubicacion: l.nombreAlmacen,
         cantidad: Number(l.cantidad),
         eliminado: l.eliminado,
@@ -1498,9 +1655,13 @@ const handleEsc = (event) => {
 
 watch(
   () => props.modelValue,
-  (v) => {
-    if (v) document.addEventListener("keydown", handleEsc);
-    else document.removeEventListener("keydown", handleEsc);
+  async (v) => {
+    if (v) {
+      document.addEventListener("keydown", handleEsc);
+      await cargarPromosRapidas();
+    } else {
+      document.removeEventListener("keydown", handleEsc);
+    }
   },
 );
 
@@ -1569,11 +1730,12 @@ const agregarLlanta = async (itm) => {
     ubicacion: itm.ubicacion,
 
     cantidad: 4,
+    costo: toNumber(itm.costo),
     precioUnitario: toNumber(itm.precio),
     subTotal: Number((4 * toNumber(itm.precio)).toFixed(2)),
 
     promosDisponibles: [],
-    promosAplicables: [],
+    promosAplicables: [...promosGeneralesDisponibles.value],
     // valores históricos
 
     promo: {
@@ -1752,6 +1914,7 @@ const onTogglePaquete = async (paqueteBase) => {
     idPromocionSeleccionada: 0,
     descripcion: paqueteBase.nombre,
     cantidad,
+    costo: 0,
     precioUnitario,
     precioConPromo: subTotal,
     promo: {
@@ -1774,7 +1937,7 @@ const onTogglePaquete = async (paqueteBase) => {
     })),
 
     promosDisponibles,
-    promosAplicables: [],
+    promosAplicables: [...promosGeneralesDisponibles.value],
     nombrePromocion: null,
     valorPromocion: null,
     tipoPromocion: null,
@@ -1801,10 +1964,12 @@ const mapearInsumosParaPadre = () => {
       ubicacion: l.ubicacion,
 
       cantidad: l.cantidad,
+      costo:l.costo,
       precioUnitario: l.precioUnitario,
       precioConPromo: l.precioConPromo,
       subTotal: l.subTotal,
       promosDisponibles: l.promosDisponibles,
+      promosAplicables: l.promosAplicables,
       promo: l.promo || [],
     })),
 
@@ -1820,6 +1985,7 @@ const mapearInsumosParaPadre = () => {
       descripcion: p.descripcion,
       cantidad: p.cantidad,
       precioUnitario: p.precioUnitario,
+      costo:p.costo,
       precioConPromo: p.precioConPromo,
       subTotal: p.subTotal,
 
@@ -1833,6 +1999,7 @@ const mapearInsumosParaPadre = () => {
       })),
 
       promosDisponibles: p.promosDisponibles,
+      promosAplicables: p.promosAplicables,
 
       promo: p.promo || [],
     })),
@@ -1851,11 +2018,13 @@ const mapearInsumosParaPadre = () => {
       comentario: a.comentario,
 
       cantidad: a.cantidad,
+      costo:a.costo,
       precioUnitario: a.precioUnitario,
       precioConPromo: a.precioConPromo,
       subTotal: a.subTotal,
 
       promosDisponibles: a.promosDisponibles,
+      promosAplicables: a.promosAplicables,
 
       promo: a.promo || null,
     })),
@@ -1874,15 +2043,15 @@ const guardarInsumo = () => {
 };
 
 // Mounted
-onMounted(() => {
+onMounted(async () => {
   if (props.modelValue) document.addEventListener("keydown", handleEsc);
+  await cargarPromosRapidas();
   cargarLlantas();
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
 
-  console.log("DEBUG Props: ",props.insumos) 
-  
+  console.log("DEBUG Props: ", props.insumos);
 });
 
 const calcularTotalesDesdeInsumos = (insumos) => {
@@ -1974,7 +2143,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     const data = await res.json();
     nuevaPromo.idPromocion = data.idPromoVuelo;
     item.promosAplicables.push(nuevaPromo);
-     // Inicializar promo si está null
+    // Inicializar promo si está null
     if (!item.promo) {
       item.promo = {};
     }

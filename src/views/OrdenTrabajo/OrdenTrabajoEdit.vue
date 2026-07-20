@@ -129,6 +129,14 @@
         </div>
         <div class="col-auto">
           <button
+            class="btn btn-success shadow-sm me-2"
+            @click="retrocederEstado"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
+          >
+            <i class="bi bi-arrow-left-short me-1"></i>
+            Retroceder estado
+          </button>
+          <button
             class="btn btn-success shadow-sm"
             @click="avanzarEstado"
             :disabled="otEditar.estatus != 1"
@@ -180,7 +188,6 @@
           </button>
           <button
             class="btn btn-sm shadow-sm ms-2 btn-primary"
-            :disabled="insumosCambios"
             @click="PrintOtFunction()"
           >
             <i class="bi bi-printer-fill me-3"></i>
@@ -577,7 +584,7 @@ const modelValue = ref(false);
 const showModal = ref(false);
 const insumosCambios = ref(false);
 const aplicaDesecharLlanta = ref(false);
-const insumoOriginal = ref([]);
+const insumoOriginal = ref(normalizeInsumo({}));
 /**
  * 🔒 Estado inicial seguro
  */
@@ -612,10 +619,24 @@ const insumosFiltrados = computed(() => {
   };
 });
 
-const obtenerPromosPorInventario = async (idInventarioInicial) => {
+const obtenerPromosPorInventario = async (
+  idInventarioInicial,
+  options = {},
+) => {
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       `${proxy.$serverIP}api/Promocion/getPromocionPorInventario?idInventario=${idInventarioInicial}`,
+      options,
     );
 
     if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
@@ -628,10 +649,21 @@ const obtenerPromosPorInventario = async (idInventarioInicial) => {
     return [];
   }
 };
-const obtenerPromosPorPaquete = async (idPaquete) => {
+const obtenerPromosPorPaquete = async (idPaquete, options = {}) => {
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       `${proxy.$serverIP}api/Promocion/getPromocionPoridPaquete?idPaquete=${idPaquete}`,
+      options,
     );
 
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
@@ -643,10 +675,21 @@ const obtenerPromosPorPaquete = async (idPaquete) => {
     return [];
   }
 };
-const obtenerPromosGeneralesParaServicio = async () => {
+const obtenerPromosGeneralesParaServicio = async (options = {}) => {
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
+      options,
     );
     if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
 
@@ -681,13 +724,26 @@ const preguntaCancelar = async (ot) => {
   });
 };
 
-const cargarOrden = async () => {
+const cargarOrden = async (options = {}) => {
   try {
     const id = route.params.id;
     const otCreada = history.state?.otCreada ?? false;
     console.log("isCreated?: ", otCreada);
+
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
+
     const res = await fetch(
       `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajoById?id=${id}`,
+      options,
     );
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -756,15 +812,17 @@ const cargarOrden = async () => {
               marca: llanta.marca, // campo estetica
               cantidad: llanta.cantidad,
               precioUnitario: llanta.precioUnitario,
-              subTotal: (
-                llanta.cantidad *
-                precioFinalItem({
-                  precioUnitario: llanta.precioUnitario,
-                  idPromocion: llanta.idPromocion || llanta.idPromocionVuelo,
-                  valorPromocion: llanta.valorPromocion || llanta.valorVuelo,
-                  tipoPromocion: llanta.tipoPromocion || llanta.tipoVuelo,
-                })
-              ).toFixed(2), // campo estetico
+              subTotal: Number(
+                (
+                  llanta.cantidad *
+                  precioFinalItem({
+                    precioUnitario: llanta.precioUnitario,
+                    idPromocion: llanta.idPromocion || llanta.idPromocionVuelo,
+                    valorPromocion: llanta.valorPromocion || llanta.valorVuelo,
+                    tipoPromocion: llanta.tipoPromocion || llanta.tipoVuelo,
+                  })
+                ).toFixed(2),
+              ), // campo estetico
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
@@ -797,15 +855,19 @@ const cargarOrden = async () => {
               cantidad: 1,
               precioUnitario: paquete.precioUnitario,
 
-              subTotal: (
-                1 *
-                precioFinalItem({
-                  precioUnitario: paquete.precioUnitario,
-                  idPromocion: paquete.idPromocion || paquete.idPromocionVuelo,
-                  valorPromocion: paquete.valorPromocion || paquete.valorVuelo,
-                  tipoPromocion: paquete.tipoPromocion || paquete.tipoVuelo,
-                })
-              ).toFixed(2),
+              subTotal: Number(
+                (
+                  1 *
+                  precioFinalItem({
+                    precioUnitario: paquete.precioUnitario,
+                    idPromocion:
+                      paquete.idPromocion || paquete.idPromocionVuelo,
+                    valorPromocion:
+                      paquete.valorPromocion || paquete.valorVuelo,
+                    tipoPromocion: paquete.tipoPromocion || paquete.tipoVuelo,
+                  })
+                ).toFixed(2),
+              ),
 
               detalle: paquete.detalle.map((detalle) => ({
                 idDesglosePaquete: detalle.idDesglosePaquete,
@@ -847,15 +909,17 @@ const cargarOrden = async () => {
               cantidad: s.cantidad,
               precioUnitario: s.precioUnitario,
 
-              subTotal: (
-                s.cantidad *
-                precioFinalItem({
-                  precioUnitario: s.precioUnitario,
-                  idPromocion: s.idPromocion || s.idPromocionVuelo,
-                  valorPromocion: s.valorPromocion || s.valorVuelo,
-                  tipoPromocion: s.tipoPromocion || s.tipoVuelo,
-                })
-              ).toFixed(2),
+              subTotal: Number(
+                (
+                  s.cantidad *
+                  precioFinalItem({
+                    precioUnitario: s.precioUnitario,
+                    idPromocion: s.idPromocion || s.idPromocionVuelo,
+                    valorPromocion: s.valorPromocion || s.valorVuelo,
+                    tipoPromocion: s.tipoPromocion || s.tipoVuelo,
+                  })
+                ).toFixed(2),
+              ),
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
@@ -881,8 +945,8 @@ const cargarOrden = async () => {
       modelValue.value = true;
       history.replaceState({}, document.title);
     }
-    // GUARDAR UNA COPIA DEL LOS INSUMOS ORIGINALES
-    insumoOriginal.value = JSON.parse(JSON.stringify(otEditar.value.insumo));
+    // GUARDAR UNA COPIA NORMALIZADA DE LOS INSUMOS ORIGINALES
+    insumoOriginal.value = normalizeInsumo(otEditar.value.insumo);
   } catch (err) {
     console.error("❌ Error cargando OT:", err);
 
@@ -927,12 +991,44 @@ const precioFinalItem = (item, promoGlobal) => {
   // Sin promoción
   return base;
 };
+// Normaliza insumos para comparar: tipos consistentes y orden determinista
+function normalizeInsumo(insumo) {
+  const s = insumo || { llantas: [], paquetes: [], adicionales: [] };
+
+  const normArr = (arr) =>
+    (arr || [])
+      .map((item) => ({
+        ...item,
+        cantidad: Number(item.cantidad || 0),
+        precioUnitario: Number(item.precioUnitario || 0),
+        subTotal: Number(item.subTotal || 0),
+        eliminado: Boolean(item.eliminado),
+        idPromocion: item.idPromocion == null ? null : Number(item.idPromocion),
+        idPromocionVuelo:
+          item.idPromocionVuelo == null ? null : Number(item.idPromocionVuelo),
+      }))
+      .sort((a, b) => {
+        const ka =
+          a.idDetalleOTLlanta ?? a.idDetalleOTPaquete ?? a.idDetalleOTServicio ?? a.idLlanta ?? a.idPaquete ?? 0;
+        const kb =
+          b.idDetalleOTLlanta ?? b.idDetalleOTPaquete ?? b.idDetalleOTServicio ?? b.idLlanta ?? b.idPaquete ?? 0;
+        return (ka - kb) || (Number(a.cantidad || 0) - Number(b.cantidad || 0));
+      });
+
+  return {
+    llantas: normArr(s.llantas),
+    paquetes: normArr(s.paquetes),
+    adicionales: normArr(s.adicionales),
+  };
+}
 const actualizarInsumos = (payload) => {
   // payload = { insumo, totales }
-
-  otEditar.value.insumo.llantas = payload.insumo.llanta;
-  otEditar.value.insumo.paquetes = payload.insumo.paquete;
-  otEditar.value.insumo.adicionales = payload.insumo.adicional;
+  // Normalizar y asignar todo el insumo de forma consistente
+  otEditar.value.insumo = normalizeInsumo({
+    llantas: payload.insumo.llanta,
+    paquetes: payload.insumo.paquete,
+    adicionales: payload.insumo.adicional,
+  });
 
   otEditar.value.totales.subtotal = payload.totales.subtotal;
   otEditar.value.totales.descuento = payload.totales.descuento;
@@ -951,8 +1047,14 @@ const PrintOtFunction = () => {
 watch(
   () => otEditar.value.insumo,
   (newInsumo) => {
-    insumosCambios.value =
-      JSON.stringify(newInsumo) !== JSON.stringify(insumoOriginal.value);
+    try {
+      const plainNew = normalizeInsumo(newInsumo);
+      insumosCambios.value =
+        JSON.stringify(plainNew) !== JSON.stringify(insumoOriginal.value);
+    } catch (e) {
+      // Fallback: si normalize falla por alguna razón, marcar como cambiado
+      insumosCambios.value = true;
+    }
 
     console.log("cambios en insumos", insumosCambios.value);
   },
@@ -991,13 +1093,56 @@ const calcularTotales = () => {
   otEditar.value.totales.total = Number((subtotal - descuento).toFixed(2));
 };
 
-const cargarEmpleados = async () => {
+// Normaliza insumos para comparar: tipos consistentes y orden determinista
+/*
+const normalizeInsumo = (insumo) => {
+  const s = insumo || { llantas: [], paquetes: [], adicionales: [] };
+
+  const normArr = (arr) =>
+    (arr || [])
+      .map((item) => ({
+        ...item,
+        cantidad: Number(item.cantidad || 0),
+        precioUnitario: Number(item.precioUnitario || 0),
+        subTotal: Number(item.subTotal || 0),
+        eliminado: Boolean(item.eliminado),
+        idPromocion: item.idPromocion == null ? null : Number(item.idPromocion),
+        idPromocionVuelo:
+          item.idPromocionVuelo == null ? null : Number(item.idPromocionVuelo),
+      }))
+      .sort((a, b) => {
+        const ka =
+          a.idDetalleOTLlanta ?? a.idDetalleOTPaquete ?? a.idDetalleOTServicio ?? a.idLlanta ?? a.idPaquete ?? 0;
+        const kb =
+          b.idDetalleOTLlanta ?? b.idDetalleOTPaquete ?? b.idDetalleOTServicio ?? b.idLlanta ?? b.idPaquete ?? 0;
+        return (ka - kb) || (Number(a.cantidad || 0) - Number(b.cantidad || 0));
+      });
+
+  return {
+    llantas: normArr(s.llantas),
+    paquetes: normArr(s.paquetes),
+    adicionales: normArr(s.adicionales),
+  };
+};
+*/
+const cargarEmpleados = async (options = {}) => {
   const userSession = JSON.parse(localStorage.getItem("userSession"));
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       proxy.$serverIP +
         "api/Empleado/getEmpleado?idSucursal=" +
         userSession.usuario.idSucursal,
+      options,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
     const data = await res.json();
@@ -1010,9 +1155,22 @@ const cargarEmpleados = async () => {
   }
 };
 
-const cargarUsosCFDI = async () => {
+const cargarUsosCFDI = async (options = {}) => {
   try {
-    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI");
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
+    const res = await fetch(
+      proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI",
+      options,
+    );
     if (!res.ok) throw new Error("Error en la respuesta");
 
     const result = await res.json();
@@ -1022,10 +1180,21 @@ const cargarUsosCFDI = async () => {
   }
 };
 
-const cargarRegimenFiscal = async () => {
+const cargarRegimenFiscal = async (options = {}) => {
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (data45?.token) {
+      options.headers["Authorization"] = `Bearer ${data45?.token}`;
+    }
     const res = await fetch(
       proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",
+      options,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
 
@@ -1104,14 +1273,44 @@ const lineaClase = (estado) => {
     ? "bg-success"
     : "bg-secondary";
 };
+/*const preguntaEntregar = async (ot) => {
+  await Swal.fire({
+    title: "Entregar vehiculo",
+    text:
+      "Al entregar el vehículo no podrás retroceder la Orden de trabajo ¿Estás seguro?",
+    icon: "warning",
+    confirmButtonText: "Sí, cancelar la OT",
+    showCancelButton: true,
+    cancelButtonText: "No, volver",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      return 1; 
+    }
+  });
+};*/
 
 const avanzarEstado = async () => {
+  console.log(estados.indexOf(otEditar.value.estado));
   const idx = estados.indexOf(otEditar.value.estado);
 
   // si no existe o ya es el último → no hace nada
   if (idx === -1 || idx >= estados.length - 1) return;
 
   const nuevoEstado = estados[idx + 1];
+
+  // Si vamos a avanzar al último estado ('Entregado'), pedir confirmación
+  if (idx + 1 === estados.length - 1) {
+    const preguntaEntregar = await Swal.fire({
+      title: "Entregar vehiculo",
+      text: "Al entregar el vehículo no podrás retroceder la Orden de trabajo ¿Estás seguro?",
+      icon: "warning",
+      confirmButtonText: "Sí, Entregar vehículo",
+      showCancelButton: true,
+      cancelButtonText: "No, volver",
+    });
+
+    if (!preguntaEntregar.isConfirmed) return;
+  }
 
   try {
     // actualizar en frontend
@@ -1122,7 +1321,36 @@ const avanzarEstado = async () => {
       `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
       {
         estado: nuevoEstado,
+        idUsuario: idUsuarioSession,
       },
+      { headers: { Authorization: `Bearer ${data45?.token}` } },
+    );
+
+    mostrarToast("success", "Orden de trabajo avanzada correctamente");
+  } catch (error) {
+    console.error("No se pudo actualizar el estado", error);
+  }
+};
+const retrocederEstado = async () => {
+  const idx = estados.indexOf(otEditar.value.estado);
+
+  // si no existe o ya es el último → no hace nada
+  if (idx === 0 || idx >= estados.length - 1) return;
+
+  const nuevoEstado = estados[idx - 1];
+
+  try {
+    // actualizar en frontend
+    otEditar.value.estado = nuevoEstado;
+
+    // guardar en backend
+    await axios.put(
+      `${proxy.$serverIP}api/OrdenTrabajo/avanzarOT/${otEditar.value.idOrdenTrabajo}`,
+      {
+        estado: nuevoEstado,
+        idUsuario: idUsuarioSession,
+      },
+      { headers: { Authorization: `Bearer ${data45?.token}` } },
     );
 
     mostrarToast("success", "Orden de trabajo avanzada correctamente");
@@ -1139,6 +1367,7 @@ const cambiarEstatusOT = async (estatus) => {
       {
         estatus: estatus,
       },
+      { headers: { Authorization: `Bearer ${data45?.token}` } },
     );
 
     switch (estatus) {
@@ -1189,12 +1418,14 @@ const guardarEdicion = async () => {
     const response = await axios.put(
       `${proxy.$serverIP}api/OrdenTrabajo/editarOT/${idOT}`,
       payload,
+      { headers: { Authorization: `Bearer ${data45?.token}` } },
     );
 
     mostrarToast("success", "Orden de trabajo editada correctamente");
     console.log("OT actualizada:", response.data);
-    cargarOrden();
-    //Habilitar boton imprimir
+    // Recargar OT y luego desactivar indicador de cambios
+    await cargarOrden();
+    // Habilitar boton imprimir
     insumosCambios.value = false;
     //volver()
   } catch (error) {
@@ -1352,6 +1583,16 @@ const guardarLLantasOT = async () => {
   console.log("payload:", payload);
 
   // Ejemplo de envío al backend
+  options.headers = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+
+  // Adjuntar el token Bearer si existe
+
+  if (data45?.token) {
+    options.headers["Authorization"] = `Bearer ${data45?.token}`;
+  }
   const res = await fetch(
     `${proxy.$serverIP}api/OrdenTrabajo/InsertarLlantasOT`,
     {

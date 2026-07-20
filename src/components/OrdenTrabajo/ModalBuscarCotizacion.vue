@@ -68,7 +68,7 @@
 <script setup>
 import { getCurrentInstance, ref, onMounted } from 'vue'
 const { proxy } = getCurrentInstance()
-
+const userData = JSON.parse(localStorage.getItem('userSession'));
 const props = defineProps({
 	modelValue: {
 		type: [String, Number],
@@ -112,8 +112,19 @@ const formatearTelefono = (telefono) => {
     return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
   }
 
-const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
+const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '', options={}) => {
 	try {
+		options.headers = {
+		'Content-Type': 'application/json',
+		...options.headers
+	};
+
+	// Adjuntar el token Bearer si existe
+	
+	console.log("token Modal Buscar:", userData)
+	if (userData?.token) {
+		options.headers['Authorization'] = `Bearer ${userData?.token}`;
+	}
 		itmCotizaciones.value = []
 		const url = new URL(
 			proxy.$serverIP + 'api/Cotizacion/getCotizacionIdAprobadaOrRealizada'
@@ -123,7 +134,7 @@ const cargarCotizacionesAprobadasOrRealizadas = async (busqueda = '') => {
 			url.searchParams.append('busqueda', busqueda)
 		}
 
-		const res = await fetch(url)
+		const res = await fetch(url , options)
 		if (!res.ok) throw new Error('Error en la respuesta')
 
 		itmCotizaciones.value = await res.json()

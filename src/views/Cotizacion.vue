@@ -51,7 +51,7 @@ const conceptoOT = ref([]);
 const mostrarTabla = ref(false);
 const selectedAlmacenes = ref([]);
 const dropdownOpen = ref(false);
-
+const userData = JSON.parse(localStorage.getItem("userSession"));
 const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
 const loggeduser = {
@@ -449,11 +449,22 @@ const cargarLlantas = async () => {
 // Función para cargar detalles de la sucursal del usuario
 
 // Función para cargar cotizaciones
-const cargarCotizaciones = async () => {
+const cargarCotizaciones = async (options = {}) => {
   loading.value = true;
   try {
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (userData?.token) {
+      options.headers["Authorization"] = `Bearer ${userData?.token}`;
+    }
     const res = await fetch(
       proxy.$serverIP + "api/Cotizacion/resumenCotizaciones",
+      options,
     );
     if (!res.ok) throw new Error("Error al obtener cotizaciones");
     const data = await res.json();
@@ -538,7 +549,7 @@ onMounted(async () => {
   cargarCotizaciones();
   cargarConcpetoTrabajo();
   cargarAlmacenes();
-  cargarPromosGenerales();
+  cargarPromosRapidas();
   cleanupEscListener = registrarCerrarConEsc(mostrarVista);
 });
 
@@ -683,7 +694,7 @@ const agregarServicioExtra = async () => {
   };
 
   try {
-    const promos = await obtenerPromosGeneralesParaServicio();
+    const promos = promosGeneralesDisponibles.value;
     servicio.promosAplicables = promos;
   } catch (error) {
     servicio.promosAplicables = [];
@@ -745,9 +756,7 @@ const agregarLlanta = async (item) => {
   };
 
   try {
-    const promosDisponibles = await obtenerPromosPorInventario(
-      nuevaLlanta.idInventarioInicial,
-    );
+    const promosDisponibles = promosGeneralesDisponibles.value;
 
     nuevaLlanta.promosAplicables = promosDisponibles || [];
     nuevaLlanta.idPromocionSeleccionada = 0;
@@ -781,7 +790,6 @@ const agregarLlanta = async (item) => {
     // Si tienen la misma prioridad, ordenar por precio de mayor a menor
     return (b.precioUnitario || 0) - (a.precioUnitario || 0);
   });
-
 };
 
 // Obtener promociones aplicables a una llanta (por inventario)
@@ -971,7 +979,7 @@ watch(
       p.excluirPromocionGeneral = false;
 
       // Consultar promociones aplicables
-      const promos = await obtenerPromosPorPaquete(p.idPaquete);
+      const promos = promosGeneralesDisponibles.value;
 
       p.promosAplicables = promos || [];
     }
@@ -993,7 +1001,6 @@ const cargarConcpetoTrabajo = async () => {
       idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
       nombre: a.nombre,
     }));
-
   } catch (error) {
     console.error("Error cargando ConceptoTrabajo:", error);
   }
@@ -1099,7 +1106,7 @@ const cargarFormulario = async (cotizacion = null) => {
           : null;
 
         // 🔹 Obtener promociones aplicables desde la API
-        const promosAplicables = await obtenerPromosPorPaquete(p.idPaquete);
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         // 🔹 Calcular precio con la función estándar
         const precioBase = p.precioUnitario;
@@ -1117,7 +1124,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
           comentario: p.comentario || "",
           excluirPromocionGeneral: p.excluirPromocionGeneral ?? false,
-          cantidad: 1,
+          cantidad: p.cantidad,
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
@@ -1167,9 +1174,7 @@ const cargarFormulario = async (cotizacion = null) => {
           : null;
 
         // 2. Obtener promociones aplicables desde API
-        const promosAplicables = await obtenerPromosPorInventario(
-          ll.idInventarioInicial,
-        );
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         // 3. Calcular precio con promo
         const precioBase = ll.precioUnitario;
@@ -1235,7 +1240,7 @@ const cargarFormulario = async (cotizacion = null) => {
             }
           : null;
 
-        const promosAplicables = await obtenerPromosGeneralesParaServicio();
+        const promosAplicables = promosGeneralesDisponibles.value;
 
         const precioBase = s.precioUnitario ?? 0;
 
@@ -1279,11 +1284,27 @@ const cargarFormulario = async (cotizacion = null) => {
   }
 };
 
-const cargarPromosGenerales = async () => {
+/* const cargarPromosGenerales = async () => {
   try {
     const res = await fetch(
       `${proxy.$serverIP}api/Promocion/getPromocionesGenerales`,
     );
+    if (!res.ok) throw new Error("Error al obtener promociones generales");
+
+    const data = await res.json();
+    promosGeneralesDisponibles.value = data;
+
+    if (data.length > 0) {
+    } else {
+    }
+  } catch (error) {
+    console.error("Error al cargar promociones generales:", error);
+  }
+}; */
+
+const cargarPromosRapidas = async () => {
+  try {
+    const res = await fetch(`${proxy.$serverIP}api/Promocion/getPromosRapidas`);
     if (!res.ok) throw new Error("Error al obtener promociones generales");
 
     const data = await res.json();
@@ -1510,7 +1531,7 @@ const guardarCotizacion = async () => {
       idPromocion: p.isVuelo ? null : p.idPromocionSeleccionada || null,
       idPromocionVuelo: p.isVuelo ? p.idPromocionAlVuelo : null,
       isVuelo: p.isVuelo || false,
-      cantidad: p.cantidad ?? 1, // o el valor que requieras
+      cantidad: p.cantidad, // o el valor que requieras
       precioUnitario: p.precioUnitario ?? p.precio ?? 0,
       excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
       comentario: p.comentario || "",
@@ -1563,6 +1584,7 @@ const guardarCotizacion = async () => {
       method: cotizacionForm.codigo ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevaCotizacion),
+      Authorization: `Bearer ${userData?.token}`,
     });
 
     if (!res.ok) {
@@ -1576,7 +1598,6 @@ const guardarCotizacion = async () => {
     closeModal();
     cargarCotizaciones();
     mostrarVistaPrevia(data, "ver");
-
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
     Swal.fire("Error", "No se pudo guardar la cotización.", "error");
@@ -1783,9 +1804,22 @@ const almacenes = ref([
   { id: 3, nombre: "Sucursal Sur" },
 ]);
 
-const cargarAlmacenes = async () => {
+const cargarAlmacenes = async (options = {}) => {
   try {
-    const response = await fetch(`${proxy.$serverIP}api/Almacen/getAlmacen`);
+    options.headers = {
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
+
+    // Adjuntar el token Bearer si existe
+
+    if (userData?.token) {
+      options.headers["Authorization"] = `Bearer ${userData?.token}`;
+    }
+    const response = await fetch(
+      `${proxy.$serverIP}api/Almacen/getAlmacen`,
+      options,
+    );
 
     if (!response.ok) {
       throw new Error(`Error HTTP: ${response.status}`);
@@ -2002,9 +2036,7 @@ watch(
           mostrarEditorPromo: false,
         };
 
-        paqueteObj.promosAplicables = await obtenerPromosPorPaquete(
-          paqueteObj.idPaquete,
-        );
+        paqueteObj.promosAplicables = promosGeneralesDisponibles.value;
         cotizacionForm.paquetes.push(paqueteObj);
       }
     }
@@ -2159,6 +2191,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           idPaquete: p.idPaquete,
           nombre: p.nombre,
           descripcion: p.descripcion,
+          cantidad: p.cantidad,
           precioUnitario: precioBase,
           precio: precioConPromo,
           total: precioConPromo,
@@ -2436,11 +2469,11 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 };
 
 const formatearTelefono = (telefono) => {
-	if (!telefono) return '';
-    const digitos = telefono.replace(/\D/g, '');
-    if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
-  }
+  if (!telefono) return "";
+  const digitos = telefono.replace(/\D/g, "");
+  if (digitos.length !== 10) return telefono;
+  return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
+};
 
 const generarPDF = async () => {
   const logo = await loadLogoBase64();
@@ -2502,19 +2535,32 @@ const generarPDF = async () => {
   // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
   const llantasRows = v.llantasSelecionadas.map((ll) => {
     const tienePromo = ll.promoLabel && ll.precioConPromo < ll.precioUnitario;
+    const descripcion =
+      ll.comentario && ll.comentario.trim() !== ""
+        ? {
+            stack: [
+              { text: ll.medidas, fontSize: 10, alignment: "left" },
+              {
+                text: ll.comentario,
+                italics: true,
+                fontSize: 8,
+                color: "#555",
+                margin: [0, 2, 0, 0],
+              },
+            ],
+            margin: [0, 10, 0, 10],
+          }
+        : celdaCentroY(ll.medidas);
 
     return [
       celdaCentroY(String(ll.cantidad), "center"),
-
-      celdaCentroY(ll.medidas),
-
+      descripcion,
       celdaCentroY(
         `$${ll.precioUnitario.toLocaleString("en-US", {
           minimumFractionDigits: 2,
         })}`,
         "right",
       ),
-
       {
         stack: tienePromo
           ? [
@@ -2559,48 +2605,91 @@ const generarPDF = async () => {
     ];
   });
 
-  const paquetesRows = v.paquetes.map((p) => [
-    celdaCentroY("1", "center"),
+  const paquetesRows = v.paquetes.map((p) => {
+    const descripcion =
+      p.comentario && p.comentario.trim() !== ""
+        ? {
+            stack: [
+              {
+                text:
+                  p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase(),
+                fontSize: 10,
+                alignment: "left",
+              },
+              {
+                text: p.comentario,
+                italics: true,
+                fontSize: 8,
+                color: "#555",
+                margin: [0, 2, 0, 0],
+              },
+            ],
+            margin: [0, 10, 0, 10],
+          }
+        : celdaCentroY(
+            p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase(),
+          );
 
-    celdaCentroY(p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase()),
+    return [
+      celdaCentroY("1", "center"),
+      descripcion,
+      celdaCentroY(formatMoney(p.precioUnitario), "right"),
+      celdaTotalConPromo({
+        precioUnitario: p.precioUnitario,
+        cantidad: p.cantidad,
+        total: p.total,
+        fontSize: 10,
+        promoLabel: p.promoLabel,
+      }),
+    ];
+  });
 
-    celdaCentroY(formatMoney(p.precioUnitario), "right"),
+  const serviciosRows = v.serviciosAdicionales.map((s) => {
+    const comentario = s.comentario || s.observacion || "";
+    const descripcion =
+      comentario.trim() !== ""
+        ? {
+            stack: [
+              { text: s.nombreServicio, fontSize: 10, alignment: "left" },
+              {
+                text: comentario,
+                italics: true,
+                fontSize: 8,
+                color: "#555",
+                margin: [0, 2, 0, 0],
+              },
+            ],
+            margin: [0, 10, 0, 10],
+          }
+        : {
+            text: s.nombreServicio,
+            italics: false,
+            fontSize: 10,
+            margin: [0, 10, 0, 10],
+          };
 
-    celdaTotalConPromo({
-      precioUnitario: p.precioUnitario,
-      cantidad: 1,
-      total: p.total,
-      fontSize: 10,
-      promoLabel: p.promoLabel,
-    }),
-  ]);
-
-  const serviciosRows = v.serviciosAdicionales.map((s) => [
-    {
-      text: String(s.cantidad),
-      alignment: "center",
-      fontSize: 10,
-      margin: [0, 10, 0, 10],
-    },
-    {
-      text: s.nombreServicio,
-      italics: false,
-      fontSize: 10,
-      margin: [0, 10, 0, 10],
-    },
-    {
-      text: formatMoney(s.precioUnitario),
-      alignment: "right",
-      fontSize: 9,
-      margin: [0, 10, 0, 10],
-    },
-    celdaTotalConPromo({
-      precioUnitario: s.precioUnitario,
-      cantidad: s.cantidad,
-      total: s.total,
-      promoLabel: s.promoLabel,
-    }),
-  ]);
+    return [
+      {
+        text: String(s.cantidad),
+        alignment: "center",
+        fontSize: 10,
+        margin: [0, 10, 0, 10],
+      },
+      descripcion,
+      {
+        text: formatMoney(s.precioUnitario),
+        alignment: "right",
+        fontSize: 9,
+        margin: [0, 10, 0, 10],
+      },
+      celdaTotalConPromo({
+        precioUnitario: s.precioUnitario,
+        cantidad: s.cantidad,
+        total: s.total,
+        promoLabel: s.promoLabel,
+      }),
+    ];
+  });
 
   const separador = (textoColumna2) => [
     {
@@ -2663,15 +2752,15 @@ const generarPDF = async () => {
   };
 
   const formatearTelefono = (telefono) => {
-	if (!telefono) return '';
-    const digitos = telefono.replace(/\D/g, '');
+    if (!telefono) return "";
+    const digitos = telefono.replace(/\D/g, "");
     if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0,3)} ${digitos.slice(3,6)} ${digitos.slice(6)}`;
-  }
+    return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
+  };
   // Definición del PDF
   const docDefinition = {
     pageMargins: [40, 40, 40, 60],
-    pageSize: 'LETTER',
+    pageSize: "LETTER",
     content: [
       // Logo y encabezado
       {
@@ -2693,10 +2782,18 @@ const generarPDF = async () => {
               text: "Blvd. Delta 2002\nesq. Rio Mayo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. Valle de Jerez C.P 37538", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 330 6060 y\n477 390 5090", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. Valle de Jerez C.P 37538",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 330 6060 y\n477 390 5090",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "delta@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2704,10 +2801,14 @@ const generarPDF = async () => {
               text: "Blvd. Lopez Mateos 827\nesq. Apolo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
             { text: "Col. Obrera C.P. 37340", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 717 7440 y\n477 470 9419", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Tel. 477 717 7440 y\n477 470 9419",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "apolo@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2715,10 +2816,18 @@ const generarPDF = async () => {
               text: "Blvd. Torres Landa 1901\nesq San Jacobo",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. La Piscina C.P. 37440", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 390 0290 y\n477 461 0028", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. La Piscina C.P. 37440",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 390 0290 y\n477 461 0028",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
             { text: "torreslanda@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
@@ -2726,10 +2835,18 @@ const generarPDF = async () => {
               text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián",
               bold: true,
               fontSize: 9,
-              lineHeight: 1.2
+              lineHeight: 1.2,
             },
-            { text: "Col. La Martinica, C.P. 37500", fontSize: 8, lineHeight: 1.2 },
-            { text: "Tel. 477 763 3285 y\n477 763 3284", fontSize: 8, lineHeight: 1.2 },
+            {
+              text: "Col. La Martinica, C.P. 37500",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
+            {
+              text: "Tel. 477 763 3285 y\n477 763 3284",
+              fontSize: 8,
+              lineHeight: 1.2,
+            },
           ],
         ],
         columnGap: 15,
@@ -2777,7 +2894,10 @@ const generarPDF = async () => {
                   text: "Teléfono(s): ",
                   bold: true,
                 },
-                { text: formatearTelefono(v.cliente.telefono) || "N/A", color: "#444" },
+                {
+                  text: formatearTelefono(v.cliente.telefono) || "N/A",
+                  color: "#444",
+                },
               ],
               fontSize: 10,
               margin: [0, 0, 10, 6],
@@ -2879,7 +2999,7 @@ const generarPDF = async () => {
         margin: [0, 14, 0, 0],
       },
     ],
-    
+
     styles: {
       tableHeaderBorder: {
         bold: true,
@@ -2973,9 +3093,7 @@ const cotizacionContext = {
   eliminarServicioExtra,
   eliminarLlanta,
   agregarLlanta,
-  obtenerPromosPorInventario,
-  obtenerPromosPorPaquete,
-  obtenerPromosGeneralesParaServicio,
+  cargarPromosRapidas,
   aplicarPromo,
   onCambioPromo,
   onCambioPromoPaquete,
@@ -2983,7 +3101,7 @@ const cotizacionContext = {
   precioFinalItem,
   cargarConcpetoTrabajo,
   cargarFormulario,
-  cargarPromosGenerales,
+  cargarPromosRapidas,
   aplicarPromocionGeneral,
   guardarCotizacion,
   subtotalLlantas,
@@ -3024,9 +3142,8 @@ const cotizacionContext = {
   togglePaquete,
   guardarPromoAlVuelo,
   formatearTelefono,
-  generarPDF
+  generarPDF,
 };
-
 </script>
 
 <style>
@@ -3140,7 +3257,6 @@ const cotizacionContext = {
 
     border: none;
     border-top: 1px solid #000;
-    
   }
 
   #area-imprimir .tr-servicios td {
