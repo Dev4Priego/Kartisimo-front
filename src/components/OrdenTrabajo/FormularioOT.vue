@@ -774,7 +774,7 @@
                     <td style="text-align: center">{{ paquete.cantidad }}</td>
                     <td style="text-align: right">
                       {{
-                        paquete.precioUnitario.toLocaleString("es-MX", {
+                        paquete.costo.toLocaleString("es-MX", {
                           style: "currency",
                           currency: "MXN",
                         })
