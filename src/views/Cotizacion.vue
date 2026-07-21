@@ -375,6 +375,7 @@ const cargarPaquetes = async () => {
         nombre: p.nombre,
         descripcion: p.descripcion,
         precioUnitario: normalizarPrecio(p.precioUnitario),
+        costo: normalizarPrecio(p.costo),
         detalle: (p.detalle || []).map((d) => ({
           idDesglosePaquete: d.idDesglosePaquete,
           idConceptoTrabajo: d.idConceptoTrabajo,
@@ -433,6 +434,7 @@ const cargarLlantas = async () => {
         ubicacion: llanta.nombreAlmacen,
         idAlmacen: llanta.idAlmacen,
         precio: parseFloat(llanta.precio) || 0,
+        costo: parseFloat(llanta.costo) || 0,
         sobrePedido,
       };
 
@@ -684,6 +686,7 @@ const agregarServicioExtra = async () => {
     observacion,
     cantidad,
     precioUnitario: normalizarPrecio(precio),
+    costo: 0,
     idConceptoTrabajo: NuevoConceptoTrabajo.value,
     promo: null,
     promosAplicables: [],
@@ -742,6 +745,7 @@ const agregarLlanta = async (item) => {
     idInventarioInicial: item.idInventarioInicial,
     cantidad: 4,
     precioUnitario: normalizarPrecio(item.precio),
+    costo: normalizarPrecio(item.costo),
     modeloMedidas: `${item.medida} ${item.rango} ${item.llanta}`,
     marca: item.marca,
     idAlmacen: item.idAlmacen,
@@ -1125,6 +1129,7 @@ const cargarFormulario = async (cotizacion = null) => {
           comentario: p.comentario || "",
           excluirPromocionGeneral: p.excluirPromocionGeneral ?? false,
           cantidad: p.cantidad,
+          costo: normalizarPrecio(p.costo ?? base.costo),
           promosAplicables,
           promo: promoIndividual,
           idPromocionSeleccionada:
@@ -1194,6 +1199,7 @@ const cargarFormulario = async (cotizacion = null) => {
           idAlmacen: ll.idAlmacen,
           cantidad: ll.cantidad,
           precioUnitario: precioBase,
+          costo: normalizarPrecio(ll.costo),
           modeloMedidas: ll.modeloMedidas,
           ubicacion: ll.ubicacion,
           idConceptoTrabajo: 1,
@@ -1259,6 +1265,7 @@ const cargarFormulario = async (cotizacion = null) => {
           observacion: s.observacion,
           cantidad: s.cantidad,
           precioUnitario: precioBase,
+          costo: normalizarPrecio(s.costo),
           idConceptoTrabajo: s.idConceptoTrabajo,
           promosAplicables,
           promo: promoIndividual,
@@ -1516,6 +1523,7 @@ const guardarCotizacion = async () => {
       idConceptoTrabajo: ll.idConceptoTrabajo,
       cantidad: Number(ll.cantidad),
       precioUnitario: Number(ll.precioUnitario),
+      costo: Number(ll.costo || 0),
       idAlmacen: ll.idAlmacen,
       idPromocion: ll.isVuelo ? null : ll.idPromocionSeleccionada || null,
       idPromocionVuelo: ll.isVuelo ? ll.idPromocionAlVuelo : null,
@@ -1533,6 +1541,7 @@ const guardarCotizacion = async () => {
       isVuelo: p.isVuelo || false,
       cantidad: p.cantidad, // o el valor que requieras
       precioUnitario: p.precioUnitario ?? p.precio ?? 0,
+      costo: Number(p.costo || 0),
       excluirPromocionGeneral: p.excluirPromocionGeneral ? 1 : 0,
       comentario: p.comentario || "",
       detalle: p.detalle.map((d) => ({
@@ -1555,6 +1564,7 @@ const guardarCotizacion = async () => {
       observacion: s.observacion || "",
       cantidad: Number(s.cantidad),
       precioUnitario: Number(s.precioUnitario),
+      costo: Number(s.costo || 0),
       excluirPromocionGeneral: s.excluirPromocionGeneral ? 1 : 0,
       comentario: s.comentario || "",
     }));
@@ -1607,6 +1617,9 @@ const guardarCotizacion = async () => {
 const subtotalLlantas = computed(() => {
   return cotizacionForm.llantas.reduce((sum, ll) => {
     const cantidad = ll.cantidad ?? 1;
+    
+    
+  
     return sum + precioFinalItem(ll, promoGeneral.value) * cantidad;
   }, 0);
 });
@@ -1885,6 +1898,7 @@ const tblHeadersModal = [
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
   { text: "Ubicación", value: "ubicacion", sortable: true },
+  { text: "Costo", value: "costo", sortable: true },
   { text: "Precio", value: "precio", sortable: true },
   { text: "Acciones", value: "acciones", width: 50 },
 ];
@@ -2023,6 +2037,7 @@ watch(
           nombre: base.nombre,
           descripcion: base.descripcion,
           precioUnitario: base.precioUnitario,
+          costo: base.costo || 0,
           cantidad: 1,
           comentario: "",
           detalle: base.detalle || [],
@@ -2173,7 +2188,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           : null;
 
         const aplicaPromo = !p.excluirPromocionGeneral;
-        const precioBase = p.precioUnitario ?? 0;
+        const precioBase = Number(p.precioUnitario ?? 0);
+        const cantidad = Number(p.cantidad ?? 1);
 
         const precioConPromo = aplicaPromo
           ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
@@ -2191,10 +2207,10 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           idPaquete: p.idPaquete,
           nombre: p.nombre,
           descripcion: p.descripcion,
-          cantidad: p.cantidad,
+          cantidad,
           precioUnitario: precioBase,
           precio: precioConPromo,
-          total: precioConPromo,
+          total: precioConPromo * cantidad,
           promoLabel,
           comentario: p.comentario || "",
         };
@@ -2223,7 +2239,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           : null;
 
         const aplicaPromo = !s.excluirPromocionGeneral;
-        const precioBase = s.precioUnitario ?? 0;
+        const precioBase = Number(s.precioUnitario ?? 0);
+        const cantidad = Number(s.cantidad ?? 1);
 
         const precioConPromo = aplicaPromo
           ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
@@ -2240,10 +2257,10 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         return {
           nombreServicio: s.descripcion,
           observacion: s.observacion,
-          cantidad: s.cantidad,
+          cantidad,
           precioUnitario: precioBase,
           precioConPromo,
-          total: precioConPromo * s.cantidad,
+          total: precioConPromo * cantidad,
           promoLabel,
           comentario: s.comentario || "",
         };
@@ -2253,17 +2270,23 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       // 🔹 CALCULO DE TOTALES
       // ===============================
       const totalBase =
-        llantasConPromo.reduce((s, l) => s + l.precioUnitario * l.cantidad, 0) +
-        paquetes.reduce((s, p) => s + p.precioUnitario, 0) +
+        llantasConPromo.reduce(
+          (s, l) => s + Number(l.precioUnitario ?? 0) * Number(l.cantidad ?? 1),
+          0,
+        ) +
+        paquetes.reduce(
+          (s, p) => s + Number(p.precioUnitario ?? 0) * Number(p.cantidad ?? 1),
+          0,
+        ) +
         serviciosAdicionales.reduce(
-          (s, s2) => s + s2.precioUnitario * s2.cantidad,
+          (s, s2) => s + Number(s2.precioUnitario ?? 0) * Number(s2.cantidad ?? 1),
           0,
         );
 
       const totalFinal =
-        llantasConPromo.reduce((s, l) => s + l.total, 0) +
-        paquetes.reduce((s, p) => s + p.total, 0) +
-        serviciosAdicionales.reduce((s, s2) => s + s2.total, 0);
+        llantasConPromo.reduce((s, l) => s + Number(l.total ?? 0), 0) +
+        paquetes.reduce((s, p) => s + Number(p.total ?? 0), 0) +
+        serviciosAdicionales.reduce((s, s2) => s + Number(s2.total ?? 0), 0);
 
       // ===============================
       // 🔹 VISTA FINAL

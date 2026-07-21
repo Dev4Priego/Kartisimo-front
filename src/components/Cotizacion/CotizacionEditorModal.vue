@@ -261,6 +261,10 @@
                     {{ slotProps.runflat === "1" ? "RF" : "" }}
                   </template>
 
+                  <template #item-costo="slotProps">
+                    {{ formatoMoneda(slotProps.costo || 0) }}
+                  </template>
+
                   <template #item-acciones="slotProps">
                     <button
                       v-if="
@@ -450,6 +454,9 @@
                         <th>Descripción</th>
                         <th style="text-align: center">Cantidad</th>
                         <th>Precio Unitario</th>
+                        <!--
+                          <th>Costo</th>
+                        -->
                         <th>Total</th>
                         <th class="text-center">Promociones</th>
                       </tr>
@@ -518,6 +525,11 @@
                               />
                             </div>
                           </td>
+                          <!--
+                            <td class="text-nowrap">
+                              {{ formatoMoneda(item.costo || 0) }}
+                            </td>
+                          -->
 
                           <td>
                             <div v-if="item.promo && item.promo.valor != null">
@@ -833,6 +845,11 @@
                               />
                             </div>
                           </td>
+                          <!--
+                            <td class="text-nowrap">
+                              {{ formatoMoneda(paq.costo || 0) }}
+                            </td>
+                          -->
 
                           <td>
                             <div v-if="paq.promo && paq.promo.valor != null">
@@ -1161,6 +1178,12 @@
                               />
                             </div>
                           </td>
+
+                          <!--
+                            <td class="text-nowrap">
+                              {{ formatoMoneda(extra.costo || 0) }}
+                            </td>
+                          -->
 
                           <td>
                             <div

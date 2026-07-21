@@ -521,10 +521,14 @@ const imprimirCotizacion = computed({
   get: () => getContextValue("imprimirCotizacion"),
   set: (nextValue) => setContextValue("imprimirCotizacion", nextValue),
 });
+const totalCotizacion = computed({
+  get: () => getContextValue("totalCotizacion"),
+  set: (nextValue) => setContextValue("totalCotizacion", nextValue),
+});
 
 const generarPDF = computed({
   get: () => getContextValue("generarPDF"),
   set: (nextValue) => setContextValue("generarPDF", nextValue),
 });
-
+console.log("DEBUG:",vistaCotizacion);
 </script>

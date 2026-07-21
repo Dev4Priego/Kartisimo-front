@@ -130,7 +130,7 @@
                         <th>Medidas</th>
                         <th class="text-center">Cantidad</th>
                         <th>Ubicación</th>
-                        <th class="text-end">Costo</th>
+                        <th v-if="mostrarCostos" class="text-end">Costo</th>
 
                         <th class="text-end">Precio</th>
                         <th class="text-end"></th>
@@ -157,7 +157,9 @@
                           {{ item.cantidad }}
                         </td>
                         <td>{{ item.ubicacion }}</td>
-                        <td class="text-end">${{ item.costo }}</td>
+                        <td v-if="mostrarCostos" class="text-end">
+                          ${{ item.costo }}
+                        </td>
 
                         <td class="text-end">${{ item.precio }}</td>
                         <td class="text-end">
@@ -272,7 +274,7 @@
                     <th>Concepto trabajo</th>
                     <th>Descripción</th>
                     <th>Cantidad</th>
-                    <th>C/U</th>
+                    <th v-if="mostrarCostos">C/U</th>
                     <th>P/U</th>
                     <th>Subtotal</th>
                     <th>Acciones</th>
@@ -309,14 +311,13 @@
                           @input="recalcularSubtotal(ll)"
                         />
                       </td>
-                      <td>
+                      <td v-if="mostrarCostos">
                         <input
                           type="number"
                           min="0"
                           step="0.01"
                           class="form-control form-control-sm input-precio-unitario"
-                          v-model.number="ll.costo  "
-                          
+                          v-model.number="ll.costo"
                           @keydown="irAlSiguientePrecio"
                         />
                       </td>
@@ -451,7 +452,7 @@
                     >
                       <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
                       <td
-                        colspan="6"
+                        :colspan="mostrarCostos ? 7 : 6"
                         class="bg-light justify-content-end align-items-end"
                       >
                         <div
@@ -576,17 +577,15 @@
 
                       <td>{{ paq.descripcion }}</td>
                       <td>{{ paq.cantidad }}</td>
-                      <td>
-
+                      <td v-if="mostrarCostos">
                         <input
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            class="form-control"
-                            v-model.number="paq.costo  "
-                            
-                            @keydown="irAlSiguientePrecio"
-                          />
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="form-control"
+                          v-model.number="paq.costo"
+                          @keydown="irAlSiguientePrecio"
+                        />
                       </td>
 
                       <td>
@@ -719,7 +718,7 @@
                     >
                       <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
                       <td
-                        colspan="6"
+                        :colspan="mostrarCostos ? 7 : 6"
                         class="bg-light justify-content-end align-items-end"
                       >
                         <div
@@ -863,16 +862,15 @@
                           @input="recalcularSubtotal(det)"
                         />
                       </td>
+                      <td v-if="mostrarCostos"></td>
                       <td></td>
                       <td></td>
-                      <td></td>
-
                       <td></td>
                     </tr>
                   </template>
                   <!--Separar los paquetes con los servicios adicionales  para una mejor vista-->
                   <tr v-if="adicionales.length > 0">
-                    <td colspan="7">
+                    <td :colspan="mostrarCostos ? 7 : 6">
                       <h4>Servicios Adicionales</h4>
                     </td>
                   </tr>
@@ -913,14 +911,13 @@
                           @input="recalcularSubtotal(ad)"
                         />
                       </td>
-                      <td>
+                      <td v-if="mostrarCostos">
                         <input
                           type="number"
                           min="0"
                           step="0.01"
                           class="form-control form-control-sm input-precio-unitario"
                           v-model.number="ad.costo"
-                          
                           @keydown="irAlSiguientePrecio"
                         />
                       </td>
@@ -1055,7 +1052,7 @@
                     >
                       <!--- Se Valida con una variable global, si esta en true, significa que el usuario va a crear una promocion nueva--->
                       <td
-                        colspan="6"
+                        :colspan="mostrarCostos ? 7 : 6"
                         class="bg-light justify-content-end align-items-end"
                       >
                         <div
@@ -1170,7 +1167,10 @@
                   </template>
                   <!--Total de insumos-->
                   <tr>
-                    <td colspan="6" class="text-end fs-5 fw-bold">
+                    <td
+                      :colspan="6"
+                      class="text-end fs-5 fw-bold"
+                    >
                       <h4>Total:</h4>
                     </td>
                     <td class="fs-5 fw-bold text-end">
@@ -1235,6 +1235,7 @@ const { proxy } = getCurrentInstance();
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
+const mostrarCostos = ref(true);
 const promosGeneralesDisponibles = ref([]);
 const userData = JSON.parse(localStorage.getItem("userSession"));
 
@@ -1849,7 +1850,7 @@ const cargarPaquetes = async () => {
       nombre: p.nombre,
       descripcion: p.descripcion,
       precioUnitario: p.precioUnitario,
-      costo:p.costo,
+      costo: p.costo,
 
       // MISMO NOMBRE que usas después
       detalle: (p.detalle || []).map((d) => ({
@@ -1965,7 +1966,7 @@ const mapearInsumosParaPadre = () => {
       ubicacion: l.ubicacion,
 
       cantidad: l.cantidad,
-      costo:l.costo,
+      costo: l.costo,
       precioUnitario: l.precioUnitario,
       precioConPromo: l.precioConPromo,
       subTotal: l.subTotal,
@@ -1986,7 +1987,7 @@ const mapearInsumosParaPadre = () => {
       descripcion: p.descripcion,
       cantidad: p.cantidad,
       precioUnitario: p.precioUnitario,
-      costo:p.costo,
+      costo: p.costo,
       precioConPromo: p.precioConPromo,
       subTotal: p.subTotal,
 
@@ -2019,7 +2020,7 @@ const mapearInsumosParaPadre = () => {
       comentario: a.comentario,
 
       cantidad: a.cantidad,
-      costo:a.costo,
+      costo: a.costo,
       precioUnitario: a.precioUnitario,
       precioConPromo: a.precioConPromo,
       subTotal: a.subTotal,
@@ -2185,5 +2186,50 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
   top: 0;
   z-index: 5;
   background: white; /* evita que se vea transparente */
+}
+
+.tabla-resumen-insumos {
+  table-layout: fixed;
+  min-width: 980px;
+  vertical-align: middle;
+}
+
+.tabla-resumen-insumos th,
+.tabla-resumen-insumos td {
+  vertical-align: middle;
+}
+
+.tabla-resumen-insumos .col-concepto {
+  width: auto;
+}
+
+.tabla-resumen-insumos .col-descripcion {
+  width: auto;
+}
+
+.tabla-resumen-insumos .col-cantidad {
+  width: auto;
+}
+
+.tabla-resumen-insumos .col-costo,
+.tabla-resumen-insumos .col-precio {
+  width: auto;
+}
+
+.tabla-resumen-insumos .col-subtotal {
+  width: auto;
+}
+
+.tabla-resumen-insumos .col-acciones {
+  width: auto;
+}
+
+.tabla-resumen-insumos .form-control,
+.tabla-resumen-insumos .form-select {
+  min-width: 0;
+}
+
+.tabla-resumen-insumos .btn-sm {
+  white-space: nowrap;
 }
 </style>
