@@ -493,7 +493,7 @@
                           <div>
                             <label class="samll"> Tipo de Promocion </label>
                             <div
-                              calss=" d-flex align-items-center justify-content-center "
+                              class=" d-flex align-items-center justify-content-center "
                             >
                               <div class="form-checK float-start mx-2">
                                 <label

@@ -47,7 +47,7 @@
             </div>
             <div class="offcanvas-body">
                 <ul class="nav flex-column">
-                    <li class="nav-item mb-2">
+                    <!-- <li class="nav-item mb-2">
                         <button 
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas" 
@@ -55,7 +55,7 @@
                         ><i class="bi bi-house-door-fill me-2"></i>
                             Inicio
                         </button>
-                    </li>
+                    </li> -->
                     <li class="nav-item mb-2">
                         <button 
                             class="nav-link text-white"                     
@@ -96,15 +96,15 @@
                         </button>
                     </li>
 
-                    <!-- <li class="nav-item mb-2">
+                    <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
                             data-bs-dismiss="offcanvas"
-                            @click.prevent="irA('/content/almacen')"
-                        >
-                            Almacen
+                            @click.prevent="irA('/content/Catalogos')"
+                        ><i class="bi bi-journal-bookmark-fill me-2"></i>
+                            Catálogos
                         </button >
-                    </li> -->
+                    </li>
                 </ul>
             </div>
         </div>

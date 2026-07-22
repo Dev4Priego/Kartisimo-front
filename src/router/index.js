@@ -7,6 +7,7 @@ import Cotizacion from '@/views/Cotizacion.vue'
 import OrdenTrabajo from '@/views/OrdenTrabajo/OrdenTrabajo.vue'
 import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import Promocion from '@/views/Promocion.vue'
+import Catalogos from '@/views/Catalogos.vue'
 import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
 import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' // agregado solo para desarrollo de componente dinamico, eliminar despues
 import OrdenTrabajoPreview from '@/views/OrdenTrabajo/OrdenTrabajoPreview.vue'
@@ -85,9 +86,9 @@ const routes = [
         component: Promocion,
       },
       {
-        path: "Almacen",
-        name: "almacen",
-        component: TablaCargarLlantas,
+        path: "Catalogos",
+        name: "Catalogos",
+        component: Catalogos,
       },
     ],
   },
