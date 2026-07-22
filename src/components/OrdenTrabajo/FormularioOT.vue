@@ -2695,6 +2695,7 @@ const cargarInfoCotizacion = async () => {
 
           cantidad: s.cantidad,
           precioUnitario: s.precioUnitario,
+          costo: s?.costo || 0,
 
           subTotal: (
             s.cantidad *
