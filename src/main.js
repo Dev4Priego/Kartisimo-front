@@ -14,11 +14,8 @@ window.bootstrap = bootstrap; // <- esto hace que sea accesible en todo el proye
 
 //app.config.globalProperties.$serverIP = "http://kartisimo.homelinux.org/"; // Entorno Productivo
 app.config.globalProperties.$serverIP = "http://localhost:5106/" // Entorno Dev
-<<<<<<< HEAD
-=======
 
 configureAuth({ router });
 installHttpAuth();
->>>>>>> 1fe0bd6d731df107f005556883fa71a2906d9e4d
 
 app.use(router).mount("#app");

@@ -9,13 +9,13 @@
                     <button class="nav-link" :class="{ active: tabActiva === 'marcas' }" @click="tabActiva = 'marcas'">Marcas</button>
                 </li>
                 <!-- <li class="nav-item">
-                    <button class="nav-link" :class="{ active: tabActiva === 'proveedores' }" @click="tabActiva = 'proveedores'">Proveedores</button>
+                    <button class="nav-link" :class="{ active: tabActiva === 'tecnicos' }" @click="tabActiva = 'tecnicos'">Técnicos</button>
                 </li> -->
             </ul>
             <div class="border border-top-0 p-3">
                 <KeepAlive>
                     <CatalogoMarcas v-if="tabActiva === 'marcas'" />
-                    <CatalogoProveedores v-else-if="tabActiva === 'proveedores'" />
+                    <CatalogoTecnicos v-else-if="tabActiva === 'tecnicos'" />
                 </KeepAlive>
             </div>
         </div>
