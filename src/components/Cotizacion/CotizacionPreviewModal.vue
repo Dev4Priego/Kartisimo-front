@@ -151,7 +151,7 @@
                     <td>
                       {{ llanta.medidas }}
                       <br />
-                      <small class="badge bg-secondary mt-1">{{
+                      <small v-if="llanta.comentario" class="badge bg-secondary mt-1">{{
                         llanta.comentario
                       }}</small>
                     </td>
@@ -257,7 +257,7 @@
                       >
                         <span class="text-decoration-line-through text-muted">
                           {{
-                            paquete.precioUnitario.toLocaleString("es-MX", {
+                            (paquete.precioUnitario * paquete.cantidad ?? 1).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })
@@ -268,7 +268,7 @@
                         </span>
                         <br />
                         <span class="text-success fw-bold d-block">{{
-                          (paquete.precioUnitario * paquete.cantidad ?? 1).toLocaleString("es-MX", {
+                          (paquete.total ?? 1).toLocaleString("es-MX", {
                             style: "currency",
                             currency: "MXN",
                           })
@@ -316,7 +316,7 @@
                       >
                         <span class="text-decoration-line-through text-muted">
                           {{
-                            servicio.precioUnitario.toLocaleString("es-MX", {
+                            (servicio.precioUnitario * servicio.cantidad).toLocaleString("es-MX", {
                               style: "currency",
                               currency: "MXN",
                             })

@@ -852,6 +852,7 @@ const obtenerPromosGeneralesParaServicio = async () => {
 
 // Helper reutilizable
 const aplicarPromo = (precio, promoIndividual, promoGlobal) => {
+  
   if (promoIndividual && promoIndividual.valor != null) {
     return promoIndividual.tipo
       ? precio * (1 - promoIndividual.valor / 100)
