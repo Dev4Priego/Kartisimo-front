@@ -9,12 +9,12 @@
                 show-create
                 create-label="Nuevo técnico"
                 :actions="acciones"
-                @create="abrirModalNuevo"
+                @create="nuevoTecnico"
                 @action="handleTableAction"
                 >
 
-                <template #item-llantas="{ item }">
-                    <span class="d-block text-end me-3">{{ item.llantas }}</span>
+                <template #item-nombre="{ item }">
+                    {{ item.nombres }} {{ item.apePaterno }} {{ item.apeMaterno }}
                 </template>
 
                 <template #item-sysFechaEditado="{ item }">
@@ -31,7 +31,7 @@
     </div>
 
     <div
-        v-if="dialogoLlantas"
+        v-if="dialogoNuevo"
         class="modal fade show d-block"
         tabindex="-1"
         :style="{ background: 'rgba(0,0,0,0.5)' }"
@@ -39,46 +39,107 @@
         <div class="modal-dialog modal-xl modal-dialog-centered modal-700">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3 class="modal-title">Llantas de la marca {{ marcaSel.nombre }}</h3>
+                    <h3 class="modal-title">{{ editandoTecnico ? 'Editar técnico' : 'Nuevo técnico' }}</h3>
                 </div>
                 <div class="modal-body p-4">
-                    <input
-                        v-model="busquedaLlantas"
-                        type="text"
-                        class="form-control mb-3"
-                        placeholder="Buscar por codigo, modelo, medida o rango"
-                    />
-
-                    <div class="tabla-llantas-contenedor">
-                    <table class="tabla_datos">
-                        <thead>
-                            <tr>
-                                <th>Código</th>
-                                <th>Marca</th>
-                                <th>Modelo</th>
-                                <th>Medida</th>
-                                <th>Rango</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="ll in llantasFiltradas" :key="ll.idLlanta || ll.codigo">
-                                <td>{{ ll.codigo }}</td>
-                                <td>{{ ll.marca }}</td>
-                                <td>{{ ll.modelo }}</td>
-                                <td>{{ ll.medida }} {{ ll.runflat == 1 ? 'RUNFLAT' : '' }}</td>
-                                <td>{{ ll.rango }}</td>
-                            </tr>
-                            <tr v-if="llantasFiltradas.length === 0">
-                                <td colspan="5" class="text-center text-muted py-4">
-                                    No hay llantas para mostrar.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="row align-items-start">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre(s) *</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.nombres"
+                                minlength="3"
+                                maxlength="150"
+                                required
+                            />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ap. Paterno</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.apePaterno"
+                                minlength="0"
+                                maxlength="50"
+                            />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ap. Materno</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.apeMaterno"
+                                minlength="0"
+                                maxlength="50"
+                            />
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label class="form-label">Sucursal *</label>
+                            <select 
+                                class="form-select"
+                                items
+                                v-model="datosTecnico.sucursal"
+                                minlength="0"
+                                maxlength="250"
+                            >
+                                <option
+                                v-for="itm in sucursales"
+                                :key="itm.idSucursal"
+                                :value="itm.idSucursal"
+                                >
+                                {{ itm.nombre }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label class="form-label">Puesto *</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.puesto"
+                                minlength="0"
+                                maxlength="100"
+                            />
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label class="form-label">Teléfono</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.telefono"
+                                minlength="0"
+                                maxlength="50"
+                            />
+                        </div>
+                        <div class="col-md-3 mt-2">
+                            <label class="form-label">Correo</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="datosTecnico.correo"
+                                minlength="0"
+                                maxlength="100"
+                            />
+                        </div>
+                        
+                        <div v-if="editandoTecnico" class="col-md-4 mt-2 me-2">
+                            <div class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input"
+                                    v-model="datosTecnico.activo"
+                                    :true-value="1"
+                                    :false-value="0"
+                                />
+                                <label class="form-check-label"> Activo</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" @click="cerrarDialogoLlantas">Cerrar</button>
+                    <button class="btn btn-secondary" @click="dialogoNuevo = false">Cancelar</button>
+                    <button class="btn btn-success ms-2" :disabled="datosTecnico.nombres == '' || datosTecnico.sucursal == null || datosTecnico.puesto == ''" @click="editandoTecnico ? modificarTecnico(datosTecnico) : insertarTecnico(datosTecnico)">Aceptar</button>
                 </div>
             </div>
         </div>
@@ -92,7 +153,10 @@ import Swal from 'sweetalert2'
 import TablaDatos from "../common/TablaDatos.vue";
 
 const tecnicos = ref([]);
-const tecnicoSel = ref({id: null, nombre: ''})
+const datosTecnico = ref({id: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, activo: 1});
+const editandoTecnico = ref(false);
+const dialogoNuevo = ref(false);
+const sucursales = ref([]);
 const loading = ref(false);
 const { proxy } = getCurrentInstance();
 
@@ -100,23 +164,18 @@ const data45= JSON.parse(localStorage.getItem('userSession'));
 const idUsuarioSession = data45?.usuario?.idUsuario;
 
 const headers = [
-    { text: "ID", value: "idMarca", sortable: true },
-    { text: "Marca", value: "nombre", sortable: true },
-    { text: "Descripción", value: "descripcion", sortable: false },
+    { text: "ID", value: "idEmpleado", sortable: true },
+    { text: "Nombre", value: "nombre", sortable: true },
+    { text: "Puesto", value: "puesto", sortable: false },
+    { text: "Teléfono", value: "telefono", sortable: false },
+    { text: "Correo", value: "correo", sortable: false },
+    { text: "Sucursal", value: "sucursal", sortable: true },
     { text: "Estado", value: "activo", sortable: false },
-    { text: "Llantas", value: "llantas", sortable: true },
-    { text: "Notas", value: "notas", sortable: false },
     { text: "Última edición", value: "sysFechaEditado", sortable: true },
     { text: "Editado por", value: "editor", sortable: true }
 ];
 
 const acciones = [
-  {
-    key: "view",
-    icon: "bi-eye",
-    class: "btn-outline-info",
-    title: "Ver llantas",
-  },
   {
     key: "edit",
     icon: "bi-pencil-square",
@@ -128,50 +187,121 @@ const acciones = [
     icon: "bi-trash",
     class: "btn-outline-danger",
     title: "Eliminar",
-    disabled: (item) => item.llantas > 0,
   },
 ];
 
 const handleTableAction = (action, item) => {
-  if (action === "view") mostrarLlantas(item);
-  if (action === "edit") editarMarca(item);
-  if (action === "delete") borrarMarca(item);
+  if (action === "edit") editarTecnico(item);
+  if (action === "delete") borrarTecnico(item);
 };
 
-const cargarMarcas = async () => {
+const cargarTecnicos = async () => {
 	loading.value = true;
 	try {
-		const res = await fetch(`${proxy.$serverIP}api/Marcas/MarcasLlantas?inactivas=true`);
+		const res = await fetch(`${proxy.$serverIP}api/Empleado/Empleados?activos=0`);
 		if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 		const data = await res.json();
         console.log(data);
 		return data;
 	} catch (error) {
-		console.error("Error al cargar marcas: ", error);
+		console.error("Error al cargar empleados: ", error);
 	} finally {
 		loading.value = false;
 	}
 };
 
-const cargarLlantas = async (marca) => {
-	loadingLlantas.value = true;
+const cargarSucursales = async () => {
+	loading.value = true;
 	try {
-		const res = await fetch(`${proxy.$serverIP}api/Marcas/LlantasPorMarca?marca=${marca}`);
+		const res = await fetch(`${proxy.$serverIP}api/Sucursales/getSucursales?activas=true`);
 		if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 		const data = await res.json();
         console.log(data);
 		return data;
 	} catch (error) {
-		console.error("Error al cargar llantas por marca: ", error);
+		console.error("Error al cargar sucursales: ", error);
 	} finally {
-		loadingLlantas.value = false;
+		loading.value = false;
 	}
 };
 
-const borrarMarca = async (marca) => {
+const nuevoTecnico = () => {
+    datosTecnico.value = {id: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, activo: 1};
+    editandoTecnico.value = false;
+    dialogoNuevo.value = true;
+}
+
+const editarTecnico = (tecnico) => {
+    datosTecnico.value = {id: tecnico.idEmpleado, nombres: tecnico.nombres, apePaterno: tecnico.apePaterno, apeMaterno: tecnico.apeMaterno, puesto: tecnico.puesto, telefono: tecnico.telefono, correo: tecnico.correo, sucursal: tecnico.idSucursal, activo: tecnico.activo};
+    editandoTecnico.value = true;
+    dialogoNuevo.value = true;
+}
+
+const insertarTecnico = async (nuevo) => {
+    try {
+        const response = await fetch(`${proxy.$serverIP}api/Empleado/insertar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nombres: nuevo.nombres,
+                apPaterno: nuevo.apePaterno,
+                apMaterno: nuevo.apeMaterno,
+                idSucursal: nuevo.sucursal,
+                puesto: nuevo.puesto,
+                telefono: nuevo.telefono,
+                correo: nuevo.correo,
+                activo: 1,
+                usuario: idUsuarioSession
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        mostrarToast("success", "Técnico insertado correctamente.");
+        dialogoNuevo.value = false;
+        tecnicos.value = await cargarTecnicos();
+    }
+    catch(err) {
+        console.log(err);
+        mostrarToast("error", "Ocurrió un error al intentar insertar la marca: " + err.message);
+    }
+}
+
+const modificarTecnico = async (editar) => {
+    try {
+        const response = await fetch(`${proxy.$serverIP}api/Empleado/editar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                idEmpleado: editar.id,
+                nombres: editar.nombres,
+                apPaterno: editar.apePaterno,
+                apMaterno: editar.apeMaterno,
+                puesto: editar.puesto,
+                telefono: editar.telefono,
+                correo: editar.correo,
+                idSucursal: editar.sucursal,
+                activo: editar.activo,
+                usuario: idUsuarioSession
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        mostrarToast("success", "Técnico editado correctamente.");
+        dialogoNuevo.value = false;
+        tecnicos.value = await cargarTecnicos();
+    }
+    catch(err) {
+        console.log(err);
+        mostrarToast("error", "Ocurrió un error al intentar editar al técnico: " + err.message);
+    }
+}
+
+const borrarTecnico = async (tecnico) => {
 	const result = await Swal.fire({
-		title: 'Eliminar marca',
-		text: `¿Desea eliminar la marca seleccionada (${marca.nombre})?`,
+		title: 'Eliminar técnico',
+		text: `¿Desea eliminar al técnico seleccionado ${'(' + tecnico.nombres + ' ' + tecnico.apePaterno + ' ' + tecnico.apeMaterno + ')?'} Esta acción no se puede deshacer.`,
 		icon: 'warning',
 		showCancelButton: true,
 		confirmButtonText: 'Eliminar',
@@ -179,62 +309,30 @@ const borrarMarca = async (marca) => {
 	});
 	if (result.isConfirmed) {
 		try {
-			const response = await fetch(`${proxy.$serverIP}api/Marcas/borrar`, {
+			const response = await fetch(`${proxy.$serverIP}api/Empleado/borrar`, {
 				method: "DELETE",
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
-					id: marca.idMarca,
+					id: tecnico.idEmpleado,
 					usuario: idUsuarioSession
 				}),
 			});
 
 			if (!response.ok)
 				throw new Error(`Error ${response.status}: ${response.statusText}`);
-			mostrarToast("success", "Marca borrada correctamente.");
-			marcas.value = await cargarMarcas();
+			mostrarToast("success", "Técnico borrado correctamente.");
+			tecnicos.value = await cargarTecnicos();
 		}
 		catch(err) {
 			console.log(err);
-			mostrarToast("error", "Ocurrió un error al intentar borrar la marca: " + err.message);
+			mostrarToast("error", "Ocurrió un error al intentar borrar al técnico: " + err.message);
 		}
 	}
 }
 
-const mostrarLlantas = async(item) => {
-    marcaSel.value.id = item.idMarca;
-    marcaSel.value.nombre = item.nombre;
-    busquedaLlantas.value = "";
-    console.log(item);
-    console.log(marcaSel.value);
-    llantas.value = await cargarLlantas(item.idMarca) || [];
-    dialogoLlantas.value = true;
-}
-
-const cerrarDialogoLlantas = () => {
-    dialogoLlantas.value = false;
-    busquedaLlantas.value = "";
-}
-
-const llantasFiltradas = computed(() => {
-    const texto = busquedaLlantas.value.trim().toLowerCase();
-    if (!texto) return llantas.value;
-
-    return llantas.value.filter((ll) => {
-        const contenido = [
-            ll.codigo,
-            ll.marca,
-            ll.modelo,
-            ll.medida,
-            ll.rango,
-            ll.runflat == 1 ? "runflat" : "",
-        ].join(" ").toLowerCase();
-
-        return contenido.includes(texto);
-    });
-});
-
 onMounted( async() => {
-    marcas.value = await cargarMarcas();
+    tecnicos.value = await cargarTecnicos();
+    sucursales.value = await cargarSucursales();
 });
 
 </script>

@@ -1,16 +1,20 @@
 <template>
   <section class="tabla-datos">
-    <div
-      v-if="title || subtitle || searchable || showCreate || hasToolbar"
-      class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-3"
-    >
-      <div v-if="title || subtitle">
+
+    <div v-if="title || subtitle" class="mb-3">
         <h5 v-if="title" class="mb-0">{{ title }}</h5>
         <small v-if="subtitle" class="text-muted">{{ subtitle }}</small>
       </div>
+      
+    <div
+      v-if="searchable || showCreate || hasToolbar"
+      class="d-flex flex-row justify-content-between align-items-end gap-3 mb-3"
+    >
+      
 
-      <div class="d-flex flex-wrap align-items-end gap-2 ms-auto">
-        <slot name="filters" />
+      <!-- <div class="d-flex justify-content-between align-items-end gap-2"> -->
+
+        <!-- <slot name="filters" /> -->
 
         <div v-if="searchable" class="input-group tabla-datos__search">
           <span class="input-group-text">
@@ -24,20 +28,19 @@
           />
         </div>
 
-        <slot name="toolbar" />
+        <!-- <slot name="toolbar" /> -->
 
         <button
           v-if="showCreate"
           type="button"
-          class="btn btn-primary shadow-sm align-self-end"
+          class="btn btn-primary shadow-sm align-self-end ml-auto"
           @click="$emit('create')"
         >
           <i class="bi bi-plus-lg me-2"></i>
           {{ createLabel }}
         </button>
 
-        
-      </div>
+      <!-- </div> -->
     </div>
 
     <div v-if="loading" class="text-center py-5">
@@ -269,7 +272,8 @@ watch(
 
 <style scoped>
 .tabla-datos__search {
-  min-width: min(320px, 100%);
+  min-width: 500px;
+  max-width: 500px;
 }
 
 .tabla-datos__table {

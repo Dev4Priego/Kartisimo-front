@@ -8,9 +8,9 @@
                 <li class="nav-item">
                     <button class="nav-link" :class="{ active: tabActiva === 'marcas' }" @click="tabActiva = 'marcas'">Marcas</button>
                 </li>
-                <!-- <li class="nav-item">
+                <li class="nav-item">
                     <button class="nav-link" :class="{ active: tabActiva === 'tecnicos' }" @click="tabActiva = 'tecnicos'">Técnicos</button>
-                </li> -->
+                </li>
             </ul>
             <div class="border border-top-0 p-3">
                 <KeepAlive>
@@ -25,6 +25,7 @@
 <script setup>
 import { ref } from "vue";
 import CatalogoMarcas from '@/components/Catalogos/CatMarcas.vue';
+import CatalogoTecnicos from '@/components/Catalogos/CatTecnicos.vue';
 
 const tabActiva = ref('marcas');
 

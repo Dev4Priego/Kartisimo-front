@@ -83,6 +83,72 @@
             </div>
         </div>
     </div>
+
+    <div
+        v-if="dialogoNueva"
+        class="modal fade show d-block"
+        tabindex="-1"
+        :style="{ background: 'rgba(0,0,0,0.5)' }"
+    >
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-500">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">{{ editarMarca ? "Editar marca" : "Nueva marca" }}</h3>
+                </div>
+                <div class="modal-body p-3">
+                    <div class="row align-items-start">
+                        <div class="col-md-4">
+                            <label class="form-label">Nombre *</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="marca.nombre"
+                                minlength="3"
+                                maxlength="50"
+                                required
+                            />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Descripción</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="marca.descripcion"
+                                minlength="0"
+                                maxlength="250"
+                            />
+                        </div>
+                        <div class="col-md-12 mt-2">
+                            <label class="form-label">Notas</label>
+                            <input 
+                                type="text" 
+                                class="form-control"
+                                v-model="marca.notas"
+                                minlength="0"
+                                maxlength="250"
+                            />
+                        </div>
+                        <div v-if="editandoMarca" class="col-md-4 mt-2 me-2">
+                            <div class="form-check">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input"
+                                    v-model="marca.activo"
+                                    :true-value="1"
+                                    :false-value="0"
+                                />
+                                <label class="form-check-label"> Activo</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @click="dialogoNueva = false">Cancelar</button>
+                    <button class="btn btn-success ms-2" :disabled="marca.nombre == ''" @click="editandoMarca ? modificarMarca(marca) : insertarMarca(marca)">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
@@ -95,9 +161,12 @@ const marcas = ref([]);
 const llantas = ref([]);
 const busquedaLlantas = ref("");
 const dialogoLlantas = ref(false);
+const dialogoNueva = ref(false);
+const editandoMarca = ref(false);
 const marcaSel = ref({id: null, nombre: ''})
 const loading = ref(false);
 const loadingLlantas = ref(false);
+const marca = ref({ id: null, nombre: '', descripcion: '', activo: 1, notas: '' });
 const { proxy } = getCurrentInstance();
 
 const data45= JSON.parse(localStorage.getItem('userSession')); 
@@ -171,6 +240,71 @@ const cargarLlantas = async (marca) => {
 		loadingLlantas.value = false;
 	}
 };
+
+const abrirModalNueva = () => {
+    marca.value = { id: null, nombre: '', descripcion: '', activo: 1, notas: '' };
+    dialogoNueva.value = true;
+    editandoMarca.value = false;
+}
+
+const editarMarca = (editar) => {
+    marca.value = { id: editar.idMarca, nombre: editar.nombre, descripcion: editar.descripcion, activo: editar.activo, notas: editar.notas }
+    editandoMarca.value = true;
+    dialogoNueva.value = true;
+}
+
+const insertarMarca = async (nueva) => {
+    try {
+        const response = await fetch(`${proxy.$serverIP}api/Marcas/insertar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                nombre: nueva.nombre,
+                descripcion: nueva.descripcion,
+                activo: 1,
+                notas: nueva.notas,
+                usuario: idUsuarioSession
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        mostrarToast("success", "Marca insertada correctamente.");
+        dialogoNueva.value = false;
+        marcas.value = await cargarMarcas();
+    }
+    catch(err) {
+        console.log(err);
+        mostrarToast("error", "Ocurrió un error al intentar insertar la marca: " + err.message);
+    }
+}
+
+const modificarMarca = async (editar) => {
+    try {
+        const response = await fetch(`${proxy.$serverIP}api/Marcas/editar`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                id: editar.id,
+                nombre: editar.nombre,
+                descripcion: editar.descripcion,
+                activo: editar.activo,
+                notas: editar.notas,
+                usuario: idUsuarioSession
+            }),
+        });
+
+        if (!response.ok)
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+        mostrarToast("success", "Marca editada correctamente.");
+        dialogoNueva.value = false;
+        marcas.value = await cargarMarcas();
+    }
+    catch(err) {
+        console.log(err);
+        mostrarToast("error", "Ocurrió un error al intentar editar la marca: " + err.message);
+    }
+}
 
 const borrarMarca = async (marca) => {
 	const result = await Swal.fire({
