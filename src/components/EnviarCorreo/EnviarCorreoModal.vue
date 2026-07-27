@@ -339,7 +339,13 @@ tbody tr:last-child td {
 				${llantas.map(l => `
 				<tr>
 				<td class="center">${l.cantidad}</td>
-				<td>${l.medidas}</td>
+				<td>${l.medidas} <br/> 
+					${
+					l.comentario.length > 0 ? `<small class="badge bg-secondary mt-1">
+					${l.comentario}
+					</small>`: ''
+					}
+					</td>
 				<td class="right">
 					$${l.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
@@ -395,15 +401,24 @@ tbody tr:last-child td {
 
 				${paquetes.map(p => `
 				<tr>
-				<td class="center">1</td>
-				<td>${p.nombre.toUpperCase()}, ${p.descripcion.toUpperCase()}</td>
+				<td class="center">${p.cantidad}</td>
+				<td>${p.nombre.toUpperCase()}, ${p.descripcion.toUpperCase()} <br/> 
+					${
+					p.comentario.length > 0 ? `
+					<small class="badge bg-secondary mt-1">
+					${
+                        p.comentario
+                      }</small>
+					`: ''
+					}
+					  </td>
 				<td class="right">
 					$${p.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
 				<td class="right">
 					${renderTotalConPromo({
 					precioUnitario: p.precioUnitario,
-					cantidad: 1,
+					cantidad: p.cantidad,
 					total: p.total,
 					promoLabel: p.promoLabel,
 					})}
@@ -414,7 +429,16 @@ tbody tr:last-child td {
 				${serviciosAdicionales.map(s => `
 				<tr>
 				<td class="center">${s.cantidad}</td>
-				<td>${s.nombreServicio.toUpperCase()}</td>
+				<td>${s.nombreServicio.toUpperCase()} <br/> 
+				${
+					s.comentario.length > 0 ? `
+					<small class="badge bg-secondary mt-1">
+					${
+                        s.comentario
+                      }</small>
+					`: ''
+					}
+					  </td>
 				<td class="right">
 					$${s.precioUnitario.toLocaleString('en-US', { minimumFractionDigits: 2 })}
 				</td>
