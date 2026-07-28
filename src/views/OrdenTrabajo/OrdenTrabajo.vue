@@ -287,6 +287,7 @@ const badgeEstado = (e) =>
     Creado: "badge bg-secondary",
     "En curso": "badge bg-warning text-dark",
     Finalizado: "badge bg-success",
+    Entregado: "badge bg-primary"
   }[e]);
 
 const colorTotal = (k) =>
