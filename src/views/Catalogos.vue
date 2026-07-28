@@ -6,6 +6,9 @@
         <div>
             <ul class="nav nav-tabs mt-4">
                 <li class="nav-item">
+                    <button class="nav-link" :class="{ active: tabActiva === 'sucursales' }" @click="tabActiva = 'sucursales'">Sucursales</button>
+                </li>
+                <li class="nav-item">
                     <button class="nav-link" :class="{ active: tabActiva === 'marcas' }" @click="tabActiva = 'marcas'">Marcas</button>
                 </li>
                 <li class="nav-item">
@@ -14,7 +17,8 @@
             </ul>
             <div class="border border-top-0 p-3">
                 <KeepAlive>
-                    <CatalogoMarcas v-if="tabActiva === 'marcas'" />
+                    <CatalogoSucursales v-if="tabActiva === 'sucursales'" />
+                    <CatalogoMarcas v-else-if="tabActiva === 'marcas'" />
                     <CatalogoTecnicos v-else-if="tabActiva === 'tecnicos'" />
                 </KeepAlive>
             </div>
@@ -26,7 +30,8 @@
 import { ref } from "vue";
 import CatalogoMarcas from '@/components/Catalogos/CatMarcas.vue';
 import CatalogoTecnicos from '@/components/Catalogos/CatTecnicos.vue';
+import CatalogoSucursales from '@/components/Catalogos/CatSucursales.vue';
 
-const tabActiva = ref('marcas');
+const tabActiva = ref('sucursales');
 
 </script>

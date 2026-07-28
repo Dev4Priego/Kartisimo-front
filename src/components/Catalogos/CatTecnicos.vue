@@ -13,10 +13,6 @@
                 @action="handleTableAction"
                 >
 
-                <template #item-nombre="{ item }">
-                    {{ item.nombres }} {{ item.apePaterno }} {{ item.apeMaterno }}
-                </template>
-
                 <template #item-sysFechaEditado="{ item }">
                     <span class="text-nowrap">
                         {{ formatearFechaHora(item.sysFechaEditado) }}
@@ -164,13 +160,12 @@ const data45= JSON.parse(localStorage.getItem('userSession'));
 const idUsuarioSession = data45?.usuario?.idUsuario;
 
 const headers = [
-    { text: "ID", value: "idEmpleado", sortable: true },
     { text: "Nombre", value: "nombre", sortable: true },
-    { text: "Puesto", value: "puesto", sortable: false },
-    { text: "Teléfono", value: "telefono", sortable: false },
-    { text: "Correo", value: "correo", sortable: false },
+    { text: "Puesto", value: "puesto", sortable: true },
+    { text: "Teléfono", value: "telefono", sortable: true },
+    { text: "Correo", value: "correo", sortable: true },
     { text: "Sucursal", value: "sucursal", sortable: true },
-    { text: "Estado", value: "activo", sortable: false },
+    { text: "Estado", value: "activo", sortable: true },
     { text: "Última edición", value: "sysFechaEditado", sortable: true },
     { text: "Editado por", value: "editor", sortable: true }
 ];
@@ -202,7 +197,14 @@ const cargarTecnicos = async () => {
 		if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
 		const data = await res.json();
         console.log(data);
-		return data;
+		return data.map(u => ({
+            ...u,
+            nombre: [
+                u.nombres,
+                u.apePaterno,
+                u.apeMaterno
+            ].filter(Boolean).join(' ')
+        }));
 	} catch (error) {
 		console.error("Error al cargar empleados: ", error);
 	} finally {
