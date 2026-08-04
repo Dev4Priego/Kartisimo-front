@@ -101,7 +101,7 @@
                             type="button"
                             class="nav-link text-white"
                             @click.prevent="showReportsOptions = !showReportsOptions"
-                        ><i class="bi bi-graph-up-arrow me-2"></i>
+                        ><i class="bi bi-file-earmark-text me-2"></i>
                             Reportes
                           
                         </button>
