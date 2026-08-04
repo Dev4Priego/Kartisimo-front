@@ -677,7 +677,6 @@
                   <th>Descripción</th>
                   <th style="text-align: center">Cantidad</th>
                   <th style="text-align: right">Costo Unit.</th>
-
                   <th style="text-align: right">Precio Unit.</th>
                   <th style="text-align: right">Subtotal</th>
                   <th></th>
@@ -693,6 +692,14 @@
                   <tr :class="{ 'fila-eliminada': llanta.eliminado }">
                     <td>{{ llanta.descripcion }}</td>
                     <td style="text-align: center">{{ llanta.cantidad }}</td>
+                    <td style="text-align: right">
+                      {{
+                        llanta.costo.toLocaleString("es-MX", {
+                          style: "currency",
+                          currency: "MXN",
+                        })
+                      }}
+                    </td>
                     <td style="text-align: right">
                       {{
                         llanta.precioUnitario.toLocaleString("es-MX", {
@@ -775,6 +782,14 @@
                     <td style="text-align: right">
                       {{
                         paquete.costo.toLocaleString("es-MX", {
+                          style: "currency",
+                          currency: "MXN",
+                        })
+                      }}
+                    </td>
+                    <td style="text-align: right">
+                      {{
+                        paquete.precioUnitario.toLocaleString("es-MX", {
                           style: "currency",
                           currency: "MXN",
                         })
@@ -866,6 +881,14 @@
                   <tr :class="{ 'fila-eliminada': ad.eliminado }">
                     <td>{{ ad.descripcion }}</td>
                     <td style="text-align: center">{{ ad.cantidad }}</td>
+                    <td style="text-align: right">
+                      {{
+                        ad.costo.toLocaleString("es-MX", {
+                          style: "currency",
+                          currency: "MXN",
+                        })
+                      }}
+                    </td>
                     <td style="text-align: right">
                       {{
                         ad.precioUnitario.toLocaleString("es-MX", {

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="container-fluid mp-4 p-4">
     <CotizacionToolbar :ctx="cotizacionContext" />
     <CotizacionesTable :ctx="cotizacionContext" />
@@ -22,13 +22,15 @@ import {
 import Swal from "sweetalert2";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
-import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
 import { useRouter } from "vue-router";
 import CotizacionToolbar from "@/components/Cotizacion/CotizacionToolbar.vue";
 import CotizacionesTable from "@/components/Cotizacion/CotizacionesTable.vue";
 import CotizacionPreviewModal from "@/components/Cotizacion/CotizacionPreviewModal.vue";
 import CotizacionEditorModal from "@/components/Cotizacion/CotizacionEditorModal.vue";
+import {
+  downloadCotizacionPdf,
+  printCotizacionPdf,
+} from "@/components/Cotizacion/CotizacionPdf";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -70,14 +72,14 @@ const normalizarPrecio = (valor) => {
 const sucursales = [
   "(Ninguna)",
   "Delta",
-  "López Mateos",
+  "LÃ³pez Mateos",
   "Torres Landa",
   "Martinica",
 ];
 const vistaCotizacion = ref({});
 const mostrarVista = ref(false);
-const tituloModal = ref("Nueva Cotización");
-const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
+const tituloModal = ref("Nueva CotizaciÃ³n");
+const codigoCotizacionEnEdicion = ref(null); // null = creaciÃ³n nueva
 const filtroEstatus = ref("");
 const loading = ref(true);
 
@@ -140,7 +142,7 @@ watch([busquedaLlantas, selectedAlmacenes], () => {
 });
 
 const cotizacionForm = reactive({
-  codigo: "", // ← Para saber si es edición
+  codigo: "", // â† Para saber si es ediciÃ³n
   idCliente: null,
   clienteNombre: "",
   nombre: "",
@@ -175,8 +177,8 @@ const telefonoFormateado = computed({
   get() {
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
-    const base = soloNumeros.slice(0, 10); // teléfono principal
-    //const ext = soloNumeros.slice(10, 13);  // extensión (máx 3)
+    const base = soloNumeros.slice(0, 10); // telÃ©fono principal
+    //const ext = soloNumeros.slice(10, 13);  // extensiÃ³n (mÃ¡x 3)
 
     let formateado = "";
 
@@ -193,14 +195,14 @@ const telefonoFormateado = computed({
   },
 
   set(v) {
-    // Guardamos SOLO números
+    // Guardamos SOLO nÃºmeros
     cotizacionForm.clienteTelefono = v.replace(/\D/g, "");
   },
 });
 
 const telefonoVistaFormateado = computed(() => {
   if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
-    return "Sin teléfono";
+    return "Sin telÃ©fono";
 
   let valor = vistaCotizacion.value.cliente.telefono.replace(/\D/g, "");
   if (valor.length > 10) valor = valor.substring(0, 10);
@@ -253,8 +255,8 @@ const cancelarCotizacion = (cotizacion) => {
       cargarCotizaciones();
     })
     .catch((error) => {
-      // Aquí capturas cualquier error de la API o de red
-      console.error("Error en la petición:", error.message);
+      // AquÃ­ capturas cualquier error de la API o de red
+      console.error("Error en la peticiÃ³n:", error.message);
     });
 };
 
@@ -280,8 +282,8 @@ const reactivarCotizacion = (cotizacion) => {
       cargarCotizaciones();
     })
     .catch((error) => {
-      // Aquí capturas cualquier error de la API o de red
-      console.error("Error en la petición:", error.message);
+      // AquÃ­ capturas cualquier error de la API o de red
+      console.error("Error en la peticiÃ³n:", error.message);
     });
 };
 
@@ -322,8 +324,8 @@ const aprobarCotizacion = (cotizacion) => {
       });
     })
     .catch((error) => {
-      // Aquí capturas cualquier error de la API o de red
-      console.error("Error en la petición:", error.message);
+      // AquÃ­ capturas cualquier error de la API o de red
+      console.error("Error en la peticiÃ³n:", error.message);
     });
 };
 
@@ -354,15 +356,15 @@ const finalizarCotizacion = (cotizacion) => {
       cargarCotizaciones();
     })
     .catch((error) => {
-      // Aquí capturas cualquier error de la API o de red
-      console.error("Error en la petición:", error.message);
+      // AquÃ­ capturas cualquier error de la API o de red
+      console.error("Error en la peticiÃ³n:", error.message);
     });
 };
 
 /***********************************
  *  FUNCIONES PARA CARGA DE DATOS
  ***********************************/
-// Función para cargar paquetes
+// FunciÃ³n para cargar paquetes
 const cargarPaquetes = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Paquetes/getPaquete");
@@ -392,7 +394,7 @@ const cargarPaquetes = async () => {
   }
 };
 
-// Función para cargar clientes
+// FunciÃ³n para cargar clientes
 const cargarClientes = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Cliente/getClientes");
@@ -404,7 +406,7 @@ const cargarClientes = async () => {
   }
 };
 
-// Función para cargar llantas
+// FunciÃ³n para cargar llantas
 const cargarLlantas = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Llanta/getLlantaPrecio");
@@ -448,9 +450,9 @@ const cargarLlantas = async () => {
   }
 };
 
-// Función para cargar detalles de la sucursal del usuario
+// FunciÃ³n para cargar detalles de la sucursal del usuario
 
-// Función para cargar cotizaciones
+// FunciÃ³n para cargar cotizaciones
 const cargarCotizaciones = async (options = {}) => {
   loading.value = true;
   try {
@@ -507,13 +509,13 @@ const registrarCerrarConEsc = (mostrarVista) => {
   const listener = (e) => {
     if (e.key !== "Escape") return;
 
-    // 1Si la vista previa está activa, la cerramos
+    // 1Si la vista previa estÃ¡ activa, la cerramos
     if (mostrarVista.value) {
       mostrarVista.value = false;
       return;
     }
 
-    // Si el modal de edición está abierto, lo cerramos
+    // Si el modal de ediciÃ³n estÃ¡ abierto, lo cerramos
     if (modalInstance && modalRef.value.classList.contains("show")) {
       closeModal();
       return;
@@ -582,22 +584,22 @@ const irAlSiguientePrecio = (event) => {
   );
   const currentIndex = inputs.indexOf(event.target);
 
-  // ⬅⬅⬅ Retroceder con Shift + Tab
+  // â¬…â¬…â¬… Retroceder con Shift + Tab
   if (isTab && isShift) {
     if (inputs[currentIndex - 1]) {
       inputs[currentIndex - 1].focus();
     } else {
-      // Si es el primero, ir al último
+      // Si es el primero, ir al Ãºltimo
       inputs[inputs.length - 1]?.focus();
     }
     return;
   }
 
-  // ➡➡➡ Avanzar con Tab o Enter
+  // âž¡âž¡âž¡ Avanzar con Tab o Enter
   if (inputs[currentIndex + 1]) {
     inputs[currentIndex + 1].focus();
   } else {
-    // Si está en el último, vuelve al primero
+    // Si estÃ¡ en el Ãºltimo, vuelve al primero
     inputs[0]?.focus();
   }
 };
@@ -625,7 +627,7 @@ watch(
   (nuevosSeleccionados) => {
     const actuales = nuevosSeleccionados.map((p) => p.idPaquete);
 
-    // Elimina de paquetesDetalles los que ya no estén seleccionados
+    // Elimina de paquetesDetalles los que ya no estÃ©n seleccionados
     Object.keys(cotizacionForm.paquetesDetalles).forEach((idPaquete) => {
       if (!actuales.includes(Number(idPaquete))) {
         delete cotizacionForm.paquetesDetalles[idPaquete];
@@ -639,7 +641,7 @@ watch(
 watch(
   paquetesDisponibles,
   (nuevoValor) => {
-    // Solo aplica si es una nueva cotización Y no hay paquetes seleccionados
+    // Solo aplica si es una nueva cotizaciÃ³n Y no hay paquetes seleccionados
     if (
       esNuevaCotizacion.value &&
       nuevoValor.length &&
@@ -713,14 +715,14 @@ const agregarServicioExtra = async () => {
 
 // Elimina ServicioAdicional del arreglo
 const eliminarServicioExtra = (id) => {
-  // Si el idDetalleCotizacionServicio es nulo, usa el índice (i) como respaldo
+  // Si el idDetalleCotizacionServicio es nulo, usa el Ã­ndice (i) como respaldo
   cotizacionForm.serviciosExtras = cotizacionForm.serviciosExtras.filter(
     (s, i) => (s.idDetalleCotizacionServicio ?? i) !== id,
   );
 };
 
 // Elimina la llanta del arreglo
-// Opcional: elimina también su cantidad para limpiar el objeto
+// Opcional: elimina tambiÃ©n su cantidad para limpiar el objeto
 const eliminarLlanta = (idLlanta) => {
   cotizacionForm.llantas = cotizacionForm.llantas.filter(
     (ll) => ll.idLlanta !== idLlanta,
@@ -730,7 +732,7 @@ const eliminarLlanta = (idLlanta) => {
 // Agrega la llanta al arreglo
 const agregarLlanta = async (item) => {
   if (cotizacionForm.llantas.length >= 6) {
-    mostrarToast("warning", "No puedes agregar más de 6 llantas");
+    mostrarToast("warning", "No puedes agregar mÃ¡s de 6 llantas");
     return;
   }
 
@@ -871,7 +873,7 @@ const onCambioPromo = (item) => {
   const idSel = item.idPromocionSeleccionada; // normal
   const idVuelo = item.idPromocionAlVuelo; // vuelo
 
-  // Si no hay ninguna promoción
+  // Si no hay ninguna promociÃ³n
   if (!idSel && !idVuelo) {
     item.promo = null;
     item.precioConPromo = item.precioUnitario;
@@ -879,7 +881,7 @@ const onCambioPromo = (item) => {
     return;
   }
 
-  // Buscamos la promoción correspondiente
+  // Buscamos la promociÃ³n correspondiente
   const promo = (item.promosAplicables || []).find(
     (p) => p.idPromocion === idSel || p.idPromocion === idVuelo,
   );
@@ -911,7 +913,7 @@ const onCambioPromoPaquete = (paquete) => {
   const promo = paquete.promosAplicables.find((p) => p.idPromocion === idSel);
   paquete.promo = promo || null;
 
-  const base = paquete.precioUnitario ?? 0;
+  const base = paquete.precioUnitario * paquete.cantidad;
 
   if (promo) {
     paquete.precioConPromo = promo.tipo
@@ -934,7 +936,7 @@ const onCambioPromoServicio = (servicio) => {
   const promo = servicio.promosAplicables.find((p) => p.idPromocion === idSel);
   servicio.promo = promo || null;
 
-  const base = servicio.precioUnitario ?? 0;
+  const base = servicio.precioUnitario * servicio.cantidad ?? 1;
 
   servicio.precioConPromo = promo
     ? promo.tipo
@@ -946,7 +948,7 @@ const onCambioPromoServicio = (servicio) => {
 const precioFinalItem = (item, promoGlobal) => {
   const base = item.precioUnitario ?? 0;
 
-  // Si tiene promo individual → aplica esa
+  // Si tiene promo individual â†’ aplica esa
   // si tiene tipo Promo false es Monto, si es true es Porcentual
   if (item.promo && item.promo.valor != null) {
     return item.promo.tipo
@@ -954,7 +956,7 @@ const precioFinalItem = (item, promoGlobal) => {
       : Math.max(0, base - item.promo.valor);
   }
 
-  // Si tiene promo general y no está excluido → aplica
+  // Si tiene promo general y no estÃ¡ excluido â†’ aplica
   if (
     promoGlobal &&
     promoGlobal.valor != null &&
@@ -965,7 +967,7 @@ const precioFinalItem = (item, promoGlobal) => {
       : Math.max(0, base - promoGlobal.valor);
   }
 
-  // Si está excluido o sin promo
+  // Si estÃ¡ excluido o sin promo
   return base;
 };
 
@@ -976,7 +978,7 @@ watch(
       // Ya configurado antes (evitar repetir)
       if (p.promosAplicables !== undefined) continue;
 
-      // Inicialización
+      // InicializaciÃ³n
       p.promo = null;
       p.idPromocionSeleccionada = 0;
       p.promosAplicables = [];
@@ -1012,7 +1014,7 @@ const cargarConcpetoTrabajo = async () => {
 };
 
 const cargarFormulario = async (cotizacion = null) => {
-  // 🔹 Guardamos lo que el usuario haya escrito
+  // ðŸ”¹ Guardamos lo que el usuario haya escrito
   const observacionesPrevias = cotizacionForm.observaciones || "";
 
   if (!cotizacion) {
@@ -1031,14 +1033,14 @@ const cargarFormulario = async (cotizacion = null) => {
       mostrarTotal: false,
       fechaCreacion: new Date(),
       observaciones: "",
-      // observaciones: observacionesPrevias, // 🔹 Conservamos lo escrito ===== ¿Por qué? Lo quité.
+      // observaciones: observacionesPrevias, // ðŸ”¹ Conservamos lo escrito ===== Â¿Por quÃ©? Lo quitÃ©.
     });
 
     promoGeneral.value = null;
     itemsSelected.value = [];
     paquetesSeleccionados.value = [];
     esNuevaCotizacion.value = true;
-    // 🔹 Asignar el primer paquete automáticamente para nuevas cotizaciones
+    // ðŸ”¹ Asignar el primer paquete automÃ¡ticamente para nuevas cotizaciones
     if (
       paquetesDisponibles.value.length > 0 &&
       paquetesSeleccionados.value.length === 0
@@ -1049,7 +1051,7 @@ const cargarFormulario = async (cotizacion = null) => {
     return;
   }
 
-  // Si se carga una cotización existente
+  // Si se carga una cotizaciÃ³n existente
   try {
     const codigoStr = String(cotizacion?.idCotizacion ?? "").trim();
     esNuevaCotizacion.value = false;
@@ -1058,17 +1060,17 @@ const cargarFormulario = async (cotizacion = null) => {
     );
 
     if (!res.ok) {
-      console.error("❌ Error HTTP:", res.status, res.statusText);
+      console.error("âŒ Error HTTP:", res.status, res.statusText);
       mostrarToast(
         "warning",
-        `No se pudo cargar la cotización: ${res.statusText}`,
+        `No se pudo cargar la cotizaciÃ³n: ${res.statusText}`,
       );
       return;
     }
 
     const data = await res.json();
 
-    // 🔹 Cargar datos de cliente
+    // ðŸ”¹ Cargar datos de cliente
     cotizacionForm.codigo = data.prefijo + "-" + data.consecutivoSucursal;
     cotizacionForm.idCotizacion = data.idCotizacion;
     cotizacionForm.fechaCreacion = data.fechaCreacion;
@@ -1082,7 +1084,7 @@ const cargarFormulario = async (cotizacion = null) => {
     cotizacionForm.observaciones = data.observaciones;
 
     // ===============================
-    // 🔹 PAQUETES
+    // ðŸ”¹ PAQUETES
     // ===============================
     cotizacionForm.paquetes = await Promise.all(
       data.paquetes.map(async (p) => {
@@ -1091,7 +1093,7 @@ const cargarFormulario = async (cotizacion = null) => {
         );
         if (!base) return null;
 
-        // 🔹 Determinar si tiene promoción individual o al vuelo
+        // ðŸ”¹ Determinar si tiene promociÃ³n individual o al vuelo
         const promoIndividual = p.idPromocion
           ? {
               idPromocion: p.idPromocion,
@@ -1110,10 +1112,10 @@ const cargarFormulario = async (cotizacion = null) => {
             }
           : null;
 
-        // 🔹 Obtener promociones aplicables desde la API
+        // ðŸ”¹ Obtener promociones aplicables desde la API
         const promosAplicables = promosGeneralesDisponibles.value;
 
-        // 🔹 Calcular precio con la función estándar
+        // ðŸ”¹ Calcular precio con la funciÃ³n estÃ¡ndar
         const precioBase = p.precioUnitario;
         const precioConPromo = precioFinalItem(
           {
@@ -1149,13 +1151,13 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
 
-    // Registrar idDetalle para edición
+    // Registrar idDetalle para ediciÃ³n
     // marcaremos los checkboxes en el modal
     paquetesSeleccionados.value = cotizacionForm.paquetes
       .filter((p) => p && p.idPaquete != null)
       .map((p) => p.idPaquete);
     // ===============================
-    // 🔹 LLANTAS
+    // ðŸ”¹ LLANTAS
     // ===============================
     cotizacionForm.llantas = await Promise.all(
       data.llantas.map(async (ll) => {
@@ -1225,7 +1227,7 @@ const cargarFormulario = async (cotizacion = null) => {
     );
 
     // ===============================
-    // 🔹 SERVICIOS EXTRAS
+    // ðŸ”¹ SERVICIOS EXTRAS
     // ===============================
     cotizacionForm.serviciosExtras = await Promise.all(
       data.servicios.map(async (s) => {
@@ -1287,8 +1289,8 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
   } catch (e) {
-    console.error("Error cargando cotización para edición:", e);
-    mostrarToast("warning", "No se pudo cargar la cotización");
+    console.error("Error cargando cotizaciÃ³n para ediciÃ³n:", e);
+    mostrarToast("warning", "No se pudo cargar la cotizaciÃ³n");
   }
 };
 
@@ -1338,7 +1340,7 @@ const aplicarPromocionGeneral = async () => {
     return;
   }
 
-  let html = "<p>Selecciona una promoción general para aplicar:</p>";
+  let html = "<p>Selecciona una promociÃ³n general para aplicar:</p>";
   promos.forEach((promo, i) => {
     html += `
             <div style="text-align:left;margin-bottom:8px;">
@@ -1346,7 +1348,7 @@ const aplicarPromocionGeneral = async () => {
       promo.idPromocion
     }" style="margin-right:6px;">
                 <label for="promoGeneral_${i}">
-                <strong>${promo.nombre}</strong> — ${
+                <strong>${promo.nombre}</strong> â€” ${
       promo.tipo
         ? `Descuento del ${promo.valor}%`
         : `Descuento de $${promo.valor}`
@@ -1361,7 +1363,7 @@ const aplicarPromocionGeneral = async () => {
     html,
     focusConfirm: false,
     showCancelButton: true,
-    confirmButtonText: "Aplicar promoción",
+    confirmButtonText: "Aplicar promociÃ³n",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const checked = document.querySelector(
@@ -1376,7 +1378,7 @@ const aplicarPromocionGeneral = async () => {
   const seleccionada = promos.find((p) => p.idPromocion == promoId);
   promoGeneral.value = seleccionada;
 
-  // 🔸 Recalcular precios con la nueva promoción general
+  // ðŸ”¸ Recalcular precios con la nueva promociÃ³n general
   cotizacionForm.llantas.forEach((ll) => {
     ll.precioConPromo = aplicarPromo(
       ll.precioUnitario,
@@ -1414,11 +1416,11 @@ const aplicarPromocionGeneral = async () => {
     );
   });
 
-  // 🔸 Actualización visual inmediata
+  // ðŸ”¸ ActualizaciÃ³n visual inmediata
   Swal.fire({
     icon: "success",
-    title: "Promoción aplicada",
-    text: `Se aplicó "${seleccionada.nombre}" correctamente.`,
+    title: "PromociÃ³n aplicada",
+    text: `Se aplicÃ³ "${seleccionada.nombre}" correctamente.`,
   });
 };
 
@@ -1438,7 +1440,7 @@ const guardarCotizacion = async () => {
     if (llantaInvalida) {
       await Swal.fire({
         icon: "warning",
-        title: "Datos inválidos en llantas",
+        title: "Datos invÃ¡lidos en llantas",
         text: "Verifica las cantidades y precios de las llantas.",
         confirmButtonColor: "#3085d6",
       });
@@ -1452,7 +1454,7 @@ const guardarCotizacion = async () => {
     if (paqueteInvalido) {
       await Swal.fire({
         icon: "warning",
-        title: "Datos inválidos en paquetes",
+        title: "Datos invÃ¡lidos en paquetes",
         text: "Verifica los precios de los paquetes.",
         confirmButtonColor: "#3085d6",
       });
@@ -1470,7 +1472,7 @@ const guardarCotizacion = async () => {
     if (servicioInvalido) {
       await Swal.fire({
         icon: "warning",
-        title: "Datos inválidos en servicios adicionales",
+        title: "Datos invÃ¡lidos en servicios adicionales",
         text: "Verifica las cantidades y precios de los servicios.",
         confirmButtonColor: "#3085d6",
       });
@@ -1492,7 +1494,7 @@ const guardarCotizacion = async () => {
       clienteEncontrado = cotizacionForm.clienteExistente;
     }
 
-    // ⚠️ IMPORTANTE: NO reconstruir el nombre en editar
+    // âš ï¸ IMPORTANTE: NO reconstruir el nombre en editar
     const cliente = clienteEncontrado
       ? {
           idCliente: clienteEncontrado.idCliente,
@@ -1604,14 +1606,14 @@ const guardarCotizacion = async () => {
 
     const data = await res.json();
 
-    mostrarToast("success", "Cotización guardada");
+    mostrarToast("success", "CotizaciÃ³n guardada");
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
     mostrarVistaPrevia(data, "ver");
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
-    Swal.fire("Error", "No se pudo guardar la cotización.", "error");
+    Swal.fire("Error", "No se pudo guardar la cotizaciÃ³n.", "error");
   }
 };
 
@@ -1691,7 +1693,7 @@ function parseMedida(text) {
   };
 }
 
-/* ====== 2) Prepara ítems una sola vez ====== */
+/* ====== 2) Prepara Ã­tems una sola vez ====== */
 const preparedItems = computed(() =>
   (items.value || []).map((it) => {
     const codigo = (it.codigo ?? "").toString();
@@ -1747,7 +1749,7 @@ const baseSorted = computed(() => {
   return arr;
 });
 
-/* ====== 4) Debounce de la búsqueda ====== */
+/* ====== 4) Debounce de la bÃºsqueda ====== */
 const q = busquedaLlantas; // tu ref existente
 const qDebounced = ref("");
 let _t; // timer
@@ -1755,7 +1757,7 @@ watch(q, (val) => {
   clearTimeout(_t);
   _t = setTimeout(() => {
     qDebounced.value = (val || "").toLowerCase().trim();
-  }, 250); // ajusta 200–300ms
+  }, 250); // ajusta 200â€“300ms
 });
 
 /* ====== 5) Filtrado usando el orden base (sin reordenar en cada tecla) ====== */
@@ -1769,7 +1771,7 @@ const itemsFiltrados = computed(() => {
       const t = it._text;
       const u = it._unido;
 
-      // 🔥 1. Filtro fuerte por medida (si existe)
+      // ðŸ”¥ 1. Filtro fuerte por medida (si existe)
       if (medidaMatch) {
         const [, ancho, perfil] = medidaMatch;
 
@@ -1778,12 +1780,12 @@ const itemsFiltrados = computed(() => {
         }
       }
 
-      // 🔥 2. Filtro por palabras
+      // ðŸ”¥ 2. Filtro por palabras
       for (let i = 0; i < palabras.length; i++) {
         const p = palabras[i].toLowerCase();
         const pn = p.replace(reNonAN, "");
 
-        // Ignorar medida aquí (ya se procesó arriba)
+        // Ignorar medida aquÃ­ (ya se procesÃ³ arriba)
         if (/^\d{3}\/\d{2}/.test(p)) continue;
 
         if (!(t.includes(p) || u.includes(pn))) {
@@ -1803,7 +1805,7 @@ const itemsFiltrados = computed(() => {
 });
 
 const toggleTodos = (e) => {
-  // Si marca “Todos”, limpiar los filtros
+  // Si marca â€œTodosâ€, limpiar los filtros
   if (e.target.checked) {
     selectedAlmacenes.value = [];
   }
@@ -1839,9 +1841,9 @@ const cargarAlmacenes = async (options = {}) => {
       throw new Error(`Error HTTP: ${response.status}`);
     }
 
-    const data = await response.json(); // <- aquí parseas el JSON real
+    const data = await response.json(); // <- aquÃ­ parseas el JSON real
 
-    // Aquí mapeamos para que tenga el mismo formato que esperabas
+    // AquÃ­ mapeamos para que tenga el mismo formato que esperabas
     almacenes.value = data.map((a) => ({
       id: a.idAlmacen,
       nombre: a.nombre,
@@ -1878,12 +1880,12 @@ const formatoMoneda = (valor) => {
   }).format(valor);
 };
 
-// Abrir modal para nueva cotización o edición
+// Abrir modal para nueva cotizaciÃ³n o ediciÃ³n
 const abrirModalCotizacion = (cotizacion = null) => {
   if (cotizacion && cotizacion.idCotizacion) {
-    tituloModal.value = "Editar Cotización";
+    tituloModal.value = "Editar CotizaciÃ³n";
   } else {
-    tituloModal.value = "Nueva Cotización";
+    tituloModal.value = "Nueva CotizaciÃ³n";
   }
   cargarFormulario(cotizacion);
   openModal();
@@ -1898,7 +1900,7 @@ const tblHeadersModal = [
   { text: "Codigo", value: "codigo" },
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
-  { text: "Ubicación", value: "ubicacion", sortable: true },
+  { text: "UbicaciÃ³n", value: "ubicacion", sortable: true },
   { text: "Costo", value: "costo", sortable: true },
   { text: "Precio", value: "precio", sortable: true },
   { text: "Acciones", value: "acciones", width: 50 },
@@ -1927,17 +1929,17 @@ const cotizacionesTransformadas = computed(() => {
       return valores.some((v) => String(v).toLowerCase().includes(texto));
     })
     .map((c) => ({
-      codigo: c.codigo || "—",
+      codigo: c.codigo || "â€”",
       sucursal: c.sucursal,
-      fechaCreacion: c.fechaCreacion || "—",
-      cliente: c.cliente?.nombre || "—",
-      telefono: c.cliente?.telefono || "—",
+      fechaCreacion: c.fechaCreacion || "â€”",
+      cliente: c.cliente?.nombre || "â€”",
+      telefono: c.cliente?.telefono || "â€”",
       observaciones: c.cliente?.observaciones || "No disponible", // <-- agregado
 
       paquete: c.paquetes?.length
         ? c.paquetes.map((p) => p.nombre).join(", ")
-        : "—",
-      nombreLlanta: c.nombreLlanta || "—",
+        : "â€”",
+      nombreLlanta: c.nombreLlanta || "â€”",
       total: formatoMoneda(c.total || 0),
       estatus: typeof c.estatus === "string" ? c.estatus : "Desconocido",
       acciones: c,
@@ -2027,7 +2029,7 @@ watch(
   async (ids) => {
     const actuales = cotizacionForm.paquetes.map((p) => p.idPaquete);
 
-    // añadir los que se acaban de marcar
+    // aÃ±adir los que se acaban de marcar
     for (const id of ids) {
       if (!actuales.includes(id)) {
         const base = paquetesDisponibles.value.find((p) => p.idPaquete === id);
@@ -2103,7 +2105,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       const data = await res.json();
 
       // ===============================
-      // 🔹 PROMOCIÓN GENERAL
+      // ðŸ”¹ PROMOCIÃ“N GENERAL
       // ===============================
       const promoGeneral = data.idPromocionGeneral
         ? {
@@ -2113,6 +2115,24 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             tipo: data.tipoPromocionGeneral,
           }
         : null;
+
+      const calcularTotalPreview = (
+        precioUnitario,
+        cantidad,
+        promoIndividual,
+        promoGlobal,
+        excluirPromocionGeneral,
+      ) => {
+        const totalBase = Number(precioUnitario ?? 0) * Number(cantidad ?? 1);
+        const promo =
+          promoIndividual || (!excluirPromocionGeneral ? promoGlobal : null);
+
+        if (!promo || promo.valor == null) return totalBase;
+
+        return promo.tipo
+          ? totalBase * (1 - Number(promo.valor) / 100)
+          : Math.max(0, totalBase - Number(promo.valor));
+      };
 
       // ===============================
       //   LLANTAS
@@ -2136,13 +2156,19 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             }
           : null;
 
-        // Si el ítem está excluido, no aplicar ninguna promo
+        // Si el Ã­tem estÃ¡ excluido, no aplicar ninguna promo
         const aplicaPromo = !ll.excluirPromocionGeneral;
         const precioBase = ll.precioUnitario ?? 0;
+        const cantidad = Number(ll.cantidad ?? 1);
 
-        const precioConPromo = aplicaPromo
-          ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
-          : precioBase;
+        const total = calcularTotalPreview(
+          precioBase,
+          cantidad,
+          promoIndividual,
+          promoGeneral,
+          !aplicaPromo,
+        );
+        const precioConPromo = cantidad ? total / cantidad : precioBase;
 
         // Etiqueta
         const promoLabel = aplicaPromo
@@ -2151,23 +2177,23 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre} `
             : ""
-          : "(Excluido de promoción)";
+          : "(Excluido de promociÃ³n)";
 
         return {
           idLlanta: ll.idLlanta,
           medidas: ll.modeloMedidas,
-          cantidad: ll.cantidad,
+          cantidad,
           precioUnitario: precioBase,
           ubicacion: ll.ubicacion,
           precioConPromo,
           promoLabel,
-          total: precioConPromo * ll.cantidad,
+          total,
           comentario: ll.comentario || "",
         };
       });
 
       // ===============================
-      // 🔹 PAQUETES
+      // ðŸ”¹ PAQUETES
       // ===============================
       const paquetes = data.paquetes.map((p) => {
         const promoIndividual = p.idPromocion
@@ -2192,9 +2218,14 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         const precioBase = Number(p.precioUnitario ?? 0);
         const cantidad = Number(p.cantidad ?? 1);
 
-        const precioConPromo = aplicaPromo
-          ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
-          : precioBase;
+        const total = calcularTotalPreview(
+          precioBase,
+          cantidad,
+          promoIndividual,
+          promoGeneral,
+          !aplicaPromo,
+        );
+        const precioConPromo = cantidad ? total / cantidad : precioBase;
 
         const promoLabel = aplicaPromo
           ? promoIndividual
@@ -2202,7 +2233,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre}`
             : ""
-          : "(Excluido de promoción)";
+          : "(Excluido de promociÃ³n)";
 
         return {
           idPaquete: p.idPaquete,
@@ -2211,14 +2242,14 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           cantidad,
           precioUnitario: precioBase,
           precio: precioConPromo,
-          total: precioConPromo * cantidad,
+          total,
           promoLabel,
           comentario: p.comentario || "",
         };
       });
 
       // ===============================
-      // 🔹 SERVICIOS
+      // ðŸ”¹ SERVICIOS
       // ===============================
       const serviciosAdicionales = data.servicios.map((s) => {
         const promoIndividual = s.idPromocion
@@ -2243,9 +2274,14 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         const precioBase = Number(s.precioUnitario ?? 0);
         const cantidad = Number(s.cantidad ?? 1);
 
-        const precioConPromo = aplicaPromo
-          ? aplicarPromo(precioBase, promoIndividual, promoGeneral)
-          : precioBase;
+        const total = calcularTotalPreview(
+          precioBase,
+          cantidad,
+          promoIndividual,
+          promoGeneral,
+          !aplicaPromo,
+        );
+        const precioConPromo = cantidad ? total / cantidad : precioBase;
 
         const promoLabel = aplicaPromo
           ? promoIndividual
@@ -2253,7 +2289,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre}`
             : ""
-          : "(Excluido de promoción)";
+          : "(Excluido de promociÃ³n)";
 
         return {
           nombreServicio: s.descripcion,
@@ -2261,14 +2297,14 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           cantidad,
           precioUnitario: precioBase,
           precioConPromo,
-          total: precioConPromo * cantidad,
+          total,
           promoLabel,
           comentario: s.comentario || "",
         };
       });
 
       // ===============================
-      // 🔹 CALCULO DE TOTALES
+      // ðŸ”¹ CALCULO DE TOTALES
       // ===============================
       const totalBase =
         llantasConPromo.reduce(
@@ -2290,7 +2326,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         serviciosAdicionales.reduce((s, s2) => s + Number(s2.total ?? 0), 0);
 
       // ===============================
-      // 🔹 VISTA FINAL
+      // ðŸ”¹ VISTA FINAL
       // ===============================
       vistaCotizacion.value = {
         codigo: data.prefijo + "-" + data.consecutivoSucursal,
@@ -2306,10 +2342,10 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         creadoPor: data.idCreador,
         cliente: {
           nombre: data.clienteNombre,
-          telefono: data.telefono || "Sin teléfono",
+          telefono: data.telefono || "Sin telÃ©fono",
           correo: data.correo || "",
           fecha: data.fechaCreacion,
-          observaciones: data.observaciones || "", // ⚡ AQUI
+          observaciones: data.observaciones || "", // âš¡ AQUI
         },
         llantasSelecionadas: llantasConPromo,
         paquetes,
@@ -2327,8 +2363,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       };
       mostrarVista.value = true;
     } catch (error) {
-      console.error("Error al cargar detalle de cotización:", error);
-      Swal.fire("Error", "No se pudo cargar la cotización.", "error");
+      console.error("Error al cargar detalle de cotizaciÃ³n:", error);
+      Swal.fire("Error", "No se pudo cargar la cotizaciÃ³n.", "error");
     }
   }
 };
@@ -2336,11 +2372,11 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
 const confirmarAccion = async (vistaCotizacion) => {
   // SE AGREGA VALIDACION PORQUE ESTO HACE UN PUT Y ACTUALIZA ESTADO DE UNA COTIZACION, EL CLIENTE PIDIO QUITAR LA CONFIRMACION
   // const result = await Swal.fire({
-  //   title: "¿Estás seguro?",
-  //   text: "Esta acción no se puede deshacer.",
+  //   title: "Â¿EstÃ¡s seguro?",
+  //   text: "Esta acciÃ³n no se puede deshacer.",
   //   icon: "warning",
   //   showCancelButton: true,
-  //   confirmButtonText: "Sí, continuar",
+  //   confirmButtonText: "SÃ­, continuar",
   //   cancelButtonText: "Cancelar",
   //   confirmButtonColor: "#d33",
   //   cancelButtonColor: "#6c757d",
@@ -2354,29 +2390,11 @@ const confirmarAccion = async (vistaCotizacion) => {
 
 // MANDAR A IMPRIMIR
 
-const imprimirCotizacion = () => {
-  window.print();
+const imprimirCotizacion = async () => {
+  await printCotizacionPdf(vistaCotizacion.value);
 };
 
 // GENERAR PDF
-
-const logoBase64 = ref(null);
-
-const loadLogoBase64 = async () => {
-  if (logoBase64.value) return logoBase64.value;
-  const response = await fetch("/images/Logo-Kartisimo.png");
-  const blob = await response.blob();
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      logoBase64.value = reader.result;
-      resolve(reader.result);
-    };
-    reader.readAsDataURL(blob);
-  });
-};
-
-pdfMake.vfs = pdfFonts.vfs;
 
 const manejarCliente = (cliente) => {
   if (cliente) {
@@ -2419,7 +2437,7 @@ const togglePromoAlVuelo = (item) => {
     return;
   }
 
-  // SI NO EXISTE → ABRIR RAMA OCULTA
+  // SI NO EXISTE â†’ ABRIR RAMA OCULTA
   item.mostrarEditorPromo = !item.mostrarEditorPromo;
 };
 const togglePaquete = (paquete) => {
@@ -2470,7 +2488,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     });
 
     if (!res.ok)
-      throw new Error(`Error al guardar promoción al vuelo (${res.status})`);
+      throw new Error(`Error al guardar promociÃ³n al vuelo (${res.status})`);
 
     const data = await res.json();
 
@@ -2487,8 +2505,8 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     PromocionesVuelo.tipo = false;
     PromocionesVuelo.tipoPromocion = 0;
   } catch (error) {
-    console.error("Error al guardar promoción al vuelo:", error);
-    Swal.fire("Error", "No se pudo guardar la promoción al vuelo.", "error");
+    console.error("Error al guardar promociÃ³n al vuelo:", error);
+    Swal.fire("Error", "No se pudo guardar la promociÃ³n al vuelo.", "error");
   }
 };
 
@@ -2500,555 +2518,7 @@ const formatearTelefono = (telefono) => {
 };
 
 const generarPDF = async () => {
-  const logo = await loadLogoBase64();
-  const v = vistaCotizacion.value;
-
-  const celdaCentroY = (text, alignment = "left") => ({
-    text,
-    alignment,
-    fontSize: 10,
-    margin: [0, 10, 0, 10],
-  });
-
-  const formatMoney = (v) =>
-    `$${(v ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
-  const celdaTotalConPromo = ({
-    precioUnitario,
-    cantidad = 1,
-    total,
-    promoLabel,
-  }) => {
-    const totalSinPromo = precioUnitario * cantidad;
-
-    const tienePromo =
-      total < totalSinPromo &&
-      promoLabel &&
-      promoLabel !== "" &&
-      promoLabel !== ""; // 🔥 filtro clave
-
-    return {
-      stack: tienePromo
-        ? [
-            // ❌ ya no quieres tachado → lo quitamos
-            {
-              text: promoLabel,
-              fontSize: 9,
-              style: "promoLabel",
-              alignment: "right",
-              margin: [0, 2, 0, 2],
-            },
-            {
-              text: formatMoney(total),
-              color: "green",
-              bold: true,
-              fontSize: 10,
-              alignment: "right",
-            },
-          ]
-        : [
-            {
-              text: formatMoney(total),
-              alignment: "right",
-              fontSize: 10,
-            },
-          ],
-      margin: [0, 10, 0, 10],
-    };
-  };
-
-  // Arma las filas para la tabla, primero llantas, luego paquetes, luego servicios
-  const llantasRows = v.llantasSelecionadas.map((ll) => {
-    const tienePromo = ll.promoLabel && ll.precioConPromo < ll.precioUnitario;
-    const descripcion =
-      ll.comentario && ll.comentario.trim() !== ""
-        ? {
-            stack: [
-              { text: ll.medidas, fontSize: 10, alignment: "left" },
-              {
-                text: ll.comentario,
-                italics: true,
-                fontSize: 8,
-                color: "#555",
-                margin: [0, 2, 0, 0],
-              },
-            ],
-            margin: [0, 10, 0, 10],
-          }
-        : celdaCentroY(ll.medidas);
-
-    return [
-      celdaCentroY(String(ll.cantidad), "center"),
-      descripcion,
-      celdaCentroY(
-        `$${ll.precioUnitario.toLocaleString("en-US", {
-          minimumFractionDigits: 2,
-        })}`,
-        "right",
-      ),
-      {
-        stack: tienePromo
-          ? [
-              {
-                text: `$${(ll.precioUnitario * ll.cantidad).toLocaleString(
-                  "en-US",
-                  { minimumFractionDigits: 2 },
-                )}`,
-                decoration: "lineThrough",
-                color: "#888",
-                fontSize: 9,
-                alignment: "right",
-              },
-              {
-                text: ll.promoLabel,
-                fontSize: 9,
-                style: "promoLabel",
-                alignment: "right",
-                margin: [0, 2, 0, 2],
-              },
-              {
-                text: `$${ll.total.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}`,
-                color: "green",
-                bold: true,
-                fontSize: 10,
-                alignment: "right",
-              },
-            ]
-          : [
-              {
-                text: `$${ll.total.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                })}`,
-                fontSize: 10,
-                alignment: "right",
-              },
-            ],
-        margin: [0, 10, 0, 10],
-      },
-    ];
-  });
-
-  const paquetesRows = v.paquetes.map((p) => {
-    const descripcion =
-      p.comentario && p.comentario.trim() !== ""
-        ? {
-            stack: [
-              {
-                text:
-                  p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase(),
-                fontSize: 10,
-                alignment: "left",
-              },
-              {
-                text: p.comentario,
-                italics: true,
-                fontSize: 8,
-                color: "#555",
-                margin: [0, 2, 0, 0],
-              },
-            ],
-            margin: [0, 10, 0, 10],
-          }
-        : celdaCentroY(
-            p.nombre.toUpperCase() + ", " + p.descripcion.toUpperCase(),
-          );
-
-    return [
-      celdaCentroY("1", "center"),
-      descripcion,
-      celdaCentroY(formatMoney(p.precioUnitario), "right"),
-      celdaTotalConPromo({
-        precioUnitario: p.precioUnitario,
-        cantidad: p.cantidad,
-        total: p.total,
-        fontSize: 10,
-        promoLabel: p.promoLabel,
-      }),
-    ];
-  });
-
-  const serviciosRows = v.serviciosAdicionales.map((s) => {
-    const comentario = s.comentario || s.observacion || "";
-    const descripcion =
-      comentario.trim() !== ""
-        ? {
-            stack: [
-              { text: s.nombreServicio, fontSize: 10, alignment: "left" },
-              {
-                text: comentario,
-                italics: true,
-                fontSize: 8,
-                color: "#555",
-                margin: [0, 2, 0, 0],
-              },
-            ],
-            margin: [0, 10, 0, 10],
-          }
-        : {
-            text: s.nombreServicio,
-            italics: false,
-            fontSize: 10,
-            margin: [0, 10, 0, 10],
-          };
-
-    return [
-      {
-        text: String(s.cantidad),
-        alignment: "center",
-        fontSize: 10,
-        margin: [0, 10, 0, 10],
-      },
-      descripcion,
-      {
-        text: formatMoney(s.precioUnitario),
-        alignment: "right",
-        fontSize: 9,
-        margin: [0, 10, 0, 10],
-      },
-      celdaTotalConPromo({
-        precioUnitario: s.precioUnitario,
-        cantidad: s.cantidad,
-        total: s.total,
-        promoLabel: s.promoLabel,
-      }),
-    ];
-  });
-
-  const separador = (textoColumna2) => [
-    {
-      text: "CANT",
-      alignment: "center",
-      style: "tableHeaderBorder",
-      fillColor: "#ededed",
-    },
-    {
-      text: textoColumna2,
-      alignment: "left",
-      style: "tableHeaderBorder",
-      fillColor: "#ededed",
-    },
-    {
-      text: "PRECIO UNIT.",
-      alignment: "right",
-      style: "tableHeaderBorder",
-      fillColor: "#ededed",
-    },
-    {
-      text: "TOTAL",
-      alignment: "right",
-      style: "tableHeaderBorder",
-      fillColor: "#ededed",
-    },
-  ];
-
-  const formatearFecha = (fecha) => {
-    if (!fecha) return "";
-
-    const d = new Date(fecha);
-
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-    const horaFormateada = d.toLocaleTimeString("es-MX", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-
-    return `${fechaFormateada}, ${horaFormateada}`;
-  };
-
-  const formatearFechaSinHora = (fecha) => {
-    if (!fecha) return "";
-
-    const d = new Date(fecha);
-
-    const fechaFormateada = d.toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-    return fechaFormateada;
-  };
-
-  const formatearTelefono = (telefono) => {
-    if (!telefono) return "";
-    const digitos = telefono.replace(/\D/g, "");
-    if (digitos.length !== 10) return telefono;
-    return `${digitos.slice(0, 3)} ${digitos.slice(3, 6)} ${digitos.slice(6)}`;
-  };
-  // Definición del PDF
-  const docDefinition = {
-    pageMargins: [40, 40, 40, 60],
-    pageSize: "LETTER",
-    content: [
-      // Logo y encabezado
-      {
-        columns: [
-          {
-            width: "*",
-            stack: [{ image: logo, width: 140, margin: [0, 0, 0, 10] }],
-          },
-          {
-            width: "auto",
-            stack: [],
-          },
-        ],
-      },
-      {
-        columns: [
-          [
-            {
-              text: "Blvd. Delta 2002\nesq. Rio Mayo",
-              bold: true,
-              fontSize: 9,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Col. Valle de Jerez C.P 37538",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Tel. 477 330 6060 y\n477 390 5090",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            { text: "delta@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
-          ],
-          [
-            {
-              text: "Blvd. Lopez Mateos 827\nesq. Apolo",
-              bold: true,
-              fontSize: 9,
-              lineHeight: 1.2,
-            },
-            { text: "Col. Obrera C.P. 37340", fontSize: 8, lineHeight: 1.2 },
-            {
-              text: "Tel. 477 717 7440 y\n477 470 9419",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            { text: "apolo@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
-          ],
-          [
-            {
-              text: "Blvd. Torres Landa 1901\nesq San Jacobo",
-              bold: true,
-              fontSize: 9,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Col. La Piscina C.P. 37440",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Tel. 477 390 0290 y\n477 461 0028",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            { text: "torreslanda@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
-          ],
-          [
-            {
-              text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián",
-              bold: true,
-              fontSize: 9,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Col. La Martinica, C.P. 37500",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-            {
-              text: "Tel. 477 763 3285 y\n477 763 3284",
-              fontSize: 8,
-              lineHeight: 1.2,
-            },
-          ],
-        ],
-        columnGap: 15,
-        margin: [0, 0, 0, 18],
-      },
-      {
-        canvas: [
-          {
-            type: "line",
-            x1: 0,
-            y1: 0,
-            x2: 515,
-            y2: 0,
-            lineWidth: 1,
-            lineColor: "#888",
-          },
-        ],
-        margin: [0, 8, 0, 8],
-      },
-      {
-        columns: [
-          {
-            width: "auto",
-            text: `C${v.codigo}`,
-            fontSize: 10,
-            margin: [0, 0, 16, 6],
-          },
-          [
-            {
-              width: "auto",
-              text: [
-                {
-                  text: "Fecha de emisión: ",
-                  bold: true,
-                },
-                `${formatearFechaSinHora(v.cliente.fecha) || ""}`,
-              ],
-              fontSize: 10,
-              margin: [0, 0, 10, 6],
-            },
-            {
-              width: "auto",
-              text: [
-                {
-                  text: "Teléfono(s): ",
-                  bold: true,
-                },
-                {
-                  text: formatearTelefono(v.cliente.telefono) || "N/A",
-                  color: "#444",
-                },
-              ],
-              fontSize: 10,
-              margin: [0, 0, 10, 6],
-            },
-          ],
-          [
-            {
-              width: "auto",
-              text: [
-                {
-                  text: "Cliente: ",
-                  bold: true,
-                },
-                `${v.cliente.nombre || "N/A"}`,
-              ],
-              fontSize: 10,
-              margin: [0, 0, 10, 6],
-            },
-            {
-              width: "auto",
-              text: [
-                {
-                  text: "Correo: ",
-                  bold: true,
-                },
-                `${v.cliente.correo || "N/A"}`,
-              ],
-              fontSize: 10,
-              margin: [0, 0, 0, 6],
-            },
-          ],
-        ],
-      },
-      {
-        text: [
-          {
-            text: "Observaciones: ",
-            bold: true,
-          },
-          v.observaciones || "N/A",
-        ],
-        fontSize: 10,
-        margin: [1, 10, 15, 13], // margen inferior para separar de la tabla
-      },
-      // Tabla principal
-      {
-        table: {
-          headerRows: 1,
-          widths: [40, "*", 90, 90],
-          body: [
-            [
-              {
-                text: "CANT",
-                style: "tableHeaderBorder",
-                alignment: "center",
-              },
-              {
-                text: "MEDIDA - MARCA - MODELO - RANGO",
-                style: "tableHeaderBorder",
-                alignment: "left",
-              },
-              {
-                text: "PRECIO UNIT.",
-                style: "tableHeaderBorder",
-                alignment: "right",
-              },
-              {
-                text: "TOTAL",
-                style: "tableHeaderBorder",
-                alignment: "right",
-              },
-            ],
-            ...llantasRows,
-            separador("SERVICIO"),
-            ...paquetesRows,
-            ...serviciosRows,
-          ],
-        },
-        layout: {
-          fillColor: (rowIndex) => (rowIndex === 0 ? "#ededed" : null),
-
-          vLineWidth: (i, node) => 0,
-        },
-        margin: [0, 12, 0, 0],
-      },
-      v.mostrarTotal
-        ? {
-            text: "Total: " + formatMoney(v.total),
-            style: "tableHeaderBorder",
-            alignment: "right",
-            fontSize: 12,
-            margin: [0, 14, 0, 0],
-          }
-        : {},
-      {
-        text: "Los precios incluyen IVA",
-        style: "notaIVA",
-        alignment: "right",
-        margin: [0, 14, 0, 0],
-      },
-    ],
-
-    styles: {
-      tableHeaderBorder: {
-        bold: true,
-        fontSize: 10,
-        border: [true, true, true, true],
-        alignment: "center",
-        margin: [0, 1, 0, 1],
-      },
-      promoLabel: {
-        fontSize: 8,
-        color: "white",
-        background: "#dc3545", // rojo bootstrap
-        margin: [0, 2, 0, 2],
-      },
-      notaIVA: {
-        italics: true,
-        fontSize: 9,
-      },
-    },
-  };
-
-  //pdfMake.createPdf(docDefinition).open();
-
-  // usa esta si el problema es download
-  pdfMake.createPdf(docDefinition).download(`Cotización_${v.codigo}.pdf`);
+  await downloadCotizacionPdf(vistaCotizacion.value);
 };
 
 const cotizacionContext = {
@@ -3158,8 +2628,6 @@ const cotizacionContext = {
   mostrarVistaPrevia,
   confirmarAccion,
   imprimirCotizacion,
-  logoBase64,
-  loadLogoBase64,
   manejarCliente,
   buscarPromocionAplicada,
   togglePromoAlVuelo,
@@ -3205,12 +2673,12 @@ const cotizacionContext = {
     padding: 0 !important;
   }
 
-  /* 🔴 Ocultar todo */
+  /* ðŸ”´ Ocultar todo */
   body * {
     visibility: hidden;
   }
 
-  /* 🟢 Mostrar solo cotización */
+  /* ðŸŸ¢ Mostrar solo cotizaciÃ³n */
   #area-imprimir,
   #area-imprimir * {
     visibility: visible;
@@ -3229,7 +2697,7 @@ const cotizacionContext = {
   }
 
   /* ========================= */
-  /* 🔥 TABLA ESTILO PDF REAL */
+  /* ðŸ”¥ TABLA ESTILO PDF REAL */
   /* ========================= */
 
   #area-imprimir table {
@@ -3287,14 +2755,14 @@ const cotizacionContext = {
     border-bottom: 1px solid #000;
   }
 
-  /* ❌ quitar líneas verticales */
+  /* âŒ quitar lÃ­neas verticales */
   #area-imprimir th,
   #area-imprimir td {
     border-left: none !important;
     border-right: none !important;
   }
 
-  /* 🔥 separador tipo SERVICIOS */
+  /* ðŸ”¥ separador tipo SERVICIOS */
   #area-imprimir .fila-separador td {
     background: #ededed;
     font-weight: bold;
@@ -3303,7 +2771,7 @@ const cotizacionContext = {
     border-bottom: 2px solid #000;
   }
 
-  /* 📐 alineaciones */
+  /* ðŸ“ alineaciones */
   #area-imprimir td:nth-child(1),
   #area-imprimir th:nth-child(1) {
     width: 40px;
@@ -3323,21 +2791,21 @@ const cotizacionContext = {
     text-align: right;
   }
 
-  /* 💰 total */
+  /* ðŸ’° total */
   #area-imprimir .total-verde {
     color: #008000;
     font-weight: bold;
     font-size: 10pt;
   }
 
-  /* 🎟️ promo */
+  /* ðŸŽŸï¸ promo */
   #area-imprimir .promo-label {
     color: #d92300;
     font-style: italic;
     font-size: 8pt;
   }
 
-  /* 📄 total general */
+  /* ðŸ“„ total general */
   #area-imprimir .total-general {
     font-weight: bold;
     font-size: 12pt;
@@ -3345,7 +2813,7 @@ const cotizacionContext = {
     margin-top: 10px;
   }
 
-  /* 📄 nota IVA */
+  /* ðŸ“„ nota IVA */
   #area-imprimir .nota-iva {
     font-style: italic;
     font-size: 9pt;
@@ -3353,7 +2821,7 @@ const cotizacionContext = {
     margin-top: 10px;
   }
 
-  /* 🔧 arreglos Bootstrap */
+  /* ðŸ”§ arreglos Bootstrap */
   .table-responsive {
     overflow: visible !important;
   }
@@ -3371,7 +2839,7 @@ const cotizacionContext = {
     height: auto !important;
   }
 
-  /* 📄 saltos de página */
+  /* ðŸ“„ saltos de pÃ¡gina */
   table {
     page-break-inside: auto;
   }
@@ -3384,7 +2852,7 @@ const cotizacionContext = {
     display: table-header-group;
   }
 
-  /* ❌ ocultar botones */
+  /* âŒ ocultar botones */
   button,
   .btn,
   .no-imprimir {

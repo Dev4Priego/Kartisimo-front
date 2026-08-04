@@ -96,6 +96,35 @@
                         </button>
                     </li>
 
+                    <li class="nav-item mb-2" v-if=" dataUser.usuario.idUsuario == 1">
+                        <button
+                            type="button"
+                            class="nav-link text-white"
+                            @click.prevent="showReportsOptions = !showReportsOptions"
+                        ><i class="bi bi-graph-up-arrow me-2"></i>
+                            Reportes
+                          
+                        </button>
+                        <ul v-if="showReportsOptions" class="ms-4 nav d-block">
+                            <li  class="nav-item mb-2">
+                                <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/rentabilidad')">
+                                    <i class="bi bi-graph-up-arrow me-2"></i>
+                                    Rentabilidad
+                                    
+                                </button>
+                                
+                            </li>
+                             <li  class="nav-item mb-2">
+                                <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/comisiones')">
+                                    <i class="bi bi-cash-coin"></i>
+                                    Comisiones
+                                    
+                                </button>
+                                
+                            </li>
+                        </ul>
+                    </li>
+
                     <li class="nav-item mb-2">
                         <button
                             class="nav-link text-white"
@@ -123,6 +152,9 @@ import { clearSession } from '@/services/auth'
 // #d43535
 const router = useRouter()
 const sidebarRef = ref(null)
+const userStorage = localStorage.getItem("userSession");
+const showReportsOptions = ref (false);
+const dataUser = JSON.parse(userStorage);
 
 const irA = (ruta) => {
 

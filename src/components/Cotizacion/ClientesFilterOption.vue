@@ -116,8 +116,7 @@ const seleccionarCliente = (c) => {
     apPaterno: c.apPaterno,
     apMaterno: c.apMaterno,
     correo: c.correo,
-    telefono: c.telefono,
-    observaciones: c.observaciones
+    telefono: c.telefono
   });
 
   // Emitimos bandera para ocultar la tabla

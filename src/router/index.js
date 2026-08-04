@@ -13,7 +13,9 @@ import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' 
 import OrdenTrabajoPreview from '@/views/OrdenTrabajo/OrdenTrabajoPreview.vue'
 import OrdenTrabajoEdit from '@/views/OrdenTrabajo/OrdenTrabajoEdit.vue'
 import OrdenTrabajoLayout from '@/views/OrdenTrabajo/OrdenTrabajoLayout.vue'
+import ReportesRentabilidad from '@/views/Reportes/RentabilidadOrdenTrabajo.vue'
 import { clearSession, isSessionValid } from '@/services/auth'
+import ComisionesTecnicos from '@/views/Reportes/ComisionesTecnicos.vue'
 
 const routes = [
   {
@@ -89,6 +91,16 @@ const routes = [
         path: "Catalogos",
         name: "Catalogos",
         component: Catalogos,
+      },
+      {
+        path: "reportes/rentabilidad",
+        name: "Reportes",
+        component: ReportesRentabilidad,
+      },
+      {
+        path: "reportes/comisiones",
+        name: "Comisiones",
+        component: ComisionesTecnicos,
       },
     ],
   },

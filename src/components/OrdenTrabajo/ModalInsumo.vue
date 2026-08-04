@@ -183,7 +183,10 @@
                       </tr>
 
                       <tr v-if="items.length === 0">
-                        <td colspan="9" class="text-center py-4 text-muted">
+                        <td
+                          :colspan="mostrarCostos ? 10 : 9"
+                          class="text-center py-4 text-muted"
+                        >
                           No hay datos disponibles
                         </td>
                       </tr>
@@ -265,10 +268,32 @@
           <hr />
           <!-- TABLA RESUMEN DE PRODUCTOS Y SERVICIOS -->
           <div class="mt-4">
-            <h4 class="mb-3">Resumen de productos y servicios</h4>
+            <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+              <h4 class="mb-0">Resumen de productos y servicios</h4>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary flex-shrink-0"
+                @click="mostrarCostos = !mostrarCostos"
+              >
+                <i
+                  class="bi me-1"
+                  :class="mostrarCostos ? 'bi-eye-slash' : 'bi-eye'"
+                ></i>
+                {{ mostrarCostos ? "Ocultar costos" : "Mostrar costos" }}
+              </button>
+            </div>
 
             <div class="table-responsive">
-              <table class="table fixed-header-table">
+              <table class="table fixed-header-table tabla-resumen-insumos">
+                <colgroup>
+                  <col class="col-concepto" />
+                  <col class="col-descripcion" />
+                  <col class="col-cantidad" />
+                  <col v-if="mostrarCostos" class="col-costo" />
+                  <col class="col-precio" />
+                  <col class="col-subtotal" />
+                  <col class="col-acciones" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Concepto trabajo</th>
@@ -856,14 +881,19 @@
                       <td>
                         <input
                           type="number"
-                          min="1"
+                          min="0"
                           class="form-control form-control-sm"
                           v-model.number="det.cantidad"
                           @input="recalcularSubtotal(det)"
                         />
                       </td>
                       <td v-if="mostrarCostos"></td>
-                      <td></td>
+                      <td v-if="userData.usuario.idUsuario == 1">
+                        <span>{{ calcularComision(det).toLocaleString('es-MX', {
+                          style: 'currency',
+                          currency: 'MXN',
+                        }) }}</span>
+                      </td>
                       <td></td>
                       <td></td>
                     </tr>
@@ -1168,7 +1198,7 @@
                   <!--Total de insumos-->
                   <tr>
                     <td
-                      :colspan="6"
+                      :colspan="mostrarCostos ? 6 : 5"
                       class="text-end fs-5 fw-bold"
                     >
                       <h4>Total:</h4>
@@ -1235,7 +1265,7 @@ const { proxy } = getCurrentInstance();
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
-const mostrarCostos = ref(true);
+const mostrarCostos = ref(false);
 const promosGeneralesDisponibles = ref([]);
 const userData = JSON.parse(localStorage.getItem("userSession"));
 
@@ -1419,6 +1449,20 @@ const toNumber = (value) => {
 const cantidadItem = (item) => {
   const cantidad = Number(item?.cantidad);
   return Number.isFinite(cantidad) ? cantidad : 1;
+};
+
+const obtenerConceptoTrabajo = (idConceptoTrabajo) => {
+  return (
+    conceptoOT.value.find(
+      (concepto) => concepto.idConceptoOrdenTrabajo === idConceptoTrabajo,
+    ) || null
+  );
+};
+
+const calcularComision = (item) => {
+  const concepto = obtenerConceptoTrabajo(item?.idConceptoTrabajo);
+  const comisionUnitaria = toNumber(concepto?.comision);
+  return cantidadItem(item) * comisionUnitaria;
 };
 
 const subtotalItem = (item) => {
@@ -1827,6 +1871,7 @@ const cargarConcpetoTrabajo = async () => {
     conceptoOT.value = data.map((a) => ({
       idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
       nombre: a.nombre,
+      comision: toNumber(a.comision),
     }));
 
     // console.log('Datos recibidos:', conceptoOT.value)
@@ -2200,28 +2245,28 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 }
 
 .tabla-resumen-insumos .col-concepto {
-  width: auto;
+  width: 190px;
 }
 
 .tabla-resumen-insumos .col-descripcion {
-  width: auto;
+  width: 240px;
 }
 
 .tabla-resumen-insumos .col-cantidad {
-  width: auto;
+  width: 105px;
 }
 
 .tabla-resumen-insumos .col-costo,
 .tabla-resumen-insumos .col-precio {
-  width: auto;
+  width: 120px;
 }
 
 .tabla-resumen-insumos .col-subtotal {
-  width: auto;
+  width: 150px;
 }
 
 .tabla-resumen-insumos .col-acciones {
-  width: auto;
+  width: 260px;
 }
 
 .tabla-resumen-insumos .form-control,
