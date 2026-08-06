@@ -55,7 +55,7 @@
             v-model.trim="busqueda"
             class="form-control"
             type="text"
-            placeholder="OT, sucursal, llanta, cliente o vehiculo"
+            placeholder="OT o Sucursal"
           />
         </div>
         <div class="col-12 col-sm-6 col-lg-3">

@@ -708,7 +708,7 @@
                         })
                       }}
                     </td>
-                    
+
                     <td style="text-align: right">
                       <div v-if="llanta.idPromocion || llanta.idPromocionVuelo">
                         <span class="text-decoration-line-through text-muted">
@@ -735,7 +735,7 @@
                               currency: "MXN",
                             })
                           }}
-                        </span>
+                        </span> 
                       </div>
                       <div v-else>
                         {{
@@ -1825,7 +1825,7 @@ const ordenTrabajoForm = reactive({
   fechaEntrega: "",
   esHija: 0,
   idOtPAdre: 0,
-  observacion:"",
+  observacion: "",
   cliente: {
     id_cliente: 0,
     nombres: "",
@@ -1931,20 +1931,22 @@ const cargarEmpleados = async () => {
   }
 };
 
-const cargarUsosCFDI = async (options={}) => {
+const cargarUsosCFDI = async (options = {}) => {
   try {
     options.headers = {
-      'Content-Type': 'application/json',
-      ...options.headers
+      "Content-Type": "application/json",
+      ...options.headers,
     };
-  
+
     // Adjuntar el token Bearer si existe
-    
+
     if (loggeduser?.token) {
-      
-      options.headers['Authorization'] = `Bearer ${loggeduser?.token}`;
+      options.headers["Authorization"] = `Bearer ${loggeduser?.token}`;
     }
-    const res = await fetch(proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI",options);
+    const res = await fetch(
+      proxy.$serverIP + "api/OrdenTrabajo/getUsosCFDI",
+      options,
+    );
     if (!res.ok) throw new Error("Error en la respuesta");
 
     const result = await res.json();
@@ -1954,21 +1956,21 @@ const cargarUsosCFDI = async (options={}) => {
   }
 };
 
-const cargarRegimenFiscal = async (options={}) => {
+const cargarRegimenFiscal = async (options = {}) => {
   try {
     options.headers = {
-    'Content-Type': 'application/json',
-    ...options.headers
-  };
+      "Content-Type": "application/json",
+      ...options.headers,
+    };
 
-  // Adjuntar el token Bearer si existe
-  
-  if (loggeduser?.token) {
-    
-    options.headers['Authorization'] = `Bearer ${loggeduser?.token}`;
-  }
+    // Adjuntar el token Bearer si existe
+
+    if (loggeduser?.token) {
+      options.headers["Authorization"] = `Bearer ${loggeduser?.token}`;
+    }
     const res = await fetch(
-      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",options
+      proxy.$serverIP + "api/OrdenTrabajo/getRegimenFiscal",
+      options,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
 
@@ -2252,7 +2254,7 @@ const validarYMostrarPreview = async () => {
                   <th>Descripción</th>
                   <th>Cantidad</th>
                   <th>P/U</th>
-                  <th>Subtotal</th>
+                  <thsSubtotal</th>
                 </tr>
             </thead>
             <tbody>
@@ -2381,8 +2383,8 @@ const guardarOT = async () => {
       idSucursal: dataUser.usuario.idSucursal,
       idCotizacion: parseInt(ordenTrabajoForm.cotSeleccionada),
       idEmpleado: ordenTrabajoForm.idEmpleado,
-      idOtPadre: parseInt( ordenTrabajoForm.idOtPAdre),
-      isHija:ordenTrabajoForm.esHija,
+      idOtPadre: parseInt(ordenTrabajoForm.idOtPAdre),
+      isHija: ordenTrabajoForm.esHija,
       idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
       metodoPago: ordenTrabajoForm.cliente.metodoPago,
       fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
@@ -2390,7 +2392,7 @@ const guardarOT = async () => {
       requiereFactura: boolFactura.value,
       desecharLlanta: desechar,
       descripcion: "",
-      observacion:ordenTrabajoForm.observacion,
+      observacion: ordenTrabajoForm.observacion,
       estado: "Creado",
       cliente: {
         idCliente: ordenTrabajoForm.cliente.id_cliente,
@@ -2612,24 +2614,7 @@ const cargarInfoCotizacion = async () => {
           cantidad: llanta.cantidad,
           precioUnitario: llanta.precioUnitario,
           costo: llanta?.costo || 0,
-          subTotal: (
-            llanta.cantidad *
-            precioFinalItem({
-              precioUnitario: llanta.precioUnitario,
-              idPromocion:
-                llanta.idPromocion != null
-                  ? llanta.idPromocion
-                  : llanta.idPromocionVuelo,
-              valorPromocion:
-                llanta.valorPromocion != null
-                  ? llanta.valorPromocion
-                  : llanta.valorPromocionVuelo,
-              tipoPromocion:
-                llanta.tipoPromocion != null
-                  ? llanta.tipoPromocion
-                  : llanta.tipoPromocionVuelo,
-            })
-          ).toFixed(2), // campo estetico
+          subTotal: precioFinalItem(llanta,promocionExistente, llanta.cantidad).toFixed(2), // campo estetico
 
           promosDisponibles: promosDisponibles || [],
           esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
@@ -2660,24 +2645,7 @@ const cargarInfoCotizacion = async () => {
           cantidad: 1,
           precioUnitario: paquete.precioUnitario,
           costo: paquete?.costo || 0,
-          subTotal: (
-            1 *
-            precioFinalItem({
-              precioUnitario: paquete.precioUnitario,
-              idPromocion:
-                paquete.idPromocion != null
-                  ? paquete.idPromocion
-                  : paquete.idPromocionVuelo,
-              valorPromocion:
-                paquete.valorPromocion != null
-                  ? paquete.valorPromocion
-                  : paquete.valorPromocionVuelo,
-              tipoPromocion:
-                paquete.tipoPromocion != null
-                  ? paquete.tipoPromocion
-                  : paquete.tipoPromocionVuelo,
-            })
-          ).toFixed(2),
+          subTotal: precioFinalItem(paquete, promocionExistente , 1).toFixed(2),
 
           detalle: paquete.detallePaquete.map((detalle) => ({
             idDesglosePaquete: detalle.idDesglosePaquete,
@@ -2720,22 +2688,7 @@ const cargarInfoCotizacion = async () => {
           precioUnitario: s.precioUnitario,
           costo: s?.costo || 0,
 
-          subTotal: (
-            s.cantidad *
-            precioFinalItem({
-              precioUnitario: s.precioUnitario,
-              idPromocion:
-                s.idPromocion != null ? s.idPromocion : s.idPromocionVuelo,
-              valorPromocion:
-                s.valorPromocion != null
-                  ? s.valorPromocion
-                  : s.valorPromocionVuelo,
-              tipoPromocion:
-                s.tipoPromocion != null
-                  ? s.tipoPromocion
-                  : s.tipoPromocionVuelo,
-            })
-          ).toFixed(2),
+          subTotal: precioFinalItem(adicional, promocionExistente , s.cantidad).toFixed(2),
 
           promosDisponibles: promosDisponibles || [],
           esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
@@ -2750,8 +2703,8 @@ const cargarInfoCotizacion = async () => {
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };
 
-const precioFinalItem = (item, promoGlobal) => {
-  const base = item.precioUnitario ?? 0;
+const precioFinalItem = (item, promoGlobal, cantidad) => {
+  const base = item.precioUnitario * cantidad;
 
   // Aplica promoción individual si existe
   if (item.idPromocion && item.valorPromocion != null) {

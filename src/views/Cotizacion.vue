@@ -72,14 +72,14 @@ const normalizarPrecio = (valor) => {
 const sucursales = [
   "(Ninguna)",
   "Delta",
-  "LÃ³pez Mateos",
+  "López Mateos",
   "Torres Landa",
   "Martinica",
 ];
 const vistaCotizacion = ref({});
 const mostrarVista = ref(false);
-const tituloModal = ref("Nueva CotizaciÃ³n");
-const codigoCotizacionEnEdicion = ref(null); // null = creaciÃ³n nueva
+const tituloModal = ref("Nueva Cotización");
+const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
 const filtroEstatus = ref("");
 const loading = ref(true);
 
@@ -142,7 +142,7 @@ watch([busquedaLlantas, selectedAlmacenes], () => {
 });
 
 const cotizacionForm = reactive({
-  codigo: "", // â† Para saber si es ediciÃ³n
+  codigo: "", // â† Para saber si es edición
   idCliente: null,
   clienteNombre: "",
   nombre: "",
@@ -178,7 +178,7 @@ const telefonoFormateado = computed({
     const soloNumeros = cotizacionForm.clienteTelefono.replace(/\D/g, "");
 
     const base = soloNumeros.slice(0, 10); // telÃ©fono principal
-    //const ext = soloNumeros.slice(10, 13);  // extensiÃ³n (mÃ¡x 3)
+    //const ext = soloNumeros.slice(10, 13);  // extensión (mÃ¡x 3)
 
     let formateado = "";
 
@@ -256,7 +256,7 @@ const cancelarCotizacion = (cotizacion) => {
     })
     .catch((error) => {
       // AquÃ­ capturas cualquier error de la API o de red
-      console.error("Error en la peticiÃ³n:", error.message);
+      console.error("Error en la petición:", error.message);
     });
 };
 
@@ -283,7 +283,7 @@ const reactivarCotizacion = (cotizacion) => {
     })
     .catch((error) => {
       // AquÃ­ capturas cualquier error de la API o de red
-      console.error("Error en la peticiÃ³n:", error.message);
+      console.error("Error en la petición:", error.message);
     });
 };
 
@@ -325,7 +325,7 @@ const aprobarCotizacion = (cotizacion) => {
     })
     .catch((error) => {
       // AquÃ­ capturas cualquier error de la API o de red
-      console.error("Error en la peticiÃ³n:", error.message);
+      console.error("Error en la petición:", error.message);
     });
 };
 
@@ -357,14 +357,14 @@ const finalizarCotizacion = (cotizacion) => {
     })
     .catch((error) => {
       // AquÃ­ capturas cualquier error de la API o de red
-      console.error("Error en la peticiÃ³n:", error.message);
+      console.error("Error en la petición:", error.message);
     });
 };
 
 /***********************************
  *  FUNCIONES PARA CARGA DE DATOS
  ***********************************/
-// FunciÃ³n para cargar paquetes
+// Función para cargar paquetes
 const cargarPaquetes = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Paquetes/getPaquete");
@@ -394,7 +394,7 @@ const cargarPaquetes = async () => {
   }
 };
 
-// FunciÃ³n para cargar clientes
+// Función para cargar clientes
 const cargarClientes = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Cliente/getClientes");
@@ -406,7 +406,7 @@ const cargarClientes = async () => {
   }
 };
 
-// FunciÃ³n para cargar llantas
+// Función para cargar llantas
 const cargarLlantas = async () => {
   try {
     const res = await fetch(proxy.$serverIP + "api/Llanta/getLlantaPrecio");
@@ -450,9 +450,9 @@ const cargarLlantas = async () => {
   }
 };
 
-// FunciÃ³n para cargar detalles de la sucursal del usuario
+// Función para cargar detalles de la sucursal del usuario
 
-// FunciÃ³n para cargar cotizaciones
+// Función para cargar cotizaciones
 const cargarCotizaciones = async (options = {}) => {
   loading.value = true;
   try {
@@ -515,7 +515,7 @@ const registrarCerrarConEsc = (mostrarVista) => {
       return;
     }
 
-    // Si el modal de ediciÃ³n estÃ¡ abierto, lo cerramos
+    // Si el modal de edición estÃ¡ abierto, lo cerramos
     if (modalInstance && modalRef.value.classList.contains("show")) {
       closeModal();
       return;
@@ -641,7 +641,7 @@ watch(
 watch(
   paquetesDisponibles,
   (nuevoValor) => {
-    // Solo aplica si es una nueva cotizaciÃ³n Y no hay paquetes seleccionados
+    // Solo aplica si es una nueva cotización Y no hay paquetes seleccionados
     if (
       esNuevaCotizacion.value &&
       nuevoValor.length &&
@@ -854,7 +854,6 @@ const obtenerPromosGeneralesParaServicio = async () => {
 
 // Helper reutilizable
 const aplicarPromo = (precio, promoIndividual, promoGlobal) => {
-  
   if (promoIndividual && promoIndividual.valor != null) {
     return promoIndividual.tipo
       ? precio * (1 - promoIndividual.valor / 100)
@@ -873,15 +872,23 @@ const onCambioPromo = (item) => {
   const idSel = item.idPromocionSeleccionada; // normal
   const idVuelo = item.idPromocionAlVuelo; // vuelo
 
-  // Si no hay ninguna promociÃ³n
+  // Si no hay ninguna promoción
   if (!idSel && !idVuelo) {
     item.promo = null;
     item.precioConPromo = item.precioUnitario;
     item.isVuelo = null;
+    item.idPromocionSeleccionada = 0;
+    item.idPromocionAlVuelo = 0;
+    item.promo = null;
+    item.isVuelo = false;
+    item.precioConPromo = item.precioUnitario;
+    item.mostrarEditorPromo = false;
     return;
   }
 
-  // Buscamos la promociÃ³n correspondiente
+  item.mostrarEditorPromo = false;
+
+  // Buscamos la promoción correspondiente
   const promo = (item.promosAplicables || []).find(
     (p) => p.idPromocion === idSel || p.idPromocion === idVuelo,
   );
@@ -945,8 +952,8 @@ const onCambioPromoServicio = (servicio) => {
     : base;
 };
 
-const precioFinalItem = (item, promoGlobal) => {
-  const base = item.precioUnitario ?? 0;
+const precioFinalItem = (item, promoGlobal, cantidad) => {
+  const base = item.precioUnitario * cantidad ?? 1;
 
   // Si tiene promo individual â†’ aplica esa
   // si tiene tipo Promo false es Monto, si es true es Porcentual
@@ -978,7 +985,7 @@ watch(
       // Ya configurado antes (evitar repetir)
       if (p.promosAplicables !== undefined) continue;
 
-      // InicializaciÃ³n
+      // Inicialización
       p.promo = null;
       p.idPromocionSeleccionada = 0;
       p.promosAplicables = [];
@@ -1051,7 +1058,7 @@ const cargarFormulario = async (cotizacion = null) => {
     return;
   }
 
-  // Si se carga una cotizaciÃ³n existente
+  // Si se carga una cotización existente
   try {
     const codigoStr = String(cotizacion?.idCotizacion ?? "").trim();
     esNuevaCotizacion.value = false;
@@ -1063,7 +1070,7 @@ const cargarFormulario = async (cotizacion = null) => {
       console.error("âŒ Error HTTP:", res.status, res.statusText);
       mostrarToast(
         "warning",
-        `No se pudo cargar la cotizaciÃ³n: ${res.statusText}`,
+        `No se pudo cargar la cotización: ${res.statusText}`,
       );
       return;
     }
@@ -1093,7 +1100,7 @@ const cargarFormulario = async (cotizacion = null) => {
         );
         if (!base) return null;
 
-        // ðŸ”¹ Determinar si tiene promociÃ³n individual o al vuelo
+        // ðŸ”¹ Determinar si tiene promoción individual o al vuelo
         const promoIndividual = p.idPromocion
           ? {
               idPromocion: p.idPromocion,
@@ -1115,7 +1122,7 @@ const cargarFormulario = async (cotizacion = null) => {
         // ðŸ”¹ Obtener promociones aplicables desde la API
         const promosAplicables = promosGeneralesDisponibles.value;
 
-        // ðŸ”¹ Calcular precio con la funciÃ³n estÃ¡ndar
+        // ðŸ”¹ Calcular precio con la función estÃ¡ndar
         const precioBase = p.precioUnitario;
         const precioConPromo = precioFinalItem(
           {
@@ -1151,7 +1158,7 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
 
-    // Registrar idDetalle para ediciÃ³n
+    // Registrar idDetalle para edición
     // marcaremos los checkboxes en el modal
     paquetesSeleccionados.value = cotizacionForm.paquetes
       .filter((p) => p && p.idPaquete != null)
@@ -1289,8 +1296,8 @@ const cargarFormulario = async (cotizacion = null) => {
       }),
     );
   } catch (e) {
-    console.error("Error cargando cotizaciÃ³n para ediciÃ³n:", e);
-    mostrarToast("warning", "No se pudo cargar la cotizaciÃ³n");
+    console.error("Error cargando cotización para edición:", e);
+    mostrarToast("warning", "No se pudo cargar la cotización");
   }
 };
 
@@ -1340,7 +1347,7 @@ const aplicarPromocionGeneral = async () => {
     return;
   }
 
-  let html = "<p>Selecciona una promociÃ³n general para aplicar:</p>";
+  let html = "<p>Selecciona una promoción general para aplicar:</p>";
   promos.forEach((promo, i) => {
     html += `
             <div style="text-align:left;margin-bottom:8px;">
@@ -1348,7 +1355,7 @@ const aplicarPromocionGeneral = async () => {
       promo.idPromocion
     }" style="margin-right:6px;">
                 <label for="promoGeneral_${i}">
-                <strong>${promo.nombre}</strong> â€” ${
+                <strong>${promo.nombre}</strong> N/A ${
       promo.tipo
         ? `Descuento del ${promo.valor}%`
         : `Descuento de $${promo.valor}`
@@ -1363,7 +1370,7 @@ const aplicarPromocionGeneral = async () => {
     html,
     focusConfirm: false,
     showCancelButton: true,
-    confirmButtonText: "Aplicar promociÃ³n",
+    confirmButtonText: "Aplicar promoción",
     cancelButtonText: "Cancelar",
     preConfirm: () => {
       const checked = document.querySelector(
@@ -1378,7 +1385,7 @@ const aplicarPromocionGeneral = async () => {
   const seleccionada = promos.find((p) => p.idPromocion == promoId);
   promoGeneral.value = seleccionada;
 
-  // ðŸ”¸ Recalcular precios con la nueva promociÃ³n general
+  // ðŸ”¸ Recalcular precios con la nueva promoción general
   cotizacionForm.llantas.forEach((ll) => {
     ll.precioConPromo = aplicarPromo(
       ll.precioUnitario,
@@ -1416,11 +1423,11 @@ const aplicarPromocionGeneral = async () => {
     );
   });
 
-  // ðŸ”¸ ActualizaciÃ³n visual inmediata
+  // ðŸ”¸ Actualización visual inmediata
   Swal.fire({
     icon: "success",
-    title: "PromociÃ³n aplicada",
-    text: `Se aplicÃ³ "${seleccionada.nombre}" correctamente.`,
+    title: "Promoción aplicada",
+    text: `Se aplicó "${seleccionada.nombre}" correctamente.`,
   });
 };
 
@@ -1606,38 +1613,36 @@ const guardarCotizacion = async () => {
 
     const data = await res.json();
 
-    mostrarToast("success", "CotizaciÃ³n guardada");
+    mostrarToast("success", "Cotización guardada");
     cargarFormulario();
     closeModal();
     cargarCotizaciones();
     mostrarVistaPrevia(data, "ver");
   } catch (error) {
     console.error("ERROR guardarCotizacion:", error);
-    Swal.fire("Error", "No se pudo guardar la cotizaciÃ³n.", "error");
+    Swal.fire("Error", "No se pudo guardar la cotización.", "error");
   }
 };
 
 const subtotalLlantas = computed(() => {
   return cotizacionForm.llantas.reduce((sum, ll) => {
     const cantidad = ll.cantidad ?? 1;
-    
-    
-  
-    return sum + precioFinalItem(ll, promoGeneral.value) * cantidad;
+
+    return sum + precioFinalItem(ll, promoGeneral.value, cantidad);
   }, 0);
 });
 
 const subtotalPaquete = computed(() => {
   return cotizacionForm.paquetes.reduce((sum, p) => {
     const cantidad = p.cantidad ?? 1;
-    return sum + precioFinalItem(p, promoGeneral.value) * cantidad;
+    return sum + precioFinalItem(p, promoGeneral.value, cantidad);
   }, 0);
 });
 
 const subtotalExtras = computed(() => {
   return cotizacionForm.serviciosExtras.reduce((sum, s) => {
     const cantidad = s.cantidad ?? 1;
-    return sum + precioFinalItem(s, promoGeneral.value) * cantidad;
+    return sum + precioFinalItem(s, promoGeneral.value, cantidad);
   }, 0);
 });
 
@@ -1785,7 +1790,7 @@ const itemsFiltrados = computed(() => {
         const p = palabras[i].toLowerCase();
         const pn = p.replace(reNonAN, "");
 
-        // Ignorar medida aquÃ­ (ya se procesÃ³ arriba)
+        // Ignorar medida aquÃ­ (ya se procesó arriba)
         if (/^\d{3}\/\d{2}/.test(p)) continue;
 
         if (!(t.includes(p) || u.includes(pn))) {
@@ -1880,12 +1885,12 @@ const formatoMoneda = (valor) => {
   }).format(valor);
 };
 
-// Abrir modal para nueva cotizaciÃ³n o ediciÃ³n
+// Abrir modal para nueva cotización o edición
 const abrirModalCotizacion = (cotizacion = null) => {
   if (cotizacion && cotizacion.idCotizacion) {
-    tituloModal.value = "Editar CotizaciÃ³n";
+    tituloModal.value = "Editar Cotización";
   } else {
-    tituloModal.value = "Nueva CotizaciÃ³n";
+    tituloModal.value = "Nueva Cotización";
   }
   cargarFormulario(cotizacion);
   openModal();
@@ -1900,7 +1905,7 @@ const tblHeadersModal = [
   { text: "Codigo", value: "codigo" },
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
-  { text: "UbicaciÃ³n", value: "ubicacion", sortable: true },
+  { text: "Ubicación", value: "ubicacion", sortable: true },
   { text: "Costo", value: "costo", sortable: true },
   { text: "Precio", value: "precio", sortable: true },
   { text: "Acciones", value: "acciones", width: 50 },
@@ -1929,17 +1934,17 @@ const cotizacionesTransformadas = computed(() => {
       return valores.some((v) => String(v).toLowerCase().includes(texto));
     })
     .map((c) => ({
-      codigo: c.codigo || "â€”",
+      codigo: c.codigo || "N/A",
       sucursal: c.sucursal,
-      fechaCreacion: c.fechaCreacion || "â€”",
-      cliente: c.cliente?.nombre || "â€”",
-      telefono: c.cliente?.telefono || "â€”",
+      fechaCreacion: c.fechaCreacion || "N/A",
+      cliente: c.cliente?.nombre || "N/A",
+      telefono: c.cliente?.telefono || "N/A",
       observaciones: c.cliente?.observaciones || "No disponible", // <-- agregado
 
       paquete: c.paquetes?.length
         ? c.paquetes.map((p) => p.nombre).join(", ")
-        : "â€”",
-      nombreLlanta: c.nombreLlanta || "â€”",
+        : "N/A",
+      nombreLlanta: c.nombreLlanta || "N/A",
       total: formatoMoneda(c.total || 0),
       estatus: typeof c.estatus === "string" ? c.estatus : "Desconocido",
       acciones: c,
@@ -2177,7 +2182,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre} `
             : ""
-          : "(Excluido de promociÃ³n)";
+          : "(Excluido de promoción)";
 
         return {
           idLlanta: ll.idLlanta,
@@ -2233,7 +2238,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre}`
             : ""
-          : "(Excluido de promociÃ³n)";
+          : "(Excluido de promoción)";
 
         return {
           idPaquete: p.idPaquete,
@@ -2289,7 +2294,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
             : promoGeneral
             ? `${promoGeneral.nombre}`
             : ""
-          : "(Excluido de promociÃ³n)";
+          : "(Excluido de promoción)";
 
         return {
           nombreServicio: s.descripcion,
@@ -2316,7 +2321,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
           0,
         ) +
         serviciosAdicionales.reduce(
-          (s, s2) => s + Number(s2.precioUnitario ?? 0) * Number(s2.cantidad ?? 1),
+          (s, s2) =>
+            s + Number(s2.precioUnitario ?? 0) * Number(s2.cantidad ?? 1),
           0,
         );
 
@@ -2363,8 +2369,8 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
       };
       mostrarVista.value = true;
     } catch (error) {
-      console.error("Error al cargar detalle de cotizaciÃ³n:", error);
-      Swal.fire("Error", "No se pudo cargar la cotizaciÃ³n.", "error");
+      console.error("Error al cargar detalle de cotización:", error);
+      Swal.fire("Error", "No se pudo cargar la cotización.", "error");
     }
   }
 };
@@ -2373,7 +2379,7 @@ const confirmarAccion = async (vistaCotizacion) => {
   // SE AGREGA VALIDACION PORQUE ESTO HACE UN PUT Y ACTUALIZA ESTADO DE UNA COTIZACION, EL CLIENTE PIDIO QUITAR LA CONFIRMACION
   // const result = await Swal.fire({
   //   title: "Â¿EstÃ¡s seguro?",
-  //   text: "Esta acciÃ³n no se puede deshacer.",
+  //   text: "Esta acción no se puede deshacer.",
   //   icon: "warning",
   //   showCancelButton: true,
   //   confirmButtonText: "SÃ­, continuar",
@@ -2433,11 +2439,12 @@ const togglePromoAlVuelo = (item) => {
     item.promo = null;
     item.isVuelo = false;
     item.precioConPromo = item.precioUnitario;
+    item.mostrarEditorPromo = false;
 
     return;
   }
 
-  // SI NO EXISTE â†’ ABRIR RAMA OCULTA
+  // SI NO EXISTE  ABRIR RAMA OCULTA
   item.mostrarEditorPromo = !item.mostrarEditorPromo;
 };
 const togglePaquete = (paquete) => {
@@ -2488,7 +2495,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     });
 
     if (!res.ok)
-      throw new Error(`Error al guardar promociÃ³n al vuelo (${res.status})`);
+      throw new Error(`Error al guardar promoción al vuelo (${res.status})`);
 
     const data = await res.json();
 
@@ -2505,8 +2512,8 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     PromocionesVuelo.tipo = false;
     PromocionesVuelo.tipoPromocion = 0;
   } catch (error) {
-    console.error("Error al guardar promociÃ³n al vuelo:", error);
-    Swal.fire("Error", "No se pudo guardar la promociÃ³n al vuelo.", "error");
+    console.error("Error al guardar promoción al vuelo:", error);
+    Swal.fire("Error", "No se pudo guardar la promoción al vuelo.", "error");
   }
 };
 
@@ -2678,7 +2685,7 @@ const cotizacionContext = {
     visibility: hidden;
   }
 
-  /* ðŸŸ¢ Mostrar solo cotizaciÃ³n */
+  /* ðŸŸ¢ Mostrar solo cotización */
   #area-imprimir,
   #area-imprimir * {
     visibility: visible;

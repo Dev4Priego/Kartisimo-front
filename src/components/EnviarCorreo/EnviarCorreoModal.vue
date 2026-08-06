@@ -1,6 +1,6 @@
 ﻿<template>
 	<div class="mt-4">
-		<!-- BotÃ³n que abre el modal -->
+		<!-- Botón que abre el modal -->
 		<button class="btn btn-primary shadow w-100 position-relative btn-sm py-2 rounded" @click="abrirModal">
 			<i class="bi-envelope-paper-fill position-absolute start-0 ms-2"></i>
 			&nbsp;&nbsp;Enviar por correo
@@ -13,7 +13,7 @@
 		>
 			<div class="correo-modal" role="dialog" aria-modal="true" aria-labelledby="correo-modal-title">
 				<div class="correo-modal-header">
-					<h3 id="correo-modal-title">Enviar cotizaciÃ³n por correo</h3>
+					<h3 id="correo-modal-title">Enviar cotización por correo</h3>
 					<button
 						type="button"
 						class="correo-modal-close"

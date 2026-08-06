@@ -114,14 +114,16 @@
                                 </button>
                                 
                             </li>
-                             <li  class="nav-item mb-2">
-                                <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/comisiones')">
-                                    <i class="bi bi-cash-coin"></i>
-                                    Comisiones
+                            <!--
+                              <li  class="nav-item mb-2">
+                                    <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/comisiones')">
+                                        <i class="bi bi-cash-coin"></i>
+                                        Comisiones
+                                        
+                                    </button>
                                     
-                                </button>
-                                
-                            </li>
+                                </li>
+                                  ---> 
                         </ul>
                     </li>
 
