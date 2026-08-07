@@ -125,7 +125,7 @@
 
                 <!-- ACCIONES -->
                 <td>
-                  <div class="d-flex gap-1 justify-content-center">
+                  <div class="d-flex gap-1 justify-content-start">
                     <button
                       class="btn btn-sm btn-outline-info"
                       @click="verOT(ot.idOrdenTrabajo)"
@@ -133,7 +133,7 @@
                       <i class="bi bi-eye"></i>
                     </button>
 
-                    <button
+                    <button v-if="(ot.idSucursal == userData.usuario.idSucursal || userData.usuario.idSucursal == 1)"
                       class="btn btn-sm btn-outline-warning"
                       @click="editarOT(ot.idOrdenTrabajo)"
                     >

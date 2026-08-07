@@ -91,6 +91,20 @@ const sortBy = ref(""); // '' = sin columna activa
 const sortType = ref("asc"); // 'asc' | 'desc'
 const tableKey = ref(0); // para forzar re-montaje cuando quieras
 const idCliente = ref(null);
+const modalRightAlignedColumns = new Set(["cantidad", "costo", "precio"]);
+const modalCenterAlignedColumns = new Set(["runflat", "acciones"]);
+
+const getModalColumnClassName = (column) => {
+  const value = typeof column === "string" ? column : column?.value;
+
+  if (modalRightAlignedColumns.has(value)) return "easy-table-text-end";
+  if (modalCenterAlignedColumns.has(value)) return "easy-table-text-center";
+
+  return "";
+};
+
+const getModalHeaderItemClassName = (header) => getModalColumnClassName(header);
+const getModalBodyItemClassName = (column) => getModalColumnClassName(column);
 
 const onUpdateSortBy = (v) => {
   sortBy.value = v ?? "";
@@ -432,7 +446,7 @@ const cargarLlantas = async () => {
         medida: llanta.medidas,
         runflat: llanta.runflat,
         rango: llanta.rango, // campo para colocar en cotizacionForm como el cliente la solicita medida - marca - modelo - rango
-        cantidad: llanta.cantidad,
+        cantidad: Number(llanta.cantidad) || 0,
         ubicacion: llanta.nombreAlmacen,
         idAlmacen: llanta.idAlmacen,
         precio: parseFloat(llanta.precio) || 0,
@@ -1900,9 +1914,9 @@ const abrirModalCotizacion = (cotizacion = null) => {
 
 const tblHeadersModal = [
   { text: "Llanta", value: "llanta", sortable: true },
-  { text: "Rango", value: "rango" },
+  { text: "Rango", value: "rango", sortable: true },
   { text: "Runflat", value: "runflat" },
-  { text: "Codigo", value: "codigo" },
+  { text: "Codigo", value: "codigo", sortable: true },
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
   { text: "Ubicación", value: "ubicacion", sortable: true },
@@ -2563,6 +2577,8 @@ const cotizacionContext = {
   sortType,
   tableKey,
   idCliente,
+  getModalHeaderItemClassName,
+  getModalBodyItemClassName,
   onUpdateSortBy,
   onUpdateSortType,
   mostrarToast,
@@ -2667,6 +2683,22 @@ const cotizacionContext = {
 .modal-1000 {
   max-width: 1000px;
   width: 100%;
+}
+
+.vue3-easy-data-table__header th.easy-table-text-end .header {
+  justify-content: flex-end !important;
+}
+
+.vue3-easy-data-table__header th.easy-table-text-center .header {
+  justify-content: center !important;
+}
+
+.vue3-easy-data-table__body td.easy-table-text-end {
+  text-align: right !important;
+}
+
+.vue3-easy-data-table__body td.easy-table-text-center {
+  text-align: center !important;
 }
 
 @media print {

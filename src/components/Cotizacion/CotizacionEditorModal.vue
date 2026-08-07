@@ -244,6 +244,8 @@
                   :table-height="400"
                   :sort-by="sortBy"
                   :sort-type="sortType"
+                  :header-item-class-name="getModalHeaderItemClassName"
+                  :body-item-class-name="getModalBodyItemClassName"
                   @update:sort-by="onUpdateSortBy"
                   @update:sort-type="onUpdateSortType"
                 >
@@ -263,6 +265,10 @@
 
                   <template #item-costo="slotProps">
                     {{ formatoMoneda(slotProps.costo || 0) }}
+                  </template>
+
+                  <template #item-precio="slotProps">
+                    {{ formatoMoneda(slotProps.precio || 0) }}
                   </template>
 
                   <template #item-acciones="slotProps">
@@ -1643,6 +1649,16 @@ const sortType = computed({
 const tableKey = computed({
   get: () => getContextValue("tableKey"),
   set: (nextValue) => setContextValue("tableKey", nextValue),
+});
+
+const getModalHeaderItemClassName = computed({
+  get: () => getContextValue("getModalHeaderItemClassName"),
+  set: (nextValue) => setContextValue("getModalHeaderItemClassName", nextValue),
+});
+
+const getModalBodyItemClassName = computed({
+  get: () => getContextValue("getModalBodyItemClassName"),
+  set: (nextValue) => setContextValue("getModalBodyItemClassName", nextValue),
 });
 
 const onUpdateSortBy = computed({
