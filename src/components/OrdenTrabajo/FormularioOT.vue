@@ -2642,10 +2642,10 @@ const cargarInfoCotizacion = async () => {
           idPromocionSeleccionada:
             paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
           descripcion: paquete.nombre,
-          cantidad: 1,
+          cantidad: paquete.cantidad,
           precioUnitario: paquete.precioUnitario,
           costo: paquete?.costo || 0,
-          subTotal: precioFinalItem(paquete, promocionExistente , 1).toFixed(2),
+          subTotal: precioFinalItem(paquete, promocionExistente , paquete.cantidad).toFixed(2),
 
           detalle: paquete.detallePaquete.map((detalle) => ({
             idDesglosePaquete: detalle.idDesglosePaquete,
@@ -2688,7 +2688,7 @@ const cargarInfoCotizacion = async () => {
           precioUnitario: s.precioUnitario,
           costo: s?.costo || 0,
 
-          subTotal: precioFinalItem(adicional, promocionExistente , s.cantidad).toFixed(2),
+          subTotal: precioFinalItem(s, promocionExistente , s.cantidad).toFixed(2),
 
           promosDisponibles: promosDisponibles || [],
           esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
