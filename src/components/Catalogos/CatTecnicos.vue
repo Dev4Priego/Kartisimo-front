@@ -39,7 +39,26 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="row align-items-start">
-                        <div class="col-md-4">
+                        <div class="col-md-12">
+                            <label class="form-label">Empleado *</label>
+                            <select 
+                                class="form-select"
+                                items
+                                v-model="datosTecnico.idContpaq"
+                                minlength="0"
+                                maxlength="250"
+                                @change="cambiaEmpleadoContpaq"
+                            >
+                                <option
+                                v-for="itm in empleadosContpaq"
+                                :key="itm.idEmpleado"
+                                :value="itm.idEmpleado"
+                                >
+                                {{ itm.codigoEmpleado }} - {{ itm.nombreLargo }} ({{ itm.puesto }})
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mt-2">
                             <label class="form-label">Nombre(s) *</label>
                             <input 
                                 type="text" 
@@ -50,7 +69,7 @@
                                 required
                             />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mt-2">
                             <label class="form-label">Ap. Paterno</label>
                             <input 
                                 type="text" 
@@ -60,7 +79,7 @@
                                 maxlength="50"
                             />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-4 mt-2">
                             <label class="form-label">Ap. Materno</label>
                             <input 
                                 type="text" 
@@ -149,7 +168,8 @@ import Swal from 'sweetalert2'
 import TablaDatos from "../common/TablaDatos.vue";
 
 const tecnicos = ref([]);
-const datosTecnico = ref({id: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, activo: 1});
+const empleadosContpaq = ref([]);
+const datosTecnico = ref({idEmpleado: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, idContpaq: null, activo: 1});
 const editandoTecnico = ref(false);
 const dialogoNuevo = ref(false);
 const sucursales = ref([]);
@@ -227,14 +247,40 @@ const cargarSucursales = async () => {
 	}
 };
 
+const cargarEmpleadosContpaq = async () => {
+	loading.value = true;
+	try {
+		const res = await fetch(`${proxy.$serverIP}api/Contpaq/Empleados`);
+		if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+		const data = await res.json();
+        console.log(data);
+		return data;
+	} catch (error) {
+		console.error("Error al cargar empleados de ContPAQ: ", error);
+	} finally {
+		loading.value = false;
+	}
+};
+
+const cambiaEmpleadoContpaq = () => {
+    const empleado = empleadosContpaq.value.find(
+        itm => itm.idEmpleado === datosTecnico.value.idContpaq
+    );
+    if (!empleado) return;
+    datosTecnico.value.nombres = empleado.nombre ?? '';
+    datosTecnico.value.apePaterno = empleado.apellidoPaterno ?? '';
+    datosTecnico.value.apeMaterno = empleado.apellidoMaterno ?? '';
+    datosTecnico.value.puesto = empleado.puesto ?? '';
+}
+
 const nuevoTecnico = () => {
-    datosTecnico.value = {id: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, activo: 1};
+    datosTecnico.value = {idEmpleado: null, nombres: '', apePaterno: '', apeMaterno: '', puesto: '', telefono: '', correo: '', sucursal: null, idContpaq: null, activo: 1};
     editandoTecnico.value = false;
     dialogoNuevo.value = true;
 }
 
 const editarTecnico = (tecnico) => {
-    datosTecnico.value = {id: tecnico.idEmpleado, nombres: tecnico.nombres, apePaterno: tecnico.apePaterno, apeMaterno: tecnico.apeMaterno, puesto: tecnico.puesto, telefono: tecnico.telefono, correo: tecnico.correo, sucursal: tecnico.idSucursal, activo: tecnico.activo};
+    datosTecnico.value = {idEmpleado: tecnico.idEmpleado, idContpaq: tecnico.idContpaq, nombres: tecnico.nombres, apePaterno: tecnico.apePaterno, apeMaterno: tecnico.apeMaterno, puesto: tecnico.puesto, telefono: tecnico.telefono, correo: tecnico.correo, sucursal: tecnico.idSucursal, activo: tecnico.activo};
     editandoTecnico.value = true;
     dialogoNuevo.value = true;
 }
@@ -252,6 +298,7 @@ const insertarTecnico = async (nuevo) => {
                 puesto: nuevo.puesto,
                 telefono: nuevo.telefono,
                 correo: nuevo.correo,
+                idContpaq: nuevo.idContpaq,
                 activo: 1,
                 usuario: idUsuarioSession
             }),
@@ -275,7 +322,7 @@ const modificarTecnico = async (editar) => {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                idEmpleado: editar.id,
+                idEmpleado: editar.idEmpleado,
                 nombres: editar.nombres,
                 apPaterno: editar.apePaterno,
                 apMaterno: editar.apeMaterno,
@@ -283,6 +330,7 @@ const modificarTecnico = async (editar) => {
                 telefono: editar.telefono,
                 correo: editar.correo,
                 idSucursal: editar.sucursal,
+                idContpaq: editar.idContpaq,
                 activo: editar.activo,
                 usuario: idUsuarioSession
             }),
@@ -335,6 +383,7 @@ const borrarTecnico = async (tecnico) => {
 onMounted( async() => {
     tecnicos.value = await cargarTecnicos();
     sucursales.value = await cargarSucursales();
+    empleadosContpaq.value = await cargarEmpleadosContpaq();
 });
 
 </script>
