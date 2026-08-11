@@ -619,7 +619,7 @@
                             >
                               <button
                                 type="button"
-                                class="btn btn-sm "
+                                class="btn btn-sm"
                                 :class="
                                   item.idPromocionSeleccionada === 0
                                     ? 'btn-light'
@@ -627,9 +627,9 @@
                                 "
                                 @click="
                                   item.idPromocionSeleccionada = 0;
+                                  item.idPromocionAlVuelo = 0;
                                   onCambioPromo(item);
                                 "
-                                :disabled="item.idPromocionAlVuelo > 0"
                               >
                                 Sin promoción
                               </button>
@@ -683,7 +683,9 @@
                                 ></i>
                               </button>
                             </div>
-                            <div  class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                            <div
+                              class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                            >
                               <button
                                 class="btn btn-sm btn-outline-danger"
                                 @click="eliminarLlanta(item.idLlanta)"
@@ -691,7 +693,6 @@
                               >
                                 <i class="bi bi-trash"></i>
                               </button>
-
                             </div>
                           </td>
                         </tr>
@@ -896,7 +897,7 @@
                             >
                               <button
                                 type="button"
-                                class="btn btn-sm "
+                                class="btn btn-sm"
                                 :class="
                                   paq.idPromocionSeleccionada === 0
                                     ? 'btn-light'
@@ -904,9 +905,9 @@
                                 "
                                 @click="
                                   paq.idPromocionSeleccionada = 0;
+                                  paq.idPromocionAlVuelo = 0;
                                   onCambioPromo(paq);
                                 "
-                                :disabled="paq.idPromocionAlVuelo > 0"
                               >
                                 Sin promoción
                               </button>
@@ -960,7 +961,9 @@
                                 ></i>
                               </button>
                             </div>
-                            <div  class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                            <div
+                              class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                            >
                               <button
                                 class="btn btn-sm btn-outline-danger"
                                 @click="eliminarPaquete(paq.idPaquete)"
@@ -968,7 +971,6 @@
                               >
                                 <i class="bi bi-trash"></i>
                               </button>
-
                             </div>
                           </td>
                         </tr>
@@ -1274,7 +1276,7 @@
                             >
                               <button
                                 type="button"
-                                class="btn btn-sm "
+                                class="btn btn-sm"
                                 :class="
                                   extra.idPromocionSeleccionada === 0
                                     ? 'btn-light'
@@ -1282,9 +1284,9 @@
                                 "
                                 @click="
                                   extra.idPromocionSeleccionada = 0;
+                                  extra.idPromocionAlVuelo = 0;
                                   onCambioPromo(extra);
                                 "
-                                :disabled="extra.idPromocionAlVuelo > 0"
                               >
                                 Sin promoción
                               </button>
@@ -1338,7 +1340,9 @@
                                 ></i>
                               </button>
                             </div>
-                            <div  class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                            <div
+                              class="mb-2 d-flex align-items-center gap-2 flex-wrap justify-content-center"
+                            >
                               <button
                                 class="btn btn-sm btn-outline-danger"
                                 @click="
@@ -1347,9 +1351,9 @@
                                   )
                                 "
                                 title="Eliminar servicio"
-                              > <i class="bi bi-trash"></i>
+                              >
+                                <i class="bi bi-trash"></i>
                               </button>
-
                             </div>
                           </td>
                         </tr>
