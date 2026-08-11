@@ -43,7 +43,7 @@
               v-for="item in cotizacionesTransformadas"
               :key="item.idCotizacion"
             >
-              <td>C{{ item.codigo }}</td>
+              <td style="white-space: nowrap;">C{{ item.codigo }}</td>
               <td>{{ item.sucursal }}</td>
               <td>{{ item.fechaCreacion }}</td>
               <td>{{ item.cliente }}</td>
