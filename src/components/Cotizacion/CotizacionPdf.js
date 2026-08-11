@@ -59,6 +59,35 @@ const cell = (text, alignment = "left") => ({
 const promoIsVisible = (promoLabel) =>
   promoLabel && promoLabel !== "(Excluido de promocion)" && promoLabel !== "(Excluido de promoción)";
 
+const promoLabelCell = (promoLabel) => ({
+  columns: [
+    { width: "*", text: "" },
+    {
+      width: "auto",
+      table: {
+        body: [
+          [
+            {
+              text: promoLabel,
+              style: "promoLabel",
+              fillColor: "#dc3545",
+            },
+          ],
+        ],
+      },
+      layout: {
+        hLineWidth: () => 0,
+        vLineWidth: () => 0,
+        paddingLeft: () => 4,
+        paddingRight: () => 4,
+        paddingTop: () => 2,
+        paddingBottom: () => 2,
+      },
+    },
+  ],
+  margin: [0, 2, 0, 2],
+});
+
 const totalCell = ({ precioUnitario = 0, cantidad = 1, total, promoLabel }) => {
   const qty = Number(cantidad) || 1;
   const totalOriginal = (Number(precioUnitario) || 0) * qty;
@@ -75,13 +104,7 @@ const totalCell = ({ precioUnitario = 0, cantidad = 1, total, promoLabel }) => {
             fontSize: 9,
             alignment: "right",
           },
-          {
-            text: promoLabel,
-            fontSize: 9,
-            style: "promoLabel",
-            alignment: "right",
-            margin: [0, 2, 0, 2],
-          },
+          promoLabelCell(promoLabel),
           {
             text: formatMoney(totalFinal),
             color: "green",
@@ -225,7 +248,7 @@ export const buildCotizacionPdfDefinition = async (cotizacion) => {
       {
         columns: [
           [
-            { text: "Blvd. Delta 2002\nesq. Rio Mayo", bold: true, fontSize: 9, lineHeight: 1.2 },
+            { text: "Blvd. Delta 2002\nesq. Río Mayo", bold: true, fontSize: 9, lineHeight: 1.2 },
             { text: "Col. Valle de Jerez C.P 37538", fontSize: 8, lineHeight: 1.2 },
             { text: "Tel. 477 330 6060 y\n477 390 5090", fontSize: 8, lineHeight: 1.2 },
             { text: "delta@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
@@ -243,7 +266,7 @@ export const buildCotizacionPdfDefinition = async (cotizacion) => {
             { text: "torreslanda@kartisimo.mx", fontSize: 8, lineHeight: 1.2 },
           ],
           [
-            { text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastian", bold: true, fontSize: 9, lineHeight: 1.2 },
+            { text: "Blvd. Mariano Escobedo Pte.\n2715 esq. San Sebastián", bold: true, fontSize: 9, lineHeight: 1.2 },
             { text: "Col. La Martinica, C.P. 37500", fontSize: 8, lineHeight: 1.2 },
             { text: "Tel. 477 763 3285 y\n477 763 3284", fontSize: 8, lineHeight: 1.2 },
           ],
@@ -263,13 +286,13 @@ export const buildCotizacionPdfDefinition = async (cotizacion) => {
           [
             {
               width: "auto",
-              text: [{ text: "Fecha de emision: ", bold: true }, formatDate(cliente.fecha || cotizacion?.fechaCreacion)],
+              text: [{ text: "Fecha de emisión: ", bold: true }, formatDate(cliente.fecha || cotizacion?.fechaCreacion)],
               fontSize: 10,
               margin: [0, 0, 10, 6],
             },
             {
               width: "auto",
-              text: [{ text: "Telefono(s): ", bold: true }, { text: formatPhone(cliente.telefono) || "N/A", color: "#444" }],
+              text: [{ text: "Teléfono(s): ", bold: true }, { text: formatPhone(cliente.telefono) || "N/A", color: "#444" }],
               fontSize: 10,
               margin: [0, 0, 10, 6],
             },
@@ -342,8 +365,6 @@ export const buildCotizacionPdfDefinition = async (cotizacion) => {
       promoLabel: {
         fontSize: 8,
         color: "white",
-        background: "#dc3545",
-        margin: [0, 2, 0, 2],
       },
       notaIVA: {
         italics: true,
@@ -360,7 +381,8 @@ export const createCotizacionPdf = async (cotizacion) => {
 
 export const downloadCotizacionPdf = async (cotizacion) => {
   const pdf = await createCotizacionPdf(cotizacion);
-  pdf.download(`Cotizacion_${cotizacion?.codigo || "Kartisimo"}.pdf`);
+  const llantas = cotizacion?.llantasSelecionadas || [];
+  pdf.download(`Cotizacion_${llantas?.[0]?.medidas || ""}_Kartisimo_C${cotizacion?.codigo || ""}.pdf`);
 };
 
 export const printCotizacionPdf = async (cotizacion) => {

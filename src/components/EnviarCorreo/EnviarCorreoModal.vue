@@ -185,7 +185,7 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 			Cuerpo: msg,
 			NombreRemitente: 'Kartisimo ' + datos.usuario.nombre,
 			AdjuntoBase64: pdfBase64,
-			NombreAdjunto: `Cotizacion_${props.cotizacion?.codigo || 'Kartisimo'}.pdf`,
+			NombreAdjunto: `Cotizacion_${props.cotizacion?.llantasSelecionadas?.[0]?.medidas || ""}_Kartisimo_${props.cotizacion?.codigo || ''}.pdf`,
 		}),
 	})
 

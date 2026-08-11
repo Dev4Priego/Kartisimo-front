@@ -216,7 +216,7 @@ const telefonoFormateado = computed({
 
 const telefonoVistaFormateado = computed(() => {
   if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
-    return "Sin telÃ©fono";
+    return "";
 
   let valor = vistaCotizacion.value.cliente.telefono.replace(/\D/g, "");
   if (valor.length > 10) valor = valor.substring(0, 10);
@@ -1915,7 +1915,7 @@ const abrirModalCotizacion = (cotizacion = null) => {
 const tblHeadersModal = [
   { text: "Llanta", value: "llanta", sortable: true },
   { text: "Rango", value: "rango", sortable: true },
-  { text: "Runflat", value: "runflat" },
+  { text: "Runflat", value: "runflat", sortable: true },
   { text: "Codigo", value: "codigo", sortable: true },
   { text: "Medidas", value: "medida", sortable: true },
   { text: "Cantidad", value: "cantidad", sortable: true },
@@ -2362,7 +2362,7 @@ const mostrarVistaPrevia = async (cotizacion, modo = "ver") => {
         creadoPor: data.idCreador,
         cliente: {
           nombre: data.clienteNombre,
-          telefono: data.telefono || "Sin telÃ©fono",
+          telefono: data.telefono || "",
           correo: data.correo || "",
           fecha: data.fechaCreacion,
           observaciones: data.observaciones || "", // âš¡ AQUI

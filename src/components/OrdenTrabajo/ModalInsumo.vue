@@ -123,22 +123,106 @@
                   >
                     <thead class="table-light" style="font-size: 9pt">
                       <tr>
-                        <th class="text-start">Llanta</th>
-                        <th>Rango</th>
-                        <th>Runflat</th>
-                        <th>Código</th>
-                        <th>Medidas</th>
-                        <th class="text-center">Cantidad</th>
-                        <th>Ubicación</th>
-                        <th v-if="mostrarCostos" class="text-end">Costo</th>
+                        <th class="text-start">
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('llanta')"
+                          >
+                            Llanta
+                            <i class="bi ms-1" :class="iconoOrden('llanta')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('rango')"
+                          >
+                            Rango
+                            <i class="bi ms-1" :class="iconoOrden('rango')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('runflat')"
+                          >
+                            Runflat
+                            <i class="bi ms-1" :class="iconoOrden('runflat')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('codigo')"
+                          >
+                            Código
+                            <i class="bi ms-1" :class="iconoOrden('codigo')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('medida')"
+                          >
+                            Medidas
+                            <i class="bi ms-1" :class="iconoOrden('medida')"></i>
+                          </button>
+                        </th>
+                        <th class="text-center">
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('cantidad')"
+                          >
+                            Cantidad
+                            <i class="bi ms-1" :class="iconoOrden('cantidad')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('ubicacion')"
+                          >
+                            Ubicación
+                            <i class="bi ms-1" :class="iconoOrden('ubicacion')"></i>
+                          </button>
+                        </th>
+                        <th v-if="mostrarCostos" class="text-end">
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('costo')"
+                          >
+                            Costo
+                            <i class="bi ms-1" :class="iconoOrden('costo')"></i>
+                          </button>
+                        </th>
 
-                        <th class="text-end">Precio</th>
+                        <th class="text-end">
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('precio')"
+                          >
+                            Precio
+                            <i class="bi ms-1" :class="iconoOrden('precio')"></i>
+                          </button>
+                        </th>
                         <th class="text-end"></th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      <tr v-for="(item, index) in items" :key="index">
+                      <tr
+                        v-for="(item, index) in itemsOrdenados"
+                        :key="item.idInventarioInicial || item.idLlanta || index"
+                      >
                         <td class="text-start">
                           {{ item.marca }} {{ item.modelo }}
                         </td>
@@ -1374,6 +1458,8 @@ const page = ref(1);
 const rowsPerPage = ref(20);
 const loading = ref(false);
 const search = ref("");
+const sortColumn = ref("");
+const sortDirection = ref("asc");
 
 const almacenes = ref([]);
 const selectedAlmacenes = ref([]);
@@ -1383,6 +1469,59 @@ const conceptoOT = ref([]);
 
 const paqueteDisponibles = ref([]);
 const paqueteSeleccionados = ref([]);
+
+const sortAccessors = {
+  llanta: (item) => `${item.marca || ""} ${item.modelo || ""}`.trim(),
+  rango: (item) => item.rango,
+  runflat: (item) => Number(item.runflat || 0),
+  codigo: (item) => item.codigo,
+  medida: (item) => item.medida,
+  cantidad: (item) => Number(item.cantidad || 0),
+  ubicacion: (item) => item.ubicacion,
+  costo: (item) => Number(item.costo || 0),
+  precio: (item) => Number(item.precio || 0),
+};
+
+const compararValores = (a, b) => {
+  if (a == null && b == null) return 0;
+  if (a == null) return -1;
+  if (b == null) return 1;
+
+  if (typeof a === "number" && typeof b === "number") {
+    return a - b;
+  }
+
+  return String(a).localeCompare(String(b), "es-MX", {
+    numeric: true,
+    sensitivity: "base",
+  });
+};
+
+const itemsOrdenados = computed(() => {
+  const accessor = sortAccessors[sortColumn.value];
+  if (!accessor) return items.value;
+
+  const direction = sortDirection.value === "desc" ? -1 : 1;
+
+  return [...items.value].sort(
+    (a, b) => compararValores(accessor(a), accessor(b)) * direction,
+  );
+});
+
+const ordenarPor = (column) => {
+  if (sortColumn.value === column) {
+    sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+    return;
+  }
+
+  sortColumn.value = column;
+  sortDirection.value = "asc";
+};
+
+const iconoOrden = (column) => {
+  if (sortColumn.value !== column) return "bi-arrow-down-up text-muted";
+  return sortDirection.value === "asc" ? "bi-sort-up" : "bi-sort-down";
+};
 
 //Array de las Promociones Vuelo
 const PromocionesVuelo = reactive({
@@ -2231,6 +2370,18 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
   top: 0;
   z-index: 5;
   background: white; /* evita que se vea transparente */
+}
+
+.sortable-table-header {
+  color: inherit;
+  font-size: inherit;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.sortable-table-header:hover,
+.sortable-table-header:focus {
+  color: inherit;
 }
 
 .tabla-resumen-insumos {
