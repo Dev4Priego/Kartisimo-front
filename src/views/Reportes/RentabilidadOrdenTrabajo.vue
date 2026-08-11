@@ -1,13 +1,13 @@
-<template>
+﻿<template>
   <div class="container-fluid p-4 reporte-rentabilidad">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
       <div>
         <h1 class="mb-1">
           <i class="bi bi-graph-up-arrow me-2"></i>
-          Rentabilidad
+          Utilidad
         </h1>
         <p class="text-muted mb-0">
-          Rentabilidad de ordenes de trabajo entregadas
+          Utilidad de ordenes de trabajo entregadas
         </p>
       </div>
 
@@ -39,7 +39,7 @@
       
       <div class="col-12 col-md-4">
         <div class="metric-card border-start border-4 border-warning">
-          <span>Rentabilidad</span>
+          <span>Utilidad</span>
           <strong :class="totales.rentabilidad < 0 ? 'text-danger' : 'text-success'">
             {{ formatoMoneda(totales.rentabilidad) }}
           </strong>
@@ -101,31 +101,155 @@
               <th >Precio Total</th>
 
 
-              <th >Rentabilidad</th>
+              <th >Utilidad</th>
+              <th >Acciones</th>
+
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in reporteFiltrado" :key="item.ot">
-              <td class="fw-semibold text-nowrap">{{ item.ot }}</td>
-              <td>{{ item.sucursal || "N/A" }}</td>
-              <td>{{ formatearFechaHora(item.fechaAlta)  || "N/A"}}</td>
-              <td>{{ formatearFechaHora(item.fechaEntrega) || "N/A" }}</td>
-              <td>{{ item.metodoPago || "N/A" }}</td>
-              <td >{{ formatoMoneda(item.precioSubtotal) }}</td>
-              <td >{{ formatoMoneda(item.costoTotal) }}</td>
-              <td >{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
-              <td >{{ formatoMoneda(item.precioTotal) }}</td>
-
-              <td
-                class=" fw-semibold"
-                :class="Number(item.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'"
+            <template v-for="item in reporteFiltrado" :key="item.ot">
+              <tr
+                class="rentabilidad-row"
+                :class="{ 'table-primary': detalleAbiertoId === item.idOrdenTrabajo }"
+                @click="cargarDetalle(item)"
               >
-                {{ formatoMoneda(item.rentabilidad) }}
-              </td>
-            </tr>
+                <td class="fw-semibold text-nowrap">{{ item.ot }}</td>
+                <td>{{ item.sucursal || "N/A" }}</td>
+                <td>{{ formatearFechaHora(item.fechaAlta)  || "N/A"}}</td>
+                <td>{{ formatearFechaHora(item.fechaEntrega) || "N/A" }}</td>
+                <td>{{ item.metodoPago || "N/A" }}</td>
+                <td >{{ formatoMoneda(item.precioSubtotal) }}</td>
+                <td >{{ formatoMoneda(item.costoTotal) }}</td>
+                <td >{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
+                <td >{{ formatoMoneda(item.precioTotal) }}</td>
+
+                <td
+                  class=" fw-semibold"
+                  :class="Number(item.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'"
+                >
+                  {{ formatoMoneda(item.rentabilidad) }}
+                </td>
+                <td> <button
+                    class="btn btn-sm btn-outline-info"
+                    @click="IrOT(item.idOrdenTrabajo)"
+                    title="Ver"
+                  >
+                    <i class="bi bi-eye"></i>
+                  </button></td>
+              </tr>
+
+              <tr v-if="detalleAbiertoId === item.idOrdenTrabajo" class="detalle-row">
+                <td colspan="11">
+                  <div v-if="detalleLoading" class="detalle-branch text-center">
+                    <div class="spinner-border text-primary"></div>
+                    <p class="text-muted mt-2 mb-0">Cargando detalle de rentabilidad...</p>
+                  </div>
+
+                  <div v-else-if="detalleError" class="detalle-branch text-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    {{ detalleError }}
+                  </div>
+
+                  <div v-else-if="detalleSeleccionado" class="detalle-branch">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                      <div>
+                        <h2 class="h5 mb-1">Detalle {{ detalleSeleccionado.ot }}</h2>
+                        <div class="text-muted small">
+                          {{ detalleSeleccionado.sucursal || "N/A" }} | {{ detalleSeleccionado.cliente || "Cliente N/A" }} | {{ detalleSeleccionado.vehiculo || "Vehiculo N/A" }}
+                        </div>
+                      </div>
+                      <button class="btn btn-sm btn-light" type="button" @click.stop="cerrarDetalle">
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                      <div class="col-12 col-md-3">
+                        <div class="mini-metric">
+                          <span>Precio subtotal</span>
+                          <strong>{{ formatoMoneda(detalleSeleccionado.precioSubtotal) }}</strong>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <div class="mini-metric">
+                          <span>Descuento</span>
+                          <strong>{{ formatoMoneda(detalleSeleccionado.descuentoPromocionTotal) }}</strong>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <div class="mini-metric">
+                          <span>Costo total</span>
+                          <strong>{{ formatoMoneda(detalleSeleccionado.costoTotal) }}</strong>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-3">
+                        <div class="mini-metric">
+                          <span>Utilidad</span>
+                          <strong :class="Number(detalleSeleccionado.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'">
+                            {{ formatoMoneda(detalleSeleccionado.rentabilidad) }}
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+
+          
+
+                    <div class="table-responsive">
+                      <table class="table table-sm align-middle mb-0">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Tipo</th>
+                            <th>Descripcion</th>
+                            <th>Cant.</th>
+                            <th>Precio unit.</th>
+                            <th>Subtotal</th>
+                            <th>Descuento</th>
+                            <th>Precio total</th>
+                            <th>Costo unit.</th>
+                            <th>Costo total</th>
+                            <th>Utilidad</th>
+                            
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="partida in detalleSeleccionado.partidas" :key="`${partida.tipo}-${partida.idDetalle}`">
+                            <td>{{ partida.tipo }}</td>
+                            <td class="descripcion-detalle">{{ partida.descripcion || "N/A" }}</td>
+                            <td>{{ Number(partida.cantidad || 0).toLocaleString("es-MX") }}</td>
+                            
+                            <td>{{ formatoMoneda(partida.precioUnitario) }}</td>
+                            <td>{{ formatoMoneda(partida.precioSubtotal) }}</td>
+                            <td>
+                              {{ formatoMoneda(partida.descuentoPromocion) }}
+                              <span v-if="partida.nombrePromocion" class="text-muted small d-block">
+                                {{ partida.nombrePromocion }}
+                              </span>
+                            </td>
+                            <td>{{ formatoMoneda(partida.precioTotal) }}</td>
+                            <td>{{ Number(partida.costoUnitario || 0).toLocaleString("es-MX") }}</td>
+                            <td>{{ formatoMoneda(partida.costoTotal) }}</td>
+                            <td
+                              class="fw-semibold"
+                              :class="Number(partida.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'"
+                            >
+                              {{ formatoMoneda(partida.rentabilidad) }}
+                            </td>
+                          </tr>
+                          <tr v-if="!detalleSeleccionado.partidas?.length">
+                            <td colspan="9" class="text-center text-muted py-4">
+                              Esta orden no tiene partidas activas para mostrar.
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </template>
 
             <tr v-if="reporteFiltrado.length === 0">
-              <td colspan="8" class="text-center py-5 text-muted">
+              <td colspan="10" class="text-center py-5 text-muted">
                 No hay ordenes entregadas para mostrar.
               </td>
             </tr>
@@ -133,20 +257,31 @@
         </table>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
 import { computed, getCurrentInstance, onMounted, ref } from "vue";
 import { formatearFechaHora } from "@/components/common/funciones";
+import { useRouter } from "vue-router";
 const { proxy } = getCurrentInstance();
 
 const reporte = ref([]);
 const loading = ref(false);
 const error = ref("");
+const detalleLoading = ref(false);
+const detalleError = ref("");
+const detalleSeleccionado = ref(null);
+const detalleAbiertoId = ref(null);
 const busqueda = ref("");
 const fechaDesde = ref("");
 const fechaHasta = ref("");
+const router = useRouter();
+
+const IrOT = (idOT) =>{
+  router.push(`/content/orden-trabajo/${idOT}/work`);
+}
 
 const formatoMoneda = (valor) =>
   new Intl.NumberFormat("es-MX", {
@@ -210,6 +345,49 @@ const limpiarFiltros = () => {
   fechaHasta.value = "";
 };
 
+const cerrarDetalle = () => {
+  detalleAbiertoId.value = null;
+  detalleSeleccionado.value = null;
+  detalleError.value = "";
+  detalleLoading.value = false;
+};
+
+const cargarDetalle = async (item) => {
+  if (!item?.idOrdenTrabajo) return;
+
+  if (detalleAbiertoId.value === item.idOrdenTrabajo) {
+    cerrarDetalle();
+    return;
+  }
+
+  detalleAbiertoId.value = item.idOrdenTrabajo;
+  detalleSeleccionado.value = null;
+  detalleLoading.value = true;
+  detalleError.value = "";
+
+  try {
+    const res = await fetch(
+      `${proxy.$serverIP}api/OrdenTrabajo/reporteRentabilidad/${item.idOrdenTrabajo}/detalle`,
+    );
+
+    if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+
+    const json = await res.json();
+    if (detalleAbiertoId.value === item.idOrdenTrabajo) {
+      detalleSeleccionado.value = json.data || null;
+    }
+  } catch (err) {
+    console.error("Error al cargar detalle de rentabilidad:", err);
+    if (detalleAbiertoId.value === item.idOrdenTrabajo) {
+      detalleError.value = "No se pudo cargar el detalle de rentabilidad.";
+    }
+  } finally {
+    if (detalleAbiertoId.value === item.idOrdenTrabajo) {
+      detalleLoading.value = false;
+    }
+  }
+};
+
 const cargarReporte = async () => {
   loading.value = true;
   error.value = "";
@@ -223,6 +401,7 @@ const cargarReporte = async () => {
 
     const json = await res.json();
     reporte.value = Array.isArray(json.data) ? json.data : [];
+    cerrarDetalle();
   } catch (err) {
     console.error("Error al cargar reporte de rentabilidad:", err);
     error.value = "No se pudo cargar el reporte de rentabilidad.";
@@ -259,6 +438,61 @@ onMounted(cargarReporte);
   font-size: 24px;
 }
 
+.rentabilidad-row {
+  cursor: pointer;
+}
+
+.rentabilidad-row:hover td {
+  background: #eef5ff;
+}
+
+.detalle-row > td {
+  padding: 0;
+  background: #f8fbff;
+  white-space: normal;
+}
+
+.detalle-branch {
+  margin: 0;
+  padding: 16px 16px 16px 24px;
+  border-left: 4px solid #0d6efd;
+  border-bottom: 1px solid #dbe7f8;
+}
+
+.mini-metric {
+  display: grid;
+  gap: 4px;
+  height: 100%;
+  padding: 12px;
+  background: #f8f9fa;
+  border: 1px solid #edf0f2;
+  border-radius: 6px;
+}
+
+.mini-metric span,
+.formula-box span {
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.mini-metric strong {
+  font-size: 18px;
+}
+
+.formula-box {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  background: #fff8e6;
+  border: 1px solid #ffe3a3;
+  border-radius: 6px;
+}
+
+.descripcion-detalle {
+  min-width: 260px;
+  white-space: normal;
+}
+
 th,
 td {
   white-space: nowrap;
@@ -271,3 +505,4 @@ td:nth-child(5) {
   white-space: normal;
 }
 </style>
+

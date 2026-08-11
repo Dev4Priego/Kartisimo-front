@@ -2028,7 +2028,7 @@ const mapearInsumosParaPadre = () => {
       idPromocionVuelo: p.idPromocionVuelo || 0,
       esAlVuelo: !!p.idPromocionVuelo,
       idConceptoOrdenTrabajo: p.idConceptoTrabajo,
-
+      nombre: p.nombre,
       descripcion: p.descripcion,
       cantidad: p.cantidad,
       precioUnitario: p.precioUnitario,

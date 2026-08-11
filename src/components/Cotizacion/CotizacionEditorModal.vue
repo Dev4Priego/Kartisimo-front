@@ -623,7 +623,7 @@
                                 :class="
                                   item.idPromocionSeleccionada === 0
                                     ? 'btn-light'
-                                    : 'btn-outline-light'
+                                    : 'btn-outline-light text-dark'
                                 "
                                 @click="
                                   item.idPromocionSeleccionada = 0;
