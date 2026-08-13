@@ -88,9 +88,13 @@ const agregarTarea = async () => {
 	const payload = {
 		descripcion: nuevaTarea.value.trim(),
 		cantidad: 1,
+		costo: 0,
 		precioUnitario: precio.value,
 		subTotal: precio.value,
 		idPromocion: null,
+		idPromocionVuelo: null,
+		idConceptoTrabajo: 0,
+		idUsuario: props.usuario || 1,
 		isVuelo: false
 	};
 	console.log(payload);

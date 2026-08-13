@@ -1,19 +1,19 @@
 <template>
   <div class="container-fluid p-4">
-    <!-- HEADER -->
     <div class="row my-3 align-items-center">
       <div>
         <h1>
           <i class="bi bi-wrench-adjustable me-2"></i>
-          Órdenes de Trabajo
+          Ordenes de Trabajo
         </h1>
       </div>
     </div>
+
     <div class="row mx-4 align-items-center">
       <div class="col">
         <input
           type="text"
-          placeholder="Buscar órden de trabajo."
+          placeholder="Buscar orden de trabajo."
           class="form-control form-control-md w-50"
           v-model="buscarOrdenTrabajo"
         />
@@ -30,7 +30,6 @@
       </div>
     </div>
 
-    <!-- TOTALES -->
     <div class="row mt-4 mx-4">
       <div class="col" v-for="(v, k) in listaOrdenTrabajo.totales" :key="k">
         <div
@@ -43,124 +42,91 @@
       </div>
     </div>
 
-    <!-- TABLA -->
     <div class="row p-3">
       <div v-if="loading" class="text-center my-5">
         <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">Cargando órdenes...</p>
+        <p class="mt-2 text-muted">Cargando ordenes...</p>
       </div>
 
       <div v-else class="col">
-        <table class="table table-hover align-middle text-center">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>Cliente</th>
-              <th>Vehículo</th>
-              <th>Fecha</th>
-              <th>Técnico</th>
-              <th>Pago</th>
-              <th>Factura</th>
-              <th>Estatus</th>
-              <th>Desechar</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
+        <EasyDataTable
+          :headers="headersOrdenTrabajo"
+          :items="ordenesTabla"
+          :rows-per-page="50"
+          rows-per-page-message="Elementos por pagina:"
+          empty-message="No hay ordenes de trabajo."
+          buttons-pagination
+          alternating
+          table-class-name="table table-hover align-middle text-center mb-0"
+        >
+          <template #item-codigo="ot">
+            <span class="text-nowrap">
+              {{ ot.codigo }}
+              <i
+                v-if="ot.isHija"
+                class="bi bi-node-plus-fill ms-1"
+                title="OT Derivada"
+              ></i>
+            </span>
+          </template>
 
-          <tbody>
-            <template v-if="listaOrdenTrabajoFilter.ordenes.length">
-              <tr
-                v-for="ot in listaOrdenTrabajoFilter.ordenes"
-                :key="ot.idOrdenTrabajo"
+          <template #item-fechaAlta="ot">
+            {{ formatearFecha(ot.fechaAlta) }}
+          </template>
+
+          <template #item-requiereFactura="ot">
+            <i
+              v-if="ot.requiereFactura"
+              class="bi bi-check-circle-fill text-success"
+            ></i>
+            <i v-else class="bi bi-x-circle-fill text-danger"></i>
+          </template>
+
+          <template #item-estadoTabla="ot">
+            <span
+              :class="
+                ot.vigente == 0
+                  ? 'badge bg-danger'
+                  : badgeEstado(ot.estado)
+              "
+            >
+              {{ ot.estadoTabla }}
+            </span>
+          </template>
+
+          <template #item-desecharOrden="ot">
+            <i
+              v-if="ot.desecharLlanta === true"
+              class="bi bi-check-circle-fill text-success"
+            ></i>
+            <i
+              v-else-if="ot.desecharLlanta === false"
+              class="bi bi-x-circle-fill text-danger"
+            ></i>
+            <i v-else class="bi bi-dash-circle-fill text-secondary"></i>
+          </template>
+
+          <template #item-acciones="ot">
+            <div class="d-flex gap-1 justify-content-start">
+              <button
+                class="btn btn-sm btn-outline-info"
+                @click="verOT(ot.idOrdenTrabajo)"
+                title="Ver"
               >
-                <td style="white-space: nowrap">
-                  O{{ ot.prefijo }}-{{ ot.consecutivoSucursal }}
-                  <div v-if="ot.isHija" class="float-sm-end">
-                    <i
-                      class="bi bi-node-plus-fill ms-1"
-                      title="OT Derivada"
-                    ></i>
-                  </div>
-                </td>
-                <td>{{ ot.clienteNombre }}</td>
-                <td>{{ ot.vehiculoModelo }} {{ ot.vehiculoPlacas }}</td>
-                <td>{{ formatearFecha(ot.fechaAlta) }}</td>
-                <td>{{ ot.empleadoNombre }}</td>
-                <td>{{ ot.metodoPago }}</td>
+                <i class="bi bi-eye"></i>
+              </button>
 
-                <!-- FACTURA -->
-                <td>
-                  <i
-                    v-if="ot.requiereFactura"
-                    class="bi bi-check-circle-fill text-success"
-                  ></i>
-                  <i v-else class="bi bi-x-circle-fill text-danger"></i>
-                </td>
-
-                <!-- ESTADO -->
-                <td>
-                  <span
-                    :class="
-                      ot.vigente == 0
-                        ? 'badge bg-danger'
-                        : badgeEstado(ot.estado)
-                    "
-                  >
-                    {{ ot.vigente == 0 ? "Cancelada" : ot.estado }}
-                  </span>
-                </td>
-
-                <!-- DESECHAR LLANTA -->
-                <td>
-                  <i
-                    v-if="ot.desecharLlanta === true"
-                    class="bi bi-check-circle-fill text-success"
-                  ></i>
-                  <i
-                    v-else-if="ot.desecharLlanta === false"
-                    class="bi bi-x-circle-fill text-danger"
-                  ></i>
-                  <i v-else class="bi bi-dash-circle-fill text-secondary"></i>
-                </td>
-
-                <!-- ACCIONES -->
-                <td>
-                  <div class="d-flex gap-1 justify-content-start">
-                    <button
-                      class="btn btn-sm btn-outline-info"
-                      @click="verOT(ot.idOrdenTrabajo)"
-                    >
-                      <i class="bi bi-eye"></i>
-                    </button>
-
-                    <button v-if="(ot.idSucursal == userData.usuario.idSucursal || userData.usuario.idSucursal == 1)"
-                      class="btn btn-sm btn-outline-warning"
-                      @click="editarOT(ot.idOrdenTrabajo)"
-                    >
-                      <i class="bi bi-pencil-square"></i>
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            </template>
-            <template v-else>
-              <tr>
-                <td colspan="10" class="text-center py-5">
-                  <div>
-                    <i
-                      class="bi bi-inbox"
-                      style="font-size: 3rem; color: #ccc"
-                    ></i>
-                    <p class="mt-3 text-muted fw-semibold">
-                      No hay órdenes de trabajo.
-                    </p>
-                    
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </tbody>
-        </table>
+              <button
+                v-if="ot.idSucursal == userData.usuario.idSucursal || userData.usuario.idSucursal == 1"
+                class="btn btn-sm btn-outline-warning"
+                @click="editarOT(ot.idOrdenTrabajo)"
+                title="Editar"
+              >
+                <i class="bi bi-pencil-square"></i>
+              </button>
+            </div>
+          </template>
+        </EasyDataTable>
       </div>
     </div>
   </div>
@@ -170,6 +136,7 @@
 import { ref, onMounted, getCurrentInstance, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
+import EasyDataTable from "vue3-easy-data-table";
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -181,10 +148,22 @@ const listaOrdenTrabajo = ref({
   totales: { finalizado: 0, enCurso: 0, creado: 0 },
 });
 const buscarOrdenTrabajo = ref("");
-/* ===== MODAL ===== */
 const otEditar = ref({});
 let modalEditar;
 let modalIncidente;
+
+const headersOrdenTrabajo = [
+  { text: "#", value: "codigo", sortable: true },
+  { text: "Cliente", value: "clienteNombre", sortable: true },
+  { text: "Vehiculo", value: "vehiculoTabla", sortable: true },
+  { text: "Fecha", value: "fechaAlta", sortable: true },
+  { text: "Tecnico", value: "empleadoNombre", sortable: true },
+  { text: "Pago", value: "metodoPago", sortable: true },
+  { text: "Factura", value: "requiereFactura", sortable: true },
+  { text: "Estatus", value: "estadoTabla", sortable: true },
+  { text: "Desechar", value: "desecharOrden", sortable: true },
+  { text: "Acciones", value: "acciones", width: 110 },
+];
 
 const abrirModalEditar = async (ot) => {
   const resp = await fetch(
@@ -208,25 +187,22 @@ const guardarEdicion = async () => {
   cargarOrdenTrabajo();
 };
 
-/* ===== DATA ===== */
-const cargarOrdenTrabajo = async ( options = {} ) => {
+const cargarOrdenTrabajo = async (options = {}) => {
   options.headers = {
-    'Content-Type': 'application/json',
-    ...options.headers
+    "Content-Type": "application/json",
+    ...options.headers,
   };
 
-  // Adjuntar el token Bearer si existe
- 
   if (userData?.token) {
-    
-    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+    options.headers["Authorization"] = `Bearer ${userData?.token}`;
   }
-  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`,options);
+
+  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`, options);
   const result = await res.json();
   listaOrdenTrabajo.value = result.data;
   loading.value = false;
 };
-// ======= FILTRAR ORDENES ========
+
 const listaOrdenTrabajoFilter = computed(() => {
   if (!buscarOrdenTrabajo.value) return listaOrdenTrabajo.value;
 
@@ -236,7 +212,7 @@ const listaOrdenTrabajoFilter = computed(() => {
     const orden = `o${ot?.prefijo?.toLowerCase() ?? ""}-${
       ot?.consecutivoSucursal
     }`;
-    const nombre = ot?.clienteNombre.toLowerCase() ?? "";
+    const nombre = ot?.clienteNombre?.toLowerCase() ?? "";
     return orden.includes(busqueda) || nombre.includes(busqueda);
   });
 
@@ -246,40 +222,45 @@ const listaOrdenTrabajoFilter = computed(() => {
   };
 });
 
+const ordenesTabla = computed(() =>
+  (listaOrdenTrabajoFilter.value.ordenes || []).map((ot) => ({
+    ...ot,
+    codigo: `O${ot.prefijo}-${ot.consecutivoSucursal}`,
+    vehiculoTabla: `${ot.vehiculoModelo || ""} ${ot.vehiculoPlacas || ""}`.trim(),
+    estadoTabla: ot.vigente == 0 ? "Cancelada" : ot.estado,
+    desecharOrden:
+      ot.desecharLlanta === true ? "Si" : ot.desecharLlanta === false ? "No" : "N/A",
+  })),
+);
+
 const verOT = (id) => {
   router.push(`/content/orden-trabajo/${id}`);
 };
 
-const cargarEmpleados = async (options={}) => {
+const cargarEmpleados = async (options = {}) => {
   options.headers = {
-    'Content-Type': 'application/json',
-    ...options.headers
+    "Content-Type": "application/json",
+    ...options.headers,
   };
 
-  // Adjuntar el token Bearer si existe
-  
   if (userData?.token) {
-    
-    options.headers['Authorization'] = `Bearer ${userData?.token}`;
+    options.headers["Authorization"] = `Bearer ${userData?.token}`;
   }
+
   try {
     const res = await fetch(
       proxy.$serverIP +
         "api/Empleado/getEmpleado?idSucursal=" +
-        userSession.usuario.idSucursal, options
+        userData.usuario.idSucursal,
+      options,
     );
     if (!res.ok) throw new Error("Error en la respuesta");
-    const data = await res.json();
-
-    itmEmpleados.value = data;
-    // console.log('Empleados: '+ JSON.stringify(data))
-    // console.log('Empleados: '+ JSON.stringify(itmEmpleados.value))
+    itmEmpleados.value = await res.json();
   } catch (error) {
     console.error("Error al cargar empleado:", error);
   }
 };
 
-/* ===== HELPERS ===== */
 const formatearFecha = (f) => new Date(f).toLocaleDateString("es-MX");
 
 const badgeEstado = (e) =>
@@ -287,7 +268,7 @@ const badgeEstado = (e) =>
     Creado: "badge bg-secondary",
     "En curso": "badge bg-warning text-dark",
     Finalizado: "badge bg-success",
-    Entregado: "badge bg-primary"
+    Entregado: "badge bg-primary",
   }[e]);
 
 const colorTotal = (k) =>
@@ -319,12 +300,10 @@ const indiceActual = computed(() => {
   return estados.indexOf(otEditar.value.estado);
 });
 
-// ¿ya pasó este estado?
 const esCompletado = (estado) => {
   return estados.indexOf(estado) < indiceActual.value;
 };
 
-// clases del círculo
 const clasePaso = (estado) => {
   const idx = estados.indexOf(estado);
 
@@ -339,7 +318,6 @@ const clasePaso = (estado) => {
   return "bg-light border";
 };
 
-// clases de la línea entre pasos
 const lineaClase = (estado) => {
   return estados.indexOf(estado) < indiceActual.value
     ? "bg-success"

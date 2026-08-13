@@ -1656,7 +1656,7 @@ function validate(path) {
 
     "vehiculo.placas": () => {
       if (value.trim() === "") return "Placas obligatorias";
-
+      if(value.length < 6) return "Las placas deben tener minimo 6 carcateres"
       return null;
     },
 

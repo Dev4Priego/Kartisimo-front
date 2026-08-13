@@ -65,8 +65,8 @@ const loggeduser = {
 };
 
 const normalizarPrecio = (valor) => {
-  const precio = Number.parseFloat(valor);
-  return Number.isFinite(precio) ? Number(precio.toFixed(2)) : 0;
+  const precio = Number.parseInt(valor);
+  return Number.isFinite(precio) ? Number(precio) : 0;
 };
 
 const sucursales = [

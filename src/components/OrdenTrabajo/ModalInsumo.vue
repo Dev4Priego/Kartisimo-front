@@ -496,7 +496,7 @@
                             :class="
                               ll.idPromocionSeleccionada === 0
                                 ? 'btn-light'
-                                : 'btn-outline-light'
+                                : 'btn-outline-light text-dark'
                             "
                             @click="limpiarPromoRapida(ll)"
                             :disabled="ll.idPromocionVuelo > 0"
@@ -971,7 +971,9 @@
                           @input="recalcularSubtotal(det)"
                         />
                       </td>
-                      <td v-if="mostrarCostos"></td>
+                      <td v-if="mostrarCostos">
+                        <input v-if="det.idConceptoTrabajo == 7" type="number" min="0" class="form-control form-control-sm" v-model.number="det.comision">
+                      </td>
                       <td v-if="userData.usuario.idUsuario == 1">
                         <span>{{ calcularComision(det).toLocaleString('es-MX', {
                           style: 'currency',

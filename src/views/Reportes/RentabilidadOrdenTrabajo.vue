@@ -1,17 +1,21 @@
 ﻿<template>
   <div class="container-fluid p-4 reporte-rentabilidad">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div
+      class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4"
+    >
       <div>
         <h1 class="mb-1">
           <i class="bi bi-graph-up-arrow me-2"></i>
           Utilidad
         </h1>
-        <p class="text-muted mb-0">
-          Utilidad de ordenes de trabajo entregadas
-        </p>
+        <p class="text-muted mb-0">Utilidad de ordenes de trabajo entregadas</p>
       </div>
 
-      <button class="btn btn-outline-primary" type="button" @click="cargarReporte">
+      <button
+        class="btn btn-outline-primary"
+        type="button"
+        @click="cargarReporte"
+      >
         <i class="bi bi-arrow-clockwise me-2"></i>
         Actualizar
       </button>
@@ -36,11 +40,13 @@
           <strong>{{ formatoMoneda(totales.costo) }}</strong>
         </div>
       </div>
-      
+
       <div class="col-12 col-md-4">
         <div class="metric-card border-start border-4 border-warning">
           <span>Utilidad</span>
-          <strong :class="totales.rentabilidad < 0 ? 'text-danger' : 'text-success'">
+          <strong
+            :class="totales.rentabilidad < 0 ? 'text-danger' : 'text-success'"
+          >
             {{ formatoMoneda(totales.rentabilidad) }}
           </strong>
         </div>
@@ -50,13 +56,13 @@
     <div class="bg-white rounded shadow-sm p-3 mb-3">
       <div class="row g-3 align-items-end">
         <div class="col-12 col-lg-5">
-          <label class="form-label fw-semibold">Buscar</label>
-          <input
-            v-model.trim="busqueda"
-            class="form-control"
-            type="text"
-            placeholder="OT o Sucursal"
-          />
+          <label class="form-label fw-semibold">Sucursal</label>
+          <select v-model="sucursalSeleccionada" class="form-select">
+            <option value="">Todas sucursales</option>
+            <option v-for="s in sucursalesDisponibles" :key="s" :value="s">
+              {{ s }}
+            </option>
+          </select>
         </div>
         <div class="col-12 col-sm-6 col-lg-3">
           <label class="form-label fw-semibold">Desde</label>
@@ -89,110 +95,235 @@
         <table class="table table-hover align-middle mb-0">
           <thead class="table-light">
             <tr>
-              <th>OT</th>
-              <th>Sucursal</th>
-              <th>Fecha Alta</th>
-              <th>Fecha Entrega</th>
-              <th>Metodo Pago</th>
-              <th >Precio subtotal</th>
-              <th >Costo total</th>
-              <th >Total Descuento</th>
-             
-              <th >Precio Total</th>
-
-
-              <th >Utilidad</th>
-              <th >Acciones</th>
-
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('ot')"
+                >
+                  OT <i :class="iconoOrden('ot')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('sucursal')"
+                >
+                  Sucursal <i :class="iconoOrden('sucursal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('fechaAlta')"
+                >
+                  Fecha Alta <i :class="iconoOrden('fechaAlta')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('fechaEntrega')"
+                >
+                  Fecha Entrega <i :class="iconoOrden('fechaEntrega')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('metodoPago')"
+                >
+                  Metodo Pago <i :class="iconoOrden('metodoPago')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('precioSubtotal')"
+                >
+                  Precio subtotal <i :class="iconoOrden('precioSubtotal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('costoTotal')"
+                >
+                  Costo total <i :class="iconoOrden('costoTotal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('descuentoPromocionTotal')"
+                >
+                  Total Descuento
+                  <i :class="iconoOrden('descuentoPromocionTotal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('precioTotal')"
+                >
+                  Precio Total <i :class="iconoOrden('precioTotal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('rentabilidad')"
+                >
+                  Utilidad <i :class="iconoOrden('rentabilidad')"></i>
+                </button>
+              </th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
-            <template v-for="item in reporteFiltrado" :key="item.ot">
+            <template v-for="item in reporteOrdenado" :key="item.rowKey">
               <tr
                 class="rentabilidad-row"
-                :class="{ 'table-primary': detalleAbiertoId === item.idOrdenTrabajo }"
+                :class="{
+                  'table-primary': detalleAbiertoId === item.idOrdenTrabajo,
+                }"
                 @click="cargarDetalle(item)"
               >
                 <td class="fw-semibold text-nowrap">{{ item.ot }}</td>
                 <td>{{ item.sucursal || "N/A" }}</td>
-                <td>{{ formatearFechaHora(item.fechaAlta)  || "N/A"}}</td>
+                <td>{{ formatearFechaHora(item.fechaAlta) || "N/A" }}</td>
                 <td>{{ formatearFechaHora(item.fechaEntrega) || "N/A" }}</td>
                 <td>{{ item.metodoPago || "N/A" }}</td>
-                <td >{{ formatoMoneda(item.precioSubtotal) }}</td>
-                <td >{{ formatoMoneda(item.costoTotal) }}</td>
-                <td >{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
-                <td >{{ formatoMoneda(item.precioTotal) }}</td>
+                <td>{{ formatoMoneda(item.precioSubtotal) }}</td>
+                <td>{{ formatoMoneda(item.costoTotal) }}</td>
+                <td>{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
+                <td>{{ formatoMoneda(item.precioTotal) }}</td>
 
                 <td
-                  class=" fw-semibold"
-                  :class="Number(item.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'"
+                  class="fw-semibold"
+                  :class="
+                    Number(item.rentabilidad || 0) < 0
+                      ? 'text-danger'
+                      : 'text-success'
+                  "
                 >
                   {{ formatoMoneda(item.rentabilidad) }}
                 </td>
-                <td> <button
+                <td>
+                  <button
                     class="btn btn-sm btn-outline-info"
-                    @click="IrOT(item.idOrdenTrabajo)"
+                    @click.stop="IrOT(item.idOrdenTrabajo)"
                     title="Ver"
                   >
                     <i class="bi bi-eye"></i>
-                  </button></td>
+                  </button>
+                </td>
               </tr>
 
-              <tr v-if="detalleAbiertoId === item.idOrdenTrabajo" class="detalle-row">
+              <tr
+                v-if="detalleAbiertoId === item.idOrdenTrabajo"
+                class="detalle-row"
+              >
                 <td colspan="11">
                   <div v-if="detalleLoading" class="detalle-branch text-center">
                     <div class="spinner-border text-primary"></div>
-                    <p class="text-muted mt-2 mb-0">Cargando detalle de rentabilidad...</p>
+                    <p class="text-muted mt-2 mb-0">
+                      Cargando detalle de rentabilidad...
+                    </p>
                   </div>
 
-                  <div v-else-if="detalleError" class="detalle-branch text-danger">
+                  <div
+                    v-else-if="detalleError"
+                    class="detalle-branch text-danger"
+                  >
                     <i class="bi bi-exclamation-triangle me-2"></i>
                     {{ detalleError }}
                   </div>
 
                   <div v-else-if="detalleSeleccionado" class="detalle-branch">
-                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+                    <div
+                      class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3"
+                    >
                       <div>
-                        <h2 class="h5 mb-1">Detalle {{ detalleSeleccionado.ot }}</h2>
+                        <h2 class="h5 mb-1">
+                          Detalle {{ detalleSeleccionado.ot }}
+                        </h2>
                         <div class="text-muted small">
-                          {{ detalleSeleccionado.sucursal || "N/A" }} | {{ detalleSeleccionado.cliente || "Cliente N/A" }} | {{ detalleSeleccionado.vehiculo || "Vehiculo N/A" }}
+                          {{ detalleSeleccionado.sucursal || "N/A" }} |
+                          {{ detalleSeleccionado.cliente || "Cliente N/A" }} |
+                          {{ detalleSeleccionado.vehiculo || "Vehiculo N/A" }}
                         </div>
                       </div>
-                      <button class="btn btn-sm btn-light" type="button" @click.stop="cerrarDetalle">
+                      <button
+                        class="btn btn-sm btn-light"
+                        type="button"
+                        @click.stop="cerrarDetalle"
+                      >
                         <i class="bi bi-x-lg"></i>
                       </button>
                     </div>
 
                     <div class="row g-3 mb-3">
-                      <div class="col-12 col-md-3">
+                      <div class="col-12 col-md-2">
                         <div class="mini-metric">
                           <span>Precio subtotal</span>
-                          <strong>{{ formatoMoneda(detalleSeleccionado.precioSubtotal) }}</strong>
+                          <strong>{{
+                            formatoMoneda(detalleSeleccionado.precioSubtotal)
+                          }}</strong>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <div class="mini-metric">
+                          <span>Descuento</span>
+                          <strong>{{
+                            formatoMoneda(
+                              detalleSeleccionado.descuentoPromocionTotal,
+                            )
+                          }}</strong>
                         </div>
                       </div>
                       <div class="col-12 col-md-3">
                         <div class="mini-metric">
-                          <span>Descuento</span>
-                          <strong>{{ formatoMoneda(detalleSeleccionado.descuentoPromocionTotal) }}</strong>
+                          <span>Precio total</span>
+                          <strong>{{
+                            formatoMoneda(detalleSeleccionado.precioTotal)
+                          }}</strong>
                         </div>
                       </div>
                       <div class="col-12 col-md-3">
                         <div class="mini-metric">
                           <span>Costo total</span>
-                          <strong>{{ formatoMoneda(detalleSeleccionado.costoTotal) }}</strong>
+                          <strong>{{
+                            formatoMoneda(detalleSeleccionado.costoTotal)
+                          }}</strong>
                         </div>
                       </div>
-                      <div class="col-12 col-md-3">
+                      <div class="col-12 col-md-2">
                         <div class="mini-metric">
                           <span>Utilidad</span>
-                          <strong :class="Number(detalleSeleccionado.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'">
-                            {{ formatoMoneda(detalleSeleccionado.rentabilidad) }}
+                          <strong
+                            :class="
+                              Number(detalleSeleccionado.rentabilidad || 0) < 0
+                                ? 'text-danger'
+                                : 'text-success'
+                            "
+                          >
+                            {{
+                              formatoMoneda(detalleSeleccionado.rentabilidad)
+                            }}
                           </strong>
                         </div>
                       </div>
                     </div>
-
-          
 
                     <div class="table-responsive">
                       <table class="table table-sm align-middle mb-0">
@@ -208,29 +339,52 @@
                             <th>Costo unit.</th>
                             <th>Costo total</th>
                             <th>Utilidad</th>
-                            
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="partida in detalleSeleccionado.partidas" :key="`${partida.tipo}-${partida.idDetalle}`">
+                          <tr
+                            v-for="partida in detalleSeleccionado.partidas"
+                            :key="`${partida.tipo}-${partida.idDetalle}`"
+                          >
                             <td>{{ partida.tipo }}</td>
-                            <td class="descripcion-detalle">{{ partida.descripcion || "N/A" }}</td>
-                            <td>{{ Number(partida.cantidad || 0).toLocaleString("es-MX") }}</td>
-                            
+                            <td class="descripcion-detalle">
+                              {{ partida.descripcion || "N/A" }}
+                            </td>
+                            <td>
+                              {{
+                                Number(partida.cantidad || 0).toLocaleString(
+                                  "es-MX",
+                                )
+                              }}
+                            </td>
+
                             <td>{{ formatoMoneda(partida.precioUnitario) }}</td>
                             <td>{{ formatoMoneda(partida.precioSubtotal) }}</td>
                             <td>
                               {{ formatoMoneda(partida.descuentoPromocion) }}
-                              <span v-if="partida.nombrePromocion" class="text-muted small d-block">
+                              <span
+                                v-if="partida.nombrePromocion"
+                                class="text-muted small d-block"
+                              >
                                 {{ partida.nombrePromocion }}
                               </span>
                             </td>
                             <td>{{ formatoMoneda(partida.precioTotal) }}</td>
-                            <td>{{ Number(partida.costoUnitario || 0).toLocaleString("es-MX") }}</td>
+                            <td>
+                              {{
+                                Number(
+                                  partida.costoUnitario || 0,
+                                ).toLocaleString("es-MX")
+                              }}
+                            </td>
                             <td>{{ formatoMoneda(partida.costoTotal) }}</td>
                             <td
                               class="fw-semibold"
-                              :class="Number(partida.rentabilidad || 0) < 0 ? 'text-danger' : 'text-success'"
+                              :class="
+                                Number(partida.rentabilidad || 0) < 0
+                                  ? 'text-danger'
+                                  : 'text-success'
+                              "
                             >
                               {{ formatoMoneda(partida.rentabilidad) }}
                             </td>
@@ -248,7 +402,7 @@
               </tr>
             </template>
 
-            <tr v-if="reporteFiltrado.length === 0">
+            <tr v-if="reporteOrdenado.length === 0">
               <td colspan="10" class="text-center py-5 text-muted">
                 No hay ordenes entregadas para mostrar.
               </td>
@@ -257,7 +411,6 @@
         </table>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -277,11 +430,13 @@ const detalleAbiertoId = ref(null);
 const busqueda = ref("");
 const fechaDesde = ref("");
 const fechaHasta = ref("");
+const sortKey = ref("");
+const sortDirection = ref("");
 const router = useRouter();
 
-const IrOT = (idOT) =>{
+const IrOT = (idOT) => {
   router.push(`/content/orden-trabajo/${idOT}/work`);
-}
+};
 
 const formatoMoneda = (valor) =>
   new Intl.NumberFormat("es-MX", {
@@ -314,18 +469,96 @@ const fechaEnRango = (fecha) => {
   return true;
 };
 
+const sucursalSeleccionada = ref("");
+
+const sucursalesDisponibles = computed(() => {
+  const arr = Array.from(
+    new Set(reporte.value.map((r) => r.sucursal).filter(Boolean)),
+  );
+  return arr.sort((a, b) => String(a).localeCompare(String(b)));
+});
+
 const reporteFiltrado = computed(() => {
   const texto = normalizar(busqueda.value);
+  const sucSel = normalizar(sucursalSeleccionada.value);
 
   return reporte.value.filter((item) => {
     const coincideTexto =
       !texto ||
-      [item.ot, item.sucursal, item.nombre, item.cliente, item.vehiculo]
-        .some((valor) => normalizar(valor).includes(texto));
+      [item.ot, item.sucursal, item.nombre, item.cliente, item.vehiculo].some(
+        (valor) => normalizar(valor).includes(texto),
+      );
 
-    return coincideTexto && fechaEnRango(item.fecha);
+    const coincideSucursal =
+      !sucSel || normalizar(item.sucursal || "").includes(sucSel);
+
+    return coincideTexto && coincideSucursal && fechaEnRango(item.fecha);
   });
 });
+
+const camposNumericos = new Set([
+  "precioSubtotal",
+  "costoTotal",
+  "descuentoPromocionTotal",
+  "precioTotal",
+  "rentabilidad",
+]);
+const camposFecha = new Set(["fechaAlta", "fechaEntrega"]);
+
+const valorOrdenable = (item, campo) => {
+  const valor = item?.[campo];
+
+  if (camposNumericos.has(campo)) {
+    return Number(valor || 0);
+  }
+
+  if (camposFecha.has(campo)) {
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? 0 : fecha.getTime();
+  }
+
+  return normalizar(valor);
+};
+
+const reporteOrdenado = computed(() => {
+  if (!sortKey.value || !sortDirection.value) {
+    return reporteFiltrado.value;
+  }
+
+  const direccion = sortDirection.value === "asc" ? 1 : -1;
+
+  return [...reporteFiltrado.value].sort((a, b) => {
+    const valorA = valorOrdenable(a, sortKey.value);
+    const valorB = valorOrdenable(b, sortKey.value);
+
+    if (valorA < valorB) return -1 * direccion;
+    if (valorA > valorB) return 1 * direccion;
+    return 0;
+  });
+});
+
+const ordenarPor = (campo) => {
+  if (sortKey.value === campo) {
+    if (sortDirection.value === "asc") {
+      sortDirection.value = "desc";
+      return;
+    }
+
+    sortKey.value = "";
+    sortDirection.value = "";
+    return;
+  }
+
+  sortKey.value = campo;
+  sortDirection.value = "asc";
+};
+
+const iconoOrden = (campo) => {
+  if (sortKey.value !== campo) return "bi bi-arrow-down-up ms-1 text-muted";
+  return sortDirection.value === "asc"
+    ? "bi bi-sort-up ms-1"
+    : "bi bi-sort-down ms-1";
+};
 
 const totales = computed(() =>
   reporteFiltrado.value.reduce(
@@ -343,6 +576,7 @@ const limpiarFiltros = () => {
   busqueda.value = "";
   fechaDesde.value = "";
   fechaHasta.value = "";
+  sucursalSeleccionada.value = "";
 };
 
 const cerrarDetalle = () => {
@@ -400,7 +634,12 @@ const cargarReporte = async () => {
     if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
 
     const json = await res.json();
-    reporte.value = Array.isArray(json.data) ? json.data : [];
+    reporte.value = Array.isArray(json.data)
+      ? json.data.map((item, index) => ({
+          ...item,
+          rowKey: `${item.idOrdenTrabajo || "sin-id"}-${index}`,
+        }))
+      : [];
     cerrarDetalle();
   } catch (err) {
     console.error("Error al cargar reporte de rentabilidad:", err);
@@ -444,6 +683,25 @@ onMounted(cargarReporte);
 
 .rentabilidad-row:hover td {
   background: #eef5ff;
+}
+
+.sort-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sort-header:hover {
+  color: #0d6efd;
 }
 
 .detalle-row > td {
@@ -505,4 +763,3 @@ td:nth-child(5) {
   white-space: normal;
 }
 </style>
-

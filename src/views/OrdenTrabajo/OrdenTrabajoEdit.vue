@@ -340,6 +340,13 @@
             Derivar OT
           </button>
           <button
+            class="btn btn-sm shadow-sm ms-2 btn-dark"
+            @click="costeoModal = true"
+          >
+            <i class="bi bi-calculator-fill me-3"></i>
+            Costeo
+          </button>
+          <button
             class="btn btn-sm shadow-sm ms-2 btn-primary"
             @click="PrintOtFunction()"
           >
@@ -699,6 +706,10 @@
   </div>
 
   <ImprimirOT v-model="modelValue" :OT="prepararDatosImpresion()" />
+  <CosteoOrdenTrabajoModal
+    v-model="costeoModal"
+    :idOrdenTrabajo="otEditar.idOrdenTrabajo || 0"
+  />
 </template>
 
 <script setup>
@@ -720,6 +731,7 @@ import OtrosSection from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Adicional
 import Incidentes from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Incidentes.vue";
 import ImprimirOT from "@/components/OrdenTrabajo/ImprimirOT.vue";
 import Refacciones from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Refacciones.vue";
+import CosteoOrdenTrabajoModal from "@/components/OrdenTrabajo/EditarOrdenTrabajo/CosteoOrdenTrabajoModal.vue";
 import { parse } from "vue/compiler-sfc";
 import axios from "axios";
 import Toastify from "toastify-js";
@@ -734,6 +746,7 @@ const itmEmpleados = ref({});
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const modelValue = ref(false);
+const costeoModal = ref(false);
 const showModal = ref(false);
 const insumosCambios = ref(false);
 const aplicaDesecharLlanta = ref(false);
