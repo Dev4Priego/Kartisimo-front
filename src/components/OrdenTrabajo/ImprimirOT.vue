@@ -55,7 +55,13 @@
             </span>
           </div>
         </div>
+        <div v-if="props.OT?.observacion.length > 0">
+          <h6 class="text-uppercase text-muted mb-2">Observaciones</h6>
+      <div class="card border-1 shadow-sm mb-2">
+        <span class="py-3 px-3">{{props.OT?.observacion}}</span>
+      </div>
 
+        </div>
         <!-- DATOS VEHICULO + CLIENTE -->
         <div class="card border-1 shadow-sm mb-2 card-datos">
           <div class="card-body">
@@ -401,10 +407,7 @@
             </ul>
           </div>
         </template>
-       <h5 class="text-uppercase text-muted mb-2">Observaciones</h5>
-		<div class="card border-1 shadow-sm mb-2">
-			<span class="py-3 px-3">{{props.OT?.observacion}}</span>
-		</div>
+       
 		<hr>
 
         <!-- TOTAL -->

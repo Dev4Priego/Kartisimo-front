@@ -11,14 +11,29 @@
         <p class="text-muted mb-0">Utilidad de ordenes de trabajo entregadas</p>
       </div>
 
-      <button
-        class="btn btn-outline-primary"
-        type="button"
-        @click="cargarReporte"
-      >
-        <i class="bi bi-arrow-clockwise me-2"></i>
-        Actualizar
-      </button>
+      <div class="d-flex flex-wrap gap-2">
+        <button
+          class="btn btn-outline-success"
+          type="button"
+          :disabled="loading || exportando || reporteOrdenado.length === 0"
+          @click="exportarXlsx"
+        >
+          <span
+            v-if="exportando"
+            class="spinner-border spinner-border-sm me-2"
+          ></span>
+          <i v-else class="bi bi-filetype-xlsx me-2"></i>
+          Exportar XLSX
+        </button>
+        <button
+          class="btn btn-outline-primary"
+          type="button"
+          @click="cargarReporte"
+        >
+          <i class="bi bi-arrow-clockwise me-2"></i>
+          Actualizar
+        </button>
+      </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -204,7 +219,7 @@
                 <td>{{ formatearFechaHora(item.fechaEntrega) || "N/A" }}</td>
                 <td>{{ item.metodoPago || "N/A" }}</td>
                 <td>{{ formatoMoneda(item.precioSubtotal) }}</td>
-                <td>{{ formatoMoneda(item.costoTotal) }}</td>
+                <td class="text-danger">{{ formatoMoneda(item.costoTotal) }}</td>
                 <td>{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
                 <td>{{ formatoMoneda(item.precioTotal) }}</td>
 
@@ -338,6 +353,7 @@
                             <th>Precio total</th>
                             <th>Costo unit.</th>
                             <th>Costo total</th>
+                            <th>Refacciones</th>
                             <th>Utilidad</th>
                           </tr>
                         </thead>
@@ -378,6 +394,15 @@
                               }}
                             </td>
                             <td>{{ formatoMoneda(partida.costoTotal) }}</td>
+                            <td>
+                              {{ formatoMoneda(partida.refaccionTotal) }}
+                              <span
+                                v-if="partida.refaccionDetalle"
+                                class="text-muted small d-block"
+                              >
+                                {{ partida.refaccionDetalle }}
+                              </span>
+                            </td>
                             <td
                               class="fw-semibold"
                               :class="
@@ -390,7 +415,7 @@
                             </td>
                           </tr>
                           <tr v-if="!detalleSeleccionado.partidas?.length">
-                            <td colspan="9" class="text-center text-muted py-4">
+                            <td colspan="11" class="text-center text-muted py-4">
                               Esta orden no tiene partidas activas para mostrar.
                             </td>
                           </tr>
@@ -403,7 +428,7 @@
             </template>
 
             <tr v-if="reporteOrdenado.length === 0">
-              <td colspan="10" class="text-center py-5 text-muted">
+              <td colspan="11" class="text-center py-5 text-muted">
                 No hay ordenes entregadas para mostrar.
               </td>
             </tr>
@@ -427,6 +452,7 @@ const detalleLoading = ref(false);
 const detalleError = ref("");
 const detalleSeleccionado = ref(null);
 const detalleAbiertoId = ref(null);
+const exportando = ref(false);
 const busqueda = ref("");
 const fechaDesde = ref("");
 const fechaHasta = ref("");
@@ -443,6 +469,18 @@ const formatoMoneda = (valor) =>
     style: "currency",
     currency: "MXN",
   }).format(Number(valor || 0));
+
+const formatoFechaArchivo = (fecha = new Date()) => {
+  const pad = (valor) => String(valor).padStart(2, "0");
+  return `${fecha.getFullYear()}${pad(fecha.getMonth() + 1)}${pad(
+    fecha.getDate(),
+  )}_${pad(fecha.getHours())}${pad(fecha.getMinutes())}`;
+};
+
+const fechaExcel = (valor) => {
+  const fecha = new Date(valor);
+  return Number.isNaN(fecha.getTime()) ? null : fecha;
+};
 
 const normalizar = (valor) =>
   String(valor ?? "")
@@ -577,6 +615,205 @@ const limpiarFiltros = () => {
   fechaDesde.value = "";
   fechaHasta.value = "";
   sucursalSeleccionada.value = "";
+};
+
+const descargarArchivo = (buffer, nombreArchivo) => {
+  const blob = new Blob([buffer], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = nombreArchivo;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
+const exportarXlsx = async () => {
+  const datos = reporteOrdenado.value;
+  if (!datos.length) return;
+
+  exportando.value = true;
+
+  try {
+    const ExcelJS = await import("exceljs");
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Rentabilidad", {
+      views: [{ state: "frozen", ySplit: 9 }],
+    });
+
+    workbook.creator = "Kartisimo";
+    workbook.created = new Date();
+
+    worksheet.mergeCells("A1:J1");
+    worksheet.getCell("A1").value = "Reporte de Utilidad";
+    worksheet.getCell("A1").font = {
+      bold: true,
+      size: 16,
+      color: { argb: "FFFFFFFF" },
+    };
+    worksheet.getCell("A1").fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF111827" },
+    };
+    worksheet.getCell("A1").alignment = { vertical: "middle" };
+    worksheet.getRow(1).height = 28;
+
+    worksheet.addRow([]);
+    worksheet.addRow([
+      "Sucursal",
+      sucursalSeleccionada.value || "Todas",
+      "Desde",
+      fechaDesde.value || "Sin filtro",
+      "Hasta",
+      fechaHasta.value || "Sin filtro",
+    ]);
+    worksheet.addRow([
+      "Ordenamiento",
+      sortKey.value
+        ? `${sortKey.value} ${sortDirection.value === "desc" ? "DESC" : "ASC"}`
+        : "Sin orden",
+      "Registros",
+      datos.length,
+    ]);
+    worksheet.addRow([]);
+    worksheet.addRow(["Resumen"]);
+    worksheet.addRow([
+      "Ordenes entregadas",
+      datos.length,
+      "Precio total",
+      totales.value.precio,
+      "Costo total",
+      totales.value.costo,
+      "Utilidad",
+      totales.value.rentabilidad,
+    ]);
+    worksheet.addRow([]);
+
+    const encabezado = [
+      "OT",
+      "Sucursal",
+      "Fecha alta",
+      "Fecha entrega",
+      "Metodo pago",
+      "Precio subtotal",
+      "Costo total",
+      "Total descuento",
+      "Precio total",
+      "Utilidad",
+    ];
+    worksheet.addRow(encabezado);
+
+    datos.forEach((item) => {
+      worksheet.addRow([
+        item.ot || "",
+        item.sucursal || "N/A",
+        fechaExcel(item.fechaAlta),
+        fechaExcel(item.fechaEntrega),
+        item.metodoPago || "N/A",
+        Number(item.precioSubtotal || 0),
+        Number(item.costoTotal || 0),
+        Number(item.descuentoPromocionTotal || 0),
+        Number(item.precioTotal || 0),
+        Number(item.rentabilidad || 0),
+      ]);
+    });
+
+    worksheet.mergeCells("A6:J6");
+    worksheet.getCell("A6").font = { bold: true };
+
+    const filaResumen = worksheet.getRow(7);
+    filaResumen.font = { bold: true };
+    [4, 6, 8].forEach((col) => {
+      filaResumen.getCell(col).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
+    });
+
+    const filaHeader = worksheet.getRow(9);
+    filaHeader.font = { bold: true, color: { argb: "FFFFFFFF" } };
+    filaHeader.fill = {
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: "FF2563EB" },
+    };
+    filaHeader.alignment = { vertical: "middle", horizontal: "center" };
+    filaHeader.height = 22;
+
+    worksheet.autoFilter = {
+      from: "A9",
+      to: "J9",
+    };
+
+    worksheet.columns = [
+      { width: 14 },
+      { width: 24 },
+      { width: 22 },
+      { width: 22 },
+      { width: 22 },
+      { width: 18 },
+      { width: 18 },
+      { width: 18 },
+      { width: 18 },
+      { width: 18 },
+    ];
+
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.border = {
+          top: { style: "thin", color: { argb: "FFE5E7EB" } },
+          left: { style: "thin", color: { argb: "FFE5E7EB" } },
+          bottom: { style: "thin", color: { argb: "FFE5E7EB" } },
+          right: { style: "thin", color: { argb: "FFE5E7EB" } },
+        };
+
+        if (rowNumber >= 9) {
+          cell.alignment = { vertical: "middle" };
+        }
+      });
+    });
+
+    for (let rowNumber = 10; rowNumber <= worksheet.rowCount; rowNumber++) {
+      const row = worksheet.getRow(rowNumber);
+      row.getCell(3).numFmt = "dd/mm/yyyy hh:mm";
+      row.getCell(4).numFmt = "dd/mm/yyyy hh:mm";
+
+      [6, 7, 8, 9, 10].forEach((col) => {
+        row.getCell(col).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
+        row.getCell(col).alignment = {
+          vertical: "middle",
+          horizontal: "right",
+        };
+      });
+
+      row.getCell(10).font = {
+        bold: true,
+        color: {
+          argb: Number(row.getCell(10).value || 0) < 0 ? "FFDC3545" : "FF198754",
+        },
+      };
+
+      if (rowNumber % 2 === 0) {
+        row.eachCell((cell) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFF8FAFC" },
+          };
+        });
+      }
+    }
+
+    const buffer = await workbook.xlsx.writeBuffer();
+    descargarArchivo(buffer, `Rentabilidad_OT_${formatoFechaArchivo()}.xlsx`);
+  } catch (err) {
+    console.error("Error al exportar rentabilidad:", err);
+    alert("No se pudo exportar el reporte de rentabilidad.");
+  } finally {
+    exportando.value = false;
+  }
 };
 
 const cerrarDetalle = () => {

@@ -2,8 +2,8 @@
     <div class="row mx-4 no-imprimir">
       <h2><i class="bi bi-file-ruled-fill me-2"></i> Cotizaciones</h2>
     </div>
-    <div class="row m-4 no-imprimir">
-      <div class="col-5 d-flex align-items-center">
+    <div class="row m-4 g-2 no-imprimir">
+      <div class="col-12 col-lg-4 d-flex align-items-center">
         <input
           class="form-control"
           placeholder="Buscar por código, cliente, fecha..."
@@ -12,8 +12,26 @@
         />
       </div>
 
-      <div class="col-5 d-flex align-items-center">
-        <label for="select" class="form-label m-2">Estatus: </label>
+      <div class="col-12 col-lg-3 d-flex align-items-center">
+        <label for="selectSucursalCotizacion" class="form-label m-2">Sucursal:</label>
+        <select
+          id="selectSucursalCotizacion"
+          v-model="filtroSucursal"
+          class="form-select"
+        >
+          <option value="">Todas</option>
+          <option
+            v-for="sucursal in sucursalesCotizacion"
+            :key="sucursal"
+            :value="sucursal"
+          >
+            {{ sucursal }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-12 col-lg-3 d-flex align-items-center">
+        <label for="selectEstatusCotizacion" class="form-label m-2">Estatus:</label>
         <select v-model="filtroEstatus" class="form-select">
           <option value="">Todos</option>
           <option value="Creada">Activos</option>
@@ -23,7 +41,7 @@
         </select>
       </div>
 
-      <div class="col-2 d-flex align-items-right">
+      <div class="col-12 col-lg-2 d-flex align-items-right">
         <button
           class="btn btn-primary position-relative shadow w-100"
           @click="abrirModalCotizacion()"
@@ -69,6 +87,16 @@ const busquedaCotizaciones = computed({
 const filtroEstatus = computed({
   get: () => getContextValue("filtroEstatus"),
   set: (nextValue) => setContextValue("filtroEstatus", nextValue),
+});
+
+const filtroSucursal = computed({
+  get: () => getContextValue("filtroSucursal"),
+  set: (nextValue) => setContextValue("filtroSucursal", nextValue),
+});
+
+const sucursalesCotizacion = computed({
+  get: () => getContextValue("sucursalesCotizacion"),
+  set: (nextValue) => setContextValue("sucursalesCotizacion", nextValue),
 });
 
 const abrirModalCotizacion = computed({

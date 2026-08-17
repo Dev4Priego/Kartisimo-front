@@ -109,7 +109,7 @@
                             <li  class="nav-item mb-2">
                                 <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/rentabilidad')">
                                     <i class="bi bi-graph-up-arrow me-2"></i>
-                                    Rentabilidad
+                                    Utilidad
                                     
                                 </button>
                                 

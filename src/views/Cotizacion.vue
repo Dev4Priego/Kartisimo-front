@@ -31,6 +31,7 @@ import {
   downloadCotizacionPdf,
   printCotizacionPdf,
 } from "@/components/Cotizacion/CotizacionPdf";
+import {AplicarPromo , onCambioPromo, onCambioPromoPaquete ,onCambioPromoServicio} from '@/components/common/funciones'
 
 const { proxy } = getCurrentInstance();
 const router = useRouter();
@@ -81,6 +82,7 @@ const mostrarVista = ref(false);
 const tituloModal = ref("Nueva Cotización");
 const codigoCotizacionEnEdicion = ref(null); // null = creación nueva
 const filtroEstatus = ref("");
+const filtroSucursal = ref("");
 const loading = ref(true);
 
 const itemsSelected = ref([]);
@@ -880,117 +882,11 @@ const aplicarPromo = (precio, promoIndividual, promoGlobal) => {
   return precio;
 };
 
-// aplica la promocion
-const onCambioPromo = (item) => {
-  // Funciona para los 3 servicios
-  const idSel = item.idPromocionSeleccionada; // normal
-  const idVuelo = item.idPromocionAlVuelo; // vuelo
-
-  // Si no hay ninguna promoción
-  if (!idSel && !idVuelo) {
-    item.promo = null;
-    item.precioConPromo = item.precioUnitario;
-    item.isVuelo = null;
-    item.idPromocionSeleccionada = 0;
-    item.idPromocionAlVuelo = 0;
-    item.promo = null;
-    item.isVuelo = false;
-    item.precioConPromo = item.precioUnitario;
-    item.mostrarEditorPromo = false;
-    return;
-  }
-
-  item.mostrarEditorPromo = false;
-
-  // Buscamos la promoción correspondiente
-  const promo = (item.promosAplicables || []).find(
-    (p) => p.idPromocion === idSel || p.idPromocion === idVuelo,
-  );
-
-  item.promo = promo || null;
-  item.isVuelo = !!idVuelo;
-
-  // Calcular precio con la promo
-  const base = item.precioUnitario * item.cantidad;
-  if (promo) {
-    item.precioConPromo = promo.tipo
-      ? base * (1 - promo.valor / 100)
-      : Math.max(0, base - promo.valor);
-  } else {
-    item.precioConPromo = base;
-  }
-};
 
 // aplica promo seleccionada
-const onCambioPromoPaquete = (paquete) => {
-  const idSel = paquete.idPromocionSeleccionada;
 
-  if (!idSel) {
-    paquete.promo = null;
-    paquete.precioConPromo = paquete.precioUnitario;
-    return;
-  }
 
-  const promo = paquete.promosAplicables.find((p) => p.idPromocion === idSel);
-  paquete.promo = promo || null;
 
-  const base = paquete.precioUnitario * paquete.cantidad;
-
-  if (promo) {
-    paquete.precioConPromo = promo.tipo
-      ? base * (1 - promo.valor / 100)
-      : Math.max(0, base - promo.valor);
-  } else {
-    paquete.precioConPromo = base;
-  }
-};
-
-const onCambioPromoServicio = (servicio) => {
-  const idSel = servicio.idPromocionSeleccionada;
-
-  if (!idSel) {
-    servicio.promo = null;
-    servicio.precioConPromo = servicio.precioUnitario;
-    return;
-  }
-
-  const promo = servicio.promosAplicables.find((p) => p.idPromocion === idSel);
-  servicio.promo = promo || null;
-
-  const base = servicio.precioUnitario * servicio.cantidad ?? 1;
-
-  servicio.precioConPromo = promo
-    ? promo.tipo
-      ? base * (1 - promo.valor / 100)
-      : Math.max(0, base - promo.valor)
-    : base;
-};
-
-const precioFinalItem = (item, promoGlobal, cantidad) => {
-  const base = item.precioUnitario * cantidad ?? 1;
-
-  // Si tiene promo individual â†’ aplica esa
-  // si tiene tipo Promo false es Monto, si es true es Porcentual
-  if (item.promo && item.promo.valor != null) {
-    return item.promo.tipo
-      ? base * (1 - item.promo.valor / 100)
-      : Math.max(0, base - item.promo.valor);
-  }
-
-  // Si tiene promo general y no estÃ¡ excluido â†’ aplica
-  if (
-    promoGlobal &&
-    promoGlobal.valor != null &&
-    !item.excluirPromocionGeneral
-  ) {
-    return promoGlobal.tipo
-      ? base * (1 - promoGlobal.valor / 100)
-      : Math.max(0, base - promoGlobal.valor);
-  }
-
-  // Si estÃ¡ excluido o sin promo
-  return base;
-};
 
 watch(
   () => cotizacionForm.paquetes,
@@ -1138,14 +1034,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
         // ðŸ”¹ Calcular precio con la función estÃ¡ndar
         const precioBase = p.precioUnitario;
-        const precioConPromo = precioFinalItem(
-          {
-            precioUnitario: precioBase,
-            promo: promoIndividual,
-            excluirPromocionGeneral: p.excluirPromocionGeneral,
-          },
-          promoGeneral.value,
-        );
+        const precioConPromo = AplicarPromo(p);
 
         return {
           ...base,
@@ -1207,15 +1096,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
         // 3. Calcular precio con promo
         const precioBase = ll.precioUnitario;
-        const precioConPromo = precioFinalItem(
-          {
-            precioUnitario: precioBase,
-            promo: promoIndividual,
-            excluirPromocionGeneral: ll.excluirPromocionGeneral,
-          },
-          promoGeneral.value,
-        );
-
+        const precioConPromo = AplicarPromo(ll);
         return {
           idDetalleCotizacionLlanta: ll.idDetalleCotizacionLlanta,
           idLlanta: ll.idLlanta,
@@ -1274,14 +1155,7 @@ const cargarFormulario = async (cotizacion = null) => {
 
         const precioBase = s.precioUnitario ?? 0;
 
-        const precioConPromo = precioFinalItem(
-          {
-            precioUnitario: precioBase,
-            promo: promoIndividual,
-            excluirPromocionGeneral: s.excluirPromocionGeneral,
-          },
-          promoGeneral.value,
-        );
+        const precioConPromo = AplicarPromo(s);
 
         return {
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
@@ -1642,23 +1516,25 @@ const subtotalLlantas = computed(() => {
   return cotizacionForm.llantas.reduce((sum, ll) => {
     const cantidad = ll.cantidad ?? 1;
 
-    return sum + precioFinalItem(ll, promoGeneral.value, cantidad);
+    return sum + AplicarPromo(ll);
   }, 0);
 });
 
 const subtotalPaquete = computed(() => {
   return cotizacionForm.paquetes.reduce((sum, p) => {
     const cantidad = p.cantidad ?? 1;
-    return sum + precioFinalItem(p, promoGeneral.value, cantidad);
+    return sum + AplicarPromo(p);
   }, 0);
 });
 
 const subtotalExtras = computed(() => {
   return cotizacionForm.serviciosExtras.reduce((sum, s) => {
     const cantidad = s.cantidad ?? 1;
-    return sum + precioFinalItem(s, promoGeneral.value, cantidad);
+    return sum + AplicarPromo(s);
   }, 0);
 });
+
+
 
 const totalCotizacion = computed(() => {
   return subtotalLlantas.value + subtotalPaquete.value + subtotalExtras.value;
@@ -1931,6 +1807,8 @@ const cotizacionesTransformadas = computed(() => {
       const texto = busquedaCotizaciones.value.toLowerCase().trim();
       if (filtroEstatus.value && c.estatus !== filtroEstatus.value)
         return false;
+      if (filtroSucursal.value && c.sucursal !== filtroSucursal.value)
+        return false;
       if (!texto) return true;
 
       const valores = [
@@ -1963,6 +1841,18 @@ const cotizacionesTransformadas = computed(() => {
       estatus: typeof c.estatus === "string" ? c.estatus : "Desconocido",
       acciones: c,
     }));
+});
+
+const sucursalesCotizacion = computed(() => {
+  const nombres = cotizacionesRealizadas.value
+    .map((c) => c.sucursal)
+    .filter((sucursal) => sucursal && String(sucursal).trim());
+
+  return [...new Set(nombres)].sort((a, b) =>
+    String(a).localeCompare(String(b), "es-MX", {
+      sensitivity: "base",
+    }),
+  );
 });
 
 watch(itemsSelected, (seleccionados) => {
@@ -2569,6 +2459,8 @@ const cotizacionContext = {
   tituloModal,
   codigoCotizacionEnEdicion,
   filtroEstatus,
+  filtroSucursal,
+  sucursalesCotizacion,
   loading,
   itemsSelected,
   paquetesSeleccionados,
@@ -2615,7 +2507,7 @@ const cotizacionContext = {
   onCambioPromo,
   onCambioPromoPaquete,
   onCambioPromoServicio,
-  precioFinalItem,
+  AplicarPromo,
   cargarConcpetoTrabajo,
   cargarFormulario,
   cargarPromosRapidas,

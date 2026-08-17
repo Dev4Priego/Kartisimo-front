@@ -1347,7 +1347,7 @@ import ModalAdicional from "./ModalAdicional.vue";
 import { reactive } from "vue";
 import Swal from "sweetalert2";
 const { proxy } = getCurrentInstance();
-
+import {AplicarPromo} from '@/components/common/funciones'
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
@@ -1613,15 +1613,7 @@ const subtotalItem = (item) => {
   return toNumber(item?.precioUnitario) * cantidadItem(item);
 };
 
-const precioFinalItem = (item, promo) => {
-  const base = toNumber(item?.precioUnitario) * cantidadItem(item);
 
-  if (!promo) return base;
-
-  return promo.tipo
-    ? base * (1 - toNumber(promo.valor) / 100)
-    : Math.max(0, base - toNumber(promo.valor));
-};
 
 const recalcularSubtotal = (item) => {
   // Resolver promo actual según selección
@@ -1644,7 +1636,7 @@ const recalcularSubtotal = (item) => {
   item.promo = promo;
   item.esAlVuelo = !!item.idPromocionVuelo;
   // Calcular precio final con la promo vigente
-  const precioFinal = precioFinalItem(item, promo);
+  const precioFinal = AplicarPromo(item, promo);
   item.precioConPromo = precioFinal;
   item.subTotal = Number(precioFinal.toFixed(2));
 };
@@ -2090,7 +2082,7 @@ const onTogglePaquete = async (paqueteBase) => {
   const precioUnitario = toNumber(paqueteBase.precioUnitario);
   const cantidad = 1;
   const subTotal = Number(
-    precioFinalItem({ precioUnitario, cantidad }, null).toFixed(2),
+    AplicarPromo({ precioUnitario, cantidad }, null).toFixed(2),
   );
 
   paquetes.value.push({

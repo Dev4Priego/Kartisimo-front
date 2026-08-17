@@ -655,7 +655,11 @@
             <Refacciones
               :otId="otEditar.idOrdenTrabajo"
               :usuario="idUsuarioSession"
+              :insumos="otEditar.insumo"
               :key="otEditar.idOrdenTrabajo"
+              @refaccion-guardada="
+                autoGuardarEdicion('Orden guardada despues de actualizar refacciones')
+              "
             />
           </div>
           <div class="col-12 col-lg-5">
@@ -749,8 +753,11 @@ const modelValue = ref(false);
 const costeoModal = ref(false);
 const showModal = ref(false);
 const insumosCambios = ref(false);
+const autoguardando = ref(false);
 const aplicaDesecharLlanta = ref(false);
 const insumoOriginal = ref(normalizeInsumo({}));
+import {AplicarPromo} from '@/components/common/funciones'
+
 /**
  * 🔒 Estado inicial seguro
  */
@@ -1020,12 +1027,27 @@ const cargarOrden = async (options = {}) => {
             const promosDisponibles = await obtenerPromosPorInventario(
               llanta.idInventarioInicial,
             );
+            
+            // Construir objeto de promoción existente
             const promocionExistente = {
               idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
               valor: llanta?.valorPromocion || llanta?.valorVuelo || 0,
               tipo: llanta?.tipoPromocion || llanta?.tipoVuelo || null,
               nombre: llanta?.nombrePromocion || llanta?.nombreVuelo || "",
             };
+            
+            // Crear item con promo ya asignado
+            const itemConPromo = {
+              ...llanta,
+              cantidad: llanta.cantidad,
+              precioUnitario: llanta.precioUnitario,
+              promo: promocionExistente,
+            };
+            
+            // AHORA calcular el precio con promo
+            const precioConPromo = AplicarPromo(itemConPromo);
+            console.log("precioConPromo:", precioConPromo);
+            
             return {
               idDetalleOTLlanta: llanta.idDetalleOTLlanta, // no se agrega
               idLlanta: llanta.idLlanta,
@@ -1042,17 +1064,8 @@ const cargarOrden = async (options = {}) => {
               cantidad: llanta.cantidad,
               precioUnitario: llanta.precioUnitario,
               costo:llanta.costo,
-              subTotal: Number(
-                (
-                  llanta.cantidad *
-                  precioFinalItem({
-                    precioUnitario: llanta.precioUnitario,
-                    idPromocion: llanta.idPromocion || llanta.idPromocionVuelo,
-                    valorPromocion: llanta.valorPromocion || llanta.valorVuelo,
-                    tipoPromocion: llanta.tipoPromocion || llanta.tipoVuelo,
-                  })
-                ).toFixed(2),
-              ), // campo estetico
+              subTotal: precioConPromo,
+               // campo estetico
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
@@ -1065,6 +1078,8 @@ const cargarOrden = async (options = {}) => {
           json.paquetes.map(async (paquete) => {
             const promosDisponibles =
               (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
+            
+            // Construir objeto de promoción existente
             const promocionExistente = {
               idPromocion:
                 paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
@@ -1072,6 +1087,18 @@ const cargarOrden = async (options = {}) => {
               tipo: paquete?.tipoPromocion || paquete?.tipoVuelo || null,
               nombre: paquete?.nombrePromocion || paquete?.nombreVuelo || "",
             };
+            
+            // Crear item con promo ya asignado
+            const itemConPromo = {
+              ...paquete,
+              cantidad: 1,
+              precioUnitario: paquete.precioUnitario,
+              promo: promocionExistente,
+            };
+            
+            // AHORA calcular el precio con promo
+            const precioConPromo = AplicarPromo(itemConPromo);
+            
             return {
               idDetalleOTPaquete: paquete.idDetalleOTPaquete || 0,
               idPaquete: paquete.idPaquete,
@@ -1085,19 +1112,7 @@ const cargarOrden = async (options = {}) => {
               cantidad: 1,
               precioUnitario: paquete.precioUnitario,
               costo:paquete.costo,
-              subTotal: Number(
-                (
-                  1 *
-                  precioFinalItem({
-                    precioUnitario: paquete.precioUnitario,
-                    idPromocion:
-                      paquete.idPromocion || paquete.idPromocionVuelo,
-                    valorPromocion:
-                      paquete.valorPromocion || paquete.valorVuelo,
-                    tipoPromocion: paquete.tipoPromocion || paquete.tipoVuelo,
-                  })
-                ).toFixed(2),
-              ),
+              subTotal: Number((precioConPromo).toFixed(2)),
 
               detalle: paquete.detalle.map((detalle) => ({
                 idDesglosePaquete: detalle.idDesglosePaquete,
@@ -1118,12 +1133,25 @@ const cargarOrden = async (options = {}) => {
             const promosDisponibles =
               (await obtenerPromosGeneralesParaServicio()) || [];
 
+            // Construir objeto de promoción existente
             const promocionExistente = {
               idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
               valor: s?.valorPromocion || s?.valorVuelo || 0,
               tipo: s?.tipoPromocion || s?.tipoVuelo || null,
               nombre: s?.nombrePromocion || s?.nombreVuelo || "",
             };
+            
+            // Crear item con promo ya asignado
+            const itemConPromo = {
+              ...s,
+              cantidad: s.cantidad,
+              precioUnitario: s.precioUnitario,
+              promo: promocionExistente,
+            };
+            
+            // AHORA calcular el precio con promo
+            const precioConPromo = AplicarPromo(itemConPromo);
+            
             return {
               idDetalleOTServicio: s.idDetalleOTServicio,
               idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
@@ -1139,17 +1167,7 @@ const cargarOrden = async (options = {}) => {
               cantidad: s.cantidad,
               precioUnitario: s.precioUnitario,
               costo:s.costo,
-              subTotal: Number(
-                (
-                  s.cantidad *
-                  precioFinalItem({
-                    precioUnitario: s.precioUnitario,
-                    idPromocion: s.idPromocion || s.idPromocionVuelo,
-                    valorPromocion: s.valorPromocion || s.valorVuelo,
-                    tipoPromocion: s.tipoPromocion || s.tipoVuelo,
-                  })
-                ).toFixed(2),
-              ),
+              subTotal: Number((precioConPromo).toFixed(2)),
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
@@ -1197,31 +1215,7 @@ const cargarOrden = async (options = {}) => {
   calcularTotales();
 };
 
-const precioFinalItem = (item, promoGlobal) => {
-  console.log("ITEM:", item);
-  const base = item.precioUnitario ?? 0;
 
-  // Aplica promoción individual si existe
-  if (item.idPromocion && item.valorPromocion != null) {
-    return item.tipoPromocion
-      ? base * (1 - item.valorPromocion / 100) // porcentaje
-      : Math.max(0, base - item.valorPromocion); // monto fijo
-  }
-
-  // Aplica promo global si no está excluido
-  if (
-    promoGlobal &&
-    promoGlobal.valor != null &&
-    !item.excluirPromocionGeneral
-  ) {
-    return promoGlobal.tipo
-      ? base * (1 - promoGlobal.valor / 100) // porcentaje
-      : Math.max(0, base - promoGlobal.valor); // monto fijo
-  }
-
-  // Sin promoción
-  return base;
-};
 // Normaliza insumos para comparar: tipos consistentes y orden determinista
 function normalizeInsumo(insumo) {
   const s = insumo || { llantas: [], paquetes: [], adicionales: [] };
@@ -1252,7 +1246,18 @@ function normalizeInsumo(insumo) {
     adicionales: normArr(s.adicionales),
   };
 }
-const actualizarInsumos = (payload) => {
+const autoGuardarEdicion = async (mensaje) => {
+  if (autoguardando.value) return;
+
+  autoguardando.value = true;
+  try {
+    await guardarEdicion({ mensaje });
+  } finally {
+    autoguardando.value = false;
+  }
+};
+
+const actualizarInsumos = async (payload) => {
   // payload = { insumo, totales }
   // Normalizar y asignar todo el insumo de forma consistente
   otEditar.value.insumo = normalizeInsumo({
@@ -1265,6 +1270,8 @@ const actualizarInsumos = (payload) => {
   otEditar.value.totales.descuento = payload.totales.descuento;
   otEditar.value.totales.iva = payload.totales.iva;
   otEditar.value.totales.total = payload.totales.total;
+
+  await autoGuardarEdicion("Orden guardada despues de actualizar insumos");
 };
 // provicional, lo ideal es usar computed
 const PrintOtFunction = () => {
@@ -1767,8 +1774,10 @@ const validarClienteVehiculoEdicion = () => {
   return true;
 };
 
-const guardarEdicion = async () => {
+const guardarEdicion = async (opciones = {}) => {
   const idOT = otEditar.value.idOrdenTrabajo;
+  const mensajeExito =
+    opciones?.mensaje || "Orden de trabajo editada correctamente";
 
   //console.log("usuario edita" , otEditar.observacion);
 
@@ -1802,7 +1811,7 @@ const guardarEdicion = async () => {
       { headers: { Authorization: `Bearer ${data45?.token}` } },
     );
 
-    mostrarToast("success", "Orden de trabajo editada correctamente");
+    mostrarToast("success", mensajeExito);
     console.log("OT actualizada:", response.data);
     // Recargar OT y luego desactivar indicador de cambios
     await cargarOrden();

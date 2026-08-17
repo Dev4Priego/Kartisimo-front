@@ -86,31 +86,82 @@
                       <th>Descripcion</th>
                       <th class="text-end">Cant.</th>
                       <th class="text-end">Precio unit.</th>
-                      <th class="text-end">Venta</th>
+                      <th class="text-end">Precio</th>
                       <th class="text-end">Costo unit.</th>
-                      <th class="text-end">Costo total</th>
+                      <th class="text-end">Costo Insumo</th>
+                      <th class="text-end">Refacciones</th>
+                      <th class="text-end">Costo final</th>
                       <th class="text-end">Utilidad</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr
+                    <template
                       v-for="partida in costosPrecios"
                       :key="`${partida.tipo}-${partida.idDetalle}`"
                     >
-                      <td>{{ etiquetaTipo(partida.tipo) }}</td>
-                      <td>{{ partida.descripcion }}</td>
-                      <td class="text-end">{{ numero(partida.cantidad) }}</td>
-                      <td class="text-end">{{ moneda(partida.precioUnitario) }}</td>
-                      <td class="text-end">{{ moneda(partida.precioTotal) }}</td>
-                      <td class="text-end">{{ moneda(partida.costoUnitario) }}</td>
-                      <td class="text-end">{{ moneda(partida.costoFinal) }}</td>
-                      <td
-                        class="text-end"
-                        :class="partida.utilidad < 0 ? 'text-danger' : 'text-success'"
-                      >
-                        {{ moneda(partida.utilidad) }}
-                      </td>
-                    </tr>
+                      <tr>
+                        <td>{{ etiquetaTipo(partida.tipo) }}</td>
+                        <td>{{ partida.descripcion }}</td>
+                        <td class="text-end">{{ numero(partida.cantidad) }}</td>
+                        <td class="text-end">{{ moneda(partida.precioUnitario) }}</td>
+                        <td class="text-end">
+                          <div v-if="tienePromocion(partida)" class="precio-promocion">
+                            <span class="precio-anterior">
+                              {{ moneda(partida.precioSubtotal) }}
+                            </span>
+                            <span class="badge bg-danger promo-badge">
+                              {{ etiquetaPromocion(partida) }}
+                            </span>
+                            <span class="precio-final">
+                              {{ moneda(partida.precioTotal) }}
+                            </span>
+                          </div>
+                          <span v-else>{{ moneda(partida.precioTotal) }}</span>
+                        </td>
+                        <td class="text-end">{{ moneda(partida.costoUnitario) }}</td>
+                        <td class="text-end text-danger">{{ moneda(partida.costoTotal) }}</td>
+                        <td class="text-end">{{ moneda(partida.refaccionTotal) }}</td>
+                        <td class="text-end text-danger">{{ moneda(partida.costoFinal) }}</td>
+                        <td
+                          class="text-end"
+                          :class="partida.utilidad < 0 ? 'text-danger' : 'text-success'"
+                        >
+                          {{ moneda(partida.utilidad) }}
+                        </td>
+                      </tr>
+                      <tr v-if="refaccionesDePartida(partida).length">
+                        <td colspan="10" class="p-0 refacciones-cell">
+                          <div class="refacciones-desglose">
+                            <div class="fw-semibold small mb-2">
+                              Refacciones vinculadas
+                            </div>
+                            <table class="table table-sm mb-0 refacciones-table">
+                              <thead>
+                                <tr>
+                                  <th>Refaccion</th>
+                                  <th class="text-end">Cant.</th>
+                                  <th class="text-end">Precio unit.</th>
+                                  <th class="text-end">Total</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr
+                                  v-for="refaccion in refaccionesDePartida(partida)"
+                                  :key="`ref-${refaccion.idDetalle}`"
+                                >
+                                  <td>{{ refaccion.descripcion }}</td>
+                                  <td class="text-end">{{ numero(refaccion.cantidad) }}</td>
+                                  <td class="text-end">{{ moneda(refaccion.costoUnitario) }}</td>
+                                  <td class="text-end fw-semibold">
+                                    {{ moneda(refaccion.costoTotal) }}
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>
@@ -178,10 +229,16 @@ const costeo = ref(null);
 
 const partidas = computed(() => costeo.value?.partidas || []);
 const costosPrecios = computed(() =>
-  partidas.value.filter((partida) => partida.tipo !== "Comision"),
+  partidas.value.filter(
+    (partida) =>
+      partida.tipo !== "Comision" && partida.tipo !== "RefaccionDetalle",
+  ),
 );
 const comisiones = computed(() =>
   partidas.value.filter((partida) => partida.tipo === "Comision"),
+);
+const refaccionesDetalle = computed(() =>
+  partidas.value.filter((partida) => partida.tipo === "RefaccionDetalle"),
 );
 const totalCostosPrecios = computed(() =>
   costosPrecios.value.reduce(
@@ -192,6 +249,38 @@ const totalCostosPrecios = computed(() =>
 
 const cerrar = () => {
   emit("update:modelValue", false);
+};
+
+const refaccionesDePartida = (partida) =>
+  refaccionesDetalle.value.filter(
+    (refaccion) =>
+      refaccion.tipoInsumoVinculado === partida.tipo &&
+      Number(refaccion.idDetalleInsumoVinculado || 0) ===
+      Number(partida.idDetalle || 0),
+  );
+
+const tienePromocion = (partida) =>
+  Number(partida?.descuento || 0) > 0 ||
+  Boolean((partida?.nombrePromocion || "").trim());
+
+const esPromocionPorcentaje = (tipo) =>
+  tipo === true ||
+  tipo === 1 ||
+  tipo === "1" ||
+  String(tipo || "").toLowerCase() === "true" ||
+  String(tipo || "").toLowerCase() === "porcentaje";
+
+const etiquetaPromocion = (partida) => {
+  const nombre = (partida?.nombrePromocion || "").trim();
+  if (nombre) return nombre;
+
+  const valor = Number(partida?.valorPromocion || 0);
+  if (valor > 0 && esPromocionPorcentaje(partida?.tipoPromocion)) {
+    return `${numero(valor)}%`;
+  }
+  if (valor > 0) return `${moneda(valor)} desc.`;
+
+  return "Promocion aplicada";
 };
 
 const etiquetaTipo = (tipo) => {
@@ -291,5 +380,45 @@ watch(
 .costeo-table th:nth-child(2) {
   min-width: 260px;
   white-space: normal;
+}
+
+.refacciones-cell {
+  background: #f8fbff;
+}
+
+.refacciones-desglose {
+  margin: 0 0 0 120px;
+  padding: 10px 12px;
+  border-left: 3px solid #0d6efd;
+}
+
+.refacciones-table th,
+.refacciones-table td {
+  background: transparent;
+}
+
+.precio-promocion {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.precio-anterior {
+  color: #6c757d;
+  font-size: 0.78rem;
+  text-decoration: line-through;
+}
+
+.promo-badge {
+  max-width: 180px;
+  white-space: normal;
+  line-height: 1.1;
+  text-align: right;
+}
+
+.precio-final {
+  color: #198754;
+  font-weight: 700;
 }
 </style>

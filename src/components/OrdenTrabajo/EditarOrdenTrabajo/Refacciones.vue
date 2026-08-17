@@ -99,7 +99,7 @@
         <template v-for="(refaccion, index) in refaccionForm.refacciones" :key="refaccion.id">
          
           <div class="row mb-2">
-            <div class="col-md-8">
+            <div class="col-md-4">
               <label for="textoRefaccion" class="form-label">
                 <i class="bi bi-exclamation-triangle-fill mx-1"></i>
                 Detalle de la Refacción
@@ -119,10 +119,30 @@
                 {{ errores[`refaccion_${index}`] }}
               </small>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
+              <label class="form-label">
+                <i class="bi bi-123 mx-1"></i>
+                Cantidad
+              </label>
+              <input
+                v-model="refaccion.cantidad"
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                placeholder="1"
+                @input="validacionesNuevaRefaccion()"
+                @blur="validacionesNuevaRefaccion()"
+                :class="{ 'input-error': errores[`cantidad_${index}`] }"
+              />
+              <small v-if="errores[`cantidad_${index}`]" class="error-msg">
+                {{ errores[`cantidad_${index}`] }}
+              </small>
+            </div>
+            <div class="col-md-2">
               <label for="montoRefaccion" class="form-label">
                 <i class="bi bi-cash-coin mx-1"></i>
-                Monto
+                Total
               </label>
               <input
                 id="montoRefaccion"
@@ -139,6 +159,21 @@
               <small v-if="errores[`monto_${index}`]" class="error-msg">
                 {{ errores[`monto_${index}`] }}
               </small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">
+                <i class="bi bi-link-45deg mx-1"></i>
+                Vincular a
+              </label>
+              <select v-model="refaccion.vinculoInsumo" class="form-select">
+                <option
+                  v-for="opcion in insumosVinculables"
+                  :key="opcion.value"
+                  :value="opcion.value"
+                >
+                  {{ opcion.label }}
+                </option>
+              </select>
             </div>
           </div>
         </template>
@@ -249,7 +284,7 @@
           </div>
         </div>
         <div class="row mb-2">
-          <div class="col-md-8">
+          <div class="col-md-4">
             <label for="textoRefaccion" class="form-label">
               <i class="bi bi-exclamation-triangle-fill mx-1"></i>
               Detalle de la Refacción
@@ -269,10 +304,30 @@
               {{ errores["refaccion"] }}
             </small>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-2">
+            <label class="form-label">
+              <i class="bi bi-123 mx-1"></i>
+              Cantidad
+            </label>
+            <input
+              v-model="editarRefaccionForm.cantidad"
+              type="number"
+              step="0.01"
+              min="0.01"
+              class="form-control"
+              placeholder="1"
+              @input="validate('cantidad', 2)"
+              @blur="validate('cantidad', 2)"
+              :class="{ 'input-error': errores['cantidad'] }"
+            />
+            <small v-if="errores['cantidad']" class="error-msg">
+              {{ errores["cantidad"] }}
+            </small>
+          </div>
+          <div class="col-md-2">
             <label for="montoRefaccion" class="form-label">
               <i class="bi bi-cash-coin mx-1"></i>
-              Monto
+              Total
             </label>
             <input
               id="montoRefaccion"
@@ -289,6 +344,21 @@
             <small v-if="errores['monto']" class="error-msg">
               {{ errores["monto"] }}
             </small>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">
+              <i class="bi bi-link-45deg mx-1"></i>
+              Vincular a
+            </label>
+            <select v-model="editarRefaccionForm.vinculoInsumo" class="form-select">
+              <option
+                v-for="opcion in insumosVinculables"
+                :key="opcion.value"
+                :value="opcion.value"
+              >
+                {{ opcion.label }}
+              </option>
+            </select>
           </div>
         </div>
         <div class="row mb-2">
@@ -354,7 +424,10 @@
             <tr>
               <th scope="col">Proveedor</th>
               <th scope="col">Refacción</th>
-              <th scope="col">Monto</th>
+              <th scope="col">Insumo vinculado</th>
+              <th scope="col">Cant.</th>
+              <th scope="col">Precio unit.</th>
+              <th scope="col">Total</th>
               <th scope="col">Factura/Nota</th>
               <th scope="col">Fecha/hora</th>
               <th scope="col">Acciones</th>
@@ -364,6 +437,13 @@
             <tr v-for="i in Refacciones" :key="i.idRefacciones">
               <td>{{ i.nombreProveedor }}</td>
               <td>{{ i.refaccion }}</td>
+              <td>{{ i.insumoVinculado || "Ninguna" }}</td>
+              <td style="text-align: right">
+                {{ formatNumber(i.cantidad) }}
+              </td>
+              <td style="text-align: right">
+                {{ "$" + formatNumber(i.precioUnitarioRefaccion) }}
+              </td>
               <td style="text-align: left">
                 {{ "$" + formatNumber(i.monto_refaccion) }}
               </td>
@@ -387,7 +467,7 @@
           </tbody>
           <tfoot>
             <tr>
-              <td colspan="2" style="font-size: 11pt">
+              <td colspan="5" style="font-size: 11pt">
                 <strong>Total:</strong>
               </td>
               <td style="text-align: right; font-size: 11pt">
@@ -518,7 +598,9 @@ const refaccionForm = reactive({
     {
       id: contadorID++,
       refaccion: "",
+      cantidad: 1,
       monto: 0,
+      vinculoInsumo: "",
     },
   ],
   proveedor: null,
@@ -529,6 +611,7 @@ const editarRefaccionForm = ref({
   fecha: "",
   hora: "",
   refaccion: "",
+  cantidad: 1,
   monto: 0.0,
   proveedor: null,
   id_proveedor: null,
@@ -536,11 +619,21 @@ const editarRefaccionForm = ref({
   usuario: "",
   nombreProveedor: "",
   idRefacciones: null,
+  vinculoInsumo: "",
 });
 const props = defineProps({
   otId: Number,
   usuario: Number,
+  insumos: {
+    type: Object,
+    default: () => ({
+      llantas: [],
+      paquetes: [],
+      adicionales: [],
+    }),
+  },
 });
+const emit = defineEmits(["refaccion-guardada"]);
 
 /// Proveedores
 const proveedores = ref([]);
@@ -662,6 +755,74 @@ const formValida = ref(false);
 
 const listaErrores = computed(() => Object.values(errores));
 
+const textoCorto = (valor, max = 72) => {
+  const texto = String(valor || "").trim();
+  return texto.length > max ? `${texto.slice(0, max)}...` : texto;
+};
+
+const insumosVinculables = computed(() => {
+  const insumos = props.insumos || {};
+  const opciones = [{ value: "", label: "Ninguna" }];
+
+  (insumos.llantas || [])
+    .filter((item) => !item.eliminado && Number(item.idDetalleOTLlanta || 0) > 0)
+    .forEach((item) => {
+      opciones.push({
+        value: `Llanta:${item.idDetalleOTLlanta}`,
+        label: `Llanta - ${textoCorto(item.descripcion || item.detalle)}`,
+      });
+    });
+
+  (insumos.paquetes || [])
+    .filter((item) => !item.eliminado && Number(item.idDetalleOTPaquete || 0) > 0)
+    .forEach((item) => {
+      opciones.push({
+        value: `Paquete:${item.idDetalleOTPaquete}`,
+        label: `Paquete - ${textoCorto(item.nombre || item.descripcion)}`,
+      });
+    });
+
+  (insumos.adicionales || [])
+    .filter((item) => !item.eliminado && Number(item.idDetalleOTServicio || 0) > 0)
+    .forEach((item) => {
+      opciones.push({
+        value: `Servicio:${item.idDetalleOTServicio}`,
+        label: `Servicio - ${textoCorto(item.descripcion || item.descripcionServicio)}`,
+      });
+    });
+
+  return opciones;
+});
+
+const obtenerVinculo = (valor) => {
+  if (!valor) {
+    return {
+      tipoInsumoVinculado: null,
+      idDetalleInsumoVinculado: null,
+    };
+  }
+
+  const [tipo, id] = String(valor).split(":");
+  const idDetalle = Number(id || 0);
+
+  if (!tipo || idDetalle <= 0) {
+    return {
+      tipoInsumoVinculado: null,
+      idDetalleInsumoVinculado: null,
+    };
+  }
+
+  return {
+    tipoInsumoVinculado: tipo,
+    idDetalleInsumoVinculado: idDetalle,
+  };
+};
+
+const crearVinculo = (tipo, idDetalle) => {
+  if (!tipo || !idDetalle) return "";
+  return `${tipo}:${idDetalle}`;
+};
+
 const getValor = (path, tipo) => {
   const origen = tipo == 1 ? refaccionForm : editarRefaccionForm.value;
 
@@ -677,7 +838,9 @@ watch(
         refaccionForm.refacciones.push({
           id:contadorID++,
           refaccion: "",
-          monto:0
+          cantidad: 1,
+          monto:0,
+          vinculoInsumo: "",
         })
       }
     }else if(diff < 0){
@@ -713,6 +876,16 @@ function validate(path, tipo) {
       if (num < 0) return "El monto debe ser igual o mayor a cero.";
       return null;
     },
+
+    cantidad: () => {
+      if (value === "") return "Cantidad obligatoria.";
+
+      const num = Number(value);
+
+      if (isNaN(num)) return "La cantidad debe ser un número.";
+      if (num <= 0) return "La cantidad debe ser mayor a cero.";
+      return null;
+    },
   };
 
   const error = rules[path] ? rules[path]() : null;
@@ -743,6 +916,7 @@ function validaciones(tipo) {
   const campos = [
     "id_proveedor",
     "refaccion",
+    "cantidad",
     "monto",
     "numero_factura",
     "nota_factura",
@@ -772,6 +946,7 @@ function validacionesNuevaRefaccion() {
 
   refaccionForm.refacciones.forEach((item, index) => {
     const descripcion = (item.refaccion ?? "").toString().trim();
+    const cantidad = Number(item.cantidad);
     const monto = Number(item.monto);
 
     if (!descripcion) {
@@ -780,6 +955,10 @@ function validacionesNuevaRefaccion() {
 
     if (item.monto === "" || Number.isNaN(monto) || monto < 0) {
       errores[`monto_${index}`] = `La refacción ${index + 1} requiere un monto válido.`;
+    }
+
+    if (item.cantidad === "" || Number.isNaN(cantidad) || cantidad <= 0) {
+      errores[`cantidad_${index}`] = `La refacción ${index + 1} requiere una cantidad mayor a cero.`;
     }
   });
 }
@@ -844,7 +1023,9 @@ const agregarRefaccion = () => {
     {
       id: contadorID++,
       refaccion: "",
+      cantidad: 1,
       monto: 0,
+      vinculoInsumo: "",
     },
   ];
   refaccionForm.numero_factura = "";
@@ -858,7 +1039,9 @@ const guardarRefaccion = async () => {
   const idOT = props.otId;
   const refacciones = refaccionForm.refacciones.map((item) => ({
     refaccion: item.refaccion,
+    cantidad: Number(Number(item.cantidad || 1).toFixed(2)),
     monto: Number(Number(item.monto || 0).toFixed(2)),
+    ...obtenerVinculo(item.vinculoInsumo),
   }));
 
   const payload = {
@@ -866,9 +1049,11 @@ const guardarRefaccion = async () => {
     fecha: refaccionForm.fecha + "T" + refaccionForm.hora,
     idOrdenTrabajo: idOT,
     refaccion: refacciones[0]?.refaccion ?? "",
+    cantidad: refacciones[0]?.cantidad ?? 1,
     monto: refacciones[0]?.monto ?? 0,
     id_proveedor: refaccionForm.id_proveedor,
     nota_factura: refaccionForm.numero_factura,
+    ...obtenerVinculo(refaccionForm.refacciones[0]?.vinculoInsumo),
     refacciones,
   };
   console.log(payload);
@@ -878,9 +1063,10 @@ const guardarRefaccion = async () => {
       payload,
       { headers: authHeaders() },
     );
-    cargarRefacciones(idOT);
+    await cargarRefacciones(idOT);
     limpiarFormulario();
     modalRefacciones.value = !modalRefacciones.value;
+    emit("refaccion-guardada");
   } catch (error) {
     console.error("Error al crear el refacciones:", error);
   }
@@ -898,8 +1084,13 @@ const getEditarRefaccionOT = (ot) => {
   editarRefaccionForm.value.hora = hora.substring(0, 5);
   editarRefaccionForm.value.idOrdenTrabajo = ot.idOrdenTrabajo;
   editarRefaccionForm.value.refaccion = ot.refaccion;
+  editarRefaccionForm.value.cantidad = ot.cantidad || 1;
   editarRefaccionForm.value.monto = ot.monto_refaccion;
   editarRefaccionForm.value.nota_factura = ot.nota_Factura;
+  editarRefaccionForm.value.vinculoInsumo = crearVinculo(
+    ot.tipoInsumoVinculado,
+    ot.idDetalleInsumoVinculado,
+  );
   Object.keys(errores).forEach((k) => delete errores[k]);
   modalRefacciones.value = false;
   modalEditarRefacciones.value = !modalEditarRefacciones.value;
@@ -939,9 +1130,11 @@ const editarRefaccionOT = async () => {
     idOrdenTrabajo: editarRefaccionForm.value.idOrdenTrabajo,
     idRefacciones: editarRefaccionForm.value.idRefacciones,
     refaccion: editarRefaccionForm.value.refaccion,
+    cantidad: Number(Number(editarRefaccionForm.value.cantidad || 1).toFixed(2)),
     monto: parseFloat(editarRefaccionForm.value.monto).toFixed(2),
     id_proveedor: editarRefaccionForm.value.id_proveedor,
     nota_factura: editarRefaccionForm.value.nota_factura,
+    ...obtenerVinculo(editarRefaccionForm.value.vinculoInsumo),
   };
   console.log(payload);
   try {
@@ -950,9 +1143,10 @@ const editarRefaccionOT = async () => {
       payload,
       { headers: authHeaders() },
     );
-    cargarRefacciones(idOT);
+    await cargarRefacciones(idOT);
     limpiarFormulario();
     modalEditarRefacciones.value = !modalEditarRefacciones.value;
+    emit("refaccion-guardada");
   } catch (error) {
     console.error("Error al crear el refacciones:", error);
   }
@@ -962,12 +1156,14 @@ const limpiarFormulario = () => {
     fecha: "",
     hora: "",
     refaccion: "",
+    cantidad: 1,
     monto: 0.0,
     id_proveedor: null,
     nota_factura: "",
     usuario: "",
     nombreProveedor: "",
     idRefacciones: null,
+    vinculoInsumo: "",
   };
   proveedorNombre.value = "";
   Object.assign(refaccionForm, {
@@ -978,7 +1174,9 @@ const limpiarFormulario = () => {
       {
         id: contadorID++,
         refaccion: "",
+        cantidad: 1,
         monto: 0,
+        vinculoInsumo: "",
       },
     ],
     proveedor: null,

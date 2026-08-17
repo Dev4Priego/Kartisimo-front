@@ -11,10 +11,27 @@
 
     <div class="row mx-4 align-items-center">
       <div class="col">
+        <select
+          name="sucursalFilter"
+          id="sucursalFilter"
+          class="form-select"
+          v-model="SucursalSelected"
+        >
+          <option value="">[Selecciona]</option>
+          <option
+            v-for="sucursal in sucursales"
+            :key="sucursal.idSucursal"
+            :value="sucursal.idSucursal"
+          >
+            {{ sucursal.nombre }}
+          </option>
+        </select>
+      </div>
+      <div class="col">
         <input
           type="text"
           placeholder="Buscar orden de trabajo."
-          class="form-control form-control-md w-50"
+          class="form-control  w-100"
           v-model="buscarOrdenTrabajo"
         />
       </div>
@@ -85,9 +102,7 @@
           <template #item-estadoTabla="ot">
             <span
               :class="
-                ot.vigente == 0
-                  ? 'badge bg-danger'
-                  : badgeEstado(ot.estado)
+                ot.vigente == 0 ? 'badge bg-danger' : badgeEstado(ot.estado)
               "
             >
               {{ ot.estadoTabla }}
@@ -117,7 +132,10 @@
               </button>
 
               <button
-                v-if="ot.idSucursal == userData.usuario.idSucursal || userData.usuario.idSucursal == 1"
+                v-if="
+                  ot.idSucursal == userData.usuario.idSucursal ||
+                  userData.usuario.idSucursal == 1
+                "
                 class="btn btn-sm btn-outline-warning"
                 @click="editarOT(ot.idOrdenTrabajo)"
                 title="Editar"
@@ -137,7 +155,7 @@ import { ref, onMounted, getCurrentInstance, computed } from "vue";
 import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
 import EasyDataTable from "vue3-easy-data-table";
-
+import axios from "axios";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const userData = JSON.parse(localStorage.getItem("userSession"));
@@ -151,7 +169,9 @@ const buscarOrdenTrabajo = ref("");
 const otEditar = ref({});
 let modalEditar;
 let modalIncidente;
-
+const sucursales = ref([]);
+const SucursalSelected = ref("");
+const API_SUCURSALES = `${proxy.$serverIP}api/Sucursales/getSucursales`;
 const headersOrdenTrabajo = [
   { text: "#", value: "codigo", sortable: true },
   { text: "Cliente", value: "clienteNombre", sortable: true },
@@ -197,24 +217,49 @@ const cargarOrdenTrabajo = async (options = {}) => {
     options.headers["Authorization"] = `Bearer ${userData?.token}`;
   }
 
-  const res = await fetch(`${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`, options);
+  const res = await fetch(
+    `${proxy.$serverIP}api/OrdenTrabajo/getOrdenTrabajo`,
+    options,
+  );
   const result = await res.json();
   listaOrdenTrabajo.value = result.data;
   loading.value = false;
 };
 
+const fetchSucursales = async () => {
+  try {
+    const res = await axios.get(API_SUCURSALES, {
+      headers: {
+        Authorization: `Bearer ${userData?.token}`,
+      },
+    });
+    sucursales.value = res.data;
+  } catch (error) {
+    console.error("Error al obtener sucursales:", error);
+    Swal.fire("Error", "Error al cargar sucursales.", "error");
+  }
+};
 const listaOrdenTrabajoFilter = computed(() => {
-  if (!buscarOrdenTrabajo.value) return listaOrdenTrabajo.value;
+  let ordenesFiltered = listaOrdenTrabajo.value.ordenes;
 
-  const busqueda = buscarOrdenTrabajo.value.toLowerCase();
+  // Filtro por sucursal
+  if (SucursalSelected.value) {
+    ordenesFiltered = ordenesFiltered.filter(
+      (ot) => ot?.idSucursal == SucursalSelected.value,
+    );
+  }
 
-  const ordenesFiltered = listaOrdenTrabajo.value.ordenes.filter((ot) => {
-    const orden = `o${ot?.prefijo?.toLowerCase() ?? ""}-${
-      ot?.consecutivoSucursal
-    }`;
-    const nombre = ot?.clienteNombre?.toLowerCase() ?? "";
-    return orden.includes(busqueda) || nombre.includes(busqueda);
-  });
+  // Filtro por búsqueda
+  if (buscarOrdenTrabajo.value) {
+    const busqueda = buscarOrdenTrabajo.value.toLowerCase();
+    ordenesFiltered = ordenesFiltered.filter((ot) => {
+      const orden = `o${ot?.prefijo?.toLowerCase() ?? ""}-${
+        ot?.consecutivoSucursal
+      }`;
+      const nombre = ot?.clienteNombre?.toLowerCase() ?? "";
+      return orden.includes(busqueda) || nombre.includes(busqueda);
+    });
+  }
 
   return {
     ordenes: ordenesFiltered,
@@ -226,10 +271,16 @@ const ordenesTabla = computed(() =>
   (listaOrdenTrabajoFilter.value.ordenes || []).map((ot) => ({
     ...ot,
     codigo: `O${ot.prefijo}-${ot.consecutivoSucursal}`,
-    vehiculoTabla: `${ot.vehiculoModelo || ""} ${ot.vehiculoPlacas || ""}`.trim(),
+    vehiculoTabla: `${ot.vehiculoModelo || ""} ${
+      ot.vehiculoPlacas || ""
+    }`.trim(),
     estadoTabla: ot.vigente == 0 ? "Cancelada" : ot.estado,
     desecharOrden:
-      ot.desecharLlanta === true ? "Si" : ot.desecharLlanta === false ? "No" : "N/A",
+      ot.desecharLlanta === true
+        ? "Si"
+        : ot.desecharLlanta === false
+        ? "No"
+        : "N/A",
   })),
 );
 
@@ -287,7 +338,10 @@ const nombreTotal = (k) =>
     cancelado: "Canceladas",
   }[k]);
 
-onMounted(cargarOrdenTrabajo);
+onMounted(() => {
+  fetchSucursales();
+  cargarOrdenTrabajo();
+});
 
 const editarOT = (id) => {
   console.log(" Editar OT:", id);

@@ -50,6 +50,12 @@
         </span>
       </div>
     </div>
+    <div v-if="orden?.observacion" class="mb-2">
+      <h6 class="text-uppercase text-muted mb-2">Observaciones</h6>
+      <div class="card border-1 shadow-sm mb-2">
+        <span class="py-3 px-3">{{ orden?.observacion }}</span>
+      </div>
+    </div>
 
     <!-- DATOS VEHICULO + CLIENTE -->
     <div class="card border-1 shadow-sm mb-2 card-datos">
@@ -215,7 +221,7 @@
 
                 <span class="text-success fw-bold">
                   {{
-                    Number(precioFinalItem(llanta)).toLocaleString("es-MX", {
+                    Number(AplicarPromo(llanta)).toLocaleString("es-MX", {
                       style: "currency",
                       currency: "MXN",
                     })
@@ -225,7 +231,7 @@
 
               <div v-else class="text-end">
                 {{
-                  Number(precioFinalItem(llanta)).toLocaleString("es-MX", {
+                  Number(AplicarPromo(llanta)).toLocaleString("es-MX", {
                     style: "currency",
                     currency: "MXN",
                   })
@@ -284,7 +290,7 @@
                 </small>
                 <span class="text-success fw-bold">
                   {{
-                    Number(precioFinalItem(paquete)).toLocaleString("es-MX", {
+                    Number(AplicarPromo(paquete)).toLocaleString("es-MX", {
                       style: "currency",
                       currency: "MXN",
                     })
@@ -295,7 +301,7 @@
 
               <div v-else class="text-end">
                 {{
-                  Number(precioFinalItem(paquete)).toLocaleString("es-MX", {
+                  Number(AplicarPromo(paquete)).toLocaleString("es-MX", {
                     style: "currency",
                     currency: "MXN",
                   })
@@ -366,7 +372,7 @@
 
                   <span class="text-success fw-bold">
                     {{
-                      Number(precioFinalItem(s)).toLocaleString("es-MX", {
+                      Number(AplicarPromo(s)).toLocaleString("es-MX", {
                         style: "currency",
                         currency: "MXN",
                       })
@@ -377,7 +383,7 @@
 
               <div v-else class="text-end">
                 {{
-                  Number(precioFinalItem(s)).toLocaleString("es-MX", {
+                  Number(AplicarPromo(s)).toLocaleString("es-MX", {
                     style: "currency",
                     currency: "MXN",
                   })
@@ -448,7 +454,7 @@
 import { format } from "pdfmake/build/pdfmake";
 import { ref, onMounted, getCurrentInstance, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import {AplicarPromo} from '@/components/common/funciones'
 const { proxy } = getCurrentInstance();
 
 const route = useRoute();
@@ -621,23 +627,7 @@ const porcentaje = computed(() => {
   return Math.round((completadas.value / total.value) * 100);
 });
 
-const precioFinalItem = (item) => {
-  const base = item.precioUnitario ?? 0;
-  const valor = item?.valorVuelo || item?.valorPromocion || null;
 
-  // si tiene tipo Promo false es Monto, si es true es Porcentual
-  if ((item.idPromocion || item.idPromocionVuelo) && valor != null) {
-    return item?.tipoPromocion || item?.tipoVuelo
-      ? item?.cantidad
-        ? base * (1 - valor / 100) * item.cantidad
-        : base * (1 - valor / 100)
-      : item?.cantidad
-      ? Math.max(0, base - valor) * item?.cantidad
-      : Math.max(0, base - valor);
-  } else {
-    return item.cantidad ? base * item.cantidad : base;
-  }
-};
 
 //Funcion para sumar todo y tener el total final de la orden, considerando promociones y vuelos
 
@@ -646,19 +636,19 @@ const totalFinalOrden = computed(() => {
 
   if (orden.value?.llantas) {
     orden.value.llantas.forEach((item) => {
-      total += precioFinalItem(item) || 0;
+      total += AplicarPromo(item) || 0;
     });
   }
 
   if (orden.value?.paquetes) {
     orden.value.paquetes.forEach((item) => {
-      total += precioFinalItem(item) || 0;
+      total += AplicarPromo(item) || 0;
     });
   }
 
   if (orden.value?.adicionales) {
     orden.value.adicionales.forEach((item) => {
-      total += precioFinalItem(item) || 0;
+      total += AplicarPromo(item) || 0;
     });
   }
 

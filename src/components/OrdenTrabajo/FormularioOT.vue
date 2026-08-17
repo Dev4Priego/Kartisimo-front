@@ -1455,6 +1455,7 @@ const regimenFiscal = ref([]);
 const vehiculos = ref([]);
 const readOnlyOTderivada = ref(false);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
+import {AplicarPromo} from '@/components/common/funciones'
 const sucursales = [
   "(Ninguna)",
   "Delta",
@@ -2614,7 +2615,7 @@ const cargarInfoCotizacion = async () => {
           cantidad: llanta.cantidad,
           precioUnitario: llanta.precioUnitario,
           costo: llanta?.costo || 0,
-          subTotal: precioFinalItem(llanta,promocionExistente, llanta.cantidad).toFixed(2), // campo estetico
+          subTotal: AplicarPromo(llanta,promocionExistente, llanta.cantidad).toFixed(2), // campo estetico
 
           promosDisponibles: promosDisponibles || [],
           esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
@@ -2645,7 +2646,7 @@ const cargarInfoCotizacion = async () => {
           cantidad: paquete.cantidad,
           precioUnitario: paquete.precioUnitario,
           costo: paquete?.costo || 0,
-          subTotal: precioFinalItem(paquete, promocionExistente , paquete.cantidad).toFixed(2),
+          subTotal: AplicarPromo(paquete, promocionExistente , paquete.cantidad).toFixed(2),
 
           detalle: paquete.detallePaquete.map((detalle) => ({
             idDesglosePaquete: detalle.idDesglosePaquete,
@@ -2688,7 +2689,7 @@ const cargarInfoCotizacion = async () => {
           precioUnitario: s.precioUnitario,
           costo: s?.costo || 0,
 
-          subTotal: precioFinalItem(s, promocionExistente , s.cantidad).toFixed(2),
+          subTotal: AplicarPromo(s, promocionExistente , s.cantidad).toFixed(2),
 
           promosDisponibles: promosDisponibles || [],
           esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
@@ -2703,30 +2704,7 @@ const cargarInfoCotizacion = async () => {
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };
 
-const precioFinalItem = (item, promoGlobal, cantidad) => {
-  const base = item.precioUnitario * cantidad;
 
-  // Aplica promoción individual si existe
-  if (item.idPromocion && item.valorPromocion != null) {
-    return item.tipoPromocion
-      ? base * (1 - item.valorPromocion / 100) // porcentaje
-      : Math.max(0, base - item.valorPromocion); // monto fijo
-  }
-
-  // Aplica promo global si no está excluido
-  if (
-    promoGlobal &&
-    promoGlobal.valor != null &&
-    !item.excluirPromocionGeneral
-  ) {
-    return promoGlobal.tipo
-      ? base * (1 - promoGlobal.valor / 100) // porcentaje
-      : Math.max(0, base - promoGlobal.valor); // monto fijo
-  }
-
-  // Sin promoción
-  return base;
-};
 
 const limpiarOrdenTrabajoForm = () => {
   ordenTrabajoForm.cotSeleccionada = 0;

@@ -584,8 +584,7 @@
                               <span class="text-success fw-bold d-block">
                                 {{
                                   formatoMoneda(
-                                    precioFinalItem(item, promoGeneral) *
-                                      (item.cantidad ?? 1),
+                                    AplicarPromo(item),
                                   )
                                 }}
                               </span>
@@ -901,7 +900,7 @@
                                 :class="
                                   paq.idPromocionSeleccionada === 0
                                     ? 'btn-light'
-                                    : 'btn-outline-light'
+                                    : 'btn-outline-light text-dark'
                                 "
                                 @click="
                                   paq.idPromocionSeleccionada = 0;
@@ -1241,8 +1240,8 @@
                               <span class="text-success fw-bold d-block">
                                 {{
                                   formatoMoneda(
-                                    precioFinalItem(extra, promoGeneral) *
-                                      (extra.cantidad ?? 1),
+                                    AplicarPromo(extra)
+          
                                   )
                                 }}
                               </span>
@@ -1280,7 +1279,7 @@
                                 :class="
                                   extra.idPromocionSeleccionada === 0
                                     ? 'btn-light'
-                                    : 'btn-outline-light'
+                                    : 'btn-outline-light text-dark'
                                 "
                                 @click="
                                   extra.idPromocionSeleccionada = 0;
@@ -1745,9 +1744,9 @@ const onCambioPromo = computed({
   set: (nextValue) => setContextValue("onCambioPromo", nextValue),
 });
 
-const precioFinalItem = computed({
-  get: () => getContextValue("precioFinalItem"),
-  set: (nextValue) => setContextValue("precioFinalItem", nextValue),
+const AplicarPromo = computed({
+  get: () => getContextValue("AplicarPromo"),
+  set: (nextValue) => setContextValue("AplicarPromo", nextValue),
 });
 
 const guardarCotizacion = computed({
