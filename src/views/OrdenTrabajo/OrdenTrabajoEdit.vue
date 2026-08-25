@@ -3,7 +3,7 @@
     <div class="border-bottom py-2">
       <h3 class="mb-0">
         Editar OT # O{{ otEditar.prefijoSucursal }}-{{
-          otEditar.consecutivoSucursal
+          otEditar?.esHija != 1 ? otEditar.consecutivoSucursal : otEditar.subConsecutivo
         }}
       </h3>
     </div>
@@ -32,6 +32,7 @@
             <div class="card-header d-flex justify-content-between align-items-center">
               <span><i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo</span>
               <button
+              v-if="estados.indexOf(otEditar.estado) != 3"
                 class="btn btn-sm"
                 :class="editandoClienteVehiculo ? 'btn-outline-secondary' : 'btn-outline-primary'"
                 @click="toggleEdicionClienteVehiculo"
@@ -297,9 +298,10 @@
             Avanzar estado <i class="bi bi-arrow-right-short ms-2"></i>
           </button>
         </div>
-        <div class="col-12 d-flex justify-content-end mt-3">
+        <div class="col-12 d-flex justify-content-end mt-3" >
           <button
             class="btn btn-danger btn-sm shadow-sm"
+            v-if="estados.indexOf(otEditar.estado) != 3"
             @click="
               preguntaCancelar(
                 'O' +
@@ -315,6 +317,7 @@
 
           <button
             class="btn btn-sm shadow-sm ms-2"
+            v-if="estados.indexOf(otEditar.estado) != 3"
             :class="otEditar.estatus == 2 ? 'btn-success' : 'btn-warning'"
             @click="cambiarEstatusOT(otEditar.estatus == 2 ? 1 : 2)"
             :disabled="otEditar.estatus == 0"
@@ -332,9 +335,10 @@
             {{ otEditar.estatus == 2 ? "Retomar OT" : "Suspender OT" }}
           </button>
 
-          <button
+          <button v-if="otEditar.esHija == 0"
             class="btn btn-sm shadow-sm ms-2 btn-info"
             @click="derivarOtPadre()"
+            :disabled="estados.indexOf(otEditar.estado)  != 3 "
           >
             <i class="bi bi-node-plus-fill me-3"></i>
             Derivar OT
@@ -369,36 +373,59 @@
         <div class="col-6 col-lg-3">
           <label class="form-label">Método de pago</label>
           <select
+           :disabled="estados.indexOf(otEditar.estado) == 3"
             v-model="otEditar.metodoPago"
             class="form-select"
             name="formaPago"
             id="slcFormaPago"
           >
             <option value="Efectivo">01 - Efectivo</option>
-            <option value="Cheque nominativo">02 - Cheque nominativo</option>
+            <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+            <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
             <option value="Transferencia electrónica de fondos">
               03 - Transferencia electrónica de fondos
             </option>
-            <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+            <option value="Por definir">99 - Por definir</option>
+            <option value="Cheque nominativo">02 - Cheque nominativo</option>
             <option value="Condonación">15 - Condonación</option>
             <option value="Compensación">17 - Compensación</option>
             <option value="Prescripción o caducidad">
               26 - Prescripción o caducidad
             </option>
-            <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
             <option value="Aplicación de anticipos">
               30 - Aplicación de anticipos
             </option>
             <option value="Intermediario pagos">
               31 - Intermediario pagos
             </option>
-            <option value="Por definir">99 - Por definir</option>
           </select>
         </div>
 
-        <div v-if="otEditar.empleado" class="col-12 col-lg-6">
+        <div v-if="isCreditCard" class="col-6 col-lg-3">
+          <label class="form-label" for="slcMeses">Meses</label>
+          <select
+            v-model="otEditar.formaPago"
+            class="form-select"
+            name="meses"
+            id="slcMeses"
+          >
+            <option
+              v-for="forma in FORMAS_PAGO_TARJETA"
+              :key="forma"
+              :value="forma"
+            >
+              {{ forma }}
+            </option>
+          </select>
+        </div>
+
+        <div
+          v-if="otEditar.empleado"
+          :class="isCreditCard ? 'col-12 col-lg-3' : 'col-12 col-lg-6'"
+        >
           <label class="form-label" for="slcTecnico">Técnico asignado</label>
           <select
+           :disabled="estados.indexOf(otEditar.estado) == 3"
             v-model="otEditar.empleado.idEmpleado"
             class="form-select"
             name="tecnico"
@@ -421,6 +448,7 @@
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
+             :disabled="estados.indexOf(otEditar.estado) == 3"
           />
           No
           <input
@@ -428,11 +456,13 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
+             :disabled="estados.indexOf(otEditar.estado) == 3"
           />
         </div>
         <div class="col-6">
           <label class="form-label">¿Desechar llanta?</label><br />
           <input
+           :disabled="estados.indexOf(otEditar.estado) == 3"
             class="form-check-input me-2"
             type="checkbox"
             id="aplicaDesechar"
@@ -443,11 +473,12 @@
           </label>
           Si
           <input
+
             v-model="otEditar.desecharLlanta"
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
-            :disabled="aplicaDesecharLlanta"
+            :disabled="aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3"
           />
           No
           <input
@@ -455,7 +486,7 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
-            :disabled="aplicaDesecharLlanta"
+            :disabled="aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3"
           />
         </div>
         <div v-if="otEditar.requiereFactura" class="col-12">
@@ -603,6 +634,7 @@
       <h5>Tareas</h5>
       <div class="text-center m-3">
         <button
+        v-if="estados.indexOf(otEditar.estado) != 3"
           class="btn btn-sm btn-primary"
           title="Agregar"
           @click="showModal = true"
@@ -655,6 +687,7 @@
             <Refacciones
               :otId="otEditar.idOrdenTrabajo"
               :usuario="idUsuarioSession"
+              :estadoOT="estados.indexOf(otEditar.estado)"
               :insumos="otEditar.insumo"
               :key="otEditar.idOrdenTrabajo"
               @refaccion-guardada="
@@ -741,6 +774,10 @@ import axios from "axios";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import ModalInsumo from "../../components/OrdenTrabajo/ModalInsumo.vue";
+import {
+  FORMAS_PAGO_TARJETA,
+  normalizarFormaPago,
+} from "@/utils/formaPago";
 
 const { proxy } = getCurrentInstance();
 const route = useRoute();
@@ -766,6 +803,8 @@ const data45 = JSON.parse(localStorage.getItem("userSession")); // o el nombre d
 const idUsuarioSession = data45?.usuario?.idUsuario;
 
 const otEditar = ref({
+  metodoPago: "",
+  formaPago: "Contado",
   insumo: {
     llantas: [],
     paquetes: [],
@@ -777,6 +816,10 @@ const otEditar = ref({
     iva: 0,
   },
 });
+
+const isCreditCard = computed(
+  () => otEditar.value.metodoPago === "Tarjeta de crédito",
+);
 
 const editandoClienteVehiculo = ref(false);
 const sugerenciasVehiculosEdicion = ref([]);
@@ -992,6 +1035,10 @@ const cargarOrden = async (options = {}) => {
       idOrdenTrabajo: json?.idOrdenTrabajo || 0,
       prefijoSucursal: json.prefijoSucursal,
       consecutivoSucursal: json.consecutivoSucursal,
+      //sub consecutivo OT
+      subConsecutivo : json.subConsecutivoSucursal,
+      esHija : json.esHija,
+      idPadre:json.idOtPadre,
       consecutivoCotizacion: json.consecutivoCotizacion,
       prefijoCotizacion: json.prefijoCotizacion,
       observacion: json?.observacion,
@@ -1007,6 +1054,7 @@ const cargarOrden = async (options = {}) => {
       paquetes: Array.isArray(json.paquetes) ? json.paquetes : [],
 
       metodoPago: json.metodoPago || "",
+      formaPago: normalizarFormaPago(json.metodoPago, json.formaPago),
       usoCFDI: json.usoCFDI || "",
       regimenFiscal: json.regimenFiscal || "",
 
@@ -1299,6 +1347,16 @@ watch(
   { deep: true },
 );
 
+watch(
+  () => otEditar.value.metodoPago,
+  (metodoPago) => {
+    otEditar.value.formaPago = normalizarFormaPago(
+      metodoPago,
+      otEditar.value.formaPago,
+    );
+  },
+);
+
 const calcularTotales = () => {
   const totalLlantas = (otEditar.value.insumo.llantas || []).reduce(
     (acc, i) => acc + Number(i.eliminado ? 0 : i.subTotal || 0),
@@ -1540,7 +1598,7 @@ const avanzarEstado = async () => {
   if (idx + 1 === estados.length - 1) {
     const preguntaEntregar = await Swal.fire({
       title: "Entregar vehiculo",
-      text: "Al entregar el vehículo no podrás retroceder la Orden de trabajo ¿Estás seguro?",
+      text: "Al entregar el vehículo no podrás retroceder ni editar la Orden de trabajo ¿Estás seguro?",
       icon: "warning",
       confirmButtonText: "Sí, Entregar vehículo",
       showCancelButton: true,
@@ -1792,6 +1850,10 @@ const guardarEdicion = async (opciones = {}) => {
     idUsuario: idUsuarioSession,
     idEmpleado: otEditar.value.empleado.idEmpleado,
     metodoPago: otEditar.value.metodoPago,
+    formaPago: normalizarFormaPago(
+      otEditar.value.metodoPago,
+      otEditar.value.formaPago,
+    ),
     desecharLlanta: desechar,
     observacion: otEditar.value.observacion,
     requiereFactura: otEditar.value.requiereFactura,

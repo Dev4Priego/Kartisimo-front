@@ -32,7 +32,12 @@
                 <div class="col-5">
                   <div class="text-muted small">
                     <i class="bi bi-cash me-1"></i>
-                    Forma de pago: {{ props.OT?.metodoPago }}
+                    Método de pago: {{ props.OT?.metodoPago }}
+                  </div>
+
+                  <div class="text-muted small">
+                    <i class="bi bi-credit-card me-1"></i>
+                    Forma de pago: {{ props.OT?.formaPago || "Contado" }}
                   </div>
 
                   <div class="text-muted small">

@@ -37,7 +37,7 @@
     </div>
 
     <div class="row g-3 mb-4">
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-3">
         <div class="metric-card border-start border-4 border-primary">
           <span>Ordenes entregadas</span>
           <strong>{{ reporteFiltrado.length }}</strong>
@@ -50,13 +50,19 @@
         </div>
       </div>
       <div class="col-12 col-md-2">
-        <div class="metric-card border-start border-4 border-success">
-          <span>Precio total</span>
+        <div class="metric-card border-start border-4 border-danger">
+          <span>Costo total</span>
           <strong>{{ formatoMoneda(totales.costo) }}</strong>
         </div>
       </div>
+      <div class="col-12 col-md-2">
+        <div class="metric-card border-start border-4 border-info">
+          <span>Refacciones</span>
+          <strong>{{ formatoMoneda(totales.refacciones) }}</strong>
+        </div>
+      </div>
 
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-3">
         <div class="metric-card border-start border-4 border-warning">
           <span>Utilidad</span>
           <strong
@@ -159,6 +165,15 @@
                 <button
                   class="sort-header"
                   type="button"
+                  @click="ordenarPor('formaPago')"
+                >
+                  Forma Pago <i :class="iconoOrden('formaPago')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
                   @click="ordenarPor('precioSubtotal')"
                 >
                   Precio subtotal <i :class="iconoOrden('precioSubtotal')"></i>
@@ -171,6 +186,15 @@
                   @click="ordenarPor('costoTotal')"
                 >
                   Costo total <i :class="iconoOrden('costoTotal')"></i>
+                </button>
+              </th>
+              <th>
+                <button
+                  class="sort-header"
+                  type="button"
+                  @click="ordenarPor('refacciones')"
+                >
+                  Refacciones <i :class="iconoOrden('refacciones')"></i>
                 </button>
               </th>
               <th>
@@ -218,8 +242,10 @@
                 <td>{{ formatearFechaHora(item.fechaAlta) || "N/A" }}</td>
                 <td>{{ formatearFechaHora(item.fechaEntrega) || "N/A" }}</td>
                 <td>{{ item.metodoPago || "N/A" }}</td>
+                <td>{{ item.formaPago || "Contado" }}</td>
                 <td>{{ formatoMoneda(item.precioSubtotal) }}</td>
                 <td class="text-danger">{{ formatoMoneda(item.costoTotal) }}</td>
+                <td>{{ formatoMoneda(item.refacciones) }}</td>
                 <td>{{ formatoMoneda(item.descuentoPromocionTotal) }}</td>
                 <td>{{ formatoMoneda(item.precioTotal) }}</td>
 
@@ -248,7 +274,7 @@
                 v-if="detalleAbiertoId === item.idOrdenTrabajo"
                 class="detalle-row"
               >
-                <td colspan="11">
+                <td colspan="13">
                   <div v-if="detalleLoading" class="detalle-branch text-center">
                     <div class="spinner-border text-primary"></div>
                     <p class="text-muted mt-2 mb-0">
@@ -276,6 +302,10 @@
                           {{ detalleSeleccionado.sucursal || "N/A" }} |
                           {{ detalleSeleccionado.cliente || "Cliente N/A" }} |
                           {{ detalleSeleccionado.vehiculo || "Vehiculo N/A" }}
+                        </div>
+                        <div class="text-muted small">
+                          {{ detalleSeleccionado.metodoPago || "N/A" }} |
+                          {{ detalleSeleccionado.formaPago || "Contado" }}
                         </div>
                       </div>
                       <button
@@ -306,7 +336,7 @@
                           }}</strong>
                         </div>
                       </div>
-                      <div class="col-12 col-md-3">
+                      <div class="col-12 col-md-2">
                         <div class="mini-metric">
                           <span>Precio total</span>
                           <strong>{{
@@ -314,11 +344,19 @@
                           }}</strong>
                         </div>
                       </div>
-                      <div class="col-12 col-md-3">
+                      <div class="col-12 col-md-2">
                         <div class="mini-metric">
                           <span>Costo total</span>
                           <strong>{{
                             formatoMoneda(detalleSeleccionado.costoTotal)
+                          }}</strong>
+                        </div>
+                      </div>
+                      <div class="col-12 col-md-2">
+                        <div class="mini-metric">
+                          <span>Refacciones</span>
+                          <strong>{{
+                            formatoMoneda(detalleSeleccionado.refacciones)
                           }}</strong>
                         </div>
                       </div>
@@ -428,7 +466,7 @@
             </template>
 
             <tr v-if="reporteOrdenado.length === 0">
-              <td colspan="11" class="text-center py-5 text-muted">
+              <td colspan="13" class="text-center py-5 text-muted">
                 No hay ordenes entregadas para mostrar.
               </td>
             </tr>
@@ -523,7 +561,15 @@ const reporteFiltrado = computed(() => {
   return reporte.value.filter((item) => {
     const coincideTexto =
       !texto ||
-      [item.ot, item.sucursal, item.nombre, item.cliente, item.vehiculo].some(
+      [
+        item.ot,
+        item.sucursal,
+        item.nombre,
+        item.cliente,
+        item.vehiculo,
+        item.metodoPago,
+        item.formaPago,
+      ].some(
         (valor) => normalizar(valor).includes(texto),
       );
 
@@ -537,6 +583,7 @@ const reporteFiltrado = computed(() => {
 const camposNumericos = new Set([
   "precioSubtotal",
   "costoTotal",
+  "refacciones",
   "descuentoPromocionTotal",
   "precioTotal",
   "rentabilidad",
@@ -603,10 +650,11 @@ const totales = computed(() =>
     (acc, item) => {
       acc.precio += Number(item.precioTotal || 0);
       acc.costo += Number(item.costoTotal || 0);
+      acc.refacciones += Number(item.refacciones || 0);
       acc.rentabilidad += Number(item.rentabilidad || 0);
       return acc;
     },
-    { precio: 0, costo: 0, rentabilidad: 0 },
+    { precio: 0, costo: 0, refacciones: 0, rentabilidad: 0 },
   ),
 );
 
@@ -648,7 +696,7 @@ const exportarXlsx = async () => {
     workbook.creator = "Kartisimo";
     workbook.created = new Date();
 
-    worksheet.mergeCells("A1:J1");
+    worksheet.mergeCells("A1:L1");
     worksheet.getCell("A1").value = "Reporte de Utilidad";
     worksheet.getCell("A1").font = {
       bold: true,
@@ -689,6 +737,8 @@ const exportarXlsx = async () => {
       totales.value.precio,
       "Costo total",
       totales.value.costo,
+      "Refacciones",
+      totales.value.refacciones,
       "Utilidad",
       totales.value.rentabilidad,
     ]);
@@ -700,8 +750,10 @@ const exportarXlsx = async () => {
       "Fecha alta",
       "Fecha entrega",
       "Metodo pago",
+      "Forma pago",
       "Precio subtotal",
       "Costo total",
+      "Refacciones",
       "Total descuento",
       "Precio total",
       "Utilidad",
@@ -715,20 +767,22 @@ const exportarXlsx = async () => {
         fechaExcel(item.fechaAlta),
         fechaExcel(item.fechaEntrega),
         item.metodoPago || "N/A",
+        item.formaPago || "Contado",
         Number(item.precioSubtotal || 0),
         Number(item.costoTotal || 0),
+        Number(item.refacciones || 0),
         Number(item.descuentoPromocionTotal || 0),
         Number(item.precioTotal || 0),
         Number(item.rentabilidad || 0),
       ]);
     });
 
-    worksheet.mergeCells("A6:J6");
+    worksheet.mergeCells("A6:L6");
     worksheet.getCell("A6").font = { bold: true };
 
     const filaResumen = worksheet.getRow(7);
     filaResumen.font = { bold: true };
-    [4, 6, 8].forEach((col) => {
+    [4, 6, 8, 10].forEach((col) => {
       filaResumen.getCell(col).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
     });
 
@@ -744,7 +798,7 @@ const exportarXlsx = async () => {
 
     worksheet.autoFilter = {
       from: "A9",
-      to: "J9",
+      to: "L9",
     };
 
     worksheet.columns = [
@@ -753,6 +807,8 @@ const exportarXlsx = async () => {
       { width: 22 },
       { width: 22 },
       { width: 22 },
+      { width: 18 },
+      { width: 18 },
       { width: 18 },
       { width: 18 },
       { width: 18 },
@@ -780,7 +836,7 @@ const exportarXlsx = async () => {
       row.getCell(3).numFmt = "dd/mm/yyyy hh:mm";
       row.getCell(4).numFmt = "dd/mm/yyyy hh:mm";
 
-      [6, 7, 8, 9, 10].forEach((col) => {
+      [7, 8, 9, 10, 11, 12].forEach((col) => {
         row.getCell(col).numFmt = '"$"#,##0.00;[Red]-"$"#,##0.00';
         row.getCell(col).alignment = {
           vertical: "middle",
@@ -788,10 +844,10 @@ const exportarXlsx = async () => {
         };
       });
 
-      row.getCell(10).font = {
+      row.getCell(12).font = {
         bold: true,
         color: {
-          argb: Number(row.getCell(10).value || 0) < 0 ? "FFDC3545" : "FF198754",
+          argb: Number(row.getCell(12).value || 0) < 0 ? "FFDC3545" : "FF198754",
         },
       };
 

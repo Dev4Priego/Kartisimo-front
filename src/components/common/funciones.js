@@ -1,5 +1,6 @@
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
+import { computed } from "vue";
 
 export function formatearFecha(fecha) {
   if (!fecha) return "";
@@ -153,3 +154,19 @@ export const onCambioPromoServicio = (servicio) => {
       : Math.max(0, base - promo.valor)
     : base;
 };
+
+export const telefonoFormateado = computed(() => {
+  if (!vistaCotizacion.value.cliente || !vistaCotizacion.value.cliente.telefono)
+    return "";
+
+  let valor = vistaCotizacion.value.cliente.telefono.replace(/\D/g, "");
+  if (valor.length > 10) valor = valor.substring(0, 10);
+
+  if (valor.length > 6) {
+    return valor.replace(/(\d{3})(\d{3})(\d{0,4})/, "$1 $2 $3");
+  } else if (valor.length > 3) {
+    return valor.replace(/(\d{3})(\d{0,3})/, "$1 $2");
+  } else {
+    return valor;
+  }
+});

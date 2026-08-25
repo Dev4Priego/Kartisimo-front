@@ -5,6 +5,7 @@
     >
       <div><i class="bi bi-nut-fill me-2"></i>Refacciones</div>
       <button
+      v-if="props.estadoOT != 3"
         class="btn btn-sm btn-outline-primary shadow-sm"
         @click="agregarRefaccion()"
       >
@@ -88,6 +89,7 @@
               <i class="bi bi-wrench mx-1"></i>Num. Refacciones
             </label>
             <input
+              ref="num_refacciones"
               type="number"
               class="form-control"
               v-model="refaccionForm.numRefacciones"
@@ -430,7 +432,7 @@
               <th scope="col">Total</th>
               <th scope="col">Factura/Nota</th>
               <th scope="col">Fecha/hora</th>
-              <th scope="col">Acciones</th>
+              <th scope="col" v-if="props.estadoOT != 3">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -449,7 +451,7 @@
               </td>
               <td>{{ i.nota_Factura }}</td>
               <td>{{ formatearFecha(i.fecha) }}</td>
-              <td>
+              <td  v-if="props.estadoOT != 3">
                 <button
                   class="btn btn-sm btn-outline-warning me-1"
                   @click="getEditarRefaccionOT(i)"
@@ -624,8 +626,9 @@ const editarRefaccionForm = ref({
 const props = defineProps({
   otId: Number,
   usuario: Number,
+  estadoOT: Number,
   insumos: {
-    type: Object,
+    type: Object, 
     default: () => ({
       llantas: [],
       paquetes: [],
@@ -733,11 +736,13 @@ const seleccionarProveedor = (proveedor) => {
 
   if (modal) modal.hide();
 };
+const num_refacciones = ref(null);
 const manejarProveedor = (proveedor) => {
   refaccionForm.id_proveedor = proveedor.id_proveedor;
   refaccionForm.proveedor = proveedor.nombreproveedor;
   proveedorNombre.value = proveedor.nombreproveedor;
   mostrarTabla.value = false;
+  num_refacciones.value.focus();
 };
 const buscarProveedores = () => {
   currentPage.value = 1;

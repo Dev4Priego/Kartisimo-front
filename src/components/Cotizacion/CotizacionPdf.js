@@ -382,11 +382,17 @@ export const createCotizacionPdf = async (cotizacion) => {
 export const downloadCotizacionPdf = async (cotizacion) => {
   const pdf = await createCotizacionPdf(cotizacion);
   const llantas = cotizacion?.llantasSelecionadas || [];
-  pdf.download(`Cotizacion_${llantas?.[0]?.medidas || ""}_Kartisimo_C${cotizacion?.codigo || ""}.pdf`);
+  const NormalizarLlantas = llantas?.[0]?.medidas.replaceAll("/"," ");
+  pdf.download(
+    `Cotizacion ${NormalizarLlantas || ""} Kartisimo C${
+      cotizacion?.codigo || ""
+    }.pdf`,
+  );
 };
 
 export const printCotizacionPdf = async (cotizacion) => {
   const pdf = await createCotizacionPdf(cotizacion);
+  const win = window.open("", "_blank");
   pdf.print();
 };
 

@@ -54,15 +54,23 @@
             </div>
 
             <div class="row g-3 mb-3">
-              <div class="col-12 col-lg-4">
+              <div class="col-12 col-lg">
+                <span class="costeo-label">Método de pago</span>
+                <div>{{ costeo.metodoPago || "Sin método" }}</div>
+              </div>
+              <div class="col-12 col-lg">
+                <span class="costeo-label">Forma de pago</span>
+                <div>{{ costeo.formaPago || "Contado" }}</div>
+              </div>
+              <div class="col-12 col-lg">
                 <span class="costeo-label">Tecnico</span>
                 <div>{{ costeo.tecnico || "Sin tecnico" }}</div>
               </div>
-              <div class="col-12 col-lg-4">
+              <div class="col-12 col-lg">
                 <span class="costeo-label">Vehiculo</span>
                 <div>{{ costeo.vehiculo || "Sin vehiculo" }}</div>
               </div>
-              <div class="col-12 col-lg-4">
+              <div class="col-12 col-lg">
                 <span class="costeo-label">Costo total</span>
                 <div class="fw-bold">{{ moneda(costeo.costoTotal) }}</div>
               </div>

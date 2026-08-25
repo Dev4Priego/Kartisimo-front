@@ -13,7 +13,7 @@
         table-class-name="table table-hover table-sm align-middle mb-0"
       >
         <template #item-codigo="item">
-          <span class="text-nowrap">C{{ item.codigo }}</span>
+          <span class="text-nowrap">{{ item.codigo }}</span>
         </template>
 
         <template #item-telefono="item">
@@ -86,15 +86,16 @@
 </template>
 
 <script setup>
-import { computed, isRef } from "vue";
+import { toRefs, watch } from "vue";
 import EasyDataTable from "vue3-easy-data-table";
+import { useCotizaciones } from "@/composables/cotizacion/useCotizaciones";
 
 const props = defineProps({
-  ctx: {
-    type: Object,
-    required: true,
-  },
+  busqueda: { type: String, default: "" },
+  estatus: { type: String, default: "" },
+  sucursal: { type: String, default: "" },
 });
+const emit = defineEmits(["edit", "preview", "sucursales-change"]);
 
 const headers = [
   { text: "Codigo", value: "codigo", sortable: true },
@@ -107,64 +108,27 @@ const headers = [
   { text: "Acciones", value: "acciones", width: 170 },
 ];
 
-const getContextValue = (key) => {
-  const value = props.ctx[key];
-  return isRef(value) ? value.value : value;
-};
+const filtros = toRefs(props);
+const {
+  aprobar: aprobarCotizacion,
+  cancelar: cancelarCotizacion,
+  cargar,
+  finalizar: finalizarCotizacion,
+  formatearTelefono,
+  items: cotizacionesTransformadas,
+  loading,
+  reactivar: reactivarCotizacion,
+  sucursales,
+} = useCotizaciones(filtros);
 
-const setContextValue = (key, nextValue) => {
-  const value = props.ctx[key];
+const abrirModalCotizacion = (cotizacion) => emit("edit", cotizacion);
+const mostrarVistaPrevia = (cotizacion) => emit("preview", cotizacion);
 
-  if (isRef(value)) {
-    value.value = nextValue;
-    return;
-  }
+watch(
+  sucursales,
+  (valor) => emit("sucursales-change", valor),
+  { immediate: true },
+);
 
-  props.ctx[key] = nextValue;
-};
-
-const loading = computed({
-  get: () => getContextValue("loading"),
-  set: (nextValue) => setContextValue("loading", nextValue),
-});
-
-const cancelarCotizacion = computed({
-  get: () => getContextValue("cancelarCotizacion"),
-  set: (nextValue) => setContextValue("cancelarCotizacion", nextValue),
-});
-
-const reactivarCotizacion = computed({
-  get: () => getContextValue("reactivarCotizacion"),
-  set: (nextValue) => setContextValue("reactivarCotizacion", nextValue),
-});
-
-const aprobarCotizacion = computed({
-  get: () => getContextValue("aprobarCotizacion"),
-  set: (nextValue) => setContextValue("aprobarCotizacion", nextValue),
-});
-
-const finalizarCotizacion = computed({
-  get: () => getContextValue("finalizarCotizacion"),
-  set: (nextValue) => setContextValue("finalizarCotizacion", nextValue),
-});
-
-const abrirModalCotizacion = computed({
-  get: () => getContextValue("abrirModalCotizacion"),
-  set: (nextValue) => setContextValue("abrirModalCotizacion", nextValue),
-});
-
-const cotizacionesTransformadas = computed({
-  get: () => getContextValue("cotizacionesTransformadas"),
-  set: (nextValue) => setContextValue("cotizacionesTransformadas", nextValue),
-});
-
-const mostrarVistaPrevia = computed({
-  get: () => getContextValue("mostrarVistaPrevia"),
-  set: (nextValue) => setContextValue("mostrarVistaPrevia", nextValue),
-});
-
-const formatearTelefono = computed({
-  get: () => getContextValue("formatearTelefono"),
-  set: (nextValue) => setContextValue("formatearTelefono", nextValue),
-});
+defineExpose({ recargar: cargar });
 </script>

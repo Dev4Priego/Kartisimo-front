@@ -9,13 +9,13 @@ import FormularioOT from '@/components/OrdenTrabajo/FormularioOT.vue'
 import Promocion from '@/views/Promocion.vue'
 import Catalogos from '@/views/Catalogos.vue'
 import AlmacenOT from '@/components/Almacen/AlmacenOT.vue'
-import TablaCargarLlantas from '@/components/Cotizacion/TablaCargarLlantas.vue' // agregado solo para desarrollo de componente dinamico, eliminar despues
 import OrdenTrabajoPreview from '@/views/OrdenTrabajo/OrdenTrabajoPreview.vue'
 import OrdenTrabajoEdit from '@/views/OrdenTrabajo/OrdenTrabajoEdit.vue'
 import OrdenTrabajoLayout from '@/views/OrdenTrabajo/OrdenTrabajoLayout.vue'
 import ReportesRentabilidad from '@/views/Reportes/RentabilidadOrdenTrabajo.vue'
 import { clearSession, isSessionValid } from '@/services/auth'
 import ComisionesTecnicos from '@/views/Reportes/ComisionesTecnicos.vue'
+import RefaccionesProveedores from '@/views/Reportes/RefaccionesProveedores.vue'
 
 const routes = [
   {
@@ -101,6 +101,11 @@ const routes = [
         path: "reportes/comisiones",
         name: "Comisiones",
         component: ComisionesTecnicos,
+      },
+      {
+        path: "reportes/refacciones",
+        name: "RefaccionesProveedores",
+        component: RefaccionesProveedores,
       },
     ],
   },

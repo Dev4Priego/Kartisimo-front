@@ -44,7 +44,7 @@
       <div class="col-12 col-lg-2 d-flex align-items-right">
         <button
           class="btn btn-primary position-relative shadow w-100"
-          @click="abrirModalCotizacion()"
+          @click="emit('create')"
         >
           <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva
           cotización
@@ -54,53 +54,33 @@
 </template>
 
 <script setup>
-import { computed, isRef } from "vue";
+import { computed } from "vue";
 
 const props = defineProps({
-  ctx: {
-    type: Object,
-    required: true,
-  },
+  busqueda: { type: String, default: "" },
+  estatus: { type: String, default: "" },
+  sucursal: { type: String, default: "" },
+  sucursales: { type: Array, default: () => [] },
 });
 
-const getContextValue = (key) => {
-  const value = props.ctx[key];
-  return isRef(value) ? value.value : value;
-};
-
-const setContextValue = (key, nextValue) => {
-  const value = props.ctx[key];
-
-  if (isRef(value)) {
-    value.value = nextValue;
-    return;
-  }
-
-  props.ctx[key] = nextValue;
-};
+const emit = defineEmits([
+  "create",
+  "update:busqueda",
+  "update:estatus",
+  "update:sucursal",
+]);
 
 const busquedaCotizaciones = computed({
-  get: () => getContextValue("busquedaCotizaciones"),
-  set: (nextValue) => setContextValue("busquedaCotizaciones", nextValue),
+  get: () => props.busqueda,
+  set: (valor) => emit("update:busqueda", valor),
 });
-
 const filtroEstatus = computed({
-  get: () => getContextValue("filtroEstatus"),
-  set: (nextValue) => setContextValue("filtroEstatus", nextValue),
+  get: () => props.estatus,
+  set: (valor) => emit("update:estatus", valor),
 });
-
 const filtroSucursal = computed({
-  get: () => getContextValue("filtroSucursal"),
-  set: (nextValue) => setContextValue("filtroSucursal", nextValue),
+  get: () => props.sucursal,
+  set: (valor) => emit("update:sucursal", valor),
 });
-
-const sucursalesCotizacion = computed({
-  get: () => getContextValue("sucursalesCotizacion"),
-  set: (nextValue) => setContextValue("sucursalesCotizacion", nextValue),
-});
-
-const abrirModalCotizacion = computed({
-  get: () => getContextValue("abrirModalCotizacion"),
-  set: (nextValue) => setContextValue("abrirModalCotizacion", nextValue),
-});
+const sucursalesCotizacion = computed(() => props.sucursales);
 </script>

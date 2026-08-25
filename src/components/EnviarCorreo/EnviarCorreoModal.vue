@@ -91,7 +91,6 @@ import { getCurrentInstance, ref } from 'vue'
 import Swal from 'sweetalert2'
 import { getCotizacionPdfBlob } from '@/components/Cotizacion/CotizacionPdf'
 
-
 const { proxy } = getCurrentInstance()
 const raw = JSON.parse(localStorage.getItem("userSession") || "{}");
 
@@ -106,6 +105,74 @@ const mensajeCorreo = ref('')
 const mensajeModalCorreo = ref('')
 const estadoModalCorreo = ref('')
 const enviandoCorreo = ref(false)
+
+const escaparHtml = (valor) => String(valor ?? '')
+	.replaceAll('&', '&amp;')
+	.replaceAll('<', '&lt;')
+	.replaceAll('>', '&gt;')
+	.replaceAll('"', '&quot;')
+	.replaceAll("'", '&#039;')
+
+const formatoMoneda = (valor) => new Intl.NumberFormat('es-MX', {
+	style: 'currency',
+	currency: 'MXN',
+}).format(Number(valor || 0))
+
+const construirCotizacionCorreo = (cotizacion, mensaje) => {
+	const cliente = cotizacion?.cliente || {}
+	const partidas = [
+		...(cotizacion?.llantasSelecionadas || []).map((item) => ({
+			cantidad: item.cantidad || 0,
+			descripcion: item.medidas || 'Llanta',
+			precio: item.precioUnitario,
+			total: item.total ?? Number(item.precioUnitario || 0) * Number(item.cantidad || 0),
+		})),
+		...(cotizacion?.paquetes || []).map((item) => ({
+			cantidad: item.cantidad || 1,
+			descripcion: [item.nombre, item.descripcion].filter(Boolean).join(' - '),
+			precio: item.precioUnitario,
+			total: item.total ?? Number(item.precioUnitario || 0) * Number(item.cantidad || 1),
+		})),
+		...(cotizacion?.serviciosAdicionales || []).map((item) => ({
+			cantidad: item.cantidad || 0,
+			descripcion: item.nombreServicio || item.descripcion || 'Servicio',
+			precio: item.precioUnitario,
+			total: item.total ?? Number(item.precioUnitario || 0) * Number(item.cantidad || 0),
+		})),
+	]
+
+	const filas = partidas.map((item) => `
+		<tr>
+			<td style="padding:9px;border-bottom:1px solid #e5e7eb;text-align:center">${escaparHtml(item.cantidad)}</td>
+			<td style="padding:9px;border-bottom:1px solid #e5e7eb">${escaparHtml(item.descripcion)}</td>
+			<td style="padding:9px;border-bottom:1px solid #e5e7eb;text-align:right;white-space:nowrap">${escaparHtml(formatoMoneda(item.precio))}</td>
+			<td style="padding:9px;border-bottom:1px solid #e5e7eb;text-align:right;white-space:nowrap">${escaparHtml(formatoMoneda(item.total))}</td>
+		</tr>`).join('')
+
+	const mensajeHtml = escaparHtml(mensaje).replaceAll('\n', '<br>')
+	return `
+		<div style="margin:0;background:#f3f4f6;padding:24px;font-family:Arial,sans-serif;color:#1f2937">
+			<div style="max-width:760px;margin:auto;background:#fff;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb">
+				<div style="background:#d43535;color:#fff;padding:20px 24px">
+					<div style="font-size:24px;font-weight:700">Kartisimo</div>
+					<div style="margin-top:4px">Cotización C${escaparHtml(cotizacion?.codigo || '')}</div>
+				</div>
+				<div style="padding:22px 24px">
+					${mensajeHtml ? `<p style="margin:0 0 20px;line-height:1.5">${mensajeHtml}</p>` : ''}
+					<table role="presentation" style="width:100%;margin-bottom:18px;font-size:14px">
+						<tr><td style="padding:3px 0"><strong>Cliente:</strong> ${escaparHtml(cliente.nombre || 'N/A')}</td><td style="padding:3px 0"><strong>Teléfono:</strong> ${escaparHtml(cliente.telefono || 'N/A')}</td></tr>
+						<tr><td colspan="2" style="padding:3px 0"><strong>Observaciones:</strong> ${escaparHtml(cotizacion?.observaciones || 'N/A')}</td></tr>
+					</table>
+					<table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px">
+						<thead><tr style="background:#f3f4f6"><th style="padding:9px;text-align:center">Cant.</th><th style="padding:9px;text-align:left">Descripción</th><th style="padding:9px;text-align:right">Precio unit.</th><th style="padding:9px;text-align:right">Total</th></tr></thead>
+						<tbody>${filas || '<tr><td colspan="4" style="padding:18px;text-align:center;color:#6b7280">Sin partidas</td></tr>'}</tbody>
+					</table>
+					${cotizacion?.mostrarTotal ? `<div style="font-size:18px;font-weight:700;text-align:right;margin-top:16px">Total: ${escaparHtml(formatoMoneda(cotizacion?.total))}</div>` : ''}
+					
+				</div>
+			</div>
+		</div>`
+}
 
 const abrirModal = () => {
 	if (!props.cotizacion) {
@@ -149,7 +216,7 @@ const enviarDesdeModal = async () => {
 		await generarPDFyEnviar({
 			email: correoDestino.value,
 			subj: asuntoCorreo.value,
-			msg: mensajeCorreo.value,
+			msg:  mensajeCorreo.value,
 		})
 		//mensajeModalCorreo.value = 'Correo enviado exitosamente.'
 		//estadoModalCorreo.value = 'success'
@@ -173,6 +240,7 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 		obtenerDatosUsuarioCorreo(),
 	])
 	const pdfBase64 = await blobToBase64(pdfBlob)
+	const cuerpoCorreo = construirCotizacionCorreo(props.cotizacion, msg)
 
 	const response = await fetch(`${proxy.$serverIP}api/Email/enviar`, {
 		method: 'POST',
@@ -182,7 +250,7 @@ const generarPDFyEnviar = async ({ email, subj, msg }) => {
 			Contrasenia: datos.usuario.password_correo,
 			Para: email,
 			Asunto: subj,
-			Cuerpo: msg,
+			Cuerpo: cuerpoCorreo,
 			NombreRemitente: 'Kartisimo ' + datos.usuario.nombre,
 			AdjuntoBase64: pdfBase64,
 			NombreAdjunto: `Cotizacion_${props.cotizacion?.llantasSelecionadas?.[0]?.medidas || ""}_Kartisimo_${props.cotizacion?.codigo || ''}.pdf`,

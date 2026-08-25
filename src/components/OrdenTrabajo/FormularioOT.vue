@@ -359,7 +359,7 @@
         <div class="col-3">
           <!-- Método de pago -->
           <div class="mb-3">
-            <label class="form-label" for="formaPago">Forma de pago *</label>
+            <label class="form-label" for="formaPago">Método de pago *</label>
 
             <select
               v-model="ordenTrabajoForm.cliente.metodoPago"
@@ -371,26 +371,24 @@
             >
               <option disabled value="">-Selecciona-</option>
               <option value="Efectivo">01 - Efectivo</option>
-              <option value="Cheque nominativo">02 - Cheque nominativo</option>
+              <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+              <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
               <option value="Transferencia electrónica de fondos">
                 03 - Transferencia electrónica de fondos
               </option>
-              <option value="Tarjeta de crédito">
-                04 - Tarjeta de crédito
-              </option>
+              <option value="Cheque nominativo">02 - Cheque nominativo</option>
+              <option value="Por definir">99 - Por definir</option>
               <option value="Condonación">15 - Condonación</option>
               <option value="Compensación">17 - Compensación</option>
               <option value="Prescripción o caducidad">
                 26 - Prescripción o caducidad
               </option>
-              <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
               <option value="Aplicación de anticipos">
                 30 - Aplicación de anticipos
               </option>
               <option value="Intermediario pagos">
                 31 - Intermediario pagos
               </option>
-              <option value="Por definir">99 - Por definir</option>
             </select>
 
             <small v-if="errores['cliente.metodoPago']" class="error-msg">
@@ -398,7 +396,7 @@
             </small>
           </div>
         </div>
-        <div class="col-6">
+        <div :class="isCreditCard ? 'col-5':'col-6'">
           <div class="mb-3">
             <label class="form-label">Fecha de entrega propuesta *</label>
             <div class="row">
@@ -428,7 +426,7 @@
             </small>
           </div>
         </div>
-        <div class="col-3">
+        <div :class="isCreditCard ? 'col-2' : 'col-3'">
           <div class="mb-3">
             <label class="form-label">Fecha Alta *</label>
             <input
@@ -439,6 +437,30 @@
             />
             <small v-if="errores['cliente.fechaAlta']" class="error-msg">
               {{ errores["cliente.fechaAlta"] }}
+            </small>
+          </div>
+        </div>
+        <div class="col-2" v-if="isCreditCard">
+          <div class="mb-3">
+            <label for="Meses" class="form-label">Meses *</label>
+            <select
+              v-model="ordenTrabajoForm.cliente.formaPago"
+              name="mesesSelect"
+              id="MesesSelect"
+              class="form-select"
+              @blur="validate('cliente.formaPago')"
+              :class="{ 'input-error': errores['cliente.formaPago'] }"
+            >
+              <option
+                v-for="forma in FORMAS_PAGO_TARJETA"
+                :key="forma"
+                :value="forma"
+              >
+                {{ forma }}
+              </option>
+            </select>
+            <small v-if="errores['cliente.formaPago']" class="error-msg">
+              {{ errores["cliente.formaPago"] }}
             </small>
           </div>
         </div>
@@ -1153,8 +1175,12 @@
               <strong>Técnico seleccionado: </strong> {{ tecnicoSeleccionado }}
             </div>
             <div class="col-12 mt-1">
-              <strong>Forma de pago: </strong>
+              <strong>Método de pago: </strong>
               {{ ordenTrabajoForm.cliente.metodoPago }}
+            </div>
+            <div class="col-12 mt-1">
+              <strong>Forma de pago: </strong>
+              {{ ordenTrabajoForm.cliente.formaPago }}
             </div>
             <div class="col-12 mt-1">
               <strong>Desechar llantas antiguas: </strong>
@@ -1456,6 +1482,12 @@ const vehiculos = ref([]);
 const readOnlyOTderivada = ref(false);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
 import {AplicarPromo} from '@/components/common/funciones'
+import { normalizarPromocionInsumo } from "@/utils/promocionesInsumo";
+import {
+  FORMAS_PAGO_TARJETA,
+  normalizarFormaPago,
+} from "@/utils/formaPago";
+
 const sucursales = [
   "(Ninguna)",
   "Delta",
@@ -1672,6 +1704,12 @@ function validate(path) {
     "cliente.metodoPago": () =>
       !value ? "Debe seleccionar una forma de pago." : null,
 
+    "cliente.formaPago": () =>
+      ordenTrabajoForm.cliente.metodoPago === "Tarjeta de crédito" &&
+      !FORMAS_PAGO_TARJETA.includes(value)
+        ? "Debe seleccionar los meses de la tarjeta de crédito."
+        : null,
+
     "cliente.clienteTelefono": () => {
       if (!value.trim()) return "Debe ingresar un teléfono del cliente.";
 
@@ -1838,6 +1876,7 @@ const ordenTrabajoForm = reactive({
     clienteCorreo: "",
     fechaAlta: getFechaHoraLocal(),
     metodoPago: "",
+    formaPago: "Contado",
   },
   vehiculo: {
     id_vehiculo: 0,
@@ -2215,7 +2254,9 @@ const normalizarLlantas = () => {
       eliminado: l.eliminado ?? false,
     }));
 };
-
+const isCreditCard = computed(() => {
+  return ordenTrabajoForm.cliente.metodoPago === 'Tarjeta de crédito';
+});
 const validarYMostrarPreview = async () => {
   const errores = [];
 
@@ -2231,6 +2272,11 @@ const validarYMostrarPreview = async () => {
     errores.push("El kilometraje es obligatorio y debe ser numérico.");
   if (!ordenTrabajoForm.vehiculo.color)
     errores.push("El color del vehículo es obligatorio.");
+  if (
+    isCreditCard.value &&
+    !FORMAS_PAGO_TARJETA.includes(ordenTrabajoForm.cliente.formaPago)
+  )
+    errores.push("Debe seleccionar los meses de la tarjeta de crédito.");
 
   // Factura (si aplica)
   if (boolFactura.value) {
@@ -2388,6 +2434,10 @@ const guardarOT = async () => {
       isHija: ordenTrabajoForm.esHija,
       idTipoOrdenTrabajo: ordenTrabajoForm.idTipoOrdenTrabajo,
       metodoPago: ordenTrabajoForm.cliente.metodoPago,
+      formaPago: normalizarFormaPago(
+        ordenTrabajoForm.cliente.metodoPago,
+        ordenTrabajoForm.cliente.formaPago,
+      ),
       fechaAlta: ordenTrabajoForm.cliente.fechaAlta,
       fechaEntrega: ordenTrabajoForm.fechaEntrega,
       requiereFactura: boolFactura.value,
@@ -2555,6 +2605,10 @@ const cargarInfoCotizacion = async () => {
   ordenTrabajoForm.observacion = data?.observaciones || "";
   ordenTrabajoForm.cliente.id_cliente = data?.clienteOT?.idCliente || 0;
   ordenTrabajoForm.cliente.metodoPago = data?.metodoPago;
+  ordenTrabajoForm.cliente.formaPago = normalizarFormaPago(
+    data?.metodoPago,
+    data?.formaPago,
+  );
   ordenTrabajoForm.cliente.clienteNombre =
     data?.clienteNombre || data?.clienteOT?.nombreCompleto || "";
   ordenTrabajoForm.cliente.nombres =
@@ -2589,14 +2643,23 @@ const cargarInfoCotizacion = async () => {
         const promosDisponibles = await obtenerPromosPorInventario(
           llanta.idInventarioInicial,
         );
+        const esAlVuelo = Number(llanta?.idPromocionVuelo) > 0;
         const promocionExistente = {
           idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
-          valor: llanta?.valorPromocion || llanta?.valorPromocionVuelo || 0,
-          tipo: llanta?.tipoPromocion || llanta?.tipoPromocionVuelo || null,
-          nombre: llanta?.nombrePromocion || llanta?.nombrePromocionVuelo || "",
+          valor: esAlVuelo
+            ? llanta?.valorPromocionVuelo ?? llanta?.valorVuelo ?? 0
+            : llanta?.valorPromocion ?? 0,
+          tipo: esAlVuelo
+            ? llanta?.tipoPromocionVuelo ?? llanta?.tipoVuelo ?? false
+            : llanta?.tipoPromocion ?? false,
+          nombre: esAlVuelo
+            ? llanta?.nombrePromocionVuelo ?? llanta?.nombreVuelo ?? ""
+            : llanta?.nombrePromocion ?? "",
+          esAlVuelo,
         };
+        const subTotal = AplicarPromo({ ...llanta, promo: promocionExistente });
 
-        return {
+        return normalizarPromocionInsumo({
           idLlanta: llanta.idLlanta,
           idAlmacen: llanta.idAlmacen,
           idPromocion: llanta.idPromocion || null,
@@ -2615,27 +2678,36 @@ const cargarInfoCotizacion = async () => {
           cantidad: llanta.cantidad,
           precioUnitario: llanta.precioUnitario,
           costo: llanta?.costo || 0,
-          subTotal: AplicarPromo(llanta,promocionExistente, llanta.cantidad).toFixed(2), // campo estetico
+          precioConPromo: subTotal,
+          subTotal: Number(subTotal.toFixed(2)),
 
           promosDisponibles: promosDisponibles || [],
-          esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
+          esAlVuelo,
           // si ya tiene promo existente rellenar valores
           promo: promocionExistente,
-        };
+        });
       }),
     ),
     paquete: await Promise.all(
       data.paquetes.map(async (paquete) => {
         const promosDisponibles =
           (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
+        const esAlVuelo = Number(paquete?.idPromocionVuelo) > 0;
         const promocionExistente = {
           idPromocion: paquete?.idPromocion || paquete?.idPromocionVuelo || 0,
-          valor: paquete?.valorPromocion || paquete?.valorPromocionVuelo || 0,
-          tipo: paquete?.tipoPromocion || paquete?.tipoPromocionVuelo || null,
-          nombre:
-            paquete?.nombrePromocion || paquete?.nombrePromocionVuelo || "",
+          valor: esAlVuelo
+            ? paquete?.valorPromocionVuelo ?? paquete?.valorVuelo ?? 0
+            : paquete?.valorPromocion ?? 0,
+          tipo: esAlVuelo
+            ? paquete?.tipoPromocionVuelo ?? paquete?.tipoVuelo ?? false
+            : paquete?.tipoPromocion ?? false,
+          nombre: esAlVuelo
+            ? paquete?.nombrePromocionVuelo ?? paquete?.nombreVuelo ?? ""
+            : paquete?.nombrePromocion ?? "",
+          esAlVuelo,
         };
-        return {
+        const subTotal = AplicarPromo({ ...paquete, promo: promocionExistente });
+        return normalizarPromocionInsumo({
           idPaquete: paquete.idPaquete,
           idPromocion: paquete?.idPromocion || null,
           idConceptoTrabajo: 0,
@@ -2646,7 +2718,8 @@ const cargarInfoCotizacion = async () => {
           cantidad: paquete.cantidad,
           precioUnitario: paquete.precioUnitario,
           costo: paquete?.costo || 0,
-          subTotal: AplicarPromo(paquete, promocionExistente , paquete.cantidad).toFixed(2),
+          precioConPromo: subTotal,
+          subTotal: Number(subTotal.toFixed(2)),
 
           detalle: paquete.detallePaquete.map((detalle) => ({
             idDesglosePaquete: detalle.idDesglosePaquete,
@@ -2658,10 +2731,10 @@ const cargarInfoCotizacion = async () => {
           })),
 
           promosDisponibles: promosDisponibles || [],
-          esAlVuelo: paquete.idPromocionVuelo != 0 ? true : false,
+          esAlVuelo,
           // info histórica (si viene de backend)
           promo: promocionExistente,
-        };
+        });
       }),
     ),
 
@@ -2669,13 +2742,22 @@ const cargarInfoCotizacion = async () => {
       data.servicios.map(async (s) => {
         const promosDisponibles =
           (await obtenerPromosGeneralesParaServicio()) || [];
+        const esAlVuelo = Number(s?.idPromocionVuelo) > 0;
         const promocionExistente = {
           idPromocion: s?.idPromocion || s?.idPromocionVuelo || 0,
-          valor: s?.valorPromocion || s?.valorPromocionVuelo || 0,
-          tipo: s?.tipoPromocion || s?.tipoPromocionVuelo || null,
-          nombre: s?.nombrePromocion || s?.nombrePromocionVuelo || "",
+          valor: esAlVuelo
+            ? s?.valorPromocionVuelo ?? s?.valorVuelo ?? 0
+            : s?.valorPromocion ?? 0,
+          tipo: esAlVuelo
+            ? s?.tipoPromocionVuelo ?? s?.tipoVuelo ?? false
+            : s?.tipoPromocion ?? false,
+          nombre: esAlVuelo
+            ? s?.nombrePromocionVuelo ?? s?.nombreVuelo ?? ""
+            : s?.nombrePromocion ?? "",
+          esAlVuelo,
         };
-        return {
+        const subTotal = AplicarPromo({ ...s, promo: promocionExistente });
+        return normalizarPromocionInsumo({
           idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
           idPromocion: s?.idPromocion || null,
           idConceptoTrabajo: 7,
@@ -2689,13 +2771,14 @@ const cargarInfoCotizacion = async () => {
           precioUnitario: s.precioUnitario,
           costo: s?.costo || 0,
 
-          subTotal: AplicarPromo(s, promocionExistente , s.cantidad).toFixed(2),
+          precioConPromo: subTotal,
+          subTotal: Number(subTotal.toFixed(2)),
 
           promosDisponibles: promosDisponibles || [],
-          esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
+          esAlVuelo,
           // info histórica
           promo: promocionExistente,
-        };
+        });
       }),
     ),
   };
@@ -2719,6 +2802,7 @@ const limpiarOrdenTrabajoForm = () => {
   ordenTrabajoForm.cliente.clienteTelefono = "";
   ordenTrabajoForm.cliente.fechaAlta = new Date().toISOString().split("T")[0];
   ordenTrabajoForm.cliente.metodoPago = "";
+  ordenTrabajoForm.cliente.formaPago = "Contado";
 
   ordenTrabajoForm.vehiculo.id_vehiculo = 0;
   ordenTrabajoForm.vehiculo.marca = "";
@@ -2805,6 +2889,17 @@ watch(boolFactura, (nuevoValor) => {
   }
 });
 
+watch(
+  () => ordenTrabajoForm.cliente.metodoPago,
+  (metodoPago) => {
+    ordenTrabajoForm.cliente.formaPago = normalizarFormaPago(
+      metodoPago,
+      ordenTrabajoForm.cliente.formaPago,
+    );
+    delete errores["cliente.formaPago"];
+  },
+);
+
 const actualizarInsumos = (payload) => {
   // payload = { insumo, totales }
   console.log("INUMOS:", payload);
@@ -2845,6 +2940,7 @@ function validaciones() {
     "cliente.clienteCorreo",
     "cliente.rfc",
     "cliente.metodoPago",
+    "cliente.formaPago",
     "fechaEntrega",
     "idEmpleado",
     "insumos",

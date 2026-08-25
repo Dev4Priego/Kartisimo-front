@@ -187,11 +187,7 @@
                       class="btn btn-outline-secondary w-100 d-flex justify-content-between align-items-center"
                       @click="dropdownOpen = !dropdownOpen"
                     >
-                      <span>{{
-                        selectedAlmacenes.length
-                          ? selectedAlmacenes.join(", ")
-                          : "Elegir almacenes"
-                      }}</span>
+                      <span>{{ selectedAlmacenesLabel }}</span>
                       <i class="bi bi-caret-down-fill"></i>
                     </button>
 
@@ -223,8 +219,9 @@
                           type="checkbox"
                           class="form-check-input"
                           :id="'alm-' + alm.id"
-                          :value="alm.nombre"
+                          :value="alm.id"
                           v-model="selectedAlmacenes"
+                          @change="onAlmacenesChanged"
                         />
                         <label class="form-check-label" :for="'alm-' + alm.id">
                           {{ alm.nombre }}
@@ -234,68 +231,222 @@
                   </div>
                 </div>
               </div>
-              <div>
-                <EasyDataTable
-                  :key="tableKey"
-                  :headers="tblHeadersModal"
-                  :items="itemsFiltrados"
-                  :rows-per-page="100"
-                  show-index
-                  :table-height="400"
-                  :sort-by="sortBy"
-                  :sort-type="sortType"
-                  :header-item-class-name="getModalHeaderItemClassName"
-                  :body-item-class-name="getModalBodyItemClassName"
-                  @update:sort-by="onUpdateSortBy"
-                  @update:sort-type="onUpdateSortType"
+              <div class="table-responsive">
+                <table
+                  class="table table-sm table-hover align-middle mb-0"
+                  style="font-size: 9pt"
                 >
-                  <template #item-runflat="runFlat">
-                    <div class="text-center">
-                      <i
-                        v-if="runFlat.runflat === '1'"
-                        class="bi bi-check-circle-fill text-success"
-                      ></i>
-                    </div>
-                  </template>
+                  <thead class="table-light">
+                    <tr>
+                      <th class="text-start">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('llanta')"
+                        >
+                          Llanta
+                          <i class="bi ms-1" :class="iconoOrden('llanta')"></i>
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('rango')"
+                        >
+                          Rango
+                          <i class="bi ms-1" :class="iconoOrden('rango')"></i>
+                        </button>
+                      </th>
+                      <th class="text-center">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('runflat')"
+                        >
+                          Runflat
+                          <i class="bi ms-1" :class="iconoOrden('runflat')"></i>
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('codigo')"
+                        >
+                          Código
+                          <i class="bi ms-1" :class="iconoOrden('codigo')"></i>
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('medida')"
+                        >
+                          Medidas
+                          <i class="bi ms-1" :class="iconoOrden('medida')"></i>
+                        </button>
+                      </th>
+                      <th class="text-center">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('cantidad')"
+                        >
+                          Cantidad
+                          <i class="bi ms-1" :class="iconoOrden('cantidad')"></i>
+                        </button>
+                      </th>
+                      <th>
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('ubicacion')"
+                        >
+                          Ubicación
+                          <i class="bi ms-1" :class="iconoOrden('ubicacion')"></i>
+                        </button>
+                      </th>
+                      <th class="text-end">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('costo')"
+                        >
+                          Costo
+                          <i class="bi ms-1" :class="iconoOrden('costo')"></i>
+                        </button>
+                      </th>
+                      <th class="text-end">
+                        <button
+                          type="button"
+                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                          @click="ordenarPor('precio')"
+                        >
+                          Precio
+                          <i class="bi ms-1" :class="iconoOrden('precio')"></i>
+                        </button>
+                      </th>
+                      <th class="text-end"></th>
+                    </tr>
+                  </thead>
 
-                  <template #item-medida="slotProps">
-                    {{ slotProps.medida }} {{ slotProps.rango }}
-                    {{ slotProps.runflat === "1" ? "RF" : "" }}
-                  </template>
+                  <tbody>
+                    <tr v-if="llantasLoading">
+                      <td colspan="10" class="text-center py-4 text-muted">
+                        Cargando llantas...
+                      </td>
+                    </tr>
 
-                  <template #item-costo="slotProps">
-                    {{ formatoMoneda(slotProps.costo || 0) }}
-                  </template>
+                    <template v-else>
+                      <tr
+                        v-for="(item, index) in itemsOrdenados"
+                        :key="item.idInventarioInicial || item.id || index"
+                      >
+                        <td class="text-start">{{ item.llanta }}</td>
+                        <td>{{ item.rango }}</td>
+                        <td class="text-center">
+                          <i
+                            v-if="item.runflat == 1"
+                            class="bi bi-check-circle-fill text-success"
+                          ></i>
+                        </td>
+                        <td class="text-start">{{ item.codigo }}</td>
+                        <td class="text-start">
+                          {{ item.medida }} {{ item.runflat == 1 ? "RF" : "" }}
+                        </td>
+                        <td class="text-center">{{ item.cantidad }}</td>
+                        <td>{{ item.ubicacion }}</td>
+                        <td class="text-end">
+                          {{ formatoMoneda(item.costo || 0) }}
+                        </td>
+                        <td class="text-end">
+                          {{ formatoMoneda(item.precio || 0) }}
+                        </td>
+                        <td class="text-end">
+                          <button
+                            v-if="
+                              !cotizacionForm.llantas.some(
+                                (ll) => ll.idLlanta === item.id,
+                              )
+                            "
+                            type="button"
+                            class="btn btn-success btn-sm"
+                            @click="agregarLlanta(item)"
+                            title="Agregar llanta"
+                          >
+                            <i class="bi bi-plus"></i>
+                          </button>
+                          <span v-else class="text-secondary small">
+                            Ya agregada
+                          </span>
+                        </td>
+                      </tr>
+                    </template>
 
-                  <template #item-precio="slotProps">
-                    {{ formatoMoneda(slotProps.precio || 0) }}
-                  </template>
+                    <tr v-if="!llantasLoading && itemsOrdenados.length === 0">
+                      <td colspan="10" class="text-center py-4 text-muted">
+                        No hay datos disponibles
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
 
-                  <template #item-acciones="slotProps">
-                    <button
-                      v-if="
-                        !cotizacionForm.llantas.some(
-                          (ll) => ll.idLlanta === slotProps.id,
-                        )
-                      "
-                      type="button"
-                      class="btn btn-success btn-sm d-flex align-items-center gap-1"
-                      @click="agregarLlanta(slotProps)"
-                      :title="
-                        cotizacionForm.llantas.some(
-                          (ll) => ll.idLlanta === slotProps.id,
-                        )
-                          ? 'Llanta ya agregada'
-                          : 'Agregar llanta'
-                      "
-                    >
-                      <i class="bi bi-plus"></i>
-                    </button>
-                    <span v-else class="text-secondary small">
-                      Ya agregada
-                    </span>
-                  </template>
-                </EasyDataTable>
+              <div
+                class="d-flex justify-content-end align-items-center mt-3"
+                style="font-size: 9pt"
+              >
+                <div class="mx-2">
+                  <table>
+                    <tbody>
+                      <tr>
+                        <td style="white-space: nowrap">
+                          Renglones por página:
+                        </td>
+                        <td>
+                          <select
+                            class="form-control"
+                            style="font-size: 9pt"
+                            v-model="rowsPerPage"
+                            @change="onRowsChange"
+                          >
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                          </select>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="mx-2">
+                  <strong>Página {{ page }}:</strong>
+                  {{ paginaInicio }}-{{ paginaFin }} de {{ totalRows }}
+                </div>
+
+                <div class="mx-2">
+                  <button
+                    class="btn btn-outline-dark btn-sm me-2"
+                    @click="prevPage"
+                    :disabled="page <= 1 || llantasLoading"
+                    type="button"
+                  >
+                    <i class="bi bi-chevron-left"></i>
+                  </button>
+
+                  <button
+                    class="btn btn-outline-dark btn-sm"
+                    @click="nextPage"
+                    :disabled="page >= totalPages || llantasLoading"
+                    type="button"
+                  >
+                    <i class="bi bi-chevron-right"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1520,7 +1671,7 @@
             class="btn btn-success position-relative shadow mx-3"
             style="width: 140px"
             @click="guardarCotizacion"
-            :disabled="!telefonoEsValido || !correoEsValido"
+            :disabled="guardando || !telefonoEsValido || !correoEsValido"
           >
             <i class="bi-save-fill position-absolute start-0 ms-2"></i>
             Guardar
@@ -1532,280 +1683,75 @@
 </template>
 
 <script setup>
-import { computed, isRef } from "vue";
-import EasyDataTable from "vue3-easy-data-table";
 import ClientesFilterOption from "@/components/Cotizacion/ClientesFilterOption.vue";
+import { useCotizacionEditor } from "@/composables/cotizacion/useCotizacionEditor";
 
-const props = defineProps({
-  ctx: {
-    type: Object,
-    required: true,
-  },
+const emit = defineEmits(["saved"]);
+
+const {
+  AplicarPromo,
+  NuevoConceptoTrabajo,
+  PromocionesVuelo,
+  abrir,
+  ajustaNombre,
+  agregarLlanta,
+  agregarServicioExtra,
+  almacenes,
+  buscarPromocionAplicada,
+  busquedaLlantas,
+  closeModal,
+  conceptoOT,
+  correoEsValido,
+  cotizacionForm,
+  dropdownOpen,
+  eliminarLlanta,
+  eliminarPaquete,
+  eliminarServicioExtra,
+  formatoMoneda,
+  guardarCotizacion,
+  guardarPromoAlVuelo,
+  guardando,
+  iconoOrden,
+  irAlSiguientePrecio,
+  itemsOrdenados,
+  llantasLoading,
+  loggeduser,
+  manejarCliente,
+  modalRef,
+  mostrarTabla,
+  nextPage,
+  nuevaCantidad,
+  nuevoPrecio,
+  nuevoServicio,
+  onAlmacenesChanged,
+  onCambioPromo,
+  onRowsChange,
+  ordenarPor,
+  paquetesDisponibles,
+  paquetesSeleccionados,
+  page,
+  paginaFin,
+  paginaInicio,
+  prevPage,
+  promoGeneral,
+  rowsPerPage,
+  selectedAlmacenes,
+  selectedAlmacenesLabel,
+  sucursales,
+  telefonoEsValido,
+  telefonoFormateado,
+  tituloModal,
+  togglePromoAlVuelo,
+  toggleTodos,
+  totalCotizacion,
+  totalPages,
+  totalRows,
+} = useCotizacionEditor({
+  onGuardado: (cotizacion) => emit("saved", cotizacion),
 });
 
-const getContextValue = (key) => {
-  const value = props.ctx[key];
-  return isRef(value) ? value.value : value;
-};
-
-const setContextValue = (key, nextValue) => {
-  const value = props.ctx[key];
-
-  if (isRef(value)) {
-    value.value = nextValue;
-    return;
-  }
-
-  props.ctx[key] = nextValue;
-};
-
-const modalRef = computed({
-  get: () => getContextValue("modalRef"),
-  set: (nextValue) => setContextValue("modalRef", nextValue),
-});
-
-const paquetesDisponibles = computed({
-  get: () => getContextValue("paquetesDisponibles"),
-  set: (nextValue) => setContextValue("paquetesDisponibles", nextValue),
-});
-
-const items = computed({
-  get: () => getContextValue("items"),
-  set: (nextValue) => setContextValue("items", nextValue),
-});
-
-const nuevoServicio = computed({
-  get: () => getContextValue("nuevoServicio"),
-  set: (nextValue) => setContextValue("nuevoServicio", nextValue),
-});
-
-const NuevoConceptoTrabajo = computed({
-  get: () => getContextValue("NuevoConceptoTrabajo"),
-  set: (nextValue) => setContextValue("NuevoConceptoTrabajo", nextValue),
-});
-
-const nuevoPrecio = computed({
-  get: () => getContextValue("nuevoPrecio"),
-  set: (nextValue) => setContextValue("nuevoPrecio", nextValue),
-});
-
-const nuevaCantidad = computed({
-  get: () => getContextValue("nuevaCantidad"),
-  set: (nextValue) => setContextValue("nuevaCantidad", nextValue),
-});
-
-const busquedaLlantas = computed({
-  get: () => getContextValue("busquedaLlantas"),
-  set: (nextValue) => setContextValue("busquedaLlantas", nextValue),
-});
-
-const conceptoOT = computed({
-  get: () => getContextValue("conceptoOT"),
-  set: (nextValue) => setContextValue("conceptoOT", nextValue),
-});
-
-const mostrarTabla = computed({
-  get: () => getContextValue("mostrarTabla"),
-  set: (nextValue) => setContextValue("mostrarTabla", nextValue),
-});
-
-const selectedAlmacenes = computed({
-  get: () => getContextValue("selectedAlmacenes"),
-  set: (nextValue) => setContextValue("selectedAlmacenes", nextValue),
-});
-
-const dropdownOpen = computed({
-  get: () => getContextValue("dropdownOpen"),
-  set: (nextValue) => setContextValue("dropdownOpen", nextValue),
-});
-
-const loggeduser = computed({
-  get: () => getContextValue("loggeduser"),
-  set: (nextValue) => setContextValue("loggeduser", nextValue),
-});
-
-const sucursales = computed({
-  get: () => getContextValue("sucursales"),
-  set: (nextValue) => setContextValue("sucursales", nextValue),
-});
-
-const tituloModal = computed({
-  get: () => getContextValue("tituloModal"),
-  set: (nextValue) => setContextValue("tituloModal", nextValue),
-});
-
-const paquetesSeleccionados = computed({
-  get: () => getContextValue("paquetesSeleccionados"),
-  set: (nextValue) => setContextValue("paquetesSeleccionados", nextValue),
-});
-
-const sortBy = computed({
-  get: () => getContextValue("sortBy"),
-  set: (nextValue) => setContextValue("sortBy", nextValue),
-});
-
-const sortType = computed({
-  get: () => getContextValue("sortType"),
-  set: (nextValue) => setContextValue("sortType", nextValue),
-});
-
-const tableKey = computed({
-  get: () => getContextValue("tableKey"),
-  set: (nextValue) => setContextValue("tableKey", nextValue),
-});
-
-const getModalHeaderItemClassName = computed({
-  get: () => getContextValue("getModalHeaderItemClassName"),
-  set: (nextValue) => setContextValue("getModalHeaderItemClassName", nextValue),
-});
-
-const getModalBodyItemClassName = computed({
-  get: () => getContextValue("getModalBodyItemClassName"),
-  set: (nextValue) => setContextValue("getModalBodyItemClassName", nextValue),
-});
-
-const onUpdateSortBy = computed({
-  get: () => getContextValue("onUpdateSortBy"),
-  set: (nextValue) => setContextValue("onUpdateSortBy", nextValue),
-});
-
-const onUpdateSortType = computed({
-  get: () => getContextValue("onUpdateSortType"),
-  set: (nextValue) => setContextValue("onUpdateSortType", nextValue),
-});
-
-const promoGeneral = computed({
-  get: () => getContextValue("promoGeneral"),
-  set: (nextValue) => setContextValue("promoGeneral", nextValue),
-});
-
-const cotizacionForm = computed({
-  get: () => getContextValue("cotizacionForm"),
-  set: (nextValue) => setContextValue("cotizacionForm", nextValue),
-});
-
-const PromocionesVuelo = computed({
-  get: () => getContextValue("PromocionesVuelo"),
-  set: (nextValue) => setContextValue("PromocionesVuelo", nextValue),
-});
-
-const telefonoFormateado = computed({
-  get: () => getContextValue("telefonoFormateado"),
-  set: (nextValue) => setContextValue("telefonoFormateado", nextValue),
-});
-
-const telefonoEsValido = computed({
-  get: () => getContextValue("telefonoEsValido"),
-  set: (nextValue) => setContextValue("telefonoEsValido", nextValue),
-});
-
-const correoEsValido = computed({
-  get: () => getContextValue("correoEsValido"),
-  set: (nextValue) => setContextValue("correoEsValido", nextValue),
-});
-
-const ajustaNombre = computed({
-  get: () => getContextValue("ajustaNombre"),
-  set: (nextValue) => setContextValue("ajustaNombre", nextValue),
-});
-
-const irAlSiguientePrecio = computed({
-  get: () => getContextValue("irAlSiguientePrecio"),
-  set: (nextValue) => setContextValue("irAlSiguientePrecio", nextValue),
-});
-
-const eliminarPaquete = computed({
-  get: () => getContextValue("eliminarPaquete"),
-  set: (nextValue) => setContextValue("eliminarPaquete", nextValue),
-});
-
-const agregarServicioExtra = computed({
-  get: () => getContextValue("agregarServicioExtra"),
-  set: (nextValue) => setContextValue("agregarServicioExtra", nextValue),
-});
-
-const eliminarServicioExtra = computed({
-  get: () => getContextValue("eliminarServicioExtra"),
-  set: (nextValue) => setContextValue("eliminarServicioExtra", nextValue),
-});
-
-const eliminarLlanta = computed({
-  get: () => getContextValue("eliminarLlanta"),
-  set: (nextValue) => setContextValue("eliminarLlanta", nextValue),
-});
-
-const agregarLlanta = computed({
-  get: () => getContextValue("agregarLlanta"),
-  set: (nextValue) => setContextValue("agregarLlanta", nextValue),
-});
-
-const onCambioPromo = computed({
-  get: () => getContextValue("onCambioPromo"),
-  set: (nextValue) => setContextValue("onCambioPromo", nextValue),
-});
-
-const AplicarPromo = computed({
-  get: () => getContextValue("AplicarPromo"),
-  set: (nextValue) => setContextValue("AplicarPromo", nextValue),
-});
-
-const guardarCotizacion = computed({
-  get: () => getContextValue("guardarCotizacion"),
-  set: (nextValue) => setContextValue("guardarCotizacion", nextValue),
-});
-
-const totalCotizacion = computed({
-  get: () => getContextValue("totalCotizacion"),
-  set: (nextValue) => setContextValue("totalCotizacion", nextValue),
-});
-
-const itemsFiltrados = computed({
-  get: () => getContextValue("itemsFiltrados"),
-  set: (nextValue) => setContextValue("itemsFiltrados", nextValue),
-});
-
-const toggleTodos = computed({
-  get: () => getContextValue("toggleTodos"),
-  set: (nextValue) => setContextValue("toggleTodos", nextValue),
-});
-
-const almacenes = computed({
-  get: () => getContextValue("almacenes"),
-  set: (nextValue) => setContextValue("almacenes", nextValue),
-});
-
-const closeModal = computed({
-  get: () => getContextValue("closeModal"),
-  set: (nextValue) => setContextValue("closeModal", nextValue),
-});
-
-const formatoMoneda = computed({
-  get: () => getContextValue("formatoMoneda"),
-  set: (nextValue) => setContextValue("formatoMoneda", nextValue),
-});
-
-const tblHeadersModal = computed({
-  get: () => getContextValue("tblHeadersModal"),
-  set: (nextValue) => setContextValue("tblHeadersModal", nextValue),
-});
-
-const manejarCliente = computed({
-  get: () => getContextValue("manejarCliente"),
-  set: (nextValue) => setContextValue("manejarCliente", nextValue),
-});
-
-const buscarPromocionAplicada = computed({
-  get: () => getContextValue("buscarPromocionAplicada"),
-  set: (nextValue) => setContextValue("buscarPromocionAplicada", nextValue),
-});
-
-const togglePromoAlVuelo = computed({
-  get: () => getContextValue("togglePromoAlVuelo"),
-  set: (nextValue) => setContextValue("togglePromoAlVuelo", nextValue),
-});
-
-const guardarPromoAlVuelo = computed({
-  get: () => getContextValue("guardarPromoAlVuelo"),
-  set: (nextValue) => setContextValue("guardarPromoAlVuelo", nextValue),
+defineExpose({
+  abrir,
+  cerrar: closeModal,
 });
 </script>

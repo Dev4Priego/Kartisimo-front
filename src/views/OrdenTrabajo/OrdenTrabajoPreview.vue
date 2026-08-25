@@ -10,7 +10,7 @@
         <div class="w-100">
           <h5 class="fw-bold mb-1">
             Orden de Trabajo O{{ orden?.prefijoSucursal }}-{{
-              orden?.consecutivoSucursal
+              orden?.esHija != 1 ? orden?.consecutivoSucursal : orden.subConsecutivoSucursal
             }}
           </h5>
           <div class="row">
@@ -28,7 +28,12 @@
             <div class="col-6">
               <div class="text-muted small">
                 <i class="bi bi-cash me-1"></i>
-                Forma de pago: {{ orden?.metodoPago }}
+                Método de pago: {{ orden?.metodoPago }}
+              </div>
+
+              <div class="text-muted small">
+                <i class="bi bi-credit-card me-1"></i>
+                Forma de pago: {{ orden?.formaPago || "Contado" }}
               </div>
 
               <div class="text-muted small">
@@ -439,6 +444,7 @@
       </button>
 
       <button
+      v-if="orden?.idSucursal ==  userData.usuario.idSucursal ||userData.usuario.idSucursal == 1"
         class="btn btn-success shadow position-relative"
         style="width: 140px"
         @click="iniciarOT"

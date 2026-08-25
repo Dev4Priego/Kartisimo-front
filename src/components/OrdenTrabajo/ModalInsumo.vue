@@ -1346,12 +1346,18 @@ import "toastify-js/src/toastify.css";
 import ModalAdicional from "./ModalAdicional.vue";
 import { reactive } from "vue";
 import Swal from "sweetalert2";
+import {
+  limpiarPromocionInsumo,
+  mapearPromocionInsumo,
+  normalizarPromocionInsumo,
+  resolverPromocionInsumo,
+} from "@/utils/promocionesInsumo";
 const { proxy } = getCurrentInstance();
 import {AplicarPromo} from '@/components/common/funciones'
 const llantas = ref([]);
 const paquetes = ref([]);
 const adicionales = ref([]);
-const mostrarCostos = ref(false);
+const mostrarCostos = ref(true);
 const promosGeneralesDisponibles = ref([]);
 const userData = JSON.parse(localStorage.getItem("userSession"));
 
@@ -1382,31 +1388,29 @@ const promocionesRapidasParaItem = (item) => {
 const aplicarPromosRapidasAItem = (item) => {
   if (!item) return;
 
+  normalizarPromocionInsumo(item);
+  const promoActual = resolverPromocionInsumo(item);
+
   const promosVuelo = (item.promosAplicables || []).filter(
     (promo) => promo.esAlVuelo,
   );
-  const promoVueloActual =
-    item.idPromocionVuelo > 0 && item.promo
-      ? {
-          ...item.promo,
-          idPromocion: item.idPromocionVuelo,
-          esAlVuelo: true,
-        }
-      : null;
   const promosRapidas = promosGeneralesDisponibles.value.filter(
     (promo) => !promo.esAlVuelo,
   );
 
-  item.promosAplicables = [
+  const promociones = [
     ...promosRapidas,
     ...promosVuelo,
-    ...(promoVueloActual &&
-    !promosVuelo.some(
-      (promo) => promo.idPromocion === promoVueloActual.idPromocion,
-    )
-      ? [promoVueloActual]
-      : []),
+    ...(promoActual ? [promoActual] : []),
   ];
+  const unicas = new Map();
+  promociones.forEach((promo) => {
+    const key = `${Boolean(promo.esAlVuelo)}:${Number(promo.idPromocion)}`;
+    if (!unicas.has(key)) unicas.set(key, promo);
+  });
+
+  item.promosAplicables = [...unicas.values()];
+  if (promoActual) item.promo = promoActual;
 };
 
 const aplicarPromosRapidasAInsumos = () => {
@@ -1429,24 +1433,30 @@ const cargarPromosRapidas = async () => {
 };
 
 const limpiarPromoRapida = (item) => {
-  item.idPromocionSeleccionada = 0;
+  limpiarPromocionInsumo(item);
   onPromoChange(item);
 };
 
 const seleccionarPromoRapida = (item, promo) => {
   aplicarPromosRapidasAItem(item);
+  item.idPromocion = promo.idPromocion;
+  item.idPromocionVuelo = 0;
   item.idPromocionSeleccionada = promo.idPromocion;
+  item.esAlVuelo = false;
+  item.isVuelo = false;
   onPromoChange(item);
 };
+
+const clonarListaInsumos = (lista) =>
+  JSON.parse(JSON.stringify(Array.isArray(lista) ? lista : []));
 
 watch(
   () => props.insumos,
   (nuevo) => {
-    llantas.value = [...(nuevo.llanta || [])];
-    paquetes.value = [...(nuevo.paquete || [])];
-    adicionales.value = [...(nuevo.adicional || [])];
+    llantas.value = clonarListaInsumos(nuevo?.llanta);
+    paquetes.value = clonarListaInsumos(nuevo?.paquete);
+    adicionales.value = clonarListaInsumos(nuevo?.adicional);
     aplicarPromosRapidasAInsumos();
-    console.log("INSUMOS MODAL:", nuevo);
   },
   { immediate: true },
 );
@@ -1535,52 +1545,22 @@ const PromocionesVuelo = reactive({
 
 // Si existe idPromocion, Busca la promo en ll.promosDisponibles, Copia los datos importantes al item, recalcula Subtotal
 const onPromoChange = (item) => {
-  console.log("ITEM EN PROMOCHANGE:", item);
-  const idSel = item.idPromocionSeleccionada; // normal
-  const idVuelo = item.idPromocionVuelo; // vuelo
+  const idSel = Number(item.idPromocionSeleccionada) || 0;
+  const idVuelo = Number(item.idPromocionVuelo) || 0;
 
-  // Si no hay ninguna promoción
   if (!idSel && !idVuelo) {
-    item.promo = {
-      idPromocion: 0,
-      valor: 0,
-      tipo: false,
-      nombre: "",
-    };
-
-    item.precioConPromo = item.precioUnitario;
-    item.isVuelo = null;
-    item.idPromocion = 0; // Reset idPromocion for normal promos
+    limpiarPromocionInsumo(item);
     recalcularSubtotal(item);
     return;
   }
 
-  // Buscamos la promoción correspondiente
-  const promo = (item.promosAplicables || []).find(
-    (p) => p.idPromocion === idSel || p.idPromocion === idVuelo,
-  );
+  item.idPromocion = idVuelo ? 0 : idSel;
+  item.idPromocionSeleccionada = idVuelo || idSel;
+  item.esAlVuelo = Boolean(idVuelo);
+  item.isVuelo = Boolean(idVuelo);
+  item.promo = resolverPromocionInsumo(item);
 
-  item.promo = promo || null;
-  item.isVuelo = !!idVuelo;
-
-  // Set idPromocion for normal promos to enable display
-  if (idSel && !idVuelo) {
-    item.idPromocion = idSel;
-  } else if (idVuelo) {
-    item.idPromocion = 0; // For al vuelo, keep as 0
-  }
-
-  // Calcular precio con la promo
   recalcularSubtotal(item);
-};
-const obtenerPromoSeleccionada = (item) => {
-  const allPromos = [
-    ...(item.promosAplicables || []),
-    ...(item.promosDisponibles || []),
-  ];
-  return allPromos.find(
-    (p) => p.idPromocion === item.idPromocionSeleccionada, // <-- usar idSel
-  );
 };
 const toNumber = (value) => {
   const number = Number(value);
@@ -1616,27 +1596,12 @@ const subtotalItem = (item) => {
 
 
 const recalcularSubtotal = (item) => {
-  // Resolver promo actual según selección
-  let promo = null;
-  if (item.idPromocionVuelo) {
-    promo = { ...item.promo };
-  } else if (item.idPromocionSeleccionada) {
-    promo = obtenerPromoSeleccionada(item);
-  }
-  // Si no hay promo válida, resetear
-  if (!promo) {
-    promo = {
-      idPromocion: 0,
-      valor: 0,
-      tipo: false,
-      nombre: "",
-    };
-  }
-  // Actualizar siempre item.promo con la promo vigente
+  normalizarPromocionInsumo(item);
+  const promo = resolverPromocionInsumo(item);
   item.promo = promo;
-  item.esAlVuelo = !!item.idPromocionVuelo;
-  // Calcular precio final con la promo vigente
-  const precioFinal = AplicarPromo(item, promo);
+  const precioFinal = promo
+    ? AplicarPromo({ ...item, promo })
+    : toNumber(item.precioUnitario) * cantidadItem(item);
   item.precioConPromo = precioFinal;
   item.subTotal = Number(precioFinal.toFixed(2));
 };
@@ -2082,7 +2047,7 @@ const onTogglePaquete = async (paqueteBase) => {
   const precioUnitario = toNumber(paqueteBase.precioUnitario);
   const cantidad = 1;
   const subTotal = Number(
-    AplicarPromo({ precioUnitario, cantidad }, null).toFixed(2),
+    AplicarPromo({ precioUnitario, cantidad }).toFixed(2),
   );
 
   paquetes.value.push({
@@ -2130,10 +2095,6 @@ const mapearInsumosParaPadre = () => {
       idDetalleOTLlanta: l.idDetalleOTLlanta,
       idLlanta: l.idLlanta,
       idAlmacen: l.idAlmacen,
-      idPromocion: l.esAlVuelo ? 0 : l.idPromocionSeleccionada,
-      idPromocionVuelo: l.idPromocionVuelo || 0,
-      idPromocionSeleccionada: l.idPromocionSeleccionada || 0,
-      esAlVuelo: !!l.idPromocionVuelo,
       idConceptoTrabajo: l.idConceptoTrabajo,
       idInventarioInicial: l.idInventarioInicial,
 
@@ -2150,16 +2111,12 @@ const mapearInsumosParaPadre = () => {
       subTotal: l.subTotal,
       promosDisponibles: l.promosDisponibles,
       promosAplicables: l.promosAplicables,
-      promo: l.promo || [],
+      ...mapearPromocionInsumo(l),
     })),
 
     paquete: paquetes.value.map((p) => ({
       idDetalleOTPaquete: p.idDetalleOTPaquete,
       idPaquete: p.idPaquete,
-      idPromocion: p.esAlVuelo ? 0 : p.idPromocionSeleccionada,
-      idPromocionSeleccionada: p.idPromocionSeleccionada || 0,
-      idPromocionVuelo: p.idPromocionVuelo || 0,
-      esAlVuelo: !!p.idPromocionVuelo,
       idConceptoOrdenTrabajo: p.idConceptoTrabajo,
       nombre: p.nombre,
       descripcion: p.descripcion,
@@ -2180,17 +2137,12 @@ const mapearInsumosParaPadre = () => {
 
       promosDisponibles: p.promosDisponibles,
       promosAplicables: p.promosAplicables,
-
-      promo: p.promo || [],
+      ...mapearPromocionInsumo(p),
     })),
 
     adicional: adicionales.value.map((a) => ({
       idDetalleOTServicio: a.idDetalleOTServicio,
       idDetalleCotizacionServicio: a.idDetalleCotizacionServicio,
-      idPromocion: a.esAlVuelo ? 0 : a.idPromocionSeleccionada,
-      idPromocionSeleccionada: a.idPromocionSeleccionada || 0,
-      idPromocionVuelo: a.idPromocionVuelo || 0,
-      esAlVuelo: !!a.idPromocionVuelo,
       idConceptoTrabajo: a.idConceptoTrabajo,
 
       descripcion: a.descripcion,
@@ -2205,8 +2157,7 @@ const mapearInsumosParaPadre = () => {
 
       promosDisponibles: a.promosDisponibles,
       promosAplicables: a.promosAplicables,
-
-      promo: a.promo || null,
+      ...mapearPromocionInsumo(a),
     })),
   };
 };
@@ -2269,14 +2220,8 @@ const togglePromoAlVuelo = (item) => {
   const aplicado = item.idPromocionVuelo > 0;
 
   if (aplicado) {
-    // Quitar promo al vuelo
+    limpiarPromocionInsumo(item);
     recalcularSubtotal(item);
-    item.idPromocionVuelo = 0;
-    item.idPromocionSeleccionada = 0;
-    item.promo = null;
-    item.esAlVuelo = false;
-    item.precioConPromo = item.precioUnitario;
-    item.subTotal = (item.cantidad || 0) * item.precioUnitario;
     return;
   }
 
@@ -2333,11 +2278,13 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
     item.promo.valor = nuevaPromo.valor;
     item.promo.tipo = nuevaPromo.tipo;
     item.promo.nombre = nuevaPromo.nombre;
+    item.promo.esAlVuelo = true;
 
     item.idPromocionVuelo = nuevaPromo.idPromocion;
     item.idPromocionSeleccionada = nuevaPromo.idPromocion;
     item.idPromocion = 0; // promocion normal = 0
     item.esAlVuelo = true;
+    item.isVuelo = true;
 
     recalcularSubtotal(item);
     item.mostrarEditorPromo = false;

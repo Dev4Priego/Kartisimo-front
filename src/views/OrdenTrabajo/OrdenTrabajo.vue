@@ -11,14 +11,24 @@
 
     <div class="row mx-4 align-items-center">
       <div class="col">
+        <input
+          type="text"
+          placeholder="Buscar orden de trabajo."
+          class="form-control w-100"
+          v-model="buscarOrdenTrabajo"
+        />
+      </div>
+
+      <div class="col d-flex align-items-center">
+        <label for="" class="form-label me-2">Sucursal:</label>
         <select
           name="sucursalFilter"
           id="sucursalFilter"
           class="form-select"
           v-model="SucursalSelected"
         >
-          <option value="">[Selecciona]</option>
-          <option
+          <option value="">Todas</option>
+           <option
             v-for="sucursal in sucursales"
             :key="sucursal.idSucursal"
             :value="sucursal.idSucursal"
@@ -27,15 +37,25 @@
           </option>
         </select>
       </div>
-      <div class="col">
-        <input
-          type="text"
-          placeholder="Buscar orden de trabajo."
-          class="form-control  w-100"
-          v-model="buscarOrdenTrabajo"
-        />
+      <div class="col d-flex align-items-center">
+        <label for="" class="form-label me-2">Estatus:</label>
+        <select
+          name="sucursalFilter"
+          id="sucursalFilter"
+          class="form-select"
+          v-model="EstatusSelected"
+        >
+          <option value="">Todas</option>
+           <option
+            v-for="estatus in estatusOrdenes"
+            :key="estatus"
+            :value="estatus"
+          >
+            {{ estatus }}
+          </option>
+         
+        </select>
       </div>
-      <div class="col"></div>
 
       <div class="col-4 col-lg-3">
         <router-link :to="{ name: 'orden-trabajo-form' }">
@@ -80,7 +100,7 @@
             <span class="text-nowrap">
               {{ ot.codigo }}
               <i
-                v-if="ot.isHija"
+                v-if="ot.isHija == 1"
                 class="bi bi-node-plus-fill ms-1"
                 title="OT Derivada"
               ></i>
@@ -171,6 +191,8 @@ let modalEditar;
 let modalIncidente;
 const sucursales = ref([]);
 const SucursalSelected = ref("");
+const estatusOrdenes = ref([]);
+const EstatusSelected = ref("");
 const API_SUCURSALES = `${proxy.$serverIP}api/Sucursales/getSucursales`;
 const headersOrdenTrabajo = [
   { text: "#", value: "codigo", sortable: true },
@@ -178,7 +200,8 @@ const headersOrdenTrabajo = [
   { text: "Vehiculo", value: "vehiculoTabla", sortable: true },
   { text: "Fecha", value: "fechaAlta", sortable: true },
   { text: "Tecnico", value: "empleadoNombre", sortable: true },
-  { text: "Pago", value: "metodoPago", sortable: true },
+  { text: "Método", value: "metodoPago", sortable: true },
+  { text: "Forma", value: "formaPago", sortable: true },
   { text: "Factura", value: "requiereFactura", sortable: true },
   { text: "Estatus", value: "estadoTabla", sortable: true },
   { text: "Desechar", value: "desecharOrden", sortable: true },
@@ -209,7 +232,7 @@ const guardarEdicion = async () => {
 
 const cargarOrdenTrabajo = async (options = {}) => {
   options.headers = {
-    "Content-Type": "application/json",
+    "Content-Type": "application/json", 
     ...options.headers,
   };
 
@@ -223,7 +246,16 @@ const cargarOrdenTrabajo = async (options = {}) => {
   );
   const result = await res.json();
   listaOrdenTrabajo.value = result.data;
+  obtenerEstatusOrdenes();
   loading.value = false;
+};
+
+const obtenerEstatusOrdenes = () => {
+  const estatus = listaOrdenTrabajo.value.ordenes.map((ot) =>
+    ot?.vigente == 0 ? "Cancelada" : ot?.estado,
+  );
+
+  estatusOrdenes.value = [...new Set(estatus.filter(Boolean))];
 };
 
 const fetchSucursales = async () => {
@@ -249,6 +281,14 @@ const listaOrdenTrabajoFilter = computed(() => {
     );
   }
 
+  // Filtro por estatus
+  if (EstatusSelected.value) {
+    ordenesFiltered = ordenesFiltered.filter((ot) => {
+      const estatus = ot?.vigente == 0 ? "Cancelada" : ot?.estado;
+      return estatus === EstatusSelected.value;
+    });
+  }
+
   // Filtro por búsqueda
   if (buscarOrdenTrabajo.value) {
     const busqueda = buscarOrdenTrabajo.value.toLowerCase();
@@ -270,7 +310,7 @@ const listaOrdenTrabajoFilter = computed(() => {
 const ordenesTabla = computed(() =>
   (listaOrdenTrabajoFilter.value.ordenes || []).map((ot) => ({
     ...ot,
-    codigo: `O${ot.prefijo}-${ot.consecutivoSucursal}`,
+    codigo: `O${ot.prefijo}-${ot?.isHija == 0  ? ot?.consecutivoSucursal : ot?.subConsecutivoSucursal}`,
     vehiculoTabla: `${ot.vehiculoModelo || ""} ${
       ot.vehiculoPlacas || ""
     }`.trim(),

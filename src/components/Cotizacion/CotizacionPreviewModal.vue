@@ -14,7 +14,7 @@
             <button
               type="button"
               class="btn-close"
-              @click="mostrarVista = false"
+              @click="cerrar"
             ></button>
           </div>
           <div
@@ -102,7 +102,7 @@
                 <div class="col-5">
                   <span class="me-2">
                     <strong>Teléfono: </strong>
-                    {{ telefonoVistaFormateado || "N/A" }}
+                    {{ telefonoFormateado || "N/A" }}
                   </span>
                 </div>
                 <div class="col-5">
@@ -466,69 +466,27 @@
 </template>
 
 <script setup>
-import { computed, isRef } from "vue";
 import EnviarCorreoModal from "@/components/EnviarCorreo/EnviarCorreoModal.vue";
+import { useCotizacionPreview } from "@/composables/cotizacion/useCotizacionPreview";
 
-const props = defineProps({
-  ctx: {
-    type: Object,
-    required: true,
-  },
+const emit = defineEmits(["edit", "status-change"]);
+const {
+  abrir,
+  cerrar,
+  cotizacion: vistaCotizacion,
+  descargar: generarPDF,
+  generarOrdenTrabajo: confirmarAccion,
+  imprimir: imprimirCotizacion,
+  telefonoFormateado,
+  visible: mostrarVista,
+} = useCotizacionPreview({
+  onEstadoActualizado: () => emit("status-change"),
 });
 
-const getContextValue = (key) => {
-  const value = props.ctx[key];
-  return isRef(value) ? value.value : value;
+const abrirModalCotizacion = (cotizacion = null) => {
+  emit("edit", cotizacion);
+  cerrar();
 };
 
-const setContextValue = (key, nextValue) => {
-  const value = props.ctx[key];
-
-  if (isRef(value)) {
-    value.value = nextValue;
-    return;
-  }
-
-  props.ctx[key] = nextValue;
-};
-
-const vistaCotizacion = computed({
-  get: () => getContextValue("vistaCotizacion"),
-  set: (nextValue) => setContextValue("vistaCotizacion", nextValue),
-});
-
-const mostrarVista = computed({
-  get: () => getContextValue("mostrarVista"),
-  set: (nextValue) => setContextValue("mostrarVista", nextValue),
-});
-
-const telefonoVistaFormateado = computed({
-  get: () => getContextValue("telefonoVistaFormateado"),
-  set: (nextValue) => setContextValue("telefonoVistaFormateado", nextValue),
-});
-
-const abrirModalCotizacion = computed({
-  get: () => getContextValue("abrirModalCotizacion"),
-  set: (nextValue) => setContextValue("abrirModalCotizacion", nextValue),
-});
-
-const confirmarAccion = computed({
-  get: () => getContextValue("confirmarAccion"),
-  set: (nextValue) => setContextValue("confirmarAccion", nextValue),
-});
-
-const imprimirCotizacion = computed({
-  get: () => getContextValue("imprimirCotizacion"),
-  set: (nextValue) => setContextValue("imprimirCotizacion", nextValue),
-});
-const totalCotizacion = computed({
-  get: () => getContextValue("totalCotizacion"),
-  set: (nextValue) => setContextValue("totalCotizacion", nextValue),
-});
-
-const generarPDF = computed({
-  get: () => getContextValue("generarPDF"),
-  set: (nextValue) => setContextValue("generarPDF", nextValue),
-});
-console.log("DEBUG:",vistaCotizacion);
+defineExpose({ abrir, cerrar });
 </script>

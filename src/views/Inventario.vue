@@ -37,7 +37,7 @@
         </div>
         <div class="col-auto">
           <button class="btn btn-primary" @click="openModal">
-            Cargar CSV por marca
+            Cargar lista
           </button>
         </div>
       </div>
@@ -47,7 +47,7 @@
           class="tab-container bg-light border rounded p-3 shadow-sm"
         >
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Carga de listas <strong>(Beta)</strong></h5>
+            <h5 class="mb-0">Carga de listas  </h5>
             <button
               type="button"
               class="btn-close"
@@ -66,8 +66,16 @@
 
             <br /><strong class="text-warning">AVISO: </strong
             ><strong
-              >Asegurate que la lista cuente con una columna llamada "precio".
+              >Asegurate que la lista cuente con las siguientes columnas:
             </strong>
+            <ul>
+              <li>Código</li>
+              <li>Descripción (Medidas, Carga, Velocidad, Modelo y/o Diseño)</li>
+              <li>Marca</li>
+              <li>Cantidad</li>
+              <li>Costos</li>
+              <li>Precio</li>
+            </ul>
           </div>
 
           <!-- Único input file -->

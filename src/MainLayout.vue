@@ -114,16 +114,18 @@
                                 </button>
                                 
                             </li>
-                            <!--
-                              <li  class="nav-item mb-2">
+                              <li class="nav-item mb-2">
                                     <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/comisiones')">
-                                        <i class="bi bi-cash-coin"></i>
+                                        <i class="bi bi-cash-coin me-2"></i>
                                         Comisiones
-                                        
                                     </button>
-                                    
                                 </li>
-                                  ---> 
+                              <li class="nav-item mb-2">
+                                    <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/refacciones')">
+                                        <i class="bi bi-receipt-cutoff me-2"></i>
+                                        Refacciones
+                                    </button>
+                                </li>
                         </ul>
                     </li>
 
