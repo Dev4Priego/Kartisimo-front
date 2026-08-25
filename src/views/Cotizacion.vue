@@ -1026,7 +1026,7 @@ const cargarConcpetoTrabajo = async () => {
     const data = await response.json();
 
     conceptoOT.value = data.map((a) => ({
-      idConceptoOrdenTrabajo: a.idConcetoOrdenTrabajo,
+      idConceptoOrdenTrabajo: a.idConceptoOrdenTrabajo,
       nombre: a.nombre,
     }));
   } catch (error) {
