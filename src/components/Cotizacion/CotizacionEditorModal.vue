@@ -231,167 +231,68 @@
                   </div>
                 </div>
               </div>
-              <div class="table-responsive">
-                <table
-                  class="table table-sm table-hover align-middle mb-0"
-                  style="font-size: 9pt"
+              <div>
+                <EasyDataTable
+                  :headers="tblHeadersModal"
+                  :items="itemsOrdenados"
+                  :rows-per-page="100"
+                  show-index
+                  :table-height="400"
+                  :header-item-class-name="getModalHeaderItemClassName"
+                  :body-item-class-name="getModalBodyItemClassName"
+                  @update:sort-by="ordenarPor"
                 >
-                  <thead class="table-light">
-                    <tr>
-                      <th class="text-start">
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('llanta')"
-                        >
-                          Llanta
-                          <i class="bi ms-1" :class="iconoOrden('llanta')"></i>
-                        </button>
-                      </th>
-                      <th>
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('rango')"
-                        >
-                          Rango
-                          <i class="bi ms-1" :class="iconoOrden('rango')"></i>
-                        </button>
-                      </th>
-                      <th class="text-center">
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('runflat')"
-                        >
-                          Runflat
-                          <i class="bi ms-1" :class="iconoOrden('runflat')"></i>
-                        </button>
-                      </th>
-                      <th>
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('codigo')"
-                        >
-                          Código
-                          <i class="bi ms-1" :class="iconoOrden('codigo')"></i>
-                        </button>
-                      </th>
-                      <th>
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('medida')"
-                        >
-                          Medidas
-                          <i class="bi ms-1" :class="iconoOrden('medida')"></i>
-                        </button>
-                      </th>
-                      <th class="text-center">
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('cantidad')"
-                        >
-                          Cantidad
-                          <i class="bi ms-1" :class="iconoOrden('cantidad')"></i>
-                        </button>
-                      </th>
-                      <th>
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('ubicacion')"
-                        >
-                          Ubicación
-                          <i class="bi ms-1" :class="iconoOrden('ubicacion')"></i>
-                        </button>
-                      </th>
-                      <th class="text-end">
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('costo')"
-                        >
-                          Costo
-                          <i class="bi ms-1" :class="iconoOrden('costo')"></i>
-                        </button>
-                      </th>
-                      <th class="text-end">
-                        <button
-                          type="button"
-                          class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                          @click="ordenarPor('precio')"
-                        >
-                          Precio
-                          <i class="bi ms-1" :class="iconoOrden('precio')"></i>
-                        </button>
-                      </th>
-                      <th class="text-end"></th>
-                    </tr>
-                  </thead>
+                  <template #item-runflat="runFlat">
+                    <div class="text-center">
+                      <i
+                        v-if="Number(runFlat.runflat) === 1"
+                        class="bi bi-check-circle-fill text-success"
+                      ></i>
+                    </div>
+                  </template>
 
-                  <tbody>
-                    <tr v-if="llantasLoading">
-                      <td colspan="10" class="text-center py-4 text-muted">
-                        Cargando llantas...
-                      </td>
-                    </tr>
+                  
 
-                    <template v-else>
-                      <tr
-                        v-for="(item, index) in itemsOrdenados"
-                        :key="item.idInventarioInicial || item.id || index"
-                      >
-                        <td class="text-start">{{ item.llanta }}</td>
-                        <td>{{ item.rango }}</td>
-                        <td class="text-center">
-                          <i
-                            v-if="item.runflat == 1"
-                            class="bi bi-check-circle-fill text-success"
-                          ></i>
-                        </td>
-                        <td class="text-start">{{ item.codigo }}</td>
-                        <td class="text-start">
-                          {{ item.medida }} {{ item.runflat == 1 ? "RF" : "" }}
-                        </td>
-                        <td class="text-center">{{ item.cantidad }}</td>
-                        <td>{{ item.ubicacion }}</td>
-                        <td class="text-end">
-                          {{ formatoMoneda(item.costo || 0) }}
-                        </td>
-                        <td class="text-end">
-                          {{ formatoMoneda(item.precio || 0) }}
-                        </td>
-                        <td class="text-end">
-                          <button
-                            v-if="
-                              !cotizacionForm.llantas.some(
-                                (ll) => ll.idLlanta === item.id,
-                              )
-                            "
-                            type="button"
-                            class="btn btn-success btn-sm"
-                            @click="agregarLlanta(item)"
-                            title="Agregar llanta"
-                          >
-                            <i class="bi bi-plus"></i>
-                          </button>
-                          <span v-else class="text-secondary small">
-                            Ya agregada
-                          </span>
-                        </td>
-                      </tr>
-                    </template>
+                  <template #item-medida="slotProps">
+                    {{ slotProps.medida }}
+                    {{ Number(slotProps.runflat) === 1 ? "RF" : "" }}
+                  </template>
 
-                    <tr v-if="!llantasLoading && itemsOrdenados.length === 0">
-                      <td colspan="10" class="text-center py-4 text-muted">
-                        No hay datos disponibles
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                  <template #item-costo="slotProps">
+                    {{ formatoMoneda(slotProps.costo || 0) }}
+                  </template>
+
+                  <template #item-precio="slotProps">
+                    {{ formatoMoneda(slotProps.precio || 0) }}
+                  </template>
+
+                  <template #item-acciones="slotProps">
+                    <button
+                      v-if="
+                        !cotizacionForm.llantas.some(
+                          (ll) => ll.idLlanta === slotProps.id,
+                        )
+                      "
+                      type="button"
+                      class="btn btn-success btn-sm d-flex align-items-center gap-1"
+                      @click="agregarLlanta(slotProps)"
+                      :title="
+                        cotizacionForm.llantas.some(
+                          (ll) =>
+                            ll.idLlanta === slotProps.id ||
+                            ll.modeloMedidas === slotProps.modeloMedidas,
+                        )
+                          ? 'Llanta ya agregada'
+                          : 'Agregar llanta'
+                      "
+                    >
+                      <i class="bi bi-plus"></i>
+                    </button>
+                    <span v-else class="text-secondary small">
+                      Ya agregada
+                    </span>
+                  </template>
+                </EasyDataTable>
               </div>
 
               <div
@@ -624,7 +525,7 @@
                         :key="'llanta-' + item.idLlanta"
                       >
                         <tr>
-                          <td>
+                          <td class="z-3">
                             <select
                               class="form-select form-select-sm"
                               v-model="item.idConceptoTrabajo"
@@ -642,19 +543,141 @@
                               </option>
                             </select>
                           </td>
-                          <td>
-                            {{ item.modeloMedidas }}
-                            <span class="badge bg-warning text-dark ms-2">
-                              {{ item.ubicacion }}
-                            </span>
+                          <td
+                            :class="[
+                              item.mostrarEditor ? 'bg-light' : '',
+                              'editor-cell',
+                            ]"
+                          >
+                            <div v-if="!item.mostrarEditor">
+                              {{ item.modeloMedidas }}
+                              <span class="badge bg-warning text-dark ms-2">
+                                {{ item.ubicacion }}
+                              </span>
+                              <i
+                                class="bi bi-pencil-square mx-2 text-warning"
+                                style="cursor: pointer"
+                                role="button"
+                                tabindex="0"
+                                title="Editar datos de la llanta"
+                                @click="cambiarEstadoEditor(item)"
+                              ></i>
+                              <div class="mt-1">
+                                <input
+                                  type="text"
+                                  v-model="item.comentario"
+                                  class="form-control form-control-sm"
+                                  placeholder="Agregar comentario..."
+                                />
+                              </div>
+                            </div>
+                            <div
+                              v-else
+                              class="container-fluid"
+                              :key="'editar_llanta+' + item.idLlanta"
+                            >
+                              <!-- TABLA -->
+                              <div class="row">
+                                <table class="w-100">
+                                  <thead>
+                                    <tr>
+                                      <th>Medida</th>
+                                      <th>Marca</th>
+                                      <th>Modelo</th>
+                                      <th>Rango</th>
+                                    </tr>
+                                  </thead>
 
-                            <div class="mt-1">
-                              <input
-                                type="text"
-                                v-model="item.comentario"
-                                class="form-control form-control-sm"
-                                placeholder="Agregar comentario..."
-                              />
+                                  <tbody>
+                                    <tr>
+                                      <td>
+                                        <input
+                                          type="text"
+                                          name="medida"
+                                          v-model="item.medida"
+                                          class="form-control"
+                                        />
+                                      </td>
+
+                                      <td>
+                                        <select
+                                          v-model.number="item.idMarca"
+                                          name="selector_marca"
+                                          class="form-select"
+                                        >
+                                          <option :value="null" disabled>
+                                            -- Seleccionar marca --
+                                          </option>
+                                          <option
+                                            v-for="marca in MarcasLlantas"
+                                            :key="marca.idMarca"
+                                            :value="marca.idMarca"
+                                          >
+                                            {{ marca.nombre }}
+                                          </option>
+                                        </select>
+                                        <!-- <input
+                                          type="text"
+                                          name="marca"
+                                          v-model="item.marca"
+                                          class="form-control"
+                                        /> -->
+                                      </td>
+
+                                      <td>
+                                        <input
+                                          type="text"
+                                          name="modelo"
+                                          v-model="item.modelo"
+                                          class="form-control"
+                                        />
+                                      </td>
+
+                                      <td>
+                                        <input
+                                          type="text"
+                                          name="rango"
+                                          v-model="item.rango"
+                                          class="form-control"
+                                        />
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+
+                              <!-- BOTONES -->
+                              <div class="edit-actions mt-3">
+                                <button
+                                  type="button"
+                                  class="btn btn-outline-secondary edit-action-btn"
+                                  aria-label="Cancelar edición"
+                                  title="Cancelar edición"
+                                  @click="cambiarEstadoEditor(item)"
+                                >
+                                  <i class="bi bi-x-lg me-1"></i> Cancelar
+                                </button>
+
+                                <button
+                                  type="button"
+                                  class="btn btn-success edit-action-btn"
+                                  aria-label="Guardar edición"
+                                  title="Guardar edición"
+                                  :disabled="item.guardandoEditor"
+                                  @click="editarDatosLlanta(item)"
+                                >
+                                  <span
+                                    v-if="item.guardandoEditor"
+                                    class="spinner-border spinner-border-sm me-2"
+                                  ></span>
+                                  <i v-else class="bi bi-save-fill me-2"></i>
+                                  {{
+                                    item.guardandoEditor
+                                      ? "Guardando..."
+                                      : "Guardar"
+                                  }}
+                                </button>
+                              </div>
                             </div>
                           </td>
 
@@ -674,7 +697,7 @@
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                class="form-control input-precio-unitario"
+                                class="form-control input-precio-unitario sin-flechas"
                                 :style="{ width: '90px' }"
                                 v-model.number="item.precioUnitario"
                                 placeholder="Precio c/u"
@@ -733,11 +756,7 @@
                               </span>
                               <br />
                               <span class="text-success fw-bold d-block">
-                                {{
-                                  formatoMoneda(
-                                    AplicarPromo(item),
-                                  )
-                                }}
+                                {{ formatoMoneda(AplicarPromo(item)) }}
                               </span>
                             </div>
 
@@ -1389,12 +1408,7 @@
                                 </span>
                               </span>
                               <span class="text-success fw-bold d-block">
-                                {{
-                                  formatoMoneda(
-                                    AplicarPromo(extra)
-          
-                                  )
-                                }}
+                                {{ formatoMoneda(AplicarPromo(extra)) }}
                               </span>
                             </div>
 
@@ -1683,10 +1697,25 @@
 </template>
 
 <script setup>
+import EasyDataTable from "vue3-easy-data-table";
 import ClientesFilterOption from "@/components/Cotizacion/ClientesFilterOption.vue";
 import { useCotizacionEditor } from "@/composables/cotizacion/useCotizacionEditor";
 
 const emit = defineEmits(["saved"]);
+
+const tblHeadersModal = [
+  { text: "Llanta", value: "llanta", sortable: true },
+  { text: "Código", value: "codigo", sortable: true },
+  { text: "Rango Carga", value: "rangoCarga", sortable: true },
+  { text: "Rango Velocidad", value: "rangoVelocidad", sortable: true },
+  { text: "Run Flat", value: "runflat", sortable: true },
+  { text: "Medidas", value: "medida", sortable: true },
+  { text: "Cantidad", value: "cantidad", sortable: true },
+  { text: "Ubicación", value: "ubicacion", sortable: true },
+  { text: "Costo", value: "costo", sortable: true },
+  { text: "Precio", value: "precio", sortable: true },
+  { text: "Acciones", value: "acciones", sortable: false },
+];
 
 const {
   AplicarPromo,
@@ -1704,6 +1733,7 @@ const {
   correoEsValido,
   cotizacionForm,
   dropdownOpen,
+  editarDatosLlanta,
   eliminarLlanta,
   eliminarPaquete,
   eliminarServicioExtra,
@@ -1717,6 +1747,7 @@ const {
   llantasLoading,
   loggeduser,
   manejarCliente,
+  MarcasLlantas,
   modalRef,
   mostrarTabla,
   nextPage,
@@ -1754,4 +1785,178 @@ defineExpose({
   abrir,
   cerrar: closeModal,
 });
+const cambiarEstadoEditor = (item) => {
+  if (!item.mostrarEditor) {
+    item._datosOriginales = {
+      idMarca: item.idMarca,
+      marca: item.marca,
+      medida: item.medida,
+      modelo: item.modelo,
+      rango: item.rango,
+    };
+    item.mostrarEditor = true;
+    return;
+  }
+
+  if (item._datosOriginales) {
+    Object.assign(item, item._datosOriginales);
+    delete item._datosOriginales;
+  }
+  item.mostrarEditor = false;
+};
 </script>
+<style>
+.edit_container {
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  animation: deslizarDerecha 0.35s ease-out both;
+}
+
+.editor-cell {
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.edit-action-btn {
+  width: 6.5rem;
+  height: 2.5rem;
+  padding: 1;
+  border-radius: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.edit-action-btn:hover,
+.edit-action-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 0.25rem 0.6rem rgb(0 0 0 / 18%);
+}
+
+.edit-row {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.edit-table-wrapper {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border-right: 8px solid transparent;
+}
+
+.edit_container table,
+.edit_container th,
+.edit_container td {
+  outline: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.edit_container table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.edit_container input {
+  width: 100%;
+  min-height: 10px;
+  border-radius: 0;
+
+  margin: 0;
+}
+
+.buttons-container-edit {
+  display: flex;
+  flex-direction: row;
+  width: 145px;
+  min-width: 145px;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  overflow: visible;
+  justify-content: end;
+
+  align-self: stretch;
+}
+
+/* Ambos botones */
+.buttons-container-edit button {
+  position: relative;
+  flex: 0 0 50%;
+  width: 50%;
+  min-width: 0;
+  min-height: 76px;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.5rem;
+
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.cancel-edit-btn {
+  background-color: #666;
+  clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+  margin-right: -8px !important;
+  z-index: 1;
+}
+
+.cancel-edit-btn:hover,
+.cancel-edit-btn:focus-visible {
+  transform: scaleX(1.3);
+  transform-origin: left center;
+  z-index: 10;
+  filter: brightness(0.89);
+}
+
+.send-edit-btn {
+  background-color: rgb(0, 132, 255);
+
+  clip-path: polygon(10% 0%, 100% 0%, 100% 100%, 0% 100%);
+
+  z-index: 2;
+}
+.send-edit-btn:hover,
+.send-edit-btn:focus-visible {
+  transform: scaleX(1.25);
+  transform-origin: right center;
+  z-index: 10;
+  filter: brightness(0.89);
+}
+
+.buttons-container-edit i {
+  position: relative;
+  z-index: 5;
+}
+@keyframes deslizarDerecha {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+</style>

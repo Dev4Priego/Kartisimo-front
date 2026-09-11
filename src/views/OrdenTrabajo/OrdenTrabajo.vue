@@ -106,9 +106,26 @@
               ></i>
             </span>
           </template>
+          <template #item-clienteTelefono="ot">
+            <div class="d-flrx justify-content-center align-items-center">
 
+            <button class="btn btn-outline-success mx-1  " v-if="ot.clienteTelefono != 'N/A'" @click="GotoWhatsApp(ot.clienteTelefono)" > <i class="bi bi-whatsapp"></i></button>
+            <span class="text-center mx-3">{{ formatearTelefono(ot.clienteTelefono) }}</span>
+          </div>
+          </template>
           <template #item-fechaAlta="ot">
             {{ formatearFecha(ot.fechaAlta) }}
+          </template>
+
+          <template #item-horaEntrega="ot">
+            <span
+              class="text-nowrap"
+              :class="entregaFueraDeTiempo(ot) ? 'text-danger' : '' "
+              :title="detalleHoraEntrega(ot)"
+            >
+              {{ formatearHora(ot.fechaEntrega) }}{{
+                fechaEntregaEsOtroDia(ot.fechaEntrega , ot.fechaAlta) ? "*" : ""}}
+            </span>
           </template>
 
           <template #item-requiereFactura="ot">
@@ -176,6 +193,8 @@ import { useRouter } from "vue-router";
 import { Modal } from "bootstrap";
 import EasyDataTable from "vue3-easy-data-table";
 import axios from "axios";
+import { GotoWhatsApp } from "@/components/common/funciones";
+import { formatearTelefono } from "@/utils/cotizacion";
 const { proxy } = getCurrentInstance();
 const router = useRouter();
 const userData = JSON.parse(localStorage.getItem("userSession"));
@@ -197,8 +216,11 @@ const API_SUCURSALES = `${proxy.$serverIP}api/Sucursales/getSucursales`;
 const headersOrdenTrabajo = [
   { text: "#", value: "codigo", sortable: true },
   { text: "Cliente", value: "clienteNombre", sortable: true },
+  { text: "Telefono", value: "clienteTelefono", sortable: true },
+
   { text: "Vehiculo", value: "vehiculoTabla", sortable: true },
   { text: "Fecha", value: "fechaAlta", sortable: true },
+  { text: "Hora entrega", value: "horaEntrega", sortable: true },
   { text: "Tecnico", value: "empleadoNombre", sortable: true },
   { text: "Método", value: "metodoPago", sortable: true },
   { text: "Forma", value: "formaPago", sortable: true },
@@ -314,6 +336,7 @@ const ordenesTabla = computed(() =>
     vehiculoTabla: `${ot.vehiculoModelo || ""} ${
       ot.vehiculoPlacas || ""
     }`.trim(),
+    horaEntrega: ot.fechaEntrega || "",
     estadoTabla: ot.vigente == 0 ? "Cancelada" : ot.estado,
     desecharOrden:
       ot.desecharLlanta === true
@@ -353,6 +376,71 @@ const cargarEmpleados = async (options = {}) => {
 };
 
 const formatearFecha = (f) => new Date(f).toLocaleDateString("es-MX");
+
+const obtenerFecha = (valor) => {
+  if (!valor) return null;
+  const fecha = new Date(valor);
+  return Number.isNaN(fecha.getTime()) ? null : fecha;
+};
+
+const esMismoDia = (fechaA, fechaB) =>
+  fechaA?.getFullYear() === fechaB?.getFullYear() &&
+  fechaA?.getMonth() === fechaB?.getMonth() &&
+  fechaA?.getDate() === fechaB?.getDate();
+
+const formatearHora = (valor) => {
+  const fecha = obtenerFecha(valor);
+  if (!fecha) return "—";
+
+  return fecha.toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const formatearFechaHora = (valor) => {
+  const fecha = obtenerFecha(valor);
+  if (!fecha) return "No registrada";
+
+  return fecha.toLocaleString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const fechaEntregaEsOtroDia = (Entrega, Alta) => {
+  const fechaEntrega = obtenerFecha(Entrega);
+  const fechaAlta = obtenerFecha(Alta)
+  return Boolean(fechaEntrega && !esMismoDia(fechaEntrega, fechaAlta));
+};
+
+const entregaFueraDeTiempo = (ot) => {
+  const fechaComprometida = obtenerFecha(ot?.fechaEntrega);
+  const fechaReal = obtenerFecha(ot?.fechaEntregaReal); //Fecha finalizado, no de entrega
+  return Boolean(fechaComprometida && fechaReal && fechaReal > fechaComprometida);
+};
+
+const detalleHoraEntrega = (ot) => {
+  if (!ot?.fechaEntrega) return "Sin fecha de entrega comprometida";
+
+  const partes = [
+    `Comprometida: ${formatearFechaHora(ot.fechaEntrega)}`,
+  ];
+
+  if (ot.fechaEntregaReal) {
+    partes.push(`Entrega real: ${formatearFechaHora(ot.fechaEntregaReal)}`);
+  }
+
+  if (fechaEntregaEsOtroDia(ot.fechaEntrega)) {
+    partes.push("* La entrega comprometida no corresponde al día de hoy");
+  }
+
+  return partes.join(". ");
+};
 
 const badgeEstado = (e) =>
   ({

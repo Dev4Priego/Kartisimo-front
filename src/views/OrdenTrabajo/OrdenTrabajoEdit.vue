@@ -3,7 +3,9 @@
     <div class="border-bottom py-2">
       <h3 class="mb-0">
         Editar OT # O{{ otEditar.prefijoSucursal }}-{{
-          otEditar?.esHija != 1 ? otEditar.consecutivoSucursal : otEditar.subConsecutivo
+          otEditar?.esHija != 1
+            ? otEditar.consecutivoSucursal
+            : otEditar.subConsecutivo
         }}
       </h3>
     </div>
@@ -29,17 +31,30 @@
         </div>
         <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span><i class="bi bi-car-front-fill me-2"></i> Datos del Vehículo</span>
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <span
+                ><i class="bi bi-car-front-fill me-2"></i> Datos del
+                Vehículo</span
+              >
               <button
-              v-if="estados.indexOf(otEditar.estado) != 3"
+                v-if="estados.indexOf(otEditar.estado) != 3"
                 class="btn btn-sm"
-                :class="editandoClienteVehiculo ? 'btn-outline-secondary' : 'btn-outline-primary'"
+                :class="
+                  editandoClienteVehiculo
+                    ? 'btn-outline-secondary'
+                    : 'btn-outline-primary'
+                "
                 @click="toggleEdicionClienteVehiculo"
               >
                 <i
                   class="bi me-1"
-                  :class="editandoClienteVehiculo ? 'bi-lock-fill' : 'bi-pencil-square'"
+                  :class="
+                    editandoClienteVehiculo
+                      ? 'bi-lock-fill'
+                      : 'bi-pencil-square'
+                  "
                 ></i>
                 {{ editandoClienteVehiculo ? "Desactivar edición" : "Editar" }}
               </button>
@@ -84,7 +99,11 @@
                     class="form-control"
                     maxlength="20"
                     :disabled="!editandoClienteVehiculo"
-                    @input="buscarVehiculosEdicion(datosClienteVehiculo.vehiculo.serie)"
+                    @input="
+                      buscarVehiculosEdicion(
+                        datosClienteVehiculo.vehiculo.serie,
+                      )
+                    "
                     @change="seleccionarVehiculoEdicion"
                   />
                   <datalist id="vehiculosEdit">
@@ -155,8 +174,12 @@
         </div>
         <div class="col-12 col-lg-6 mb-3">
           <div class="card shadow-sm h-100">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span><i class="bi bi-person-fill me-2"></i> Datos del Cliente</span>
+            <div
+              class="card-header d-flex justify-content-between align-items-center"
+            >
+              <span
+                ><i class="bi bi-person-fill me-2"></i> Datos del Cliente</span
+              >
             </div>
             <div v-if="false" class="card-body">
               <table style="width: 100%">
@@ -189,7 +212,11 @@
                 <option
                   v-for="c in sugerenciasClientesEdicion"
                   :key="c.idCliente"
-                  :value="[c.nombres, c.apPaterno, c.apMaterno].filter(Boolean).join(' ')"
+                  :value="
+                    [c.nombres, c.apPaterno, c.apMaterno]
+                      .filter(Boolean)
+                      .join(' ')
+                  "
                 >
                   {{ c.telefono }} {{ c.correo }}
                 </option>
@@ -202,8 +229,16 @@
                     list="clientesEdit"
                     class="form-control"
                     :disabled="!editandoClienteVehiculo"
-                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.nombres)"
-                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.nombres)"
+                    @input="
+                      buscarClientesEdicion(
+                        datosClienteVehiculo.cliente.nombres,
+                      )
+                    "
+                    @change="
+                      seleccionarClienteEdicionPorValor(
+                        datosClienteVehiculo.cliente.nombres,
+                      )
+                    "
                   />
                 </div>
                 <div class="col-6 mb-2">
@@ -215,15 +250,43 @@
                   />
                 </div>
                 <div class="col-6 mb-2">
-                  <label class="form-label">Teléfono</label>
-                  <input
-                    v-model="datosClienteVehiculo.cliente.telefono"
-                    list="clientesEdit"
-                    class="form-control"
-                    :disabled="!editandoClienteVehiculo"
-                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.telefono)"
-                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.telefono)"
-                  />
+                  <div class="row align-items-end">
+                    <div class="col-10">
+                      <label class="form-label">Teléfono</label>
+                      <input
+                        v-model="datosClienteVehiculo.cliente.telefono"
+                        list="clientesEdit"
+                        class="form-control"
+                        :disabled="!editandoClienteVehiculo"
+                        @input="
+                          buscarClientesEdicion(
+                            datosClienteVehiculo.cliente.telefono,
+                          )
+                        "
+                        @change="
+                          seleccionarClienteEdicionPorValor(
+                            datosClienteVehiculo.cliente.telefono,
+                          )
+                        "
+                      />
+                    </div>
+                    <div class="col-2 d-flex justify-content-end">
+                      <button
+                        v-if="
+                          datosClienteVehiculo.cliente.telefono &&
+                          datosClienteVehiculo.cliente.telefono !== 'N/A'
+                        "
+                        type="button"
+                        class="btn btn-outline-success whatsapp-button"
+                        title="Abrir WhatsApp"
+                        @click="
+                          GotoWhatsApp(datosClienteVehiculo.cliente.telefono)
+                        "
+                      >
+                        <i class="bi bi-whatsapp"></i>
+                      </button>
+                    </div>
+                  </div>
                 </div>
                 <div class="col-6 mb-2">
                   <label class="form-label">Correo</label>
@@ -233,8 +296,14 @@
                     type="email"
                     class="form-control"
                     :disabled="!editandoClienteVehiculo"
-                    @input="buscarClientesEdicion(datosClienteVehiculo.cliente.correo)"
-                    @change="seleccionarClienteEdicionPorValor(datosClienteVehiculo.cliente.correo)"
+                    @input="
+                      buscarClientesEdicion(datosClienteVehiculo.cliente.correo)
+                    "
+                    @change="
+                      seleccionarClienteEdicionPorValor(
+                        datosClienteVehiculo.cliente.correo,
+                      )
+                    "
                   />
                 </div>
                 <div class="col-6 mb-2">
@@ -244,7 +313,11 @@
                     class="form-control"
                     maxlength="13"
                     :disabled="!editandoClienteVehiculo"
-                    @input="datosClienteVehiculo.cliente.rfc = (datosClienteVehiculo.cliente.rfc || '').toUpperCase()"
+                    @input="
+                      datosClienteVehiculo.cliente.rfc = (
+                        datosClienteVehiculo.cliente.rfc || ''
+                      ).toUpperCase()
+                    "
                   />
                 </div>
               </div>
@@ -298,7 +371,7 @@
             Avanzar estado <i class="bi bi-arrow-right-short ms-2"></i>
           </button>
         </div>
-        <div class="col-12 d-flex justify-content-end mt-3" >
+        <div class="col-12 d-flex justify-content-end mt-3">
           <button
             class="btn btn-danger btn-sm shadow-sm"
             v-if="estados.indexOf(otEditar.estado) != 3"
@@ -335,10 +408,11 @@
             {{ otEditar.estatus == 2 ? "Retomar OT" : "Suspender OT" }}
           </button>
 
-          <button v-if="otEditar.esHija == 0"
+          <button
+            v-if="otEditar.esHija == 0"
             class="btn btn-sm shadow-sm ms-2 btn-info"
             @click="derivarOtPadre()"
-            :disabled="estados.indexOf(otEditar.estado)  != 3 "
+            :disabled="estados.indexOf(otEditar.estado) != 3"
           >
             <i class="bi bi-node-plus-fill me-3"></i>
             Derivar OT
@@ -362,18 +436,27 @@
       <h5>Datos generales</h5>
       <div class="row my-3 gy-3">
         <div class="col-6 col-lg-3">
-          <label class="form-label">Fecha/hora comprometida</label>
+          <label class="form-label">Fecha comprometida</label>
           <input
             type="text"
             readonly
             class="form-control-plaintext"
             :value="formatearFecha(otEditar.fechaEntrega)"
           />
+          <div
+            v-if="otEditar.estado === 'Finalizado' || 'Entregado'"
+            class="mt-2"
+          >
+            <label class="form-label mb-0 text-success">Fecha finalizado</label>
+            <div class="form-control-plaintext pt-1">
+              {{ formatearFecha(otEditar.fechaEntregaReal) }}
+            </div>
+          </div>
         </div>
         <div class="col-6 col-lg-3">
           <label class="form-label">Método de pago</label>
           <select
-           :disabled="estados.indexOf(otEditar.estado) == 3"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
             v-model="otEditar.metodoPago"
             class="form-select"
             name="formaPago"
@@ -382,9 +465,7 @@
             <option value="Efectivo">01 - Efectivo</option>
             <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
             <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
-            <option value="Transferencia electrónica de fondos">
-              03 - Transferencia electrónica de fondos
-            </option>
+            <option value="Transferencia electrónica de fondos">03 - Transferencia electrónica de fondos</option>
             <option value="Por definir">99 - Por definir</option>
             <option value="Cheque nominativo">02 - Cheque nominativo</option>
             <option value="Condonación">15 - Condonación</option>
@@ -404,6 +485,7 @@
         <div v-if="isCreditCard" class="col-6 col-lg-3">
           <label class="form-label" for="slcMeses">Meses</label>
           <select
+            :disabled="estados.indexOf(otEditar.estado) == 3"
             v-model="otEditar.formaPago"
             class="form-select"
             name="meses"
@@ -425,7 +507,7 @@
         >
           <label class="form-label" for="slcTecnico">Técnico asignado</label>
           <select
-           :disabled="estados.indexOf(otEditar.estado) == 3"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
             v-model="otEditar.empleado.idEmpleado"
             class="form-select"
             name="tecnico"
@@ -448,7 +530,7 @@
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
-             :disabled="estados.indexOf(otEditar.estado) == 3"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
           />
           No
           <input
@@ -456,13 +538,13 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
-             :disabled="estados.indexOf(otEditar.estado) == 3"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
           />
         </div>
         <div class="col-6">
           <label class="form-label">¿Desechar llanta?</label><br />
           <input
-           :disabled="estados.indexOf(otEditar.estado) == 3"
+            :disabled="estados.indexOf(otEditar.estado) == 3"
             class="form-check-input me-2"
             type="checkbox"
             id="aplicaDesechar"
@@ -473,12 +555,13 @@
           </label>
           Si
           <input
-
             v-model="otEditar.desecharLlanta"
             class="form-check-input btn-outline-dark mx-2"
             :value="true"
             type="radio"
-            :disabled="aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3"
+            :disabled="
+              aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3
+            "
           />
           No
           <input
@@ -486,7 +569,9 @@
             class="form-check-input mx-2"
             :value="false"
             type="radio"
-            :disabled="aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3"
+            :disabled="
+              aplicaDesecharLlanta || estados.indexOf(otEditar.estado) == 3
+            "
           />
         </div>
         <div v-if="otEditar.requiereFactura" class="col-12">
@@ -634,7 +719,7 @@
       <h5>Tareas</h5>
       <div class="text-center m-3">
         <button
-        v-if="estados.indexOf(otEditar.estado) != 3"
+          v-if="estados.indexOf(otEditar.estado) != 3"
           class="btn btn-sm btn-primary"
           title="Agregar"
           @click="showModal = true"
@@ -691,15 +776,28 @@
               :insumos="otEditar.insumo"
               :key="otEditar.idOrdenTrabajo"
               @refaccion-guardada="
-                autoGuardarEdicion('Orden guardada despues de actualizar refacciones')
+                autoGuardarEdicion(
+                  'Orden guardada despues de actualizar refacciones',
+                )
               "
             />
           </div>
+
           <div class="col-12 col-lg-5">
-            <Incidentes
-              :otId="otEditar.idOrdenTrabajo"
-              :usuario="idUsuarioSession"
-            />
+            <div class="container-fluid">
+              <div class="row-12">
+                <Incidentes
+                  :otId="otEditar.idOrdenTrabajo"
+                  :usuario="idUsuarioSession"
+                />
+              </div>
+              <div class="row-12">
+                <Seguimientos
+                  :otId="otEditar.idOrdenTrabajo"
+                  :usuario="idUsuarioSession"
+                />
+              </div>
+            </div>
           </div>
         </div>
         <h5>Observacion</h5>
@@ -774,10 +872,7 @@ import axios from "axios";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 import ModalInsumo from "../../components/OrdenTrabajo/ModalInsumo.vue";
-import {
-  FORMAS_PAGO_TARJETA,
-  normalizarFormaPago,
-} from "@/utils/formaPago";
+import { FORMAS_PAGO_TARJETA, normalizarFormaPago } from "@/utils/formaPago";
 
 const { proxy } = getCurrentInstance();
 const route = useRoute();
@@ -793,7 +888,8 @@ const insumosCambios = ref(false);
 const autoguardando = ref(false);
 const aplicaDesecharLlanta = ref(false);
 const insumoOriginal = ref(normalizeInsumo({}));
-import {AplicarPromo} from '@/components/common/funciones'
+import { AplicarPromo, GotoWhatsApp } from "@/components/common/funciones";
+import Seguimientos from "@/components/OrdenTrabajo/EditarOrdenTrabajo/Seguimientos.vue";
 
 /**
  * 🔒 Estado inicial seguro
@@ -852,7 +948,8 @@ const copiarClienteVehiculoDesdeOT = () => {
   const vehiculo = otEditar.value.vehiculo || {};
   const nombreCompleto = (cliente.nombreCompleto || "").trim();
   const partesNombre = nombreCompleto.split(" ").filter(Boolean);
-  const nombresCliente = cliente.nombres || cliente.nombre || partesNombre[0] || "";
+  const nombresCliente =
+    cliente.nombres || cliente.nombre || partesNombre[0] || "";
   const apellidosCliente =
     [cliente.apPaterno, cliente.apMaterno].filter(Boolean).join(" ") ||
     partesNombre.slice(1).join(" ");
@@ -1036,9 +1133,9 @@ const cargarOrden = async (options = {}) => {
       prefijoSucursal: json.prefijoSucursal,
       consecutivoSucursal: json.consecutivoSucursal,
       //sub consecutivo OT
-      subConsecutivo : json.subConsecutivoSucursal,
-      esHija : json.esHija,
-      idPadre:json.idOtPadre,
+      subConsecutivo: json.subConsecutivoSucursal,
+      esHija: json.esHija,
+      idPadre: json.idOtPadre,
       consecutivoCotizacion: json.consecutivoCotizacion,
       prefijoCotizacion: json.prefijoCotizacion,
       observacion: json?.observacion,
@@ -1063,6 +1160,7 @@ const cargarOrden = async (options = {}) => {
 
       fechaAlta: json.fechaAlta || null,
       fechaEntrega: json.fechaEntrega || null,
+      fechaEntregaReal: json.fechaEntregaReal || null,
 
       idCotizacion: json.idCotizacion || 0,
 
@@ -1075,7 +1173,7 @@ const cargarOrden = async (options = {}) => {
             const promosDisponibles = await obtenerPromosPorInventario(
               llanta.idInventarioInicial,
             );
-            
+
             // Construir objeto de promoción existente
             const promocionExistente = {
               idPromocion: llanta?.idPromocion || llanta?.idPromocionVuelo || 0,
@@ -1083,7 +1181,7 @@ const cargarOrden = async (options = {}) => {
               tipo: llanta?.tipoPromocion || llanta?.tipoVuelo || null,
               nombre: llanta?.nombrePromocion || llanta?.nombreVuelo || "",
             };
-            
+
             // Crear item con promo ya asignado
             const itemConPromo = {
               ...llanta,
@@ -1091,14 +1189,15 @@ const cargarOrden = async (options = {}) => {
               precioUnitario: llanta.precioUnitario,
               promo: promocionExistente,
             };
-            
+
             // AHORA calcular el precio con promo
             const precioConPromo = AplicarPromo(itemConPromo);
             console.log("precioConPromo:", precioConPromo);
-            
+
             return {
               idDetalleOTLlanta: llanta.idDetalleOTLlanta, // no se agrega
               idLlanta: llanta.idLlanta,
+              idMarca: llanta.idMarca,
               idAlmacen: llanta.idAlmacen,
               idConceptoTrabajo: 1,
               idPromocion: llanta.idPromocion || null,
@@ -1109,11 +1208,13 @@ const cargarOrden = async (options = {}) => {
               medida: llanta.medida, // campo estetico
               modelo: llanta.modelo, // campo estetico
               marca: llanta.marca, // campo estetica
+              rango: llanta.rango,
+              runflat: llanta.runflat,
               cantidad: llanta.cantidad,
-              precioUnitario: llanta.precioUnitario,
-              costo:llanta.costo,
+              precioUnitario: llanta.precioUnitario.toFixed(2),
+              costo: llanta.costo.toFixed(2),
               subTotal: precioConPromo,
-               // campo estetico
+              // campo estetico
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: llanta.idPromocionVuelo != 0 ? true : false,
@@ -1126,7 +1227,7 @@ const cargarOrden = async (options = {}) => {
           json.paquetes.map(async (paquete) => {
             const promosDisponibles =
               (await obtenerPromosPorPaquete(paquete.idPaquete)) || [];
-            
+
             // Construir objeto de promoción existente
             const promocionExistente = {
               idPromocion:
@@ -1135,7 +1236,7 @@ const cargarOrden = async (options = {}) => {
               tipo: paquete?.tipoPromocion || paquete?.tipoVuelo || null,
               nombre: paquete?.nombrePromocion || paquete?.nombreVuelo || "",
             };
-            
+
             // Crear item con promo ya asignado
             const itemConPromo = {
               ...paquete,
@@ -1143,10 +1244,10 @@ const cargarOrden = async (options = {}) => {
               precioUnitario: paquete.precioUnitario,
               promo: promocionExistente,
             };
-            
+
             // AHORA calcular el precio con promo
             const precioConPromo = AplicarPromo(itemConPromo);
-            
+
             return {
               idDetalleOTPaquete: paquete.idDetalleOTPaquete || 0,
               idPaquete: paquete.idPaquete,
@@ -1158,9 +1259,9 @@ const cargarOrden = async (options = {}) => {
               nombre: paquete.nombre,
               descripcion: paquete.descripcion,
               cantidad: 1,
-              precioUnitario: paquete.precioUnitario,
-              costo:paquete.costo,
-              subTotal: Number((precioConPromo).toFixed(2)),
+              precioUnitario: paquete.precioUnitario.toFixed(2),
+              costo: paquete.costo.toFixed(2),
+              subTotal: Number(precioConPromo.toFixed(2)),
 
               detalle: paquete.detalle.map((detalle) => ({
                 idDesglosePaquete: detalle.idDesglosePaquete,
@@ -1188,7 +1289,7 @@ const cargarOrden = async (options = {}) => {
               tipo: s?.tipoPromocion || s?.tipoVuelo || null,
               nombre: s?.nombrePromocion || s?.nombreVuelo || "",
             };
-            
+
             // Crear item con promo ya asignado
             const itemConPromo = {
               ...s,
@@ -1196,10 +1297,10 @@ const cargarOrden = async (options = {}) => {
               precioUnitario: s.precioUnitario,
               promo: promocionExistente,
             };
-            
+
             // AHORA calcular el precio con promo
             const precioConPromo = AplicarPromo(itemConPromo);
-            
+
             return {
               idDetalleOTServicio: s.idDetalleOTServicio,
               idDetalleCotizacionServicio: s.idDetalleCotizacionServicio,
@@ -1213,9 +1314,9 @@ const cargarOrden = async (options = {}) => {
               comentario: s.comentario,
 
               cantidad: s.cantidad,
-              precioUnitario: s.precioUnitario,
-              costo:s.costo,
-              subTotal: Number((precioConPromo).toFixed(2)),
+              precioUnitario: s.precioUnitario.toFixed(2),
+              costo: s.costo.toFixed(2),
+              subTotal: Number(precioConPromo.toFixed(2)),
 
               promosDisponibles: promosDisponibles || [],
               esAlVuelo: s.idPromocionVuelo != 0 ? true : false,
@@ -1263,7 +1364,6 @@ const cargarOrden = async (options = {}) => {
   calcularTotales();
 };
 
-
 // Normaliza insumos para comparar: tipos consistentes y orden determinista
 function normalizeInsumo(insumo) {
   const s = insumo || { llantas: [], paquetes: [], adicionales: [] };
@@ -1282,10 +1382,20 @@ function normalizeInsumo(insumo) {
       }))
       .sort((a, b) => {
         const ka =
-          a.idDetalleOTLlanta ?? a.idDetalleOTPaquete ?? a.idDetalleOTServicio ?? a.idLlanta ?? a.idPaquete ?? 0;
+          a.idDetalleOTLlanta ??
+          a.idDetalleOTPaquete ??
+          a.idDetalleOTServicio ??
+          a.idLlanta ??
+          a.idPaquete ??
+          0;
         const kb =
-          b.idDetalleOTLlanta ?? b.idDetalleOTPaquete ?? b.idDetalleOTServicio ?? b.idLlanta ?? b.idPaquete ?? 0;
-        return (ka - kb) || (Number(a.cantidad || 0) - Number(b.cantidad || 0));
+          b.idDetalleOTLlanta ??
+          b.idDetalleOTPaquete ??
+          b.idDetalleOTServicio ??
+          b.idLlanta ??
+          b.idPaquete ??
+          0;
+        return ka - kb || Number(a.cantidad || 0) - Number(b.cantidad || 0);
       });
 
   return {
@@ -1521,6 +1631,19 @@ const formatearFecha = (fecha) => {
   return `${fechaFormateada}, ${horaFormateada}`;
 };
 
+const formatearHora = (fecha) => {
+  if (!fecha) return "No registrada";
+
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) return "No registrada";
+
+  return valor.toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 const formatearTelefono = (telefono) => {
   if (!telefono) return "";
   const digitos = telefono.replace(/\D/g, "");
@@ -1621,6 +1744,10 @@ const avanzarEstado = async () => {
       },
       { headers: { Authorization: `Bearer ${data45?.token}` } },
     );
+
+    if (nuevoEstado === "Entregado") {
+      await cargarOrden();
+    }
 
     mostrarToast("success", "Orden de trabajo avanzada correctamente");
   } catch (error) {
@@ -1743,7 +1870,9 @@ const buscarClientesEdicion = (texto) => {
   debounceClienteVehiculo = setTimeout(async () => {
     try {
       const res = await fetch(
-        `${proxy.$serverIP}api/Cliente/sugerenciaCliente?texto=${encodeURIComponent(
+        `${
+          proxy.$serverIP
+        }api/Cliente/sugerenciaCliente?texto=${encodeURIComponent(
           texto.trim(),
         )}`,
       );
@@ -1820,9 +1949,14 @@ const validarClienteVehiculoEdicion = () => {
   const { cliente, vehiculo } = clienteVehiculoPayload();
   const erroresClienteVehiculo = [];
 
-  if (!cliente.nombres) erroresClienteVehiculo.push("El nombre del cliente es obligatorio.");
-  if (!vehiculo.serie) erroresClienteVehiculo.push("El número de serie del vehículo es obligatorio.");
-  if (!vehiculo.marca) erroresClienteVehiculo.push("La marca del vehículo es obligatoria.");
+  if (!cliente.nombres)
+    erroresClienteVehiculo.push("El nombre del cliente es obligatorio.");
+  if (!vehiculo.serie)
+    erroresClienteVehiculo.push(
+      "El número de serie del vehículo es obligatorio.",
+    );
+  if (!vehiculo.marca)
+    erroresClienteVehiculo.push("La marca del vehículo es obligatoria.");
 
   if (erroresClienteVehiculo.length) {
     mostrarToast("warning", erroresClienteVehiculo[0]);

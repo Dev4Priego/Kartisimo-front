@@ -137,9 +137,19 @@
                           <button
                             type="button"
                             class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
-                            @click="ordenarPor('rango')"
+                            @click="ordenarPor('rangoCarga')"
                           >
-                            Rango
+                            Rango Carga
+                            <i class="bi ms-1" :class="iconoOrden('rango')"></i>
+                          </button>
+                        </th>
+                        <th>
+                          <button
+                            type="button"
+                            class="btn btn-link btn-sm p-0 text-decoration-none text-dark fw-semibold sortable-table-header"
+                            @click="ordenarPor('rangoVelocidad')"
+                          >
+                            Rango Velocidad
                             <i class="bi ms-1" :class="iconoOrden('rango')"></i>
                           </button>
                         </th>
@@ -226,7 +236,9 @@
                         <td class="text-start">
                           {{ item.marca }} {{ item.modelo }}
                         </td>
-                        <td>{{ item.rango }}</td>
+                        <td>{{ String(item.rango ?? "").replace(/[a-z]/gi, "") }}</td>
+                        <td>{{ String(item.rango ?? "").match(/[a-z]/gi)?.[0] || "" }}</td>
+
                         <td class="text-center">
                           <i
                             v-if="item.runflat == 1"
@@ -410,7 +422,106 @@
                           </option>
                         </select>
                       </td>
-                      <td>{{ ll.medida }} {{ ll.marca }} {{ ll.modelo }}</td>
+                      <td
+                        :class="[
+                          ll.mostrarEditor ? 'bg-light' : '',
+                          'editor-cell',
+                        ]"
+                      >
+                        <div v-if="!ll.mostrarEditor">
+                          {{ ll.medida }} {{ ll.marca }} {{ ll.modelo }}
+                          <span v-if="ll.rango" class="text-muted">
+                            {{ ll.rango }}
+                          </span>
+                          <i
+                            class="bi bi-pencil-square mx-2 text-warning"
+                            style="cursor: pointer"
+                            role="button"
+                            tabindex="0"
+                            title="Editar datos de la llanta"
+                            @click="cambiarEstadoEditorLlanta(ll)"
+                          ></i>
+                        </div>
+                        <div v-else class="container-fluid px-0">
+                          <div class="table-responsive">
+                            <table class="w-100 tabla-editor-llanta">
+                              <thead>
+                                <tr>
+                                  <th>Medida</th>
+                                  <th>Marca</th>
+                                  <th>Modelo</th>
+                                  <th>Rango</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <input
+                                      v-model.trim="ll.medida"
+                                      type="text"
+                                      class="form-control form-control-sm"
+                                    />
+                                  </td>
+                                  <td>
+                                    <select
+                                      v-model.number="ll.idMarca"
+                                      class="form-select form-select-sm"
+                                    >
+                                      <option :value="null" disabled>
+                                        -- Seleccionar marca --
+                                      </option>
+                                      <option
+                                        v-for="marca in marcasLlantas"
+                                        :key="marca.idMarca"
+                                        :value="marca.idMarca"
+                                      >
+                                        {{ marca.nombre }}
+                                      </option>
+                                    </select>
+                                  </td>
+                                  <td>
+                                    <input
+                                      v-model.trim="ll.modelo"
+                                      type="text"
+                                      class="form-control form-control-sm"
+                                    />
+                                  </td>
+                                  <td>
+                                    <input
+                                      v-model.trim="ll.rango"
+                                      type="text"
+                                      class="form-control form-control-sm"
+                                    />
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                          <div class="edit-actions mt-2">
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-outline-secondary"
+                              :disabled="ll.guardandoEditor"
+                              @click="cambiarEstadoEditorLlanta(ll)"
+                            >
+                              <i class="bi bi-x-lg me-1"></i>Cancelar
+                            </button>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-success"
+                              :disabled="ll.guardandoEditor"
+                              @click="editarDatosLlanta(ll)"
+                            >
+                              <span
+                                v-if="ll.guardandoEditor"
+                                class="spinner-border spinner-border-sm me-1"
+                              ></span>
+                              <i v-else class="bi bi-save-fill me-1"></i>
+                              {{ ll.guardandoEditor ? "Guardando..." : "Guardar" }}
+                            </button>
+                          </div>
+                        </div>
+                      </td>
                       <td>
                         <input
                           type="number"
@@ -425,7 +536,7 @@
                           type="number"
                           min="0"
                           step="0.01"
-                          class="form-control form-control-sm input-precio-unitario"
+                          class="form-control form-control-sm input-precio-unitario sin-flechas"
                           v-model.number="ll.costo"
                           @keydown="irAlSiguientePrecio"
                         />
@@ -435,7 +546,7 @@
                           type="number"
                           min="0"
                           step="0.01"
-                          class="form-control form-control-sm input-precio-unitario"
+                          class="form-control form-control-sm input-precio-unitario sin-flechas"
                           v-model.number="ll.precioUnitario"
                           @input="recalcularSubtotal(ll)"
                           @keydown="irAlSiguientePrecio"
@@ -1032,7 +1143,7 @@
                           type="number"
                           min="0"
                           step="0.01"
-                          class="form-control form-control-sm input-precio-unitario"
+                          class="form-control form-control-sm input-precio-unitario sin-flechas"
                           v-model.number="ad.costo"
                           @keydown="irAlSiguientePrecio"
                         />
@@ -1042,7 +1153,7 @@
                           type="number"
                           min="0"
                           step="0.01"
-                          class="form-control form-control-sm input-precio-unitario"
+                          class="form-control form-control-sm input-precio-unitario sin-flechas"
                           v-model.number="ad.precioUnitario"
                           @input="recalcularSubtotal(ad)"
                           @keydown="irAlSiguientePrecio"
@@ -1478,6 +1589,7 @@ const selectedAlmacenes = ref([]);
 const dropdownOpen = ref(false);
 
 const conceptoOT = ref([]);
+const marcasLlantas = ref([]);
 
 const paqueteDisponibles = ref([]);
 const paqueteSeleccionados = ref([]);
@@ -1485,6 +1597,8 @@ const paqueteSeleccionados = ref([]);
 const sortAccessors = {
   llanta: (item) => `${item.marca || ""} ${item.modelo || ""}`.trim(),
   rango: (item) => item.rango,
+  rangoCarga:(item) => String(item.rango ?? "").replace(/[a-z]/gi, ""),
+  rangoVelocidad: (item) => String(item.rango ?? "").match(/[a-z]/i)?.[0] || "",
   runflat: (item) => Number(item.runflat || 0),
   codigo: (item) => item.codigo,
   medida: (item) => item.medida,
@@ -1571,6 +1685,38 @@ const cantidadItem = (item) => {
   const cantidad = Number(item?.cantidad);
   return Number.isFinite(cantidad) ? cantidad : 1;
 };
+
+const normalizarTexto = (valor) =>
+  String(valor || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+const sincronizarCantidadesPaqueteMontaje = () => {
+  const cantidadLlantas = llantas.value.reduce((total, llanta) => {
+    const cantidad = Number(llanta.cantidad);
+    return total + (Number.isFinite(cantidad) && cantidad > 0 ? cantidad : 0);
+  }, 0);
+
+  paquetes.value
+    .filter((paquete) =>
+      normalizarTexto(paquete.nombre || paquete.descripcion).includes(
+        "paquete montaje",
+      ),
+    )
+    .forEach((paquete) => {
+      (paquete.detalle || []).forEach((detalle) => {
+        const descripcion = normalizarTexto(
+          detalle.descripcion || detalle.nombre,
+        );
+        if (descripcion.includes("montaje") || descripcion.includes("balanceo")) {
+          detalle.cantidad = cantidadLlantas;
+        }
+      });
+    });
+};
+
+watch(llantas, sincronizarCantidadesPaqueteMontaje, { deep: true });
 
 const obtenerConceptoTrabajo = (idConceptoTrabajo) => {
   return (
@@ -1754,6 +1900,7 @@ const cargarLlantas = async () => {
         eliminado: l.eliminado,
 
         idLlanta: l.idLlanta,
+        idMarca: Number(l.idMarca),
         idInventarioInicial: l.idInventarioInicial,
         idAlmacen: l.idAlmacen,
         objLlanta: l,
@@ -1859,6 +2006,7 @@ const agregarLlanta = async (itm) => {
   const nuevaLlanta = {
     idDetalleOTLlanta: 0,
     idLlanta: itm.idLlanta,
+    idMarca: Number(itm.idMarca),
     idAlmacen: itm.idAlmacen,
     idPromocion: 0,
     idPromocionVuelo: 0,
@@ -1870,11 +2018,13 @@ const agregarLlanta = async (itm) => {
     medida: itm.medidas,
     modelo: itm.modelo,
     marca: itm.nombreMarca,
+    rango: itm.rango,
+    runflat: Number(itm.runflat || 0),
     ubicacion: itm.ubicacion,
 
     cantidad: 4,
-    costo: toNumber(itm.costo),
-    precioUnitario: toNumber(itm.precio),
+    costo: toNumber(itm.costo).toFixed(2),
+    precioUnitario: toNumber(itm.precio).toFixed(2),
     subTotal: Number((4 * toNumber(itm.precio)).toFixed(2)),
 
     promosDisponibles: [],
@@ -1918,6 +2068,139 @@ const agregarLlanta = async (itm) => {
     if (pa !== pb) return pa - pb;
     return (b.precioUnitario || 0) - (a.precioUnitario || 0);
   });
+};
+
+const cargarMarcasLlantas = async () => {
+  try {
+    const response = await fetch(
+      `${proxy.$serverIP}api/Llanta/getMarcasLlantas`,
+      { headers: userData?.token ? { Authorization: `Bearer ${userData.token}` } : {} },
+    );
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data?.error || "No fue posible cargar las marcas.");
+    }
+
+    marcasLlantas.value = (Array.isArray(data?.marcas) ? data.marcas : []).map((marca) => ({
+      idMarca: Number(marca.idMarca),
+      nombre: marca.nombre,
+    }));
+  } catch (error) {
+    console.error("Error al cargar marcas de llantas:", error);
+    mostrarToast("warning", "No fue posible cargar las marcas de llantas.");
+  }
+};
+
+const cambiarEstadoEditorLlanta = (llanta) => {
+  if (!llanta.mostrarEditor) {
+    llanta._datosOriginales = {
+      idMarca: llanta.idMarca,
+      marca: llanta.marca,
+      medida: llanta.medida,
+      modelo: llanta.modelo,
+      rango: llanta.rango,
+    };
+    llanta.mostrarEditor = true;
+    return;
+  }
+
+  if (llanta._datosOriginales) {
+    Object.assign(llanta, llanta._datosOriginales);
+    delete llanta._datosOriginales;
+  }
+  llanta.mostrarEditor = false;
+};
+
+const editarDatosLlanta = async (llanta) => {
+  const payload = {
+    idLlanta: Number(llanta.idLlanta),
+    medida: String(llanta.medida || "").trim(),
+    idMarca: Number(llanta.idMarca),
+    modelo: String(llanta.modelo || "").trim(),
+    rango: String(llanta.rango || "").trim(),
+    runFlat: Number(llanta.runflat || 0),
+  };
+
+  if (!payload.idLlanta) {
+    mostrarToast("warning", "No se encontró la llanta que deseas editar.");
+    return;
+  }
+  if (!payload.idMarca) {
+    mostrarToast("warning", "Selecciona una marca.");
+    return;
+  }
+  if (!payload.medida || !payload.modelo || !payload.rango) {
+    mostrarToast("warning", "Completa medida, modelo y rango.");
+    return;
+  }
+
+  llanta.guardandoEditor = true;
+  try {
+    const response = await fetch(
+      `${proxy.$serverIP}api/Listas/EditarDatosLlanta`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(userData?.token
+            ? { Authorization: `Bearer ${userData.token}` }
+            : {}),
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+    const data = await response.json();
+    if (!response.ok || data?.success === false) {
+      throw new Error(data?.error || "No se pudieron actualizar los datos.");
+    }
+
+    const editada = data?.llanta;
+    if (!editada) throw new Error("La API no devolvió la llanta editada.");
+
+    const marcaCatalogo = marcasLlantas.value.find(
+      (marca) => Number(marca.idMarca) === Number(editada.idMarca),
+    );
+    const actualizada = {
+      idMarca: Number(editada.idMarca ?? payload.idMarca),
+      marca: editada.marca || marcaCatalogo?.nombre || "",
+      modelo: editada.modelo || payload.modelo,
+      medida: editada.medida || payload.medida,
+      rango: editada.rango || payload.rango,
+      runflat: Number(editada.runFlat ?? payload.runFlat),
+    };
+
+    llantas.value
+      .filter((item) => Number(item.idLlanta) === payload.idLlanta)
+      .forEach((item) => {
+        Object.assign(item, actualizada, {
+          descripcion: `${actualizada.medida} ${actualizada.marca} ${actualizada.modelo}`.trim(),
+        });
+      });
+    items.value
+      .filter((item) => Number(item.idLlanta) === payload.idLlanta)
+      .forEach((item) => {
+        Object.assign(item, actualizada);
+        if (item.objLlanta) {
+          Object.assign(item.objLlanta, {
+            idMarca: actualizada.idMarca,
+            nombreMarca: actualizada.marca,
+            modelo: actualizada.modelo,
+            medidas: actualizada.medida,
+            rango: actualizada.rango,
+            runflat: actualizada.runflat,
+          });
+        }
+      });
+
+    llanta.mostrarEditor = false;
+    delete llanta._datosOriginales;
+    mostrarToast("success", "Datos de la llanta actualizados.");
+  } catch (error) {
+    console.error("Error al editar los datos de la llanta:", error);
+    mostrarToast("warning", error.message || "No fue posible editar la llanta.");
+  } finally {
+    llanta.guardandoEditor = false;
+  }
 };
 
 const irAlSiguientePrecio = (event) => {
@@ -2087,6 +2370,8 @@ const onTogglePaquete = async (paqueteBase) => {
     valorPromocion: null,
     tipoPromocion: null,
   });
+
+  sincronizarCantidadesPaqueteMontaje();
 };
 
 const mapearInsumosParaPadre = () => {
@@ -2102,6 +2387,9 @@ const mapearInsumosParaPadre = () => {
       medida: l.medida,
       modelo: l.modelo,
       marca: l.marca,
+      idMarca: l.idMarca,
+      rango: l.rango,
+      runflat: l.runflat,
       ubicacion: l.ubicacion,
 
       cantidad: l.cantidad,
@@ -2178,6 +2466,7 @@ onMounted(async () => {
   if (props.modelValue) document.addEventListener("keydown", handleEsc);
   await cargarPromosRapidas();
   cargarLlantas();
+  cargarMarcasLlantas();
   cargarAlmacenes();
   cargarConcpetoTrabajo();
   cargarPaquetes();
@@ -2341,7 +2630,7 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 }
 
 .tabla-resumen-insumos .col-descripcion {
-  width: 240px;
+  width: 520px;
 }
 
 .tabla-resumen-insumos .col-cantidad {
@@ -2368,5 +2657,29 @@ const guardarPromoAlVuelo = async (itemPromoActual) => {
 
 .tabla-resumen-insumos .btn-sm {
   white-space: nowrap;
+}
+
+.editor-cell {
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.tabla-editor-llanta {
+  min-width: 490px;
+}
+
+.tabla-editor-llanta th {
+  font-size: 0.75rem;
+  padding: 0 0.2rem 0.25rem;
+}
+
+.tabla-editor-llanta td {
+  padding: 0 0.2rem;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 }
 </style>

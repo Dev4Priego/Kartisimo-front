@@ -42,11 +42,23 @@
               </div>
             </div>
           </div>
-
+          <div class="mt-1 no-imprimir">
+            <i class="bi bi-calendar me-1 "></i>
+            Fecha Alta:
+            <strong>{{ formatearFecha(orden?.fechaAlta) }}</strong>
+          </div>
           <div class="mt-1">
             <i class="bi bi-clock me-1"></i>
-            Fecha/hora de entrega:
+            Fecha comprometida:
             <strong>{{ formatearFecha(orden?.fechaEntrega) }}</strong>
+          </div>
+          <div
+            v-if="orden?.estado === 'Finalizado' || 'Entegado'"
+            class="mt-1 no-imprimir"
+          >
+            <i class="bi bi-check-circle me-1 text-success"></i>
+            Fecha finalizado:
+            <strong>{{ orden?.fechaEntregaReal ? formatearFecha(orden?.fechaEntregaReal) : 'Sin registro'}}</strong>
           </div>
         </div>
 
@@ -115,6 +127,7 @@
             <div class="mb-1">
               <span class="fw-semibold">Teléfono:</span>
               {{ formatearTelefono(orden?.cliente?.telefono) || "N/A" }}
+              <button class="btn btn-outline-success mx-1  " v-if="orden?.cliente?.telefono != 'N/A'" @click="GotoWhatsApp(orden?.cliente?.telefono)" > <i class="bi bi-whatsapp"></i></button>
             </div>
 
             <div class="mb-1">
@@ -445,7 +458,7 @@
 
       <button
       v-if="orden?.idSucursal ==  userData.usuario.idSucursal ||userData.usuario.idSucursal == 1"
-        class="btn btn-success shadow position-relative"
+        class="btn btn-success shadow position-relative "
         style="width: 140px"
         @click="iniciarOT"
       >
@@ -458,9 +471,10 @@
 
 <script setup>
 import { format } from "pdfmake/build/pdfmake";
+
 import { ref, onMounted, getCurrentInstance, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import {AplicarPromo} from '@/components/common/funciones'
+import {AplicarPromo, GotoWhatsApp} from '@/components/common/funciones'
 const { proxy } = getCurrentInstance();
 
 const route = useRoute();
@@ -495,6 +509,19 @@ const formatearFecha = (fecha) => {
   });
 
   return `${fechaFormateada}, ${horaFormateada}`;
+};
+
+const formatearHora = (fecha) => {
+  if (!fecha) return "No registrada";
+
+  const valor = new Date(fecha);
+  if (Number.isNaN(valor.getTime())) return "No registrada";
+
+  return valor.toLocaleTimeString("es-MX", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 };
 
 const formatearTelefono = (telefono) => {

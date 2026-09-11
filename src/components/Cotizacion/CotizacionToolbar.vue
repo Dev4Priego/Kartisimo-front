@@ -43,11 +43,10 @@
 
       <div class="col-12 col-lg-2 d-flex align-items-right">
         <button
-          class="btn btn-primary position-relative shadow w-100"
+          class="btn btn-primary position-relative  w-100"
           @click="emit('create')"
         >
-          <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva
-          cotización
+          <i class="bi bi-plus-lg position-absolute start-0 ms-2"></i>Nueva cotización
         </button>
       </div>
     </div>

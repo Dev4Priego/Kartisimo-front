@@ -94,11 +94,11 @@
                       <th>Descripcion</th>
                       <th class="text-end">Cant.</th>
                       <th class="text-end">Precio unit.</th>
-                      <th class="text-end">Precio</th>
+                      <th class="text-end">Precio total</th>
                       <th class="text-end">Costo unit.</th>
-                      <th class="text-end">Costo Insumo</th>
+                      <th class="text-end">Costo Total</th>
                       <th class="text-end">Refacciones</th>
-                      <th class="text-end">Costo final</th>
+
                       <th class="text-end">Utilidad</th>
                     </tr>
                   </thead>
@@ -126,10 +126,30 @@
                           </div>
                           <span v-else>{{ moneda(partida.precioTotal) }}</span>
                         </td>
-                        <td class="text-end">{{ moneda(partida.costoUnitario) }}</td>
-                        <td class="text-end text-danger">{{ moneda(partida.costoTotal) }}</td>
-                        <td class="text-end">{{ moneda(partida.refaccionTotal) }}</td>
-                        <td class="text-end text-danger">{{ moneda(partida.costoFinal) }}</td>
+                        <td
+                          class="text-end"
+                          :class="{ 'costo-reemplazado': tieneRefaccionVinculada(partida) }"
+                          :title="
+                            tieneRefaccionVinculada(partida)
+                              ? 'Costo sustituido por la refaccion vinculada'
+                              : ''
+                          "
+                        >
+                          {{ moneda(partida.costoUnitario) }}
+                        </td>
+                        <td
+                          class="text-end text-danger"
+                          :class="{ 'costo-reemplazado': tieneRefaccionVinculada(partida) }"
+                          :title="
+                            tieneRefaccionVinculada(partida)
+                              ? 'Costo sustituido por la refaccion vinculada'
+                              : ''
+                          "
+                        >
+                          {{ moneda(partida.costoTotal) }}
+                        </td>
+                        <td class="text-end text-danger">{{ moneda(partida.refaccionTotal) }}</td>
+
                         <td
                           class="text-end"
                           :class="partida.utilidad < 0 ? 'text-danger' : 'text-success'"
@@ -266,6 +286,9 @@ const refaccionesDePartida = (partida) =>
       Number(refaccion.idDetalleInsumoVinculado || 0) ===
       Number(partida.idDetalle || 0),
   );
+
+const tieneRefaccionVinculada = (partida) =>
+  refaccionesDePartida(partida).length > 0;
 
 const tienePromocion = (partida) =>
   Number(partida?.descuento || 0) > 0 ||
@@ -428,5 +451,10 @@ watch(
 .precio-final {
   color: #198754;
   font-weight: 700;
+}
+
+.costo-reemplazado {
+  color: #6c757d !important;
+  text-decoration: line-through;
 }
 </style>

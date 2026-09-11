@@ -1,10 +1,19 @@
 <template>
-  <div @focusin="abrirSelector" @focusout="handleFocusOut">
+  <div class="clientes-filter-option" @focusin="abrirSelector" @focusout="handleFocusOut">
     <input
+      ref="buscadorRef"
       v-model="busquedaClientes"
       type="text"
       placeholder="Buscar cliente..."
       class="form-select mb-3"
+      role="combobox"
+      aria-label="Buscar cliente"
+      aria-autocomplete="list"
+      :aria-expanded="modelValue"
+      @keydown.down.prevent="moverSeleccion(1)"
+      @keydown.up.prevent="moverSeleccion(-1)"
+      @keydown.enter.prevent="seleccionarConTeclado"
+      @keydown.tab="seleccionarConTeclado"
     />
 
     <div style="max-height: 150px; overflow-y: auto">
@@ -21,10 +30,13 @@
         </thead>
         <tbody>
           <tr
-            v-for="cliente in clientesFiltrados"
+            v-for="(cliente, index) in clientesFiltrados"
             :key="cliente.idCliente"
             style="cursor: pointer"
-            @click="seleccionarCliente(cliente)"
+            :class="{ 'table-primary': index === indiceActivo }"
+            :aria-selected="index === indiceActivo"
+            @mouseenter="indiceActivo = index"
+            @mousedown.prevent="seleccionarCliente(cliente)"
           >
             <td>{{ cliente.nombreCompleto || "(SIN NOMBRE)" }}</td>
             <td>{{ cliente.correo || "(SIN CORREO)" }}</td>
@@ -37,7 +49,7 @@
 </template>
 
 <script setup>
-import { computed, getCurrentInstance, ref } from "vue";
+import { computed, getCurrentInstance, nextTick, ref, watch } from "vue";
 import { createCotizacionApi } from "@/services/cotizacionApi";
 
 defineProps({
@@ -55,6 +67,8 @@ const clientes = ref([]);
 const cargando = ref(false);
 const clientesCargados = ref(false);
 const busquedaClientes = ref("");
+const indiceActivo = ref(-1);
+const buscadorRef = ref(null);
 
 const cargarClientes = async () => {
   if (clientesCargados.value || cargando.value) return;
@@ -62,11 +76,15 @@ const cargarClientes = async () => {
   cargando.value = true;
   try {
     const data = await api.listarClientes();
-    clientes.value = (data || []).map((cliente) => ({
-      ...cliente,
-      nombreCompleto:
-        `${cliente.nombres || ""} ${cliente.apPaterno || ""} ${cliente.apMaterno || ""}`.trim(),
-    }));
+    clientes.value = (data || []).map((cliente) => {
+      const normalizado = normalizarCliente(cliente);
+      return {
+        ...cliente,
+        ...normalizado,
+        nombreCompleto:
+          `${normalizado.nombres} ${normalizado.apPaterno} ${normalizado.apMaterno}`.trim(),
+      };
+    });
     clientesCargados.value = true;
   } catch (error) {
     console.error("Error al cargar clientes:", error);
@@ -109,15 +127,55 @@ const clientesFiltrados = computed(() => {
     .slice(0, 50);
 });
 
-const seleccionarCliente = (cliente) => {
-  emit("seleccionar-cliente", {
-    idCliente: cliente.idCliente,
-    nombres: cliente.nombres,
-    apPaterno: cliente.apPaterno,
-    apMaterno: cliente.apMaterno,
-    correo: cliente.correo,
-    telefono: cliente.telefono,
+watch([busquedaClientes, clientesFiltrados], () => {
+  indiceActivo.value = clientesFiltrados.value.length ? 0 : -1;
+});
+
+const moverSeleccion = (direccion) => {
+  if (!clientesFiltrados.value.length) return;
+
+  emit("update:modelValue", true);
+  const ultimoIndice = clientesFiltrados.value.length - 1;
+  if (indiceActivo.value < 0) {
+    indiceActivo.value = direccion > 0 ? 0 : ultimoIndice;
+  } else {
+    indiceActivo.value = Math.min(
+      ultimoIndice,
+      Math.max(0, indiceActivo.value + direccion),
+    );
+  }
+
+  void nextTick(() => {
+    const filas = buscadorRef.value
+      ?.closest(".clientes-filter-option")
+      ?.querySelectorAll("tbody tr");
+    filas?.[indiceActivo.value]?.scrollIntoView({ block: "nearest" });
   });
+};
+
+const normalizarCliente = (cliente) => ({
+  idCliente: Number(cliente.idCliente ?? cliente.id_cliente ?? 0),
+  nombres: cliente.nombres ?? cliente.nombre ?? "",
+  apPaterno: cliente.apPaterno ?? cliente.ap_paterno ?? "",
+  apMaterno: cliente.apMaterno ?? cliente.ap_materno ?? "",
+  rfc: cliente.rfc ?? "",
+  correo: cliente.correo ?? cliente.email ?? "",
+  telefono: cliente.telefono ?? "",
+  observaciones: cliente.observaciones ?? "",
+});
+
+const seleccionarCliente = (cliente) => {
+  if (!cliente) return;
+  emit("seleccionar-cliente", normalizarCliente(cliente));
+  busquedaClientes.value = "";
+  indiceActivo.value = -1;
   emit("update:modelValue", false);
+};
+
+const seleccionarConTeclado = (event) => {
+  if (event?.shiftKey) return;
+  if (!clientesFiltrados.value.length) return;
+  const indice = indiceActivo.value >= 0 ? indiceActivo.value : 0;
+  seleccionarCliente(clientesFiltrados.value[indice]);
 };
 </script>

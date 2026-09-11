@@ -96,7 +96,7 @@
                         </button>
                     </li>
 
-                    <li class="nav-item mb-2" v-if=" dataUser.usuario.idUsuario == 1">
+                    <li class="nav-item mb-2">
                         <button
                             type="button"
                             class="nav-link text-white"
@@ -124,6 +124,18 @@
                                     <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/refacciones')">
                                         <i class="bi bi-receipt-cutoff me-2"></i>
                                         Refacciones
+                                    </button>
+                                </li>
+                              <li class="nav-item mb-2">
+                                    <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/llantas-mas-vendidas')">
+                                        <i class="bi bi-trophy me-2"></i>
+                                        Llantas más vendidas
+                                    </button>
+                                </li>
+                              <li class="nav-item mb-2">
+                                    <button class="nav-link text-white" data-bs-dismiss="offcanvas" @click.prevent="irA('/content/reportes/seguimientos')">
+                                        <i class="bi bi-calendar-check me-2"></i>
+                                        Seguimientos
                                     </button>
                                 </li>
                         </ul>

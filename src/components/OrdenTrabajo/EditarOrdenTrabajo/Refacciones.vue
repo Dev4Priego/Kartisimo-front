@@ -129,8 +129,7 @@
               <input
                 v-model="refaccion.cantidad"
                 type="number"
-                step="0.01"
-                min="0.01"
+                min ="0"
                 class="form-control"
                 placeholder="1"
                 @input="validacionesNuevaRefaccion()"
@@ -152,7 +151,7 @@
                 type="number"
                 step="0.01"
                 min="0"
-                class="form-control"
+                class="form-control sin-flechas"
                 placeholder="0.00"
                 @input="validacionesNuevaRefaccion()"
                 @blur="validacionesNuevaRefaccion()"

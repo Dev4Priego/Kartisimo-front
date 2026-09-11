@@ -47,7 +47,7 @@
           class="tab-container bg-light border rounded p-3 shadow-sm"
         >
           <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Carga de listas  </h5>
+            <h5 class="mb-0">Carga de listas</h5>
             <button
               type="button"
               class="btn-close"
@@ -60,17 +60,21 @@
             Solo se admite un archivo <strong>.xlsx</strong> (tipo
             <code>Excel.xlsx</code>), Asegúrate que el nombre del archivo sea
             igual al de los proveedores admitidos, como: Avante, Bridgestone,
-            Kartisimo, Martinica y Llantas Directas
+            Kartisimo, Martinica, Llantas Directas y Z Tyres
 
             <br />
-
+            <strong class="text-danger">¡IMPORTANTE! </strong>
+            <strong>Elimina cualquier tipo de hoja extra o oculta.</strong>
+            <br />
             <br /><strong class="text-warning">AVISO: </strong
             ><strong
               >Asegurate que la lista cuente con las siguientes columnas:
             </strong>
             <ul>
               <li>Código</li>
-              <li>Descripción (Medidas, Carga, Velocidad, Modelo y/o Diseño)</li>
+              <li>
+                Descripción (Medidas, Carga, Velocidad, Modelo y/o Diseño)
+              </li>
               <li>Marca</li>
               <li>Cantidad</li>
               <li>Costos</li>
@@ -181,7 +185,6 @@
 <script setup>
 import { ref, onMounted, computed, getCurrentInstance, reactive } from "vue";
 import EasyDataTable from "vue3-easy-data-table";
-import "bootstrap/dist/js/bootstrap.bundle"; // muy importante para que offcanvas funcione
 import { log } from "pdfmake/build/pdfmake";
 import ListaLlantas from "@/components/Inventario/ListaLlantas.vue";
 import Swal from "sweetalert2";
@@ -419,10 +422,6 @@ function clearBrand(brand) {
 const totalFiles = computed(() =>
   Object.values(filesByBrand).reduce((acc, arr) => acc + arr.length, 0),
 );
-
-// Modal Bootstrap
-const modalEl = ref(null);
-let bsModal = null;
 
 function openModal() {
   showUploader.value = true;

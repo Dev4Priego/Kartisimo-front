@@ -16,8 +16,14 @@ import ReportesRentabilidad from '@/views/Reportes/RentabilidadOrdenTrabajo.vue'
 import { clearSession, isSessionValid } from '@/services/auth'
 import ComisionesTecnicos from '@/views/Reportes/ComisionesTecnicos.vue'
 import RefaccionesProveedores from '@/views/Reportes/RefaccionesProveedores.vue'
+import LlantasMasVendidas from '@/views/Reportes/LlantasMasVendidas.vue'
+import ReporteSeguimientos from '@/views/Reportes/Seguimientos.vue'
 
 const routes = [
+  {
+    path: "/__preview/llantas-mas-vendidas",
+    component: LlantasMasVendidas,
+  },
   {
     path: "/",
     component: Login,
@@ -106,6 +112,16 @@ const routes = [
         path: "reportes/refacciones",
         name: "RefaccionesProveedores",
         component: RefaccionesProveedores,
+      },
+      {
+        path: "reportes/llantas-mas-vendidas",
+        name: "LlantasMasVendidas",
+        component: LlantasMasVendidas,
+      },
+      {
+        path: "reportes/seguimientos",
+        name: "ReporteSeguimientos",
+        component: ReporteSeguimientos,
       },
     ],
   },

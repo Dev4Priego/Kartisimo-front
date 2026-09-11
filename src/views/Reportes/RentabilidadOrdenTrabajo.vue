@@ -76,24 +76,47 @@
 
     <div class="bg-white rounded shadow-sm p-3 mb-3">
       <div class="row g-3 align-items-end">
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-3">
           <label class="form-label fw-semibold">Sucursal</label>
-          <select v-model="sucursalSeleccionada" class="form-select">
-            <option value="">Todas sucursales</option>
+          <select
+            v-model="sucursalSeleccionada"
+            class="form-select"
+            :disabled="!alcanceReportes.esAdministrador"
+          >
+            <option v-if="alcanceReportes.esAdministrador" value="">
+              Todas sucursales
+            </option>
             <option v-for="s in sucursalesDisponibles" :key="s" :value="s">
               {{ s }}
             </option>
           </select>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-3 col-lg-3">
           <label class="form-label fw-semibold">Desde</label>
           <input v-model="fechaDesde" class="form-control" type="date" />
         </div>
-        <div class="col-12 col-sm-6 col-lg-3">
+        <div class="col-12 col-sm-3 col-lg-3">
           <label class="form-label fw-semibold">Hasta</label>
           <input v-model="fechaHasta" class="form-control" type="date" />
         </div>
-        <div class="col-12 col-lg-1 d-grid">
+        <div class="col-12 col-sm-3 col-lg-3">
+          <label class="form-label fw-semibold">Forma de pago</label>
+          <select
+            id="forma_pago"
+            v-model="metodoPagoSeleccionado"
+            class="form-select"
+          >
+            <option value="">-- Todas --</option>
+            <option
+              v-for="metodo in metodosPagoDisponibles"
+              :key="metodo"
+              :value="metodo"
+            >
+              {{ metodo }}
+            </option>
+          </select>
+        </div>
+        <div class="col-12  col-sm-3 d-grid">
           <button class="btn btn-light" type="button" @click="limpiarFiltros">
             <i class="bi bi-x-lg"></i>
           </button>
@@ -480,8 +503,10 @@
 <script setup>
 import { computed, getCurrentInstance, onMounted, ref } from "vue";
 import { formatearFechaHora } from "@/components/common/funciones";
+import { obtenerAlcanceReportes } from "@/utils/reportes";
 import { useRouter } from "vue-router";
 const { proxy } = getCurrentInstance();
+const alcanceReportes = obtenerAlcanceReportes();
 
 const reporte = ref([]);
 const loading = ref(false);
@@ -494,6 +519,7 @@ const exportando = ref(false);
 const busqueda = ref("");
 const fechaDesde = ref("");
 const fechaHasta = ref("");
+const metodoPagoSeleccionado = ref("");
 const sortKey = ref("");
 const sortDirection = ref("");
 const router = useRouter();
@@ -554,9 +580,17 @@ const sucursalesDisponibles = computed(() => {
   return arr.sort((a, b) => String(a).localeCompare(String(b)));
 });
 
+const metodosPagoDisponibles = computed(() => {
+  const metodos = Array.from(
+    new Set(reporte.value.map((item) => item.metodoPago).filter(Boolean)),
+  );
+  return metodos.sort((a, b) => String(a).localeCompare(String(b), "es-MX"));
+});
+
 const reporteFiltrado = computed(() => {
   const texto = normalizar(busqueda.value);
   const sucSel = normalizar(sucursalSeleccionada.value);
+  const metodoPagoSel = normalizar(metodoPagoSeleccionado.value);
 
   return reporte.value.filter((item) => {
     const coincideTexto =
@@ -575,8 +609,15 @@ const reporteFiltrado = computed(() => {
 
     const coincideSucursal =
       !sucSel || normalizar(item.sucursal || "").includes(sucSel);
+    const coincideMetodoPago =
+      !metodoPagoSel || normalizar(item.metodoPago || "") === metodoPagoSel;
 
-    return coincideTexto && coincideSucursal && fechaEnRango(item.fecha);
+    return (
+      coincideTexto &&
+      coincideSucursal &&
+      coincideMetodoPago &&
+      fechaEnRango(item.fecha)
+    );
   });
 });
 
@@ -662,7 +703,10 @@ const limpiarFiltros = () => {
   busqueda.value = "";
   fechaDesde.value = "";
   fechaHasta.value = "";
-  sucursalSeleccionada.value = "";
+  metodoPagoSeleccionado.value = "";
+  sucursalSeleccionada.value = alcanceReportes.esAdministrador
+    ? ""
+    : sucursalesDisponibles.value[0] || "";
 };
 
 const descargarArchivo = (buffer, nombreArchivo) => {
@@ -933,6 +977,9 @@ const cargarReporte = async () => {
           rowKey: `${item.idOrdenTrabajo || "sin-id"}-${index}`,
         }))
       : [];
+    if (!alcanceReportes.esAdministrador) {
+      sucursalSeleccionada.value = sucursalesDisponibles.value[0] || "";
+    }
     cerrarDetalle();
   } catch (err) {
     console.error("Error al cargar reporte de rentabilidad:", err);

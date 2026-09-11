@@ -66,6 +66,7 @@
                     autocomplete="off"
                     v-model="ordenTrabajoForm.vehiculo.serie"
                     @input="suggestions(), validate('vehiculo.serie')"
+                    @keydown="manejarTeclasSugerencias($event, 'vehiculo')"
                     @change="onSerieSeleccionada"
                     list="vehiculos"
                     placeholder="(17 caracteres)"
@@ -90,19 +91,20 @@
                 </div>
                 <div class="col-5 mb-3">
                   <label for="marca" class="form-label">Marca *</label>
-
                   <input
                     id="marca"
                     v-model="ordenTrabajoForm.vehiculo.marca"
                     class="form-control"
                     type="text"
                     placeholder="Marca"
-                    @input="validate('vehiculo.marca')"
+                    @focus="branchSuggestion()"
+                    @input="branchSuggestion(), validate('vehiculo.marca')"
+                    @keydown="manejarTeclasSugerencias($event, 'marca')"
                     @blur="validate('vehiculo.marca')"
                     :class="{ 'input-error': errores['vehiculo.marca'] }"
                     :readonly="isReadOnlyVehiculo || readOnlyOTderivada"
                   />
-
+                  <div id="branchSuggestion" class="suggestions-list"></div>
                   <small v-if="errores['vehiculo.marca']" class="error-msg">
                     {{ errores["vehiculo.marca"] }}
                   </small>
@@ -148,7 +150,7 @@
                   <input
                     id="kilometraje"
                     v-model="ordenTrabajoForm.vehiculo.kilometraje"
-                    class="form-control"
+                    class="form-control sin-flechas"
                     type="number"
                     placeholder="(Kilometraje actual)"
                     @input="validate('vehiculo.kilometraje')"
@@ -209,6 +211,14 @@
             </div>
             <div class="card-body">
               <div class="row">
+                <div class="col-12">
+                  <ClientesFilterOption
+                    v-model="mostrarTabla"
+                    @seleccionar-cliente="manejarCliente"
+                  />
+                </div>
+              </div>
+              <div class="row">
                 <!-- Nombre -->
                 <div class="col-6 mb-3">
                   <label for="nombrecliente" class="form-label"
@@ -225,6 +235,7 @@
                       onClienteInput($event.target.value),
                         validate('cliente.nombres')
                     "
+                    @change="ajustaNombre(), validate('cliente.nombres')"
                     @blur="validate('cliente.nombres')"
                     :class="{ 'input-error': errores['cliente.nombres'] }"
                     :readonly="readOnlyOTderivada"
@@ -248,6 +259,7 @@
                     @input="validate('cliente.apellidos')"
                     @blur="validate('cliente.apellidos')"
                     :class="{ 'input-error': errores['cliente.apellidos'] }"
+                    @change="ajustaNombre()"
                     :readonly="readOnlyOTderivada"
                   />
                   <small v-if="errores['cliente.apellidos']" class="error-msg">
@@ -371,7 +383,9 @@
             >
               <option disabled value="">-Selecciona-</option>
               <option value="Efectivo">01 - Efectivo</option>
-              <option value="Tarjeta de crédito">04 - Tarjeta de crédito</option>
+              <option value="Tarjeta de crédito">
+                04 - Tarjeta de crédito
+              </option>
               <option value="Tarjeta de débito">28 - Tarjeta de débito</option>
               <option value="Transferencia electrónica de fondos">
                 03 - Transferencia electrónica de fondos
@@ -396,7 +410,7 @@
             </small>
           </div>
         </div>
-        <div :class="isCreditCard ? 'col-5':'col-6'">
+        <div :class="isCreditCard ? 'col-5' : 'col-6'">
           <div class="mb-3">
             <label class="form-label">Fecha de entrega propuesta *</label>
             <div class="row">
@@ -757,7 +771,7 @@
                               currency: "MXN",
                             })
                           }}
-                        </span> 
+                        </span>
                       </div>
                       <div v-else>
                         {{
@@ -1045,21 +1059,20 @@
 
       <div class="row my-3">
         <div class="col text-end">
-          <router-link :to="{ name: 'orden-trabajo-list' }">
-            <button
-              class="btn btn-primary position-relative shadow mx-3"
-              type="button"
-              style="width: 140px"
-            >
-              <i
-                class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"
-              ></i>
-              &nbsp;Volver
-            </button>
+          <router-link
+            :to="{ name: 'orden-trabajo-list' }"
+            class="btn  btn-primary position-relative  mx-3 button_router selected_button "
+            style="width: 140px"
+            
+          >
+            <i
+              class="bi bi-arrow-left-circle-fill position-absolute start-0 ms-2"
+            ></i>
+            &nbsp;Volver
           </router-link>
           <button
             type="button"
-            class="btn btn-success position-relative shadow ms-3"
+            class="btn btn-success position-relative  ms-3 selected_button"
             style="width: 140px"
             @click="validar_formulario()"
           >
@@ -1468,7 +1481,7 @@ import ModalInsumo from "./ModalInsumo.vue";
 import ModalBuscarCotizacion from "./ModalBuscarCotizacion.vue";
 const isReadOnlyVehiculo = ref(false);
 const router = useRouter();
-
+const mostrarTabla = ref(false);
 const { proxy } = getCurrentInstance();
 const boolFactura = ref(true);
 const boolDesecharLlanta = ref(false);
@@ -1479,14 +1492,79 @@ const formValida = ref(false);
 const usosCFDI = ref([]);
 const regimenFiscal = ref([]);
 const vehiculos = ref([]);
+const MARCAS = [
+  "Acura",
+  "Alfa Romeo",
+  "Audi",
+  "BAIC",
+  "Bestune",
+  "BMW",
+  "Buick",
+  "BYD",
+  "Cadillac",
+  "Changan",
+  "Chevrolet",
+  "Chirey",
+  "Chrysler",
+  "CUPRA",
+  "Deepal",
+  "Denza",
+  "DFSK",
+  "Dodge",
+  "Dongfeng",
+  "Fiat",
+  "Ford",
+  "Foton",
+  "GAC Motor",
+  "Geely",
+  "GMC",
+  "GWM",
+  "Honda",
+  "Hongqi",
+  "Hyundai",
+  "INEOS",
+  "Infiniti",
+  "JAC",
+  "JAECOO",
+  "Jeep",
+  "Jetour",
+  "JMC",
+  "KIA",
+  "Land Rover",
+  "Leapmotor",
+  "Lexus",
+  "Lincoln",
+  "Lynk & Co",
+  "Mazda",
+  "Mercedes-Benz",
+  "MG",
+  "MINI",
+  "Mitsubishi",
+  "Nissan",
+  "Omoda",
+  "Peugeot",
+  "Porsche",
+  "RAM",
+  "Renault",
+  "SEAT",
+  "SERES",
+  "SEV",
+  "Soueast",
+  "Subaru",
+  "Suzuki",
+  "Tesla",
+  "Toyota",
+  "Volkswagen",
+  "Volvo",
+  "XPeng",
+  "Zeekr",
+];
 const readOnlyOTderivada = ref(false);
 const loggeduser = JSON.parse(localStorage.getItem("userSession"));
-import {AplicarPromo} from '@/components/common/funciones'
+import { AplicarPromo } from "@/components/common/funciones";
 import { normalizarPromocionInsumo } from "@/utils/promocionesInsumo";
-import {
-  FORMAS_PAGO_TARJETA,
-  normalizarFormaPago,
-} from "@/utils/formaPago";
+import { FORMAS_PAGO_TARJETA, normalizarFormaPago } from "@/utils/formaPago";
+import ClientesFilterOption from "../Cotizacion/ClientesFilterOption.vue";
 
 const sucursales = [
   "(Ninguna)",
@@ -1586,6 +1664,86 @@ const getValor = (path) => {
   return path.split(".").reduce((obj, key) => obj?.[key], ordenTrabajoForm);
 };
 
+let indiceMarcaActivo = -1;
+let indiceVehiculoActivo = -1;
+
+const actualizarOpcionActiva = (selector, indice) => {
+  document.querySelectorAll(`${selector} > div`).forEach((opcion, index) => {
+    opcion.classList.toggle("suggestion-active", index === indice);
+  });
+};
+
+const seleccionarMarca = (marca) => {
+  ordenTrabajoForm.vehiculo.marca = marca;
+  validate("vehiculo.marca");
+  document.getElementById("branchSuggestion").innerHTML = "";
+  indiceMarcaActivo = -1;
+};
+
+const seleccionarVehiculo = (resultado) => {
+  ordenTrabajoForm.vehiculo.id_vehiculo = resultado.idVehiculo;
+  ordenTrabajoForm.vehiculo.serie = resultado.serie;
+  ordenTrabajoForm.vehiculo.marca = resultado.marca;
+  ordenTrabajoForm.vehiculo.modelo = resultado.modelo;
+  ordenTrabajoForm.vehiculo.color = resultado.color;
+  ordenTrabajoForm.vehiculo.anio = resultado.anio;
+  ordenTrabajoForm.vehiculo.placas = resultado.placas;
+  document.getElementById("Suggestion").innerHTML = "";
+  indiceVehiculoActivo = -1;
+  isReadOnlyVehiculo.value = true;
+  validate("vehiculo.serie");
+};
+
+const manejarTeclasSugerencias = (event, tipo) => {
+  const selector = tipo === "marca" ? "#branchSuggestion" : "#Suggestion";
+  const opciones = document.querySelectorAll(`${selector} > div`);
+  if (!opciones.length) return;
+
+  let indice = tipo === "marca" ? indiceMarcaActivo : indiceVehiculoActivo;
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    const desplazamiento = event.key === "ArrowDown" ? 1 : -1;
+    indice = (indice + desplazamiento + opciones.length) % opciones.length;
+    if (tipo === "marca") indiceMarcaActivo = indice;
+    else indiceVehiculoActivo = indice;
+    actualizarOpcionActiva(selector, indice);
+    opciones[indice].scrollIntoView({ block: "nearest" });
+    return;
+  }
+
+  if (event.key === "Enter" || event.key === "Tab") {
+    if (indice < 0) return;
+    event.preventDefault();
+    opciones[indice].click();
+    if (event.key === "Tab") event.target.blur();
+    return;
+  }
+
+  if (event.key === "Escape") {
+    document.querySelector(selector).innerHTML = "";
+    if (tipo === "marca") indiceMarcaActivo = -1;
+    else indiceVehiculoActivo = -1;
+  }
+};
+
+const branchSuggestion = () => {
+  const branch = ordenTrabajoForm.vehiculo.marca;
+  const suggestiondiv = document.getElementById("branchSuggestion");
+  suggestiondiv.innerHTML = "";
+
+  const filtro = MARCAS.filter((marca) =>
+    marca.toLowerCase().startsWith(branch.toLowerCase()),
+  );
+  indiceMarcaActivo = filtro.length ? 0 : -1;
+  filtro.forEach((resultado, index) => {
+    const div = document.createElement("div");
+    div.innerHTML = `<strong>${resultado}</strong><hr>`;
+    div.addEventListener("click", () => seleccionarMarca(resultado));
+    suggestiondiv.appendChild(div);
+    div.classList.toggle("suggestion-active", index === indiceMarcaActivo);
+  });
+};
+
 const suggestions = () => {
   const serie = ordenTrabajoForm.vehiculo.serie.toLowerCase();
   const suggestiondiv = document.getElementById("Suggestion");
@@ -1598,7 +1756,8 @@ const suggestions = () => {
     vehiculo.serie.toLowerCase().startsWith(serie),
   );
 
-  filtro.forEach((resultado) => {
+  indiceVehiculoActivo = filtro.length ? 0 : -1;
+  filtro.forEach((resultado, index) => {
     const div = document.createElement("div");
 
     div.innerHTML = `
@@ -1620,21 +1779,10 @@ const suggestions = () => {
   <hr>
 `;
 
-    div.addEventListener("click", function () {
-      ordenTrabajoForm.vehiculo.id_vehiculo = resultado.idVehiculo;
-      ordenTrabajoForm.vehiculo.serie = resultado.serie;
-      ordenTrabajoForm.vehiculo.marca = resultado.marca;
-      ordenTrabajoForm.vehiculo.modelo = resultado.modelo;
-      ordenTrabajoForm.vehiculo.color = resultado.color;
-      ordenTrabajoForm.vehiculo.kilometraje = resultado.kilometraje;
-      ordenTrabajoForm.vehiculo.anio = resultado.anio;
-      ordenTrabajoForm.vehiculo.placas = resultado.placas;
-      suggestiondiv.innerHTML = "";
-      isReadOnlyVehiculo.value = true;
-      validate("vehiculo.serie");
-    });
+    div.addEventListener("click", () => seleccionarVehiculo(resultado));
 
     suggestiondiv.appendChild(div);
+    div.classList.toggle("suggestion-active", index === indiceVehiculoActivo);
     isReadOnlyVehiculo.value = false;
   });
 };
@@ -1689,7 +1837,7 @@ function validate(path) {
 
     "vehiculo.placas": () => {
       if (value.trim() === "") return "Placas obligatorias";
-      if(value.length < 6) return "Las placas deben tener minimo 6 carcateres"
+      if (value.length < 6) return "Las placas deben tener minimo 6 carcateres";
       return null;
     },
 
@@ -2118,7 +2266,7 @@ const onSerieSeleccionada = () => {
       numSerie: seleccionado.serie,
       color: seleccionado.color,
       placas: seleccionado.placas,
-      kilometraje: seleccionado.kilometraje ?? "",
+      //kilometraje: seleccionado.kilometraje ?? "",
       anio: seleccionado.anio,
     };
     kilometrajeBase.value = seleccionado.kilometraje;
@@ -2255,7 +2403,7 @@ const normalizarLlantas = () => {
     }));
 };
 const isCreditCard = computed(() => {
-  return ordenTrabajoForm.cliente.metodoPago === 'Tarjeta de crédito';
+  return ordenTrabajoForm.cliente.metodoPago === "Tarjeta de crédito";
 });
 const validarYMostrarPreview = async () => {
   const errores = [];
@@ -2661,6 +2809,7 @@ const cargarInfoCotizacion = async () => {
 
         return normalizarPromocionInsumo({
           idLlanta: llanta.idLlanta,
+          idMarca: llanta.idMarca,
           idAlmacen: llanta.idAlmacen,
           idPromocion: llanta.idPromocion || null,
           idPromocionVuelo: llanta.idPromocionVuelo || null,
@@ -2673,6 +2822,8 @@ const cargarInfoCotizacion = async () => {
           medida: llanta.medida, // campo estetico
           modelo: llanta.modelo, // campo estetico
           marca: llanta.marca, // campo estetico
+          rango: llanta.soloRango || llanta.rango,
+          runflat: llanta.runflat,
           ubicacion: llanta.ubicacion, // campo estetico
 
           cantidad: llanta.cantidad,
@@ -2706,7 +2857,10 @@ const cargarInfoCotizacion = async () => {
             : paquete?.nombrePromocion ?? "",
           esAlVuelo,
         };
-        const subTotal = AplicarPromo({ ...paquete, promo: promocionExistente });
+        const subTotal = AplicarPromo({
+          ...paquete,
+          promo: promocionExistente,
+        });
         return normalizarPromocionInsumo({
           idPaquete: paquete.idPaquete,
           idPromocion: paquete?.idPromocion || null,
@@ -2786,8 +2940,34 @@ const cargarInfoCotizacion = async () => {
   calcularTotales();
   //console.log(JSON.stringify(ordenTrabajoForm.insumo))
 };
-
-
+const ajustaNombre = () => {
+  ordenTrabajoForm.cliente.clienteNombre =
+    `${ordenTrabajoForm.cliente.nombres} ${ordenTrabajoForm.cliente.apellidos}`.trim();
+};
+const manejarCliente = (cliente) => {
+  if (!cliente) return;
+  const apPaterno = cliente.apPaterno ?? "";
+  const apMaterno = cliente.apMaterno ?? "";
+  Object.assign(ordenTrabajoForm.cliente, {
+    id_cliente: Number(cliente.idCliente || 0),
+    nombres: cliente.nombres ?? "",
+    apellidos: `${apPaterno} ${apMaterno}`.trim(),
+    apPaterno,
+    apMaterno,
+    rfc: cliente.rfc ?? "",
+    clienteTelefono: String(cliente.telefono ?? "").replace(/\D/g, ""),
+    clienteCorreo: cliente.correo ?? "",
+  });
+  ajustaNombre();
+  [
+    "cliente.nombres",
+    "cliente.apellidos",
+    "cliente.clienteTelefono",
+    "cliente.clienteCorreo",
+    "cliente.rfc",
+  ].forEach((campo) => delete errores[campo]);
+  mostrarTabla.value = false;
+};
 
 const limpiarOrdenTrabajoForm = () => {
   ordenTrabajoForm.cotSeleccionada = 0;
@@ -3080,5 +3260,9 @@ button:disabled {
 
 .suggestions-list div:hover {
   background-color: #e9e9e9;
+}
+
+.suggestions-list div.suggestion-active {
+  background-color: #dbeafe;
 }
 </style>

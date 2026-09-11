@@ -7,7 +7,10 @@ const getSession = () => {
 };
 
 const joinUrl = (baseUrl, path) =>
-  `${String(baseUrl || "").replace(/\/$/, "")}/${String(path).replace(/^\//, "")}`;
+  `${String(baseUrl || "").replace(/\/$/, "")}/${String(path).replace(
+    /^\//,
+    "",
+  )}`;
 
 const responseCache = new Map();
 const pendingRequests = new Map();
@@ -19,7 +22,8 @@ const SUMMARY_TTL = 5 * 1000;
 
 const getCached = (key, ttl, loader) => {
   const cached = responseCache.get(key);
-  if (cached && cached.expiresAt > Date.now()) return Promise.resolve(cached.data);
+  if (cached && cached.expiresAt > Date.now())
+    return Promise.resolve(cached.data);
 
   const generation = cacheGeneration;
   const pendingKey = `${generation}:${key}`;
@@ -110,7 +114,9 @@ export const createCotizacionApi = (baseUrl) => {
     obtenerDetalle: (idCotizacion) =>
       cachedRequest(
         `cotizacion:detalle:${idCotizacion}`,
-        `api/Cotizacion/getDetalleCotizacion?id=${encodeURIComponent(idCotizacion)}`,
+        `api/Cotizacion/getDetalleCotizacion?id=${encodeURIComponent(
+          idCotizacion,
+        )}`,
         DETAIL_TTL,
       ),
     crear: (cotizacion) =>
@@ -123,13 +129,22 @@ export const createCotizacionApi = (baseUrl) => {
         method: "PUT",
         body: JSON.stringify(cotizacion),
       }),
+    editarDatosLlanta: (llanta) =>
+      mutation("api/Listas/EditarDatosLlanta", {
+        method: "PUT",
+        body: JSON.stringify(llanta),
+      }),
     actualizarEstado: (estado) =>
       mutation("api/Cotizacion/editarEstado", {
         method: "PUT",
         body: JSON.stringify(estado),
       }),
     listarPaquetes: () =>
-      cachedRequest("catalogo:paquetes", "api/Paquetes/getPaquete", CATALOG_TTL),
+      cachedRequest(
+        "catalogo:paquetes",
+        "api/Paquetes/getPaquete",
+        CATALOG_TTL,
+      ),
     listarLlantas: ({ page, pageSize, search, idAlmacenes, signal }) => {
       const params = new URLSearchParams({
         page: String(page),
@@ -137,8 +152,16 @@ export const createCotizacionApi = (baseUrl) => {
         search: search || "",
         idAlmacenes: idAlmacenes || "",
       });
-      return request(`api/Llanta/getLlantaPrecio-Paginado?${params}`, { signal });
+      return request(`api/Llanta/getLlantaPrecio-Paginado?${params}`, {
+        signal,
+      });
     },
+    listarMarcas: () =>
+      cachedRequest(
+        "catalogo:marcas",
+        "api/Llanta/getMarcasLlantas",
+        CATALOG_TTL,
+      ).then((data) => data?.marcas || []),
     listarConceptosTrabajo: () =>
       cachedRequest(
         "catalogo:conceptos",
@@ -146,7 +169,11 @@ export const createCotizacionApi = (baseUrl) => {
         CATALOG_TTL,
       ),
     listarAlmacenes: () =>
-      cachedRequest("catalogo:almacenes", "api/Almacen/getAlmacen", CATALOG_TTL),
+      cachedRequest(
+        "catalogo:almacenes",
+        "api/Almacen/getAlmacen",
+        CATALOG_TTL,
+      ),
     listarPromocionesRapidas: () =>
       cachedRequest(
         "catalogo:promociones",
@@ -154,7 +181,11 @@ export const createCotizacionApi = (baseUrl) => {
         CATALOG_TTL,
       ),
     listarClientes: () =>
-      cachedRequest("catalogo:clientes", "api/Cliente/getClientes", CLIENTS_TTL),
+      cachedRequest(
+        "catalogo:clientes",
+        "api/Cliente/getClientes",
+        CLIENTS_TTL,
+      ),
     crearPromocionVuelo: (promocion) =>
       request("api/promocionVuelo/CrearPromoVuelo", {
         method: "POST",

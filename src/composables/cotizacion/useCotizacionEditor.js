@@ -8,6 +8,7 @@ import {
   ref,
   watch,
 } from "vue";
+
 import { Modal } from "bootstrap";
 import Swal from "sweetalert2";
 import { createCotizacionApi } from "@/services/cotizacionApi";
@@ -104,7 +105,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   const promosGeneralesDisponibles = ref([]);
   const promoGeneral = ref(null);
   const esNuevaCotizacion = ref(true);
-
+  const MarcasLlantas = ref([]);
   const mostrarTabla = ref(false);
   const nuevoServicio = ref("");
   const NuevoConceptoTrabajo = ref(0);
@@ -117,7 +118,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   const dropdownOpen = ref(false);
   const totalRows = ref(0);
   const page = ref(1);
-  const rowsPerPage = ref(20);
+  const rowsPerPage = ref(100);
   const llantasLoading = ref(false);
   const sortColumn = ref("");
   const sortDirection = ref("asc");
@@ -170,9 +171,10 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   const selectedAlmacenesLabel = computed(() => {
     if (!selectedAlmacenes.value.length) return "Elegir almacenes";
     return selectedAlmacenes.value
-      .map((id) =>
-        almacenes.value.find((almacen) => Number(almacen.id) === Number(id))
-          ?.nombre || id,
+      .map(
+        (id) =>
+          almacenes.value.find((almacen) => Number(almacen.id) === Number(id))
+            ?.nombre || id,
       )
       .join(", ");
   });
@@ -203,6 +205,98 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
       })),
     }));
   };
+  const cargarMarcas = async () => {
+    const data = await api.listarMarcas();
+    MarcasLlantas.value = (data || []).map((marca) => ({
+      idMarca: Number(marca.idMarca),
+      nombre: marca.nombre,
+    }));
+  };
+
+  const editarDatosLlanta = async (item) => {
+    const idLlanta = Number(item.idLlanta);
+    const idMarca = Number(item.idMarca);
+    const medida = String(item.medida || "").trim();
+    const modelo = String(item.modelo || "").trim();
+    const rango = String(item.rango || "").trim();
+    const runFlat = Number(item.runflat || 0);
+
+    if (!idLlanta) {
+      mostrarToast("warning", "No se encontró la llanta que deseas editar.");
+      return false;
+    }
+    if (!idMarca) {
+      mostrarToast("warning", "Selecciona una marca.");
+      return false;
+    }
+    if (!medida || !modelo || !rango) {
+      mostrarToast("warning", "Completa medida, modelo y rango.");
+      return false;
+    }
+
+    item.guardandoEditor = true;
+    try {
+      const response = await api.editarDatosLlanta({
+        idLlanta,
+        medida,
+        idMarca,
+        modelo,
+        rango,
+        runFlat,
+      });
+      const editada = response?.llanta;
+      if (!editada) {
+        throw new Error("La API no devolvió la llanta editada.");
+      }
+
+      const marcaCatalogo = MarcasLlantas.value.find(
+        (marca) => Number(marca.idMarca) === Number(editada.idMarca ?? idMarca),
+      );
+      const datosActualizados = {
+        idMarca: Number(editada.idMarca ?? idMarca),
+        marca: editada.marca || marcaCatalogo?.nombre || "",
+        modelo: editada.modelo || modelo,
+        medida: editada.medida || medida,
+        rango: editada.rango || rango,
+        runflat: Number(editada.runFlat ?? runFlat),
+      };
+      datosActualizados.modeloMedidas = [
+        datosActualizados.medida,
+        datosActualizados.marca,
+        datosActualizados.modelo,
+        datosActualizados.rango,
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      for (const llanta of cotizacionForm.llantas) {
+        if (Number(llanta.idLlanta) === idLlanta) {
+          Object.assign(llanta, datosActualizados);
+        }
+      }
+      for (const llanta of items.value) {
+        if (Number(llanta.idLlanta) === idLlanta) {
+          Object.assign(llanta, datosActualizados, {
+            llanta: `${datosActualizados.marca} ${datosActualizados.modelo}`.trim(),
+          });
+        }
+      }
+
+      item.mostrarEditor = false;
+      delete item._datosOriginales;
+      mostrarToast("success", "Datos de la llanta actualizados.");
+      return true;
+    } catch (error) {
+      console.error("Error al editar los datos de la llanta:", error);
+      mostrarToast(
+        "error",
+        error?.message || "No se pudieron actualizar los datos de la llanta.",
+      );
+      return false;
+    } finally {
+      item.guardandoEditor = false;
+    }
+  };
 
   const cargarConceptosTrabajo = async () => {
     const data = await api.listarConceptosTrabajo();
@@ -231,6 +325,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
 
     catalogosPromise = Promise.all([
       cargarPaquetes(),
+      cargarMarcas(),
       cargarConceptosTrabajo(),
       cargarAlmacenes(),
       cargarPromosRapidas(),
@@ -270,15 +365,20 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
             idLlanta: llanta.idLlanta,
             idInventarioInicial: llanta.idInventarioInicial,
             codigo: llanta.codigo,
+            marca: llanta.nombreMarca,
+            idMarca: llanta.idMarca,
+            modelo: llanta.modelo,
             llanta: `${llanta.nombreMarca} ${llanta.modelo}`.trim(),
             medida: llanta.medidas,
             runflat: llanta.runflat,
             rango: llanta.rango,
+            rangoCarga: String(llanta.rango ?? "").replace(/[a-z]/gi, ""),
+            rangoVelocidad:String(llanta.rango ?? "").match(/[a-z]/i)?.[0] || "",
             cantidad: Number(llanta.cantidad) || 0,
             ubicacion,
             idAlmacen: llanta.idAlmacen,
-            precio:Math.trunc(llanta.precio),
-            costo:Math.trunc(llanta.costo),
+            precio: Math.trunc(llanta.precio),
+            costo: Math.trunc(llanta.costo),
             sobrePedido: ubicacion.toLowerCase().includes("proveedor"),
           };
         });
@@ -307,6 +407,8 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   };
   const sortAccessors = {
     llanta: (item) => item.llanta,
+    rangoCarga: (item) => item.rangoCarga,
+    rangoVelocidad: (item) =>item.rangoVelocidad,
     rango: (item) => item.rango,
     runflat: (item) => Number(item.runflat || 0),
     codigo: (item) => item.codigo,
@@ -324,13 +426,21 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
       (a, b) => compararValores(accessor(a), accessor(b)) * direction,
     );
   });
-  const ordenarPor = (columna) => {
+  const ordenarPor = (actualizacion) => {
+    const columna =
+      typeof actualizacion === "string"
+        ? actualizacion
+        : actualizacion?.sortBy;
+    if (!columna) return;
+
     if (sortColumn.value === columna) {
-      sortDirection.value = sortDirection.value === "asc" ? "desc" : "asc";
+      sortDirection.value =
+        actualizacion?.sortType ||
+        (sortDirection.value === "asc" ? "desc" : "asc");
       return;
     }
     sortColumn.value = columna;
-    sortDirection.value = "asc";
+    sortDirection.value = actualizacion?.sortType || "asc";
   };
   const iconoOrden = (columna) => {
     if (sortColumn.value !== columna) return "bi-arrow-down-up text-muted";
@@ -383,9 +493,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     limpiarFormulario();
     if (!resumen) {
       if (paquetesDisponibles.value.length) {
-        paquetesSeleccionados.value = [
-          paquetesDisponibles.value[0].idPaquete,
-        ];
+        paquetesSeleccionados.value = [paquetesDisponibles.value[0].idPaquete];
       }
       return;
     }
@@ -452,6 +560,12 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
         cantidad: Number(llanta.cantidad ?? 1),
         precioUnitario: normalizarPrecio(llanta.precioUnitario),
         costo: normalizarPrecio(llanta.costo),
+        medida: llanta.soloMedida,
+        rango: llanta.soloRango,
+        modelo: llanta.modelo,
+        idMarca: Number(llanta.idMarca),
+        marca: llanta.nombreMarca,
+        runflat: Number(llanta.runflat ?? 0),
         modeloMedidas: llanta.modeloMedidas,
         ubicacion: llanta.ubicacion,
         idConceptoTrabajo: llanta.idConceptoTrabajo ?? 1,
@@ -499,7 +613,10 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
         ? api.obtenerDetalle(resumen.idCotizacion)
         : Promise.resolve(null);
       const llantasPromise = cargarLlantas();
-      const [, detalle] = await Promise.all([cargarCatalogos(), detallePromise]);
+      const [, detalle] = await Promise.all([
+        cargarCatalogos(),
+        detallePromise,
+      ]);
 
       await cargarFormulario(resumen, detalle);
       if (!modalInstance) {
@@ -527,8 +644,9 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     if (!cliente) return;
     cotizacionForm.idCliente = cliente.idCliente;
     cotizacionForm.nombre = cliente.nombres ?? "";
-    cotizacionForm.apellidos =
-      `${cliente.apPaterno ?? ""} ${cliente.apMaterno ?? ""}`.trim();
+    cotizacionForm.apellidos = `${cliente.apPaterno ?? ""} ${
+      cliente.apMaterno ?? ""
+    }`.trim();
     cotizacionForm.clienteTelefono = cliente.telefono ?? "";
     cotizacionForm.clienteCorreo = cliente.correo ?? "";
     cotizacionForm.observaciones = cliente.observaciones ?? "";
@@ -573,6 +691,12 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
       cantidad: 4,
       precioUnitario: normalizarPrecio(item.precio),
       costo: normalizarPrecio(item.costo),
+      modelo: item.modelo,
+      marca: item.marca,
+      idMarca: item.idMarca,
+      medida: item.medida,
+      rango: item.rango,
+      runflat: Number(item.runflat ?? 0),
       modeloMedidas: `${item.medida} ${item.rango} ${item.llanta}`,
       marca: item.marca,
       idAlmacen: item.idAlmacen,
@@ -601,10 +725,13 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   };
 
   const agregarServicioExtra = () => {
-    const nombre = String(nuevoServicio.value || "").trim().toUpperCase();
+    const nombre = String(nuevoServicio.value || "")
+      .trim()
+      .toUpperCase();
     const cantidad = Number.parseInt(nuevaCantidad.value);
     const precio = Number.parseFloat(nuevoPrecio.value);
-    if (!nombre) return mostrarToast("warning", "Debes ingresar el nombre del servicio.");
+    if (!nombre)
+      return mostrarToast("warning", "Debes ingresar el nombre del servicio.");
     if (!Number.isFinite(cantidad) || cantidad <= 0) {
       return mostrarToast("warning", "La cantidad debe ser mayor a 0.");
     }
@@ -646,9 +773,10 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
 
   const onCambioPromo = (item) => {
     const idPromocion = item.idPromocionAlVuelo || item.idPromocionSeleccionada;
-    item.promo = (item.promosAplicables || []).find(
-      (promo) => promo.idPromocion === idPromocion,
-    ) || null;
+    item.promo =
+      (item.promosAplicables || []).find(
+        (promo) => promo.idPromocion === idPromocion,
+      ) || null;
     item.isVuelo = Boolean(item.idPromocionAlVuelo);
     item.mostrarEditorPromo = false;
     item.precioConPromo = AplicarPromo(item);
@@ -703,14 +831,20 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
       });
     } catch (error) {
       console.error("Error al guardar promoción al vuelo:", error);
-      await Swal.fire("Error", "No se pudo guardar la promoción al vuelo.", "error");
+      await Swal.fire(
+        "Error",
+        "No se pudo guardar la promoción al vuelo.",
+        "error",
+      );
     }
   };
 
   const irAlSiguientePrecio = (event) => {
     if (event.key !== "Tab" && event.key !== "Enter") return;
     event.preventDefault();
-    const inputs = Array.from(document.querySelectorAll(".input-precio-unitario"));
+    const inputs = Array.from(
+      document.querySelectorAll(".input-precio-unitario"),
+    );
     const actual = inputs.indexOf(event.target);
     const siguiente = event.shiftKey
       ? (actual - 1 + inputs.length) % inputs.length
@@ -855,37 +989,34 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     }, 250);
   });
 
-  watch(
-    paquetesSeleccionados,
-    (ids) => {
-      for (const id of ids) {
-        if (cotizacionForm.paquetes.some((paquete) => paquete.idPaquete === id)) {
-          continue;
-        }
-        const base = paquetesDisponibles.value.find(
-          (paquete) => paquete.idPaquete === id,
-        );
-        if (!base) continue;
-        const item = {
-          ...base,
-          cantidad: 1,
-          comentario: "",
-          excluirPromocionGeneral: false,
-        };
-        cotizacionForm.paquetes.push({
-          ...item,
-          ...crearItemPromocionable(
-            item,
-            promosGeneralesDisponibles.value,
-            promoGeneral.value,
-          ),
-        });
+  watch(paquetesSeleccionados, (ids) => {
+    for (const id of ids) {
+      if (cotizacionForm.paquetes.some((paquete) => paquete.idPaquete === id)) {
+        continue;
       }
-      cotizacionForm.paquetes = cotizacionForm.paquetes.filter((paquete) =>
-        ids.includes(paquete.idPaquete),
+      const base = paquetesDisponibles.value.find(
+        (paquete) => paquete.idPaquete === id,
       );
-    },
-  );
+      if (!base) continue;
+      const item = {
+        ...base,
+        cantidad: 1,
+        comentario: "",
+        excluirPromocionGeneral: false,
+      };
+      cotizacionForm.paquetes.push({
+        ...item,
+        ...crearItemPromocionable(
+          item,
+          promosGeneralesDisponibles.value,
+          promoGeneral.value,
+        ),
+      });
+    }
+    cotizacionForm.paquetes = cotizacionForm.paquetes.filter((paquete) =>
+      ids.includes(paquete.idPaquete),
+    );
+  });
 
   const recalcular = (partidas) => {
     partidas.forEach((partida) => {
@@ -895,8 +1026,14 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   watch(
     () => [
       promoGeneral.value,
-      cotizacionForm.llantas.map((item) => [item.precioUnitario, item.cantidad]),
-      cotizacionForm.paquetes.map((item) => [item.precioUnitario, item.cantidad]),
+      cotizacionForm.llantas.map((item) => [
+        item.precioUnitario,
+        item.cantidad,
+      ]),
+      cotizacionForm.paquetes.map((item) => [
+        item.precioUnitario,
+        item.cantidad,
+      ]),
       cotizacionForm.serviciosExtras.map((item) => [
         item.precioUnitario,
         item.cantidad,
@@ -911,7 +1048,9 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
   );
 
   onMounted(() => {
-    nextTick(() => modalRef.value?.addEventListener("hidden.bs.modal", onModalOculto));
+    nextTick(() =>
+      modalRef.value?.addEventListener("hidden.bs.modal", onModalOculto),
+    );
   });
   onBeforeUnmount(() => {
     clearTimeout(buscarLlantasTimer);
@@ -936,6 +1075,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     correoEsValido,
     cotizacionForm,
     dropdownOpen,
+    editarDatosLlanta,
     eliminarLlanta,
     eliminarPaquete,
     eliminarServicioExtra,
@@ -948,6 +1088,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     itemsOrdenados,
     llantasLoading,
     loggeduser,
+    MarcasLlantas,
     manejarCliente,
     modalRef,
     mostrarTabla,
@@ -959,6 +1100,7 @@ export const useCotizacionEditor = ({ onGuardado } = {}) => {
     onCambioPromo,
     onRowsChange,
     ordenarPor,
+    cargarMarcas,
     paquetesDisponibles,
     paquetesSeleccionados,
     page,

@@ -170,3 +170,9 @@ export const telefonoFormateado = computed(() => {
     return valor;
   }
 });
+export const GotoWhatsApp = (telefono, pdf) =>{
+  const numeroLimpio = telefono.replace(/[^0-9]/g, ""); // Solo dígitos
+  let url;
+  url = `https://wa.me/+52${numeroLimpio}`;
+  window.open(url, "_bank");
+};

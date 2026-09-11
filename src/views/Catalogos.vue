@@ -14,12 +14,20 @@
                 <li class="nav-item">
                     <button class="nav-link" :class="{ active: tabActiva === 'tecnicos' }" @click="tabActiva = 'tecnicos'">Técnicos</button>
                 </li>
+                <li class="nav-item">
+                    <button class="nav-link" :class="{ active: tabActiva === 'clientes' }" @click="tabActiva = 'clientes'">Clientes</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" :class="{ active: tabActiva === 'vehiculos' }" @click="tabActiva = 'vehiculos'">Vehículos</button>
+                </li>
             </ul>
             <div class="border border-top-0 p-3">
                 <KeepAlive>
                     <CatalogoSucursales v-if="tabActiva === 'sucursales'" />
                     <CatalogoMarcas v-else-if="tabActiva === 'marcas'" />
                     <CatalogoTecnicos v-else-if="tabActiva === 'tecnicos'" />
+                    <CatalogoClientes v-else-if="tabActiva === 'clientes'" />
+                    <CatalogoVehiculos v-else-if="tabActiva === 'vehiculos'" />
                 </KeepAlive>
             </div>
         </div>
@@ -31,6 +39,8 @@ import { ref } from "vue";
 import CatalogoMarcas from '@/components/Catalogos/CatMarcas.vue';
 import CatalogoTecnicos from '@/components/Catalogos/CatTecnicos.vue';
 import CatalogoSucursales from '@/components/Catalogos/CatSucursales.vue';
+import CatalogoClientes from '@/components/Catalogos/CatClientes.vue';
+import CatalogoVehiculos from '@/components/Catalogos/CatVehiculos.vue';
 
 const tabActiva = ref('sucursales');
 

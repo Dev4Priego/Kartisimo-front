@@ -17,7 +17,11 @@
         </template>
 
         <template #item-telefono="item">
-          {{ formatearTelefono(item.telefono) }}
+          <div class="d-flrx justify-content-center align-items-center">
+
+            <button class="btn btn-outline-success mx-1 " v-if="item.telefono != 'N/A'" @click="GotoWhatsApp(item.telefono)" > <i class="bi bi-whatsapp"></i></button>
+            <span class="text-center mx-3">{{ formatearTelefono(item.telefono) }}</span>
+          </div>
         </template>
 
         <template #item-acciones="item">
@@ -89,6 +93,7 @@
 import { toRefs, watch } from "vue";
 import EasyDataTable from "vue3-easy-data-table";
 import { useCotizaciones } from "@/composables/cotizacion/useCotizaciones";
+import { GotoWhatsApp } from "../common/funciones";
 
 const props = defineProps({
   busqueda: { type: String, default: "" },
